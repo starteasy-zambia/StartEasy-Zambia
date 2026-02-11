@@ -1,197 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StartEasy Zambia — Your Local Operations Team</title>
-  <meta name="description" content="StartEasy Zambia helps founders, professionals, diaspora clients and foreign investors set up, activate, and operate in Zambia without dealing with paperwork or bureaucracy." />
-  <meta property="og:title" content="StartEasy Zambia" />
-  <meta property="og:description" content="We make things happen in Zambia. Setup, Activate, Represent." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="/assets/cover.jpg" />
-  <link rel="icon" href="/assets/favicon.png" />
-  <style>
-    :root{--green:#0f7a4f;--dark:#0c3b2e;--gold:#f5a623;--light:#f7faf9;--text:#1f2937}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:var(--text);background:#fff}
-    a{color:inherit;text-decoration:none}
-    .container{max-width:1100px;margin:0 auto;padding:0 16px}
-    header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;z-index:50}
-    .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--dark)}
-    .brand img{width:36px;height:36px;border-radius:50%}
-    .menu{display:flex;gap:18px}
-    .cta{background:var(--green);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
-    .hero{background:linear-gradient(135deg, #e9fff5, #fff6e6);padding:56px 0}
-    .hero h1{font-size:34px;line-height:1.2;margin:0 0 12px}
-    .hero p{font-size:18px;margin:0 0 20px}
-    .badges{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
-    .badge{background:#fff;border:1px solid #e6efe9;border-radius:999px;padding:8px 12px;font-weight:600}
-    .grid{display:grid;gap:20px}
-    .grid-2{grid-template-columns:1fr}
-    .card{background:#fff;border:1px solid #e9ecef;border-radius:16px;padding:18px}
-    .card h3{margin-top:0}
-    .section{padding:44px 0}
-    .section h2{margin:0 0 12px;font-size:28px}
-    .kicker{color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:12px}
-    ul{padding-left:18px;margin:8px 0}
-    li{margin:6px 0}
-    .audiences .pill{border:1px dashed #d6e7df;border-radius:14px;padding:16px}
-    .steps{counter-reset:step}
-    .step{position:relative;padding-left:48px;margin:16px 0}
-    .step:before{counter-increment:step;content:counter(step);position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
-    .contact{background:var(--light);border-top:1px solid #e6efe9}
-    form{display:grid;gap:10px}
-    input,textarea{padding:12px;border-radius:10px;border:1px solid #d7e4dd;font-size:15px}
-    button{padding:12px 14px;border-radius:12px;border:0;background:var(--green);color:#fff;font-weight:700}
-    footer{padding:24px 0;color:#6b7280}
-    .wa{position:fixed;right:16px;bottom:16px;background:#25D366;color:#fff;border-radius:999px;padding:12px 16px;font-weight:800;box-shadow:0 10px 24px rgba(0,0,0,.18)}
-    @media(min-width:768px){
-      .hero h1{font-size:42px}
-      .grid-2{grid-template-columns:1.1fr .9fr}
-      .services{grid-template-columns:repeat(3,1fr)}
-      .audiences{grid-template-columns:repeat(3,1fr)}
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StartEasy Zambia</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#0B5ED7; /* deep blue */
+  --accent:#16A085; /* teal */
+  --gold:#F4B400; /* highlight */
+  --dark:#0f172a;
+  --light:#f5f7fb;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:#ffffff;color:#111;line-height:1.6}
+
+/* HEADER */
+header{
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  color:white;
+  padding:18px 20px;
+  position:sticky;top:0;z-index:999;
+}
+header h1{font-size:22px;font-weight:800}
+header p{font-size:12px;opacity:.9}
+
+.container{max-width:1100px;margin:auto;padding:20px}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#0B5ED7,#16A085);
+  color:white;
+  padding:55px 20px 65px;
+  text-align:center;
+}
+.hero h2{font-size:30px;font-weight:800;margin-bottom:10px}
+.hero p{font-size:16px;max-width:700px;margin:0 auto 20px}
+
+.cta{
+  display:inline-block;
+  background:var(--gold);
+  color:#000;
+  padding:14px 22px;
+  border-radius:8px;
+  text-decoration:none;
+  font-weight:700;
+  margin:8px;
+}
+.cta.secondary{background:white;color:var(--primary)}
+
+/* SECTIONS */
+section{padding:45px 0}
+section h3{text-align:center;font-size:26px;margin-bottom:25px;font-weight:800;color:var(--dark)}
+
+/* SERVICE CARDS */
+.card-wrapper{text-align:center}
+.card{
+  display:inline-block;
+  vertical-align:top;
+  width:31%;
+  min-width:260px;
+  background:#fff;
+  margin:10px;
+  padding:22px;
+  border-radius:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  text-align:left;
+  border-top:6px solid var(--primary);
+}
+.card.activate{border-top-color:var(--accent)}
+.card.represent{border-top-color:var(--gold)}
+
+.card h4{font-size:20px;margin-bottom:10px}
+.card ul{padding-left:18px;font-size:14px}
+.card li{margin-bottom:6px}
+
+/* AUDIENCE */
+.audience{
+  background:var(--light);
+  border-radius:14px;
+  padding:25px;
+  text-align:center;
+}
+.audience p{margin:10px 0}
+.badge{
+  display:inline-block;
+  background:white;
+  padding:10px 14px;
+  border-radius:30px;
+  margin:6px;
+  font-size:13px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+/* CONTACT */
+.contact-box{
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:white;
+  padding:35px;
+  border-radius:14px;
+  text-align:center;
+}
+.contact-box h4{font-size:24px;margin-bottom:10px}
+.contact-box a{color:white;text-decoration:none;font-weight:700}
+
+.whatsapp{
+  display:inline-block;
+  background:#25D366;
+  color:white;
+  padding:14px 22px;
+  border-radius:8px;
+  text-decoration:none;
+  font-weight:700;
+  margin-top:12px;
+}
+
+footer{
+  text-align:center;
+  padding:25px;
+  background:#0f172a;
+  color:white;
+  font-size:13px;
+}
+
+/* MOBILE */
+@media(max-width:800px){
+  .card{width:100%}
+  .hero h2{font-size:24px}
+}
+</style>
 </head>
 <body>
-  <header>
-    <div class="container nav">
-      <div class="brand">
-        <img src="/assets/logo.png" alt="StartEasy logo" />
-        <span>StartEasy Zambia</span>
-      </div>
-      <nav class="menu">
-        <a href="#services">Services</a>
-        <a href="#audiences">Who We Help</a>
-        <a href="#process">How It Works</a>
-        <a class="cta" href="#contact">Contact</a>
-      </nav>
-    </div>
-  </header>
 
-  <section class="hero">
-    <div class="container grid grid-2">
-      <div>
-        <h1>We run the processes so you can run your life.</h1>
-        <p>StartEasy helps founders, busy professionals, diaspora clients and foreign investors <b>set up, activate, and operate</b> in Zambia — without queues, confusion or paperwork headaches.</p>
-        <div class="badges">
-          <span class="badge">Company Registration</span>
-          <span class="badge">Websites & Systems</span>
-          <span class="badge">Local Representation</span>
-        </div>
-        <a class="cta" href="https://wa.me/260771196634" target="_blank" rel="noopener">WhatsApp +260 771 196634</a>
-      </div>
-      <div class="card">
-        <h3>Quick Request</h3>
-        <p>Tell us your goal. We’ll reply with next steps.</p>
-        <form action="mailto:hello@starteasyzambia.com" method="post" enctype="text/plain">
-          <input required name="name" placeholder="Your name" />
-          <input required name="phone" placeholder="Phone / WhatsApp" />
-          <input name="email" placeholder="Email (optional)" />
-          <textarea name="message" rows="4" placeholder="What do you want to accomplish in Zambia?"></textarea>
-          <button type="submit">Send</button>
-        </form>
-      </div>
-    </div>
-  </section>
+<header>
+  <div class="container">
+    <h1>StartEasy Zambia</h1>
+    <p>Business setup • Digital systems • Local representation</p>
+  </div>
+</header>
 
-  <section id="services" class="section">
-    <div class="container">
-      <div class="kicker">Our Services</div>
-      <h2>Three integrated divisions</h2>
-      <div class="grid services">
-        <div class="card">
-          <h3>1) StartEasy Setup (Formalization)</h3>
-          <p>Handles government & legal process friction.</p>
-          <ul>
-            <li>PACRA registration</li>
-            <li>ZRA TPIN & VAT</li>
-            <li>NAPSA employer setup</li>
-            <li>Licenses & permits</li>
-            <li>ZDA guidance</li>
-            <li>Bank account assistance</li>
-          </ul>
-        </div>
-        <div class="card">
-          <h3>2) StartEasy Activate (Digital & Business Systems)</h3>
-          <ul>
-            <li><b>Digital Presence:</b> Website, domain, hosting, business email, Google Business Profile, online store</li>
-            <li><b>Payments & Tools:</b> Mobile money (MTN, Airtel, Zamtel), POS guidance, invoices, booking systems</li>
-            <li><b>Operational Systems:</b> Quotation templates, CRM, WhatsApp automation, inventory tracking, payroll guidance</li>
-          </ul>
-        </div>
-        <div class="card">
-          <h3>3) StartEasy Represent (Ongoing Support)</h3>
-          <ul>
-            <li>Local representation & document collection</li>
-            <li>Property inspections</li>
-            <li>Permit renewals & compliance reminders</li>
-            <li>Follow-ups at offices</li>
-            <li>Contractor coordination</li>
-            <li>Statutory payments assistance & monthly reporting</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
+<section class="hero">
+  <h2>We Make Doing Business in Zambia Easy</h2>
+  <p>We handle registration, websites, compliance and on-ground operations for busy professionals, diaspora founders and foreign investors.</p>
+  <a class="cta" href="https://wa.me/260771196634">Chat on WhatsApp</a>
+  <a class="cta secondary" href="tel:+260771196634">Call +260 771 196 634</a>
+</section>
 
-  <section id="audiences" class="section audiences">
-    <div class="container grid audiences">
-      <div class="pill">
-        <h3>Busy Professionals</h3>
-        <p>Own a business without managing paperwork or operations. We handle setup and systems while you keep your day job.</p>
-      </div>
-      <div class="pill">
-        <h3>Diaspora Zambians</h3>
-        <p>Invest, build or manage property from abroad. We become your trusted person on the ground with reporting and accountability.</p>
-      </div>
-      <div class="pill">
-        <h3>Foreign Investors</h3>
-        <p>Enter Zambia confidently. We coordinate compliance, local processes and operational setup so you can start trading.</p>
-      </div>
-    </div>
-  </section>
+<section>
+<h3>Our Core Services</h3>
+<div class="container card-wrapper">
 
-  <section id="process" class="section">
-    <div class="container">
-      <div class="kicker">How it works</div>
-      <h2>Simple 4‑step process</h2>
-      <div class="steps">
-        <div class="step"><b>Tell us your goal</b> — business, property or administration.</div>
-        <div class="step"><b>We plan & quote</b> — clear tasks and timeline.</div>
-        <div class="step"><b>We execute</b> — submissions, follow‑ups, systems setup.</div>
-        <div class="step"><b>You receive results</b> — documents, access and reports.</div>
-      </div>
-    </div>
-  </section>
+<div class="card">
+<h4>StartEasy Setup</h4>
+<ul>
+<li>PACRA Registration</li>
+<li>ZRA TPIN & VAT</li>
+<li>NAPSA</li>
+<li>Licenses & permits</li>
+<li>ZDA guidance</li>
+<li>Bank account assistance</li>
+</ul>
+</div>
 
-  <section id="contact" class="section contact">
-    <div class="container grid grid-2">
-      <div>
-        <h2>Contact StartEasy</h2>
-        <p><b>Phone/WhatsApp:</b> <a href="https://wa.me/260771196634">+260 771 196634</a><br/>
-        <b>Email:</b> hello@starteasyzambia.com<br/>
-        <b>Location:</b> Lusaka, Zambia</p>
-        <p>Office hours: Mon–Sat, 08:00–18:00 CAT</p>
-      </div>
-      <div class="card">
-        <h3>Start a conversation</h3>
-        <form action="mailto:hello@starteasyzambia.com" method="post" enctype="text/plain">
-          <input required name="name" placeholder="Full name" />
-          <input required name="phone" placeholder="Phone / WhatsApp" />
-          <textarea name="message" rows="5" placeholder="Describe what you need help with"></textarea>
-          <button type="submit">Request Assistance</button>
-        </form>
-      </div>
-    </div>
-  </section>
+<div class="card activate">
+<h4>StartEasy Activate</h4>
+<ul>
+<li>Website development</li>
+<li>Business email</li>
+<li>Google Business Profile</li>
+<li>Online store setup</li>
+<li>Mobile money setup</li>
+<li>Booking & appointment systems</li>
+<li>WhatsApp automation</li>
+<li>Basic CRM & invoicing</li>
+</ul>
+</div>
 
-  <footer>
-    <div class="container">© <span id="y"></span> StartEasy Zambia — Your local team in Zambia.</div>
-  </footer>
+<div class="card represent">
+<h4>StartEasy Represent</h4>
+<ul>
+<li>Local representation</li>
+<li>Permit renewals</li>
+<li>Office follow-ups</li>
+<li>Property inspections</li>
+<li>Contractor coordination</li>
+<li>Monthly reporting</li>
+<li>Compliance reminders</li>
+</ul>
+</div>
 
-  <a class="wa" href="https://wa.me/260771196634" target="_blank" rel="noopener">Chat on WhatsApp</a>
-  <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+</div>
+</section>
+
+<section class="container">
+<div class="audience">
+<h3>Who We Help</h3>
+<div>
+<span class="badge">Busy Professionals</span>
+<span class="badge">Doctors & Consultants</span>
+<span class="badge">Civil Servants</span>
+<span class="badge">Contractors & Engineers</span>
+<span class="badge">Diaspora Zambians</span>
+<span class="badge">Foreign Investors</span>
+</div>
+<p>You focus on your work. We handle the systems.</p>
+</div>
+</section>
+
+<section class="container">
+<div class="contact-box">
+<h4>Start Your Business Today</h4>
+<p>Speak directly with our team.</p>
+<p>Phone: <a href="tel:+260771196634">+260 771 196 634</a></p>
+<p>Email: starteasyzambia@gmail.com</p>
+<a class="whatsapp" href="https://wa.me/260771196634">Message Us on WhatsApp</a>
+</div>
+</section>
+
+<footer>
+<p>© 2026 StartEasy Zambia — Your Zambia Business Operations Partner</p>
+</footer>
+
 </body>
 </html>
