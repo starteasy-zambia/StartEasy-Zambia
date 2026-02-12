@@ -59,12 +59,71 @@ body{background:#ffffff;color:#1a1f1c;line-height:1.6}
 .cta .btn{border:2px solid #fff}
 .cta .btn.secondary{background:#fff;color:var(--primary)}
 
-/* FOOTER */
-footer{background:#0b1f14;color:#fff;text-align:center;padding:28px 18px;font-size:13px}
+/* ===== STARTEASY GLOBAL FOOTER ===== */
 
-@media(max-width:900px){
-  .grid{grid-template-columns:1fr}
-  .hero h1{font-size:28px}
+.footer{
+    background:#0b1f14;
+    color:#ffffff;
+    padding:40px 20px 20px;
+    margin-top:60px;
+    font-family:'Inter',sans-serif;
+}
+
+.footer-container{
+    max-width:1100px;
+    margin:auto;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:30px;
+}
+
+.footer h4{
+    margin-bottom:12px;
+    color:#ffb000; /* brand orange */
+    font-size:16px;
+}
+
+.footer p{
+    font-size:14px;
+    line-height:1.6;
+    opacity:0.9;
+}
+
+.footer ul{
+    list-style:none;
+    padding:0;
+}
+
+.footer li{
+    margin-bottom:8px;
+}
+
+.footer a{
+    color:#ffffff;
+    text-decoration:none;
+    font-size:14px;
+    transition:0.25s;
+}
+
+.footer a:hover{
+    color:#19b35a; /* brand green */
+}
+
+.footer-bottom{
+    text-align:center;
+    border-top:1px solid rgba(255,255,255,0.15);
+    margin-top:25px;
+    padding-top:15px;
+    font-size:13px;
+    opacity:0.8;
+}
+
+/* mobile */
+@media(max-width:700px){
+    .footer-container{
+        flex-direction:column;
+    }
 }
 </style>
 </head>
