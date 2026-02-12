@@ -1,171 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StartEasy Zambia | Your Local Team in Zambia</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-            background-color: #f4f6f8;
-            color: #222;
-        }
-        header {
-            background: #0a2e5c;
-            color: #fff;
-            padding: 60px 20px;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 40px;
-        }
-        header p {
-            font-size: 18px;
-            margin-top: 10px;
-        }
-        section {
-            padding: 50px 20px;
-            max-width: 1100px;
-            margin: auto;
-        }
-        h2 {
-            color: #0a2e5c;
-            margin-bottom: 20px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        ul {
-            padding-left: 20px;
-        }
-        footer {
-            background: #0a2e5c;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-        }
-        .cta {
-            background: #1b4fa3;
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        .cta h2 {
-            color: white;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 25px;
-            background: white;
-            color: #1b4fa3;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-top: 15px;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StartEasy Zambia | Your Local Team in Zambia</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0a7f3f;   /* deep green */
+  --accent:#19b35a;    /* bright green */
+  --gold:#ff8a00;      /* orange */
+  --gold-soft:#ffb000; /* highlight */
+  --dark:#0b1f14;
+  --light:#f3f7f4;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:#ffffff;color:#1a1f1c;line-height:1.6}
+.container{max-width:1100px;margin:auto;padding:22px}
+
+/* NAV */
+.nav{background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.08);position:sticky;top:0;z-index:10}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:800;color:var(--primary);font-size:20px}
+.nav a{color:#1a1f1c;text-decoration:none;font-weight:600;margin-left:14px}
+.nav .cta{background:var(--gold);padding:10px 14px;border-radius:10px;color:#000}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
+.hero-wrap{display:grid;grid-template-columns:1fr;gap:22px;align-items:center;padding:56px 22px}
+.hero h1{font-size:36px;line-height:1.15;font-weight:800}
+.hero p{font-size:16px;opacity:.95}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:8px 12px;border-radius:999px;font-size:13px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.btn{display:inline-block;padding:14px 18px;border-radius:12px;font-weight:700;text-decoration:none}
+.btn-primary{background:var(--gold-soft);color:#0b2b44}
+.btn-secondary{background:#ffffff;color:var(--primary)}
+.hero-card{background:#ffffff;color:#0b2b44;border-radius:18px;padding:18px;box-shadow:0 18px 40px rgba(0,0,0,.25)}
+.hero-card h3{margin-bottom:8px}
+.hero-list{padding-left:18px}
+.hero-list li{margin:6px 0}
+
+/* SECTIONS */
+.section{padding:40px 0}
+.section h2{text-align:center;font-size:28px;margin-bottom:20px;color:var(--dark)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:#fff;border-radius:16px;box-shadow:0 10px 22px rgba(0,0,0,.10);padding:20px;border-top:6px solid var(--primary)}
+.card h3{margin-bottom:8px}
+.card p{font-size:14px}
+.list{background:var(--light);border-radius:16px;padding:20px}
+.list ul{padding-left:18px}
+.list li{margin:6px 0}
+
+/* CTA */
+.cta{background:linear-gradient(135deg,#0b1f14,#0a7f3f);color:#fff;text-align:center;padding:46px 20px}
+.cta h2{margin-bottom:8px}
+.cta .actions{display:flex;justify-content:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.cta .btn{border:2px solid #fff}
+.cta .btn.secondary{background:#fff;color:var(--primary)}
+
+/* FOOTER */
+footer{background:#0b1f14;color:#fff;text-align:center;padding:28px 18px;font-size:13px}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .hero h1{font-size:28px}
+}
+</style>
 </head>
 <body>
 
-<header>
-    <h1>StartEasy Zambia</h1>
-    <p>We run the processes so you can run your life.</p>
-    <p>If it requires forms, offices, approvals, or systems in Zambia — StartEasy handles it.</p>
-</header>
-
-<section>
-    <h2>Who We Serve</h2>
-    <div class="grid">
-        <div class="card">
-            <h3>Busy Local Professionals</h3>
-            <p>Doctors, engineers, contractors, civil servants, executives and entrepreneurs who don’t have time for administrative processes.</p>
-        </div>
-        <div class="card">
-            <h3>Diaspora Zambians</h3>
-            <p>Zambians abroad who want to invest, buy property, or open businesses safely and correctly back home.</p>
-        </div>
-        <div class="card">
-            <h3>Foreign Investors</h3>
-            <p>Investors from China, India, UAE, Europe and South Africa looking to operate legally and efficiently in Zambia.</p>
-        </div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <div class="brand">StartEasy Zambia</div>
+    <div>
+      <a href="#serve">Who We Serve</a>
+      <a href="#services">Services</a>
+      <a href="#contact" class="cta">WhatsApp</a>
     </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container hero-wrap">
+    <div>
+      <h1>We Run The Processes So You Can Run Your Life</h1>
+      <p>If it requires forms, offices, approvals, or systems in Zambia — StartEasy handles it. Business setup, compliance, digital systems and local representation.</p>
+      <div class="badges">
+        <span class="badge">Busy Professionals</span>
+        <span class="badge">Diaspora Zambians</span>
+        <span class="badge">Foreign Investors</span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="https://wa.me/260771196634">Chat on WhatsApp</a>
+        <a class="btn btn-secondary" href="pricing.html">View Pricing</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <h3>We Handle</h3>
+      <ul class="hero-list">
+        <li>PACRA, TPIN, VAT & NAPSA</li>
+        <li>Licenses & Permits</li>
+        <li>Websites & Online Payments</li>
+        <li>Property & Document Representation</li>
+        <li>Monthly Reporting & Follow‑ups</li>
+      </ul>
+    </div>
+  </div>
 </section>
 
-<section>
-    <h2>Business & Investment Support</h2>
+<section id="serve" class="section container">
+  <h2>Who We Serve</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Busy Local Professionals</h3>
+      <p>Doctors, engineers, contractors, civil servants and executives who do not have time for administrative processes.</p>
+    </div>
+    <div class="card">
+      <h3>Diaspora Zambians</h3>
+      <p>Zambians abroad who want to invest, buy property or open businesses safely and correctly back home.</p>
+    </div>
+    <div class="card">
+      <h3>Foreign Investors</h3>
+      <p>Investors from China, India, UAE, Europe and South Africa needing a trusted on‑ground operations partner.</p>
+    </div>
+  </div>
+</section>
+
+<section id="services" class="section container">
+  <h2>Business & Investment Support</h2>
+  <div class="list">
     <ul>
-        <li>Company registration (PACRA)</li>
-        <li>TPIN & VAT registration (ZRA)</li>
-        <li>NAPSA employer setup</li>
-        <li>ZPPA supplier registration</li>
-        <li>Business licenses & sector permits</li>
-        <li>Investment license (ZDA)</li>
-        <li>Work permit support</li>
-        <li>Websites, online stores & booking systems</li>
-        <li>WhatsApp automation & CRM systems</li>
-        <li>Mobile money & POS setup guidance</li>
+      <li>Company registration (PACRA)</li>
+      <li>TPIN & VAT registration (ZRA)</li>
+      <li>NAPSA employer setup</li>
+      <li>ZPPA supplier registration</li>
+      <li>Business licenses & sector permits</li>
+      <li>Investment license (ZDA)</li>
+      <li>Work permit support</li>
+      <li>Websites, online stores & booking systems</li>
+      <li>WhatsApp automation & CRM systems</li>
+      <li>Mobile money & POS setup guidance</li>
     </ul>
+  </div>
 </section>
 
-<section>
-    <h2>Property & Asset Support</h2>
+<section class="section container">
+  <h2>Property & Asset Support</h2>
+  <div class="list">
     <ul>
-        <li>Land verification & title searches</li>
-        <li>Property purchase representation</li>
-        <li>Rental management setup</li>
-        <li>Utility connections (ZESCO, water)</li>
-        <li>Property tax compliance</li>
-        <li>Construction approvals</li>
+      <li>Land verification & title searches</li>
+      <li>Property purchase representation</li>
+      <li>Rental management setup</li>
+      <li>Utility connections (ZESCO, water)</li>
+      <li>Property tax compliance</li>
+      <li>Construction approvals</li>
     </ul>
+  </div>
 </section>
 
-<section>
-    <h2>Personal Administration</h2>
+<section class="section container">
+  <h2>Personal Administration</h2>
+  <div class="list">
     <ul>
-        <li>NRC replacement guidance</li>
-        <li>Passport application assistance</li>
-        <li>Driving license renewals</li>
-        <li>School & university paperwork</li>
-        <li>NAPSA claims follow-ups</li>
-        <li>Pension documentation</li>
-        <li>Medical aid registration</li>
-        <li>Bank account setup assistance</li>
+      <li>NRC replacement guidance</li>
+      <li>Passport application assistance</li>
+      <li>Driving license renewals</li>
+      <li>School & university paperwork</li>
+      <li>NAPSA claims follow-ups</li>
+      <li>Pension documentation</li>
+      <li>Medical aid registration</li>
+      <li>Bank account setup assistance</li>
     </ul>
+  </div>
 </section>
 
-<section>
-    <h2>Diaspora Representation Services</h2>
+<section class="section container">
+  <h2>Diaspora Representation Services</h2>
+  <div class="list">
     <ul>
-        <li>Local representation in Zambia</li>
-        <li>Document verification & submission</li>
-        <li>Certificate collection</li>
-        <li>Property inspections</li>
-        <li>Statutory fee payments</li>
-        <li>Contractor management</li>
-        <li>Structured reporting</li>
+      <li>Local representation in Zambia</li>
+      <li>Document verification & submission</li>
+      <li>Certificate collection</li>
+      <li>Property inspections</li>
+      <li>Statutory fee payments</li>
+      <li>Contractor management</li>
+      <li>Structured reporting</li>
     </ul>
+  </div>
 </section>
 
-<div class="cta">
-    <h2>StartEasy Zambia</h2>
-    <p>Your local team in Zambia.</p>
-    <a href="#" class="button">Contact Us</a>
-</div>
+<section id="contact" class="cta">
+  <h2>StartEasy Zambia — Your Local Team in Zambia</h2>
+  <p>Start your business, investment or administration safely and correctly.</p>
+  <div class="actions">
+    <a class="btn" href="https://wa.me/260771196634">WhatsApp Us</a>
+    <a class="btn secondary" href="mailto:info@starteasyzm.com">Email Us</a>
+  </div>
+</section>
 
 <footer>
-    <p>&copy; 2026 StartEasy Zambia. All Rights Reserved.</p>
+  © 2026 StartEasy Zambia. All Rights Reserved.
 </footer>
 
 </body>
