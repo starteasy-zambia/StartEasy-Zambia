@@ -120,19 +120,73 @@ section h3{text-align:center;font-size:26px;margin-bottom:25px;font-weight:800;c
   margin-top:12px;
 }
 
-footer{
-  text-align:center;
-  padding:25px;
-  background:#0f172a;
-  color:white;
-  font-size:13px;
+/* ===== STARTEASY GLOBAL FOOTER ===== */
+
+.footer{
+    background:#0b1f14;
+    color:#ffffff;
+    padding:40px 20px 20px;
+    margin-top:60px;
+    font-family:'Inter',sans-serif;
 }
 
-/* MOBILE */
-@media(max-width:800px){
-  .card{width:100%}
-  .hero h2{font-size:24px}
+.footer-container{
+    max-width:1100px;
+    margin:auto;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:30px;
 }
+
+.footer h4{
+    margin-bottom:12px;
+    color:#ffb000; /* brand orange */
+    font-size:16px;
+}
+
+.footer p{
+    font-size:14px;
+    line-height:1.6;
+    opacity:0.9;
+}
+
+.footer ul{
+    list-style:none;
+    padding:0;
+}
+
+.footer li{
+    margin-bottom:8px;
+}
+
+.footer a{
+    color:#ffffff;
+    text-decoration:none;
+    font-size:14px;
+    transition:0.25s;
+}
+
+.footer a:hover{
+    color:#19b35a; /* brand green */
+}
+
+.footer-bottom{
+    text-align:center;
+    border-top:1px solid rgba(255,255,255,0.15);
+    margin-top:25px;
+    padding-top:15px;
+    font-size:13px;
+    opacity:0.8;
+}
+
+/* mobile */
+@media(max-width:700px){
+    .footer-container{
+        flex-direction:column;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -145,6 +199,7 @@ footer{
     <div>
       <h1 style="margin:0; font-size:22px; font-weight:800;">StartEasy Zambia</h1>
       <p style="margin:2px 0 0; font-size:12px; opacity:0.9;">Business setup • Digital systems • Local representation</p>
+   <link rel="stylesheet" href="styles.css">
     </div>
   </div>
 </header>
@@ -226,9 +281,42 @@ footer{
 <a class="whatsapp" href="https://wa.me/260771196634">Message Us on WhatsApp</a>
 </div>
 </section>
+<footer class="footer">
+    <div class="footer-container">
 
-<footer>
-<p>© 2026 StartEasy Zambia — Your Zambia Business Operations Partner</p>
+        <div>
+            <h4>StartEasy Zambia</h4>
+            <p>
+                Your Zambia operations partner.
+                We handle registration, compliance, systems and representation
+                so you can focus on running your business and investments.
+            </p>
+        </div>
+
+        <div>
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="how-it-works.html">How It Works</a></li>
+                <li><a href="pricing.html">See Our Prices</a></li>
+                <li><a href="https://www.facebook.com/profile.php?id=61571399302136" target="_blank">Facebook Page</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4>Contact</h4>
+            <p>
+                Phone / WhatsApp:<br>
+                <a href="https://wa.me/260771196634">+260 771 196 634</a>
+            </p>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        © 2026 StartEasy Zambia — All Rights Reserved
+    </div>
 </footer>
 
 </body>
