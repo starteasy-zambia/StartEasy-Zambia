@@ -527,7 +527,9 @@ const DESKS={
   nhima:{id:'nhima',code:'5',title:'NHIMA Desk',subtitle:'National Health Insurance Compliance',authority:'National Health Insurance Management Authority',color:'#0E7C7B',icon:'fa-heart-pulse',intro:'Register as an employer, register employees, and administer monthly health insurance premiums.',options:[{v:'reg',t:'Register as an employer',d:'Employer account and portal.',icon:'fa-user-plus',services:['h_reg']},{v:'emp',t:'Register employees',d:'Employee and beneficiary records.',icon:'fa-users',services:['h_emp','h_monthly']},{v:'monthly',t:'Monthly premiums',d:'Schedules, returns, payments.',icon:'fa-calendar-check',services:['h_monthly','h_ongoing']},{v:'behind',t:'Clean up / arrears',d:'Outstanding returns and reconciliation.',icon:'fa-wrench',services:['h_cleanup']}]},
   licensing:{id:'licensing',code:'6',title:'Licensing Desk',subtitle:'Business Licences & Council Compliance',authority:'Local Authorities · Councils',color:'#E8730F',icon:'fa-id-card',intro:'Register, renew and keep your council licences, health permits, fire certificates and premises approvals current.',options:[{v:'trading',t:'Council trading licence',d:'Business levy and trading licence.',icon:'fa-store',services:['l_trading','l_renew']},{v:'health',t:'Health & food handling',d:'Restaurants, food handlers.',icon:'fa-utensils',services:['l_health','l_renew']},{v:'fire',t:'Fire certificate',d:'Fire inspection and certificate.',icon:'fa-fire-extinguisher',services:['l_fire','l_renew']},{v:'premises',t:'Premises approval',d:'Zoning, planning, occupation.',icon:'fa-building',services:['l_premises']},{v:'renew',t:'Renew existing licences',d:'Prevent lapses — 60 days ahead.',icon:'fa-rotate',services:['l_renew','l_ongoing']}]},
   sector:{id:'sector',code:'7',title:'Sector Regulators Desk',subtitle:'ZDA · ZEMA · ZTA · ZABS · ERB · ZICTA · Cooperatives · CEEC · ZPPA',authority:'Sector Regulators',color:'#1B6CA8',icon:'fa-sitemap',intro:'One desk for your sector regulator registrations, licences and renewals.',options:[{v:'inv',t:'Investment — ZDA',d:'Investment licence, certificate.',icon:'fa-hand-holding-dollar',services:['s_zda']},{v:'env',t:'Environment — ZEMA',d:'Environmental registration.',icon:'fa-leaf',services:['s_zema']},{v:'tourism',t:'Tourism — ZTA',d:'Tourism enterprise and licence.',icon:'fa-plane',services:['s_tourism']},{v:'standards',t:'Standards — ZABS',d:'Product and standards.',icon:'fa-certificate',services:['s_zabs']},{v:'energy',t:'Energy — ERB',d:'Energy sector licences.',icon:'fa-bolt',services:['s_erb']},{v:'ict',t:'ICT — ZICTA',d:'ICT and telecoms licences.',icon:'fa-tower-cell',services:['s_zicta']},{v:'coop',t:'Cooperative',d:'Department of Cooperatives.',icon:'fa-people-group',services:['s_coop']},{v:'ceec',t:'CEEC registration',d:'Citizens Economic Empowerment.',icon:'fa-hand-holding-heart',services:['s_ceec']},{v:'tender',t:'Government tenders — ZPPA',d:'Supplier registration.',icon:'fa-file-signature',services:['s_zppa']}]},
-  compliance:{id:'compliance',code:'8',title:'Compliance Desk',subtitle:'Ongoing Compliance Management',authority:'Cross-desk coordination',color:'#0E7C7B',icon:'fa-calendar-check',intro:'Your outsourced administrative compliance department — calendar, filings, renewals and coordination.',options:[{v:'audit',t:'Compliance Check-Up',d:'Written status report across all areas.',icon:'fa-magnifying-glass-chart',services:['c_audit']},{v:'behind',t:'I am behind — bring me up to date',d:'Structured regularisation programme.',icon:'fa-wrench',services:['c_regularise','c_ongoing']},{v:'ongoing',t:'Ongoing compliance support',d:'Calendar, filings, renewals, report.',icon:'fa-calendar-check',services:['c_ongoing']},{v:'ask',t:'I have a question',d:'Talk to an officer first.',icon:'fa-comments',services:[]}]}
+  compliance:{id:'compliance',code:'8',title:'Compliance Desk',subtitle:'Ongoing Compliance Management',authority:'Cross-desk coordination',color:'#0E7C7B',icon:'fa-calendar-check',intro:'Your outsourced administrative compliance department — calendar, filings, renewals and coordination.',options:[{v:'audit',t:'Compliance Check-Up',d:'Written status report across all areas.',icon:'fa-magnifying-glass-chart',services:['c_audit']},{v:'behind',t:'I am behind — bring me up to date',d:'Structured regularisation programme.',icon:'fa-wrench',services:['c_regularise','c_ongoing']},{v:'ongoing',t:'Ongoing compliance support',d:'Calendar, filings, renewals, report.',icon:'fa-calendar-check',services:['c_ongoing']},{v:'ask',t:'I have a question',d:'Talk to an officer first.',icon:'fa-comments',services:[]}]},
+  personal:{id:'personal',code:'9',title:'Personal Administrative Desk',subtitle:'Administrative help for individuals',authority:'Personal Administrative Services',color:'#1B6CA8',icon:'fa-user',intro:'A dedicated desk for individuals who need administrative work done — documents, applications, certificates, follow-up and government portal navigation.',options:[{v:'docs',t:'Document preparation',d:'CVs, applications, supporting documents.',icon:'fa-file-lines',services:['pe_docs']},{v:'certs',t:'Certificates & statutory documents',d:'Affidavits, certified copies, statements.',icon:'fa-certificate',services:['pe_certs']},{v:'apps',t:'Application submissions',d:'Government portal applications.',icon:'fa-paper-plane',services:['pe_apps']},{v:'follow',t:'Application follow-up',d:'Monitoring and correspondence.',icon:'fa-phone',services:['pe_follow']},{v:'print',t:'Scanning, printing & copies',d:'Document handling and delivery.',icon:'fa-print',services:['pe_print']},{v:'ask',t:'I have a question',d:'Talk to an officer first.',icon:'fa-comments',services:[]}]},
+  outsourcing:{id:'outsourcing',code:'10',title:'Outsourced Administrative Desk',subtitle:'For NGOs, churches, associations, cooperatives',authority:'External Administration Department',color:'#7A4FA3',icon:'fa-sitemap',intro:'We become your organisation\'s external administrative office — records, filings, minutes, renewals and correspondence managed monthly.',options:[{v:'starter',t:'Outsourced desk — Starter',d:'Records + calendar + reminders.',icon:'fa-folder-open',services:['o_starter']},{v:'organisation',t:'Outsourced desk — Organisation',d:'For NGOs, churches, associations.',icon:'fa-people-group',services:['o_org']},{v:'executive',t:'Outsourced desk — Executive',d:'Virtual administrative department.',icon:'fa-briefcase',services:['o_exec']},{v:'oneoff',t:'One-off clean-up',d:'Get disorganised records in order.',icon:'fa-broom',services:['o_cleanup']},{v:'ask',t:'I have a question',d:'Talk to an officer first.',icon:'fa-comments',services:[]}]}
 };
 
 const S={
@@ -579,7 +581,16 @@ const S={
   s_zppa:{code:'S9',desk:'sector',title:'ZPPA Supplier Registration',clientDesc:'Administrative support to register as a supplier for government tenders.',whatsCovered:['Supplier registration support','Supplier profile administration','Documentation coordination','Compliance document management','Tender-readiness administration'],service:'standard',timeline:'Varies'},
   c_audit:{code:'C1',desk:'compliance',title:'Business Compliance Check-Up',clientDesc:'A written Business Compliance Status Report covering every applicable regulatory area.',whatsCovered:['Business identity review','Tax review','Employee review','Premises review','Industry review','Written report with ratings'],service:'checkup',timeline:'Report within 5 business days',popular:true},
   c_regularise:{code:'C2',desk:'compliance',title:'Compliance Regularisation Programme',clientDesc:'A structured programme to bring your business up to date across every applicable authority.',whatsCovered:['PACRA status check and outstanding annual returns','ZRA status check and missing tax returns','NAPSA, NHIMA and WCFCB status checks','Council licence status and expired licences','Missing certificates identified','Employee compliance review','Regulatory correspondence','Compliance backlog filed','Renewals coordinated','Certificate retrieval','Record reconstruction','Compliance calendar created'],service:'regularise',ongoing:'standard',timeline:'Varies depending on backlog',popular:true},
-  c_ongoing:{code:'C3',desk:'compliance',title:'Ongoing Compliance Management',clientDesc:'We become your external administrative compliance department.',whatsCovered:['PACRA — annual returns and corporate changes','ZRA — tax registrations, returns and compliance','NAPSA — employer, employee and contribution compliance','NHIMA — employee registration, returns and premiums','WCFCB — employer registration, assessments and compliance','Council — business levy and local licences','Health — permits and inspections','Fire — certificates and renewals','ZDA — investment regulatory matters','ZEMA — environmental licences','ZABS — standards and certification','Tourism — tourism licences','ERB — energy licences','ZICTA — ICT regulatory licences','ZPPA — supplier compliance','Monthly / quarterly compliance status report','Annual compliance review'],ongoing:'managed',timeline:'Ongoing',popular:true,subscription:true}
+  c_ongoing:{code:'C3',desk:'compliance',title:'Ongoing Compliance Management',clientDesc:'We become your external administrative compliance department.',whatsCovered:['PACRA — annual returns and corporate changes','ZRA — tax registrations, returns and compliance','NAPSA — employer, employee and contribution compliance','NHIMA — employee registration, returns and premiums','WCFCB — employer registration, assessments and compliance','Council — business levy and local licences','Health — permits and inspections','Fire — certificates and renewals','ZDA — investment regulatory matters','ZEMA — environmental licences','ZABS — standards and certification','Tourism — tourism licences','ERB — energy licences','ZICTA — ICT regulatory licences','ZPPA — supplier compliance','Monthly / quarterly compliance status report','Annual compliance review'],ongoing:'managed',timeline:'Ongoing',popular:true,subscription:true},
+  pe_docs:{code:'PE1',desk:'personal',title:'Document Preparation',clientDesc:'Administrative preparation of CVs, application letters, supporting documents and personal paperwork.',whatsCovered:['CV and cover letter preparation','Application and motivation letters','Supporting document preparation','Document review for consistency','Formatting and finishing'],service:'basic',timeline:'2–5 working days'},
+  pe_certs:{code:'PE2',desk:'personal',title:'Certificates & Statutory Documents',clientDesc:'Administrative support to obtain certificates, certified copies, affidavits and statutory statements.',whatsCovered:['Certificate application preparation','Certified copy coordination','Affidavit preparation support','Statutory statement preparation','Submission on your behalf','Collection and delivery'],service:'standard',timeline:'Varies',popular:true},
+  pe_apps:{code:'PE3',desk:'personal',title:'Application Submissions',clientDesc:'Administrative submission of applications on government portals and with public offices.',whatsCovered:['Correct portal identified','Application prepared','Submitted on your behalf','Confirmation captured','Follow-up scheduled'],service:'basic',timeline:'1–5 working days'},
+  pe_follow:{code:'PE4',desk:'personal',title:'Application Follow-Up',clientDesc:'Ongoing follow-up on your application until a decision is issued.',whatsCovered:['Application tracking','Regular follow-up correspondence','Status updates to you','Resolution of queries','Final decision captured'],service:'basic',ongoing:'filing',timeline:'Until resolved'},
+  pe_print:{code:'PE5',desk:'personal',title:'Scanning, Printing & Copies',clientDesc:'Document scanning, printing, photocopying, binding and delivery.',whatsCovered:['Document scanning and digitisation','Printing and photocopying','Binding and finishing','Courier delivery','Digital archive handover'],service:'micro',timeline:'24–72 hours'},
+  o_starter:{code:'O1',desk:'outsourcing',title:'Outsourced Desk — Starter',clientDesc:'A lightweight outsourced administrative desk for small organisations. Records, calendar and reminders.',whatsCovered:['Statutory document register built','Compliance calendar maintained','Renewal reminders','Document storage and retrieval','Monthly administrative note'],ongoing:'filing',timeline:'Ongoing monthly',popular:true},
+  o_org:{code:'O2',desk:'outsourcing',title:'Outsourced Desk — Organisation',clientDesc:'A full outsourced administrative desk for NGOs, churches, associations and cooperatives.',whatsCovered:['Statutory document register','Board and director records','Meeting and minutes administration','Constitution and policy register','Donor and procurement documentation','Filing calendar and renewals','Contract register','Correspondence handling','Monthly administrative report'],ongoing:'standard',timeline:'Ongoing monthly',popular:true},
+  o_exec:{code:'O3',desk:'outsourcing',title:'Outsourced Desk — Executive',clientDesc:'We become your virtual administrative department. Named officer, defined service package and monthly reporting.',whatsCovered:['Everything in Organisation','Named administrative officer','Defined service package per month','Monthly administrative report','Compliance calendar and tracking','Executive / board pack assembly','Priority turnaround'],ongoing:'managed',timeline:'Ongoing monthly',subscription:true},
+  o_cleanup:{code:'O4',desk:'outsourcing',title:'Administrative Clean-Up',clientDesc:'One-off programme to bring disorganised records, filings and documents back into order.',whatsCovered:['Records audit','Statutory filings regularised','Document register rebuilt','Missing certificates identified and obtained','Compliance calendar created','Handover pack'],service:'complex',ongoing:'standard',timeline:'Varies with scope'}
 };
 const ALL_SERVICES=Object.entries(S).map(([k,v])=>({key:k,...v}));
 const findServiceByKey=key=>S[key]?{key,...S[key]}:null;
@@ -1578,7 +1589,7 @@ function AdminPortal({onExit}){
                 <div key={e.id||i} style={{display:'flex',gap:14,alignItems:'flex-start',padding:'12px 0',borderBottom:i<recentActivity.length-1?'1px dashed rgba(10,31,18,.08)':'none'}}>
                   <span style={{width:32,height:32,borderRadius:8,background:'rgba(232,115,15,.1)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                     <i className={`fas ${{
-                      visit:'fa-eye',page_view:'fa-compass',wizard_start:'fa-wand-magic-sparkles',wizard_step:'fa-shoe-prints',wizard_complete:'fa-circle-check',service_view:'fa-file',payment_submit:'fa-receipt',payment_reviewed:'fa-gavel'
+                      visit:'fa-eye',page_view:'fa-compass',wizard_start:'fa-wand-magic-sparkles',wizard_step:'fa-shoe-prints',wizard_complete:'fa-circle-check',service_view:'fa-file',payment_submit:'fa-receipt',payment_reviewed:'fa-gavel',survey_submit:'fa-poll'
                     }[e.type]||'fa-circle'}`} style={{fontSize:11}}></i>
                   </span>
                   <div style={{flex:1,minWidth:0}}>
@@ -1589,6 +1600,7 @@ function AdminPortal({onExit}){
                       {e.scope&&<>scope: <strong>{e.scope}</strong> · </>}
                       {e.ref&&<>ref: <strong style={{fontFamily:'Consolas,monospace'}}>{e.ref}</strong> · </>}
                       {e.status&&<>status: <strong>{e.status}</strong> · </>}
+                      {e.filled!==undefined&&<>answers: <strong>{e.filled}</strong> · </>}
                       {e.serviceCode&&<>service: <strong>{e.serviceCode}</strong></>}
                       {e.visitorId&&<span style={{color:'rgba(10,31,18,.35)',fontFamily:'Consolas,monospace'}}> · {e.visitorId}</span>}
                     </div>
@@ -1805,10 +1817,10 @@ function AdminPortal({onExit}){
   </div>;
 }
 
-const NAV=[['home','Home'],['wizard','Structure & Name'],['desks','Desks'],['services','Services'],['track','Track'],['engagement','How it works'],['pricing','Pricing'],['about','About']];
+const NAV=[['home','Home'],['wizard','Structure & Name'],['desks','Desks'],['services','Services'],['track','Track'],['orientation','Orientation'],['engagement','How it works'],['pricing','Pricing'],['about','About']];
 function Nav({route,go}){
   const [open,setOpen]=useState(false);
-  const nav=r=>{setOpen(false);go(r)};
+  const nav=r=>{setOpen(false);if(r==='orientation'){try{document.getElementById('orientation-services')?.scrollIntoView({behavior:'smooth'})}catch(e){}}go(r)};
   return <header className="sticky top-0 z-50 bg-[#0A1F12] border-b border-[#F5A623]/10">
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
@@ -1871,6 +1883,330 @@ function ServiceCard({serviceKey,onClick}){
       </div>
     </div>
   </button>;
+}
+
+/* ============================================================
+   ORIENTATION SERVICES SECTION
+   Sits near the footer. Answers "What challenge do you have?"
+   ============================================================ */
+function OrientationServicesSection({go,onWizard}){
+  const [open,setOpen]=useState('startup');
+  const toggle=id=>setOpen(prev=>prev===id?null:id);
+
+  const challenges=[
+    {id:'startup',icon:'fa-rocket',color:'#E8730F',tag:'Starting a business',title:'"I don\'t know what I am supposed to register for."',
+      lead:'A person starting a business may ask:',
+      list:['Do I need a business name or a company?','Do I need a TPIN?','Do I need NAPSA?','Do I need Workers Compensation registration?','Do I need a council trading licence?','Do I need ZABS certification?','Do I need ZICTA approval?','Do I need a health permit?','Do I need a fire certificate?','Do I need VAT?','What happens after registration?'],
+      note:'The answer depends on the nature of the organisation and its activities. ZRA itself lists several different tax obligations — including PAYE, VAT, income tax, turnover tax and withholding tax.',
+      cta:[{label:'Run a Compliance Assessment',action:'wizard'}],
+      answer:true},
+    {id:'individual',icon:'fa-user',color:'#1B6CA8',tag:'Individual',title:'"I am an individual with administrative problems."',
+      lead:'Common personal administrative requests we handle:',
+      list:['Obtaining certificates','Document applications','Statutory registrations','Business start-up documentation','Affidavits and supporting documents','Document scanning','Printing and photocopying','Application submissions','Appointment scheduling','Government portal navigation','CV / document preparation','Certified / document-related processes','Correspondence','Application follow-up','Relocation / administrative paperwork'],
+      cta:[{label:'Open Personal Administrative Desk',action:'desk',arg:'personal'}]},
+    {id:'organisation',icon:'fa-people-group',color:'#7A4FA3',tag:'Organisation',title:'"We are a small NGO, church, association, school or cooperative — and can\'t keep up."',
+      lead:'Records and documents organisations struggle to maintain:',
+      list:['Registration documents','Constitutions','Board / director information','Meeting minutes','Statutory filings','Tax documentation','Employee records','Contracts','Policies','Financial records','Licences','Donor documentation','Procurement documentation','Correspondence','Renewal dates'],
+      note:'StartEasy acts as the outsourced administration department for your organisation. Instead of employing an administrator — outsource your administrative desk to StartEasy.',
+      cta:[{label:'Open Outsourced Administrative Desk',action:'desk',arg:'outsourcing'}]},
+    {id:'busy',icon:'fa-briefcase',color:'#0E7C7B',tag:'Time-poor',title:'"I have no time to deal with government offices."',
+      lead:'StartEasy handles the administrative process while you concentrate on:',
+      list:['Selling','Managing employees','Serving customers','Finding contracts','Producing goods','Managing cash flow'],
+      note:'Government systems are usually in your favour. Don\'t worry — StartEasy provides administrative follow-up: "We submitted it, we\'re monitoring it, we\'ll tell you when something changes, and we\'ll follow up where necessary."',
+      cta:[{label:'Talk to an officer',action:'wa'}]}
+  ];
+
+  const solutions=[
+    ['"I want to start a business."','Business Start-Up Package','pacra'],
+    ['"I don\'t know what registrations I need."','Compliance Assessment','wizard'],
+    ['"I don\'t have time to deal with government offices."','Administrative Agent / Desk','desks'],
+    ['"I don\'t know when my documents expire."','Compliance Calendar','desk:compliance'],
+    ['"My business is already registered but disorganised."','Business Administration Cleanup','desk:outsourcing'],
+    ['"I don\'t know what documents I need."','Document Preparation Service','desk:personal'],
+    ['"I need someone to follow up applications."','Application Follow-Up','desk:personal'],
+    ['"I don\'t have an administrator."','Outsourced Admin Desk','desk:outsourcing'],
+    ['"I need recurring compliance help."','Monthly Compliance Retainer','pricing'],
+    ['"I want to bid for contracts."','Tender / Admin Documentation Support','desk:sector'],
+    ['"I need help maintaining company records."','Corporate Records Administration','desk:pacra']
+  ];
+
+  const pillars=[
+    {icon:'fa-rocket',color:'#2E9C4A',title:'Business Start-Up',quote:'"I want to start a business but don\'t know where to begin."',text:'Registration + tax + statutory registrations + documentation + guidance.',desk:'pacra'},
+    {icon:'fa-shield-halved',color:'#E8730F',title:'Compliance & Administration',quote:'"My business already exists, but keeping everything compliant and organised is difficult."',text:'Filing, renewals, records, compliance calendar and follow-up across every authority.',desk:'compliance'},
+    {icon:'fa-briefcase',color:'#7A4FA3',title:'Outsourced Administrative Department',quote:'"We are too small to employ a full-time administrator."',text:'StartEasy becomes the organisation\'s external administrative office.',desk:'outsourcing'},
+    {icon:'fa-user',color:'#1B6CA8',title:'Personal Administrative Services',quote:'"I am an individual — I just need help with paperwork."',text:'Documents, applications, certificates, follow-up, CVs and government portals.',desk:'personal'}
+  ];
+
+  const retainers=[
+    {name:'StartEasy Basic',audience:'Individuals / micro-businesses',color:'#0E7C7B',icon:'fa-user',features:['Document preparation support','Government portal assistance','Application follow-up','Compliance calendar reminders']},
+    {name:'StartEasy Business',audience:'Small businesses',color:'#1B6CA8',icon:'fa-store',features:['Everything in Basic','PACRA annual returns tracking','ZRA filing calendar','NAPSA / NHIMA / WCFCB reminders','Council licence renewals'],popular:true},
+    {name:'StartEasy Organisation',audience:'NGOs, churches, associations, cooperatives',color:'#7A4FA3',icon:'fa-people-group',features:['Everything in Business','Statutory document register','Board / director records','Meeting & minutes administration','Donor & procurement documentation']},
+    {name:'StartEasy Executive',audience:'Virtual / outsourced administrative department',color:'#E8730F',icon:'fa-briefcase',features:['Everything in Organisation','Named administrative officer','Defined service package per month','Monthly administrative report','Compliance calendar & tracking','Executive / board pack assembly']}
+  ];
+
+  const surveyQs=[
+    'What administrative task takes the most time?',
+    'What government process frustrates you most?',
+    'What have you paid someone else to do for you?',
+    'What administrative task do you keep postponing?',
+    'Have you ever missed a renewal or compliance deadline?',
+    'What documents are you constantly looking for?',
+    'What government service have you struggled to understand?',
+    'If someone could take one administrative responsibility away from you permanently, what would it be?',
+    'What would you actually pay someone to handle for you?'
+  ];
+
+  const [answers,setAnswers]=useState(Array(surveyQs.length).fill(''));
+  const [name,setName]=useState('');
+  const [role,setRole]=useState('');
+
+  const buildSurveyMsg=()=>{
+    const lines=['*STARTEASY — ORIENTATION SURVEY*',''];
+    if(name.trim())lines.push('*Name:* '+name.trim());
+    if(role.trim())lines.push('*I am:* '+role.trim());
+    if(name.trim()||role.trim())lines.push('');
+    surveyQs.forEach((q,i)=>{
+      const a=(answers[i]||'').trim();
+      if(a)lines.push('*'+q+'*',''+a,'');
+    });
+    return lines.join('\n');
+  };
+  const submitSurvey=()=>{
+    const filled=answers.filter(a=>a&&a.trim()).length;
+    if(!filled){alert('Answer at least one question before submitting.');return}
+    trackEvent('survey_submit',{filled});
+    window.open(waUrl(buildSurveyMsg()),'_blank');
+  };
+
+  const act=(a)=>{
+    if(!a)return;
+    if(a.action==='wizard'){onWizard&&onWizard(null);return}
+    if(a.action==='desk'){go('desk',a.arg);return}
+    if(a.action==='wa'){window.open(waUrl('Hello StartEasy — I need help with administrative work. I do not have time to deal with government offices.'),'_blank');return}
+  };
+  const actRoute=(r)=>{
+    if(r==='wizard'){onWizard&&onWizard(null);return}
+    if(r==='desks'){go('desks');return}
+    if(r==='pricing'){go('pricing');return}
+    if(r&&r.startsWith('desk:')){go('desk',r.slice(5));return}
+    go(r);
+  };
+
+  return <section id="orientation-services" style={{background:'#F5FAF6'}}>
+
+    {/* Header */}
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px 8px'}}>
+      <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:16}}>Orientation Services · Start here</span>
+      <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,color:'#0A1F12',marginBottom:16,maxWidth:'48rem'}}>What challenge do you have?</h2>
+      <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',maxWidth:'46rem',margin:0}}>Pick the situation that best describes you. Every answer points to a real StartEasy desk, service or assessment — so you don't have to guess what to register for, what documents you need, or who should follow up.</p>
+    </div>
+
+    {/* Challenge accordion */}
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'32px 24px 16px'}}>
+      <div style={{display:'flex',flexDirection:'column',gap:12}}>
+        {challenges.map(ch=>{
+          const isOpen=open===ch.id;
+          return <div key={ch.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderLeft:'4px solid '+ch.color,borderRadius:12,overflow:'hidden',transition:'all .25s'}}>
+            <button onClick={()=>toggle(ch.id)} style={{width:'100%',display:'flex',alignItems:'center',gap:16,padding:'22px 24px',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left'}}>
+              <span style={{width:44,height:44,borderRadius:11,background:ch.color+'18',color:ch.color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:17}}><i className={`fas ${ch.icon}`}></i></span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:ch.color,marginBottom:5}}>{ch.tag}</div>
+                <div className="serif" style={{fontSize:'clamp(1.05rem,2vw,1.25rem)',lineHeight:1.3,color:'#0A1F12',fontWeight:700}}>{ch.title}</div>
+              </div>
+              <span style={{width:34,height:34,borderRadius:'50%',background:isOpen?ch.color:'rgba(10,31,18,.06)',color:isOpen?'#fff':'rgba(10,31,18,.55)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,transition:'all .25s',transform:isOpen?'rotate(180deg)':'none'}}><i className="fas fa-chevron-down" style={{fontSize:12}}></i></span>
+            </button>
+            {isOpen&&<div className="fadein" style={{padding:'0 24px 26px',borderTop:'1px dashed rgba(10,31,18,.08)'}}>
+              <p style={{fontSize:13.5,color:'rgba(10,31,18,.7)',lineHeight:1.65,margin:'18px 0 14px',fontWeight:500}}>{ch.lead}</p>
+              <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:ch.note?16:20}}>
+                {ch.list.map((x,i)=><span key={i} style={{fontSize:12.5,color:'rgba(10,31,18,.75)',background:'rgba(10,31,18,.045)',border:'1px solid rgba(10,31,18,.08)',padding:'7px 13px',borderRadius:99,fontWeight:500}}>{x}</span>)}
+              </div>
+              {ch.note&&<div style={{background:'linear-gradient(135deg,rgba(232,115,15,.06),rgba(245,166,35,.03))',border:'1px solid rgba(232,115,15,.25)',borderRadius:10,padding:'14px 18px',fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.75)',marginBottom:18,display:'flex',gap:12,alignItems:'flex-start'}}>
+                <i className="fas fa-lightbulb" style={{color:'#E8730F',fontSize:15,flexShrink:0,marginTop:2}}></i>
+                <div>{ch.note}</div>
+              </div>}
+              <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
+                {ch.cta.map((c,i)=><button key={i} onClick={()=>act(c)} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:9}}><i className="fas fa-arrow-right"></i> {c.label}</button>)}
+              </div>
+            </div>}
+          </div>;
+        })}
+      </div>
+    </div>
+
+    {/* Compliance Assessment CTA */}
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'24px 24px 40px'}}>
+      <div style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',borderRadius:16,padding:'clamp(28px,4vw,44px)',color:'#fff',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-80,right:-80,width:340,height:340,background:'radial-gradient(circle, rgba(232,115,15,.22), transparent 65%)',pointerEvents:'none'}}/>
+        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-8" style={{position:'relative',zIndex:1,alignItems:'center'}}>
+          <div>
+            <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14}}>Administrative Compliance Assessment</span>
+            <h3 className="serif" style={{fontSize:'clamp(1.5rem,3.4vw,2.1rem)',lineHeight:1.15,marginBottom:16,maxWidth:'36rem'}}>Tell us what you do. We'll tell you what applies to you.</h3>
+            <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(255,255,255,.7)',marginBottom:22,maxWidth:'36rem'}}>You tell us what you do, where you operate and how you are structured. StartEasy gives you a written answer: <em style={{color:'#F5A623',fontStyle:'normal',fontWeight:600}}>"Here are the registrations, licences, documents and recurring obligations applicable to your organisation."</em></p>
+            <div style={{display:'flex',flexWrap:'wrap',gap:12}}>
+              <button onClick={()=>onWizard&&onWizard(null)} style={{padding:'14px 26px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:10}}><i className="fas fa-clipboard-list"></i> Run my Compliance Assessment</button>
+              <a href={waUrl('Hello StartEasy — I would like an Administrative Compliance Assessment. Here is what my organisation does: ')} target="_blank" rel="noopener noreferrer" style={{padding:'14px 26px',background:'rgba(255,255,255,.06)',color:'#fff',border:'1px solid rgba(255,255,255,.2)',borderRadius:9,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:10,textDecoration:'none'}}><i className="fab fa-whatsapp" style={{color:'#25D366'}}></i> Ask an officer first</a>
+            </div>
+          </div>
+          <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:12,padding:'20px 22px'}}>
+            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#F5A623',marginBottom:14}}>One desk covers it end-to-end</div>
+            <ol style={{listStyle:'none',padding:0,margin:0}}>
+              {['Business established','TPIN issued','Tax obligations mapped','NAPSA','Workers Compensation','Council requirements','Licences','Employees','Contracts','Records','Renewals','Annual returns','Tax filings','Compliance documents'].map((s,i)=><li key={i} style={{display:'flex',gap:12,padding:'7px 0',fontSize:13,color:'rgba(255,255,255,.78)',lineHeight:1.5,alignItems:'flex-start'}}>
+                <span style={{width:20,height:20,borderRadius:'50%',background:'rgba(245,166,35,.2)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800,flexShrink:0,fontFamily:"'Playfair Display',Georgia,serif",marginTop:1}}>{i+1}</span>
+                <span>{s}</span>
+              </li>)}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Four service pillars */}
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px 56px'}}>
+      <div style={{display:'flex',alignItems:'baseline',gap:16,marginBottom:28,flexWrap:'wrap'}}>
+        <span className="micro" style={{color:'#E8730F'}}>Four StartEasy Services</span>
+        <span style={{fontSize:12.5,color:'rgba(10,31,18,.55)'}}>Pick the door that fits you</span>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {pillars.map((p,i)=><button key={i} onClick={()=>go('desk',p.desk)} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'24px 22px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',transition:'all .25s',borderTopWidth:4,borderTopColor:p.color,display:'flex',flexDirection:'column',gap:14}}
+          onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.boxShadow='0 14px 34px rgba(0,0,0,.08)'}}
+          onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none'}}>
+          <span style={{width:46,height:46,borderRadius:12,background:p.color+'18',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}><i className={`fas ${p.icon}`}></i></span>
+          <h4 className="serif" style={{fontSize:16.5,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{p.title}</h4>
+          <p style={{fontSize:12.5,color:'rgba(10,31,18,.55)',lineHeight:1.55,margin:0,fontStyle:'italic'}}>{p.quote}</p>
+          <p style={{fontSize:13,color:'rgba(10,31,18,.7)',lineHeight:1.6,margin:0,flex:1}}>{p.text}</p>
+          <span style={{display:'inline-flex',alignItems:'center',gap:8,fontSize:11.5,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:p.color,marginTop:'auto',paddingTop:12,borderTop:'1px solid rgba(10,31,18,.06)'}}>Open desk <Arrow/></span>
+        </button>)}
+      </div>
+    </div>
+
+    {/* Solutions table */}
+    <div style={{background:'#fff',borderTop:'1px solid rgba(10,31,18,.06)',borderBottom:'1px solid rgba(10,31,18,.06)'}}>
+      <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
+        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'space-between',alignItems:'flex-end',gap:16,marginBottom:32}}>
+          <div style={{flex:'1 1 320px'}}>
+            <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:12}}>Customer problem → StartEasy solution</span>
+            <h3 className="serif" style={{fontSize:'clamp(1.5rem,3.4vw,2rem)',lineHeight:1.15,color:'#0A1F12',margin:0}}>At a glance.</h3>
+          </div>
+          <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0,maxWidth:'32rem',lineHeight:1.6}}>Every problem below is an administrative problem StartEasy Zambia actually solves. Click a row to go straight to the desk.</p>
+        </div>
+        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,overflow:'hidden'}}>
+          <div style={{overflowX:'auto'}}>
+            <table style={{width:'100%',borderCollapse:'collapse',minWidth:640}}>
+              <thead>
+                <tr>
+                  <th style={{textAlign:'left',padding:'14px 22px',background:'#0A1F12',fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(255,255,255,.65)'}}>Customer problem</th>
+                  <th style={{textAlign:'left',padding:'14px 22px',background:'#0A1F12',fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(255,255,255,.65)'}}>StartEasy solution</th>
+                  <th style={{width:60,background:'#0A1F12'}}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {solutions.map((row,i)=>(
+                  <tr key={i} onClick={()=>actRoute(row[2])} style={{borderBottom:i<solutions.length-1?'1px solid rgba(10,31,18,.06)':'none',cursor:'pointer',transition:'background .2s'}}
+                    onMouseEnter={e=>e.currentTarget.style.background='rgba(232,115,15,.04)'}
+                    onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                    <td style={{padding:'16px 22px',fontSize:13.5,color:'rgba(10,31,18,.8)',fontStyle:'italic',lineHeight:1.55}}>{row[0]}</td>
+                    <td style={{padding:'16px 22px',fontSize:13.5,color:'#0A1F12',fontWeight:700,lineHeight:1.55}}>{row[1]}</td>
+                    <td style={{padding:'16px 22px',color:'#E8730F',textAlign:'right'}}><Arrow/></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Administrative Retainers */}
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
+      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 40px'}}>
+        <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14}}>Administrative Retainers</span>
+        <h3 className="serif" style={{fontSize:'clamp(1.6rem,3.6vw,2.3rem)',lineHeight:1.15,color:'#0A1F12',marginBottom:14}}>Outsource the desk. Keep the business.</h3>
+        <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.6)',margin:0}}>Instead of employing an administrator, put your organisation on a StartEasy retainer. Defined services, defined calendar, defined reporting — every month.</p>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {retainers.map((r,i)=><div key={i} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'26px 22px',position:'relative',display:'flex',flexDirection:'column',gap:14,borderTopWidth:4,borderTopColor:r.color,boxShadow:r.popular?'0 12px 34px rgba(232,115,15,.08)':'none'}}>
+          {r.popular&&<span style={{position:'absolute',top:14,right:14,fontSize:9.5,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,padding:'4px 10px',borderRadius:99,background:'rgba(232,115,15,.12)',color:'#E8730F'}}>Most chosen</span>}
+          <span style={{width:44,height:44,borderRadius:11,background:r.color+'18',color:r.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17}}><i className={`fas ${r.icon}`}></i></span>
+          <div>
+            <h4 className="serif" style={{fontSize:17,fontWeight:800,color:'#0A1F12',lineHeight:1.2,margin:'0 0 6px'}}>{r.name}</h4>
+            <p style={{fontSize:11.5,color:'rgba(10,31,18,.55)',margin:0,lineHeight:1.5,fontStyle:'italic'}}>{r.audience}</p>
+          </div>
+          <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:9,flex:1}}>
+            {r.features.map((f,j)=><li key={j} style={{display:'flex',gap:9,fontSize:12.5,color:'rgba(10,31,18,.75)',lineHeight:1.5,alignItems:'flex-start'}}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={r.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{marginTop:4,flexShrink:0}}><path d="M20 6L9 17l-5-5"/></svg>
+              <span>{f}</span>
+            </li>)}
+          </ul>
+          <a href={waUrl('Hello StartEasy — I am interested in the '+r.name+' retainer. Please tell me what is covered and how it works.')} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'11px 16px',background:r.color,color:'#fff',borderRadius:8,fontSize:12.5,fontWeight:700,textDecoration:'none',marginTop:6}}><i className="fab fa-whatsapp"></i> Enquire on WhatsApp</a>
+        </div>)}
+      </div>
+      <p style={{textAlign:'center',fontSize:12,color:'rgba(10,31,18,.5)',fontStyle:'italic',marginTop:22,maxWidth:640,marginLeft:'auto',marginRight:'auto'}}>Retainer prices are quoted after we understand your organisation's scope, records and calendar. No published price until we know what you actually need.</p>
+    </div>
+
+    {/* Flow diagram */}
+    <div style={{background:'#0A1F12',color:'#fff'}}>
+      <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
+        <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 40px'}}>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14}}>One administrative desk</span>
+          <h3 className="serif" style={{fontSize:'clamp(1.6rem,3.6vw,2.2rem)',lineHeight:1.15,marginBottom:12}}>Made for every organisation that has paperwork.</h3>
+          <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',margin:0}}>We make administration easier. The concept is simple — one desk, one calendar, one point of contact.</p>
+        </div>
+        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:8,marginBottom:28}}>
+          {['Individuals','Businesses','NGOs','Churches','Associations','Cooperatives','SMEs'].map((x,i)=><span key={i} style={{padding:'9px 18px',background:'rgba(255,255,255,.06)',border:'1px solid rgba(245,166,35,.25)',borderRadius:99,fontSize:12.5,fontWeight:600,color:'#fff'}}>{x}</span>)}
+        </div>
+        <div style={{textAlign:'center',fontSize:22,color:'#F5A623',marginBottom:20}}><i className="fas fa-arrow-down"></i></div>
+        <div style={{background:'linear-gradient(135deg,rgba(232,115,15,.18),rgba(245,166,35,.08))',border:'1px solid rgba(245,166,35,.35)',borderRadius:14,padding:'24px 22px',textAlign:'center',maxWidth:520,margin:'0 auto 20px'}}>
+          <div className="serif" style={{fontSize:'clamp(1.3rem,2.8vw,1.7rem)',fontWeight:800,color:'#F5A623',lineHeight:1.2}}>One Administrative Desk</div>
+        </div>
+        <div style={{textAlign:'center',fontSize:22,color:'#F5A623',marginBottom:20}}><i className="fas fa-arrow-down"></i></div>
+        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:8,maxWidth:940,margin:'0 auto'}}>
+          {['Registration','Documentation','Compliance','Applications','Follow-up','Records','Ongoing Administration'].map((x,i)=><span key={i} style={{padding:'10px 18px',background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.12)',borderRadius:8,fontSize:12.5,fontWeight:600,color:'rgba(255,255,255,.85)'}}>{x}</span>)}
+        </div>
+      </div>
+    </div>
+
+    {/* Survey */}
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
+      <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'clamp(26px,4vw,40px)',boxShadow:'0 20px 60px rgba(10,31,18,.06)'}}>
+        <div className="grid lg:grid-cols-[1.1fr_1.6fr] gap-10">
+          <div>
+            <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14}}>Help us design your desk</span>
+            <h3 className="serif" style={{fontSize:'clamp(1.5rem,3.2vw,2rem)',lineHeight:1.15,color:'#0A1F12',marginBottom:16}}>Tell us what actually slows you down.</h3>
+            <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.65)',marginBottom:22}}>Answer any of these questions — even one. Your answers go directly to a StartEasy officer on WhatsApp and shape what we build next.</p>
+            <div style={{background:'rgba(232,115,15,.06)',border:'1px solid rgba(232,115,15,.2)',borderRadius:10,padding:'16px 18px',display:'flex',gap:12,alignItems:'flex-start'}}>
+              <i className="fas fa-shield-halved" style={{color:'#E8730F',fontSize:16,flexShrink:0,marginTop:2}}></i>
+              <p style={{fontSize:12,color:'rgba(10,31,18,.7)',lineHeight:1.65,margin:0}}>We only use your answers to understand what administrative services to build. No spam, no automated lists.</p>
+            </div>
+          </div>
+          <div>
+            <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',marginBottom:18}}>
+              <div><label style={{display:'block',fontSize:12,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase',color:'rgba(10,31,18,.55)',marginBottom:7}}>Your name (optional)</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Chanda M." style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'11px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/></div>
+              <div><label style={{display:'block',fontSize:12,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase',color:'rgba(10,31,18,.55)',marginBottom:7}}>I am a…</label><select value={role} onChange={e=>setRole(e.target.value)} className="inp-select" style={{paddingTop:11,paddingBottom:11,fontSize:13.5}}><option value="">Choose one</option>{['Individual','Business owner','SME founder','NGO','Church / faith organisation','Association / cooperative','School','Other'].map(x=><option key={x} value={x}>{x}</option>)}</select></div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:12}}>
+              {surveyQs.map((q,i)=><div key={i}>
+                <label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:6,lineHeight:1.5}}>{i+1}. {q}</label>
+                <textarea value={answers[i]} onChange={e=>{const a=[...answers];a[i]=e.target.value;setAnswers(a)}} rows={2} placeholder="Type your answer…" style={{width:'100%',background:'#F7FAF8',border:'1.5px solid rgba(10,31,18,.1)',borderRadius:9,padding:'11px 14px',fontSize:13,color:'#0A1F12',fontFamily:'inherit',resize:'vertical',lineHeight:1.5}}/>
+              </div>)}
+            </div>
+            <div style={{marginTop:22,display:'flex',flexWrap:'wrap',gap:12,alignItems:'center'}}>
+              <button onClick={submitSurvey} style={{padding:'14px 26px',background:'#25D366',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:10}}><i className="fab fa-whatsapp"></i> Submit to StartEasy on WhatsApp</button>
+              <span style={{fontSize:12,color:'rgba(10,31,18,.5)'}}>Your answers open directly in WhatsApp — you tap send.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Closing quote */}
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px 72px'}}>
+      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
+        <div style={{fontSize:10.5,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:14}}>StartEasy Administrative Services Desk</div>
+        <p className="serif" style={{fontSize:'clamp(1.3rem,3vw,1.8rem)',lineHeight:1.35,color:'#0A1F12',fontStyle:'italic',margin:0}}>Your organisation's outsourced administrative desk. We make administration easier.</p>
+      </div>
+    </div>
+
+  </section>;
 }
 
 function Home({go,onResume}){
@@ -1940,7 +2276,7 @@ function Home({go,onResume}){
     </section>
     <section style={{background:'#fff'}}>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
-        <Head eyebrow="Or explore by desk" title="Eight specialist desks." sub="Each desk handles a defined set of administrative services with the relevant authority." style={{marginBottom:40,maxWidth:'42rem'}}/>
+        <Head eyebrow="Or explore by desk" title="Ten specialist desks." sub="Each desk handles a defined set of administrative services with the relevant authority." style={{marginBottom:40,maxWidth:'42rem'}}/>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.values(DESKS).map(g=>{const count=ALL_SERVICES.filter(s=>s.desk===g.id).length;return <button key={g.id} onClick={()=>go('desk',g.id)} className="gtile">
             <span className="ico" style={{background:g.color+'18',color:g.color}}><i className={`fas ${g.icon}`}></i></span>
@@ -1966,6 +2302,12 @@ function Home({go,onResume}){
         </div>
       </div>
     </section>
+
+    {/* NEW: Orientation Services Area */}
+    <OrientationServicesSection
+      go={go}
+      onWizard={(scope)=>onResume && onResume(scope)}
+    />
   </div>;
 }
 
@@ -1975,7 +2317,7 @@ function DesksPage({go}){
     <section style={{background:'#0A1F12',color:'#fff',position:'relative',overflow:'hidden'}}>
       <div style={{position:'absolute',top:0,right:0,width:500,height:500,background:'radial-gradient(circle,rgba(232,115,15,.06),transparent 65%)',transform:'translate(30%,-50%)',pointerEvents:'none'}}/>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px',position:'relative',zIndex:1}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:24}}>Eight specialist desks</span>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:24}}>Ten specialist desks</span>
         <h1 className="serif" style={{fontSize:'clamp(2rem,5.2vw,3.2rem)',lineHeight:1.08,marginBottom:24,maxWidth:'48rem'}}>Pick the desk that matches your matter.</h1>
         <p style={{fontSize:16,lineHeight:1.7,color:'rgba(255,255,255,.6)',maxWidth:'42rem',marginBottom:32}}>Each desk handles a defined set of administrative services with the relevant authority. We act on your behalf — we are not the authority.</p>
         <NotReg tone="dark"/>
