@@ -102,7 +102,6 @@ input:focus,select:focus,textarea:focus{outline:none}
 .rpt ol.names li{display:flex;gap:12px;padding:9px 0;font-size:12.5px;counter-increment:rn;border-bottom:1px dashed #EEE}
 .rpt ol.names li:last-child{border-bottom:none}
 .rpt ol.names li::before{content:counter(rn);width:22px;height:22px;border-radius:50%;background:#0A1F12;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',Georgia,serif}
-.rpt ol.names li.pref li::before,
 .rpt ol.names li:nth-child(1)::before,
 .rpt ol.names li:nth-child(2)::before,
 .rpt ol.names li:nth-child(3)::before{background:#E8730F}
@@ -174,7 +173,7 @@ input:focus,select:focus,textarea:focus{outline:none}
 const { useState, useEffect, useMemo, useCallback, useRef } = React;
 
 const ADMIN_WHATSAPP='260762499581';
-const CONTACT_EMAIL='adminservices@starteasyzambia.com;
+const CONTACT_EMAIL='adminservices@starteasyzambia.com';
 const SIGNATORY_NAME='MWABA LEWIS';
 
 function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
