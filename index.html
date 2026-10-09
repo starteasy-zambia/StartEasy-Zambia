@@ -1850,7 +1850,7 @@ function Footer({go}){
           <p style={{fontSize:13,lineHeight:1.65,color:'rgba(255,255,255,.5)',maxWidth:340}}>Register. File. Renew. Regularise. Stay Compliant. — Business compliance and regulatory administration for Zambian businesses.</p>
         </div>
         <div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Explore</span><div style={{display:'flex',flexDirection:'column',gap:12}}>{[['wizard','Structure & Name'],['desks','All Desks'],['services','All Services'],['track','Track submission'],['engagement','How it works'],['pricing','Pricing'],['about','About Us']].map(([r,l])=><button key={l} onClick={()=>go(r)} style={{display:'block',fontSize:13,color:'rgba(255,255,255,.5)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left',padding:0}}>{l}</button>)}</div></div>
-        <div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Contact</span><div style={{display:'flex',flexDirection:'column',gap:12,fontSize:13,color:'rgba(255,255,255,.5)'}}><p style={{margin:0}}>{CONTACT_EMAIL}</p><p style={{margin:0}}>+260 768 526 191</p><p style={{margin:0,color:'rgba(255,255,255,.35)',fontSize:12}}>Lusaka, Zambia</p></div></div>
+        <div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Contact</span><div style={{display:'flex',flexDirection:'column',gap:12,fontSize:13,color:'rgba(255,255,255,.5)'}}><p style={{margin:0}}>{CONTACT_EMAIL}</p><p style={{margin:0}}>+260 762499581</p><p style={{margin:0,color:'rgba(255,255,255,.35)',fontSize:12}}>Lusaka, Zambia</p></div></div>
       </div>
       <div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
         <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.75,maxWidth:900}}><strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is an administrative services desk. We prepare, coordinate, submit and track your filings with PACRA, ZRA, NAPSA, NHIMA, WCFCB, councils and sector regulators — but we are not a government authority or a regulator, and we do not guarantee regulatory approval. Where a matter crosses into legal, tax, audit or other regulated professional advice, we refer you to a qualified professional. Requirements and fees change — we verify the applicable requirement with the relevant authority before every submission. Service fees shown are for StartEasy administrative work and are separate from any government or regulator fee. A StartEasy officer verifies each payment reference manually.</p>
@@ -1912,7 +1912,7 @@ function OrientationServicesSection({go,onWizard}){
     {id:'busy',icon:'fa-briefcase',color:'#0E7C7B',tag:'Time-poor',title:'"I have no time to deal with government offices."',
       lead:'StartEasy handles the administrative process while you concentrate on:',
       list:['Selling','Managing employees','Serving customers','Finding contracts','Producing goods','Managing cash flow'],
-      note:'Government systems are usually in your favour. Don\'t worry — StartEasy provides administrative follow-up: "We submitted it, we\'re monitoring it, we\'ll tell you when something changes, and we\'ll follow up where necessary."',
+      note:'Government systems are usually not in your favour. Don\'t worry — StartEasy provides administrative follow-up: "We submitted it, we\'re monitoring it, we\'ll tell you when something changes, and we\'ll follow up where necessary."',
       cta:[{label:'Talk to an officer',action:'wa'}]}
   ];
 
