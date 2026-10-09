@@ -181,16 +181,16 @@ function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|
 function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
 
 /* ============================================================
-   FIREBASE — shared with ML Gateway project
+   FIREBASE — StartEasy Zambia project
    ============================================================ */
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyC_M_jDVBN19aXKkMjxWdw502QZttzsP3A",
-  authDomain: "mlewiscapitalpartners-bee5d.firebaseapp.com",
-  projectId: "mlewiscapitalpartners-bee5d",
-  storageBucket: "mlewiscapitalpartners-bee5d.firebasestorage.app",
-  messagingSenderId: "523217241209",
-  appId: "1:523217241209:web:174672286c9a4df15740a8",
-  measurementId: "G-GBYCKPXPH5"
+  apiKey: "AIzaSyDdEyxvsd2RjgKVYTGYJfYUB_637lV3n5I",
+  authDomain: "starteasy-zambia.firebaseapp.com",
+  projectId: "starteasy-zambia",
+  storageBucket: "starteasy-zambia.firebasestorage.app",
+  messagingSenderId: "54136399237",
+  appId: "1:54136399237:web:2f9f2d7f86bfdfb4be50ec",
+  measurementId: "G-R622H7H5LJ"
 };
 
 let db = null;
@@ -1498,7 +1498,7 @@ function AdminPortal({onExit}){
         </div>
         <p style={{fontSize:13,lineHeight:1.6,color:'rgba(10,31,18,.65)',marginBottom:22}}>Restricted access. Sign in with your Firebase admin account.</p>
         <label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Admin email</label>
-        <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setPwErr('')}} placeholder="admin@mlewisgroup.com" autoComplete="username" style={{width:'100%',background:'#fff',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 18px',fontSize:15,color:'#0A1F12',fontFamily:'inherit',marginBottom:14}}/>
+        <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setPwErr('')}} placeholder="admin@starteasyzambia.com" autoComplete="username" style={{width:'100%',background:'#fff',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 18px',fontSize:15,color:'#0A1F12',fontFamily:'inherit',marginBottom:14}}/>
         <label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Password</label>
         <input type="password" value={pw} onChange={e=>{setPw(e.target.value);setPwErr('')}} onKeyDown={e=>{if(e.key==='Enter')handleSignIn()}} placeholder="••••••••••" autoComplete="current-password" style={{width:'100%',background:'#fff',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 18px',fontSize:15,color:'#0A1F12',fontFamily:'inherit'}}/>
         {pwErr&&<div style={{marginTop:10,fontSize:12.5,color:'#B8564F',display:'flex',alignItems:'center',gap:6,lineHeight:1.5}}><i className="fas fa-circle-exclamation" style={{flexShrink:0}}></i> {pwErr}</div>}
@@ -1732,8 +1732,8 @@ function AdminPortal({onExit}){
           </div>
         </div>
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 24px'}}>
-          <div style={{fontSize:12.5,fontWeight:800,color:'#0A1F12',marginBottom:10}}>Sharing the ML Gateway project</div>
-          <p style={{fontSize:13,lineHeight:1.7,color:'rgba(10,31,18,.7)',margin:0}}>This StartEasy instance shares the same Firestore database as ML Gateway (<span style={{fontFamily:'Consolas,monospace'}}>mlewiscapitalpartners-bee5d</span>), but writes only to the <span style={{fontFamily:'Consolas,monospace'}}>se_payments</span>, <span style={{fontFamily:'Consolas,monospace'}}>se_events</span> and <span style={{fontFamily:'Consolas,monospace'}}>se_admins</span> collections. ML Gateway's <span style={{fontFamily:'Consolas,monospace'}}>receipts</span>, <span style={{fontFamily:'Consolas,monospace'}}>submissions</span> and other collections are untouched.</p>
+          <div style={{fontSize:12.5,fontWeight:800,color:'#0A1F12',marginBottom:10}}>Project</div>
+          <p style={{fontSize:13,lineHeight:1.7,color:'rgba(10,31,18,.7)',margin:0}}>StartEasy runs on its own Firebase project: <span style={{fontFamily:'Consolas,monospace'}}>starteasy-zambia</span>. All data lives in the collections <span style={{fontFamily:'Consolas,monospace'}}>se_payments</span>, <span style={{fontFamily:'Consolas,monospace'}}>se_events</span> and <span style={{fontFamily:'Consolas,monospace'}}>se_admins</span>.</p>
         </div>
       </div>}
       </>}
