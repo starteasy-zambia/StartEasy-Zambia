@@ -2533,7 +2533,8 @@ function Footer({go,onSwitchToAdmin}){
 }
 
 /* ============================================================
-   VENTURE HOME — with new Support Services sections
+   VENTURE HOME — Support Services breakdown starting with the
+   exact intro paragraph requested.
    ============================================================ */
 function VentureHome({go,onSwitchToAdmin}){
   const [myRefs] = useState(()=>readMyRefs());
@@ -2694,20 +2695,21 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
-    {/* ============ NEW: FOUR SUPPORT AREAS ============ */}
+    {/* ============ EXTENDED SECTION — starts with the exact intro paragraph ============ */}
     <section style={{background:'#0A1F12',padding:'clamp(64px,9vw,110px) 24px',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
       <div style={{position:'absolute',top:-140,left:'15%',width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
       <div style={{position:'absolute',bottom:-160,right:'-10%',width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.10), transparent 65%)',pointerEvents:'none'}}/>
 
       <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
-        <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 56px'}}>
-          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Four Support Areas</span>
-          <h2 className="serif" style={{fontSize:'clamp(2rem,4.8vw,3.2rem)',lineHeight:1.1,marginBottom:18,color:'#fff'}}>
-            What we help you <em style={{fontStyle:'italic',color:'#F5A623'}}>actually</em> do.
-          </h2>
-          <p style={{fontSize:15.5,lineHeight:1.75,color:'rgba(255,255,255,.65)',margin:0,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
-            Whether you are just starting out or running an established organisation, our support spans four areas — each with a practical, defined scope, and each delivered by a named officer.
+        <div style={{textAlign:'center',maxWidth:860,margin:'0 auto 56px'}}>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.24em'}}>At StartEasy Zambia</span>
+          <p className="serif" style={{fontSize:'clamp(1.35rem,3.1vw,2rem)',lineHeight:1.45,marginBottom:24,color:'#fff',fontWeight:700,maxWidth:'52rem',marginLeft:'auto',marginRight:'auto'}}>
+            At StartEasy Zambia, we help <em style={{fontStyle:'italic',color:'#F5A623'}}>individuals</em>, <em style={{fontStyle:'italic',color:'#F5A623'}}>entrepreneurs</em>, <em style={{fontStyle:'italic',color:'#F5A623'}}>startups</em>, and <em style={{fontStyle:'italic',color:'#F5A623'}}>established businesses</em> grow by providing reliable support in four key areas: <strong style={{color:'#F5A623'}}>Finance, Technology, Marketing, and Administration.</strong>
           </p>
+          <div style={{width:80,height:3,background:'linear-gradient(90deg,#E8730F,#F5A623)',borderRadius:99,margin:'0 auto 24px'}}/>
+          <h2 className="serif" style={{fontSize:'clamp(1.6rem,3.6vw,2.2rem)',lineHeight:1.15,color:'#fff',fontWeight:800,margin:0}}>
+            Breakdown of Our Support Services
+          </h2>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-5">
@@ -2757,7 +2759,7 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
-    {/* ============ NEW: WHO CAN BENEFIT ============ */}
+    {/* ============ WHO CAN BENEFIT ============ */}
     <section style={{background:'#fff',color:'#0A1F12',padding:'clamp(64px,9vw,110px) 24px',position:'relative',overflow:'hidden'}}>
       <div style={{position:'absolute',top:-100,right:'-5%',width:440,height:440,background:'radial-gradient(circle, rgba(232,115,15,.06), transparent 65%)',pointerEvents:'none'}}/>
       <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
@@ -2790,55 +2792,6 @@ function VentureHome({go,onSwitchToAdmin}){
              style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 30px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:11,fontSize:14.5,fontWeight:700,textDecoration:'none',boxShadow:'0 14px 38px -12px rgba(232,115,15,.5)'}}>
             <i className="fab fa-whatsapp"></i> Talk to an officer about your situation
           </a>
-        </div>
-      </div>
-    </section>
-
-    {/* ============ NEW: ABOUT STARTEASY ============ */}
-    <section style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',padding:'clamp(72px,10vw,120px) 24px',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
-      <div style={{position:'absolute',top:-140,left:'20%',width:560,height:560,background:'radial-gradient(circle, rgba(245,166,35,.14), transparent 65%)',pointerEvents:'none'}}/>
-      <div style={{position:'absolute',bottom:-160,right:'-8%',width:520,height:520,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
-
-      <div style={{maxWidth:920,margin:'0 auto',textAlign:'center',position:'relative',zIndex:1}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>About StartEasy Zambia</span>
-
-        <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.12,marginBottom:26,color:'#fff',maxWidth:'42rem',marginLeft:'auto',marginRight:'auto'}}>
-          A venture building &<br/>
-          <em style={{fontStyle:'italic',color:'#F5A623'}}>business support platform.</em>
-        </h2>
-
-        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.75)',marginBottom:22,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
-          StartEasy Zambia helps entrepreneurs, startups, small businesses and established organisations operate efficiently and grow sustainably.
-        </p>
-
-        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.72)',marginBottom:40,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
-          Through financial organisation and planning, digital solutions, marketing strategies and administrative assistance, we help our clients simplify operations, improve productivity, strengthen their market presence, and make informed decisions.
-        </p>
-
-        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginBottom:44}}>
-          {[
-            {icon:'fa-wallet',      label:'Finance',        color:'#2E9C4A'},
-            {icon:'fa-laptop-code', label:'Technology',     color:'#1B6CA8'},
-            {icon:'fa-bullhorn',    label:'Marketing',      color:'#E8730F'},
-            {icon:'fa-folder-open', label:'Administration', color:'#7A4FA3'}
-          ].map((x,i)=>
-            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'12px 22px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.92rem,1.35vw,1.05rem)',fontWeight:700,color:'#fff'}}>
-              <span style={{width:32,height:32,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
-                <i className={`fas ${x.icon}`}/>
-              </span>
-              {x.label}
-            </span>
-          )}
-        </div>
-
-        <div style={{display:'inline-flex',alignItems:'center',gap:16,padding:'18px 34px',background:'rgba(245,166,35,.1)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:'clamp(.98rem,1.5vw,1.12rem)',fontWeight:700,color:'#F5A623',fontFamily:"'Playfair Display',Georgia,serif",fontStyle:'italic',maxWidth:'100%',flexWrap:'wrap',justifyContent:'center',textAlign:'center'}}>
-          <i className="fas fa-quote-left" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
-          <span>Making Business Easier, One Step at a Time.</span>
-          <i className="fas fa-quote-right" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
-        </div>
-
-        <div style={{maxWidth:640,margin:'44px auto 0'}}>
-          <NotReg tone="dark"/>
         </div>
       </div>
     </section>
@@ -3294,14 +3247,58 @@ function VenturePricing(){
   </div>;
 }
 
+/* ============================================================
+   ABOUT PAGE — full About StartEasy Zambia narrative
+   ============================================================ */
 function VentureAbout(){
   useEffect(()=>{trackEvent('page_view',{route:'about'});},[]);
-  return <div className="fadein" style={{background:'#F5FAF6'}}>
-    <section style={{background:'#0A1F12',color:'#fff',padding:'clamp(56px,8vw,80px) 24px'}}>
-      <div style={{maxWidth:1240,margin:'0 auto'}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>About</span>
-        <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,marginBottom:20,maxWidth:'48rem'}}>StartEasy Zambia</h1>
-        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:'52rem',marginBottom:28}}>A venture building service platform — a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p>
+  return <div className="fadein" style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',minHeight:'100vh'}}>
+    <div style={{position:'absolute',top:-140,left:'15%',width:560,height:560,background:'radial-gradient(circle, rgba(245,166,35,.14), transparent 65%)',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',bottom:-160,right:'-8%',width:520,height:520,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
+
+    <section style={{maxWidth:920,margin:'0 auto',padding:'clamp(72px,10vw,120px) 24px clamp(56px,7vw,80px)',position:'relative',zIndex:1,textAlign:'center'}}>
+      <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>About StartEasy Zambia</span>
+
+      <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.12,marginBottom:26,color:'#fff',maxWidth:'42rem',marginLeft:'auto',marginRight:'auto'}}>
+        A venture building &<br/>
+        <em style={{fontStyle:'italic',color:'#F5A623'}}>business support platform.</em>
+      </h1>
+
+      <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.75)',marginBottom:22,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
+        StartEasy Zambia is a venture building and business support service platform committed to helping entrepreneurs, startups, small businesses, and established organizations operate efficiently and grow sustainably.
+      </p>
+
+      <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.72)',marginBottom:40,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
+        We provide support in four key areas: <strong style={{color:'#F5A623',fontWeight:700}}>Finance, Technology, Marketing, and Administration.</strong> Through financial organization and planning, digital solutions, marketing strategies, and administrative assistance, we help our clients simplify business operations, improve productivity, strengthen their market presence, and make informed decisions.
+      </p>
+
+      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginBottom:44}}>
+        {[
+          {icon:'fa-wallet',      label:'Finance',        color:'#2E9C4A'},
+          {icon:'fa-laptop-code', label:'Technology',     color:'#1B6CA8'},
+          {icon:'fa-bullhorn',    label:'Marketing',      color:'#E8730F'},
+          {icon:'fa-folder-open', label:'Administration', color:'#7A4FA3'}
+        ].map((x,i)=>
+          <span key={i} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'12px 22px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.92rem,1.35vw,1.05rem)',fontWeight:700,color:'#fff'}}>
+            <span style={{width:32,height:32,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
+              <i className={`fas ${x.icon}`}/>
+            </span>
+            {x.label}
+          </span>
+        )}
+      </div>
+
+      <div style={{display:'inline-flex',alignItems:'center',gap:16,padding:'18px 34px',background:'rgba(245,166,35,.1)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:'clamp(.98rem,1.5vw,1.12rem)',fontWeight:700,color:'#F5A623',fontFamily:"'Playfair Display',Georgia,serif",fontStyle:'italic',maxWidth:'100%',flexWrap:'wrap',justifyContent:'center',textAlign:'center'}}>
+        <i className="fas fa-quote-left" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
+        <span>Making Business Easier, One Step at a Time.</span>
+        <i className="fas fa-quote-right" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
+      </div>
+
+      <p style={{fontSize:'clamp(.95rem,1.4vw,1.05rem)',lineHeight:1.85,color:'rgba(255,255,255,.7)',marginTop:40,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
+        At StartEasy Zambia, our mission is to make business easier by providing practical, accessible, and reliable support that empowers our clients to focus on what matters most: building and growing their businesses.
+      </p>
+
+      <div style={{maxWidth:640,margin:'44px auto 0'}}>
         <NotReg tone="dark"/>
       </div>
     </section>
