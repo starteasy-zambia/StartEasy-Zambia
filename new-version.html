@@ -2302,7 +2302,7 @@ window.StartEasyAdminDesk = (function () {
    ██  VENTURE BUILDING PLATFORM (top-level outer shell)
    ============================================================ */
 const ADMIN_WHATSAPP='260768526191';
-const CONTACT_EMAIL='engagements@starteasy.zm';
+const CONTACT_EMAIL='engagements@starteasyzambia.com;
 
 function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
 function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
@@ -2416,9 +2416,28 @@ function Footer({go,onSwitchToAdmin}){
 function VentureHome({go,onSwitchToAdmin}){
   const [snap,setSnap]=useState(()=>readSnapshot());
   const [myRefs,setMyRefs]=useState(()=>{try{return JSON.parse(localStorage.getItem('starteasy.myrefs.v1')||'[]')}catch(e){return []}});
+  const [helpPick,setHelpPick]=useState(null);
   const resumable=hasResumableWizard(snap);
   const savedLabel=snap&&snap.savedAt?timeAgo(snap.savedAt):'';
   useEffect(()=>{trackEvent('page_view',{route:'home'});},[]);
+
+  /* NEW: ask entrepreneurs — what help do you need today? */
+  const helpOptions=[
+    {id:'plan',     icon:'fa-file-lines',          color:'#E8730F', label:'Developing a business plan',              desc:'A full written business plan, reviewed by an officer.',    admin:false},
+    {id:'register', icon:'fa-building',            color:'#2E9C4A', label:'Registering the company',                 desc:'Redirects to the StartEasy Administrative Services Desk.',  admin:true },
+    {id:'suppliers',icon:'fa-truck-field',         color:'#1B6CA8', label:'Finding suppliers and equipment',         desc:'Identify, verify and engage suppliers and vendors.',        admin:false},
+    {id:'brand',    icon:'fa-palette',             color:'#7A4FA3', label:'Creating a brand and marketing strategy', desc:'Brand identity and website — domain registration included.',admin:false},
+    {id:'financial',icon:'fa-chart-line',          color:'#B8564F', label:'Building financial projections',          desc:'3-year financial model, cash flow and break-even.',         admin:false},
+    {id:'investors',icon:'fa-hand-holding-dollar', color:'#0E7C7B', label:'Finding potential investors',             desc:'Funder matching and introductions.',                        admin:false},
+    {id:'sales',    icon:'fa-bullhorn',            color:'#5E7A67', label:'Developing sales channels',               desc:'Ongoing marketing and sales channel support.',              admin:false}
+  ];
+  const handleHelp=(opt)=>{
+    setHelpPick(opt.id);
+    setTimeout(()=>{
+      if(opt.admin){ onSwitchToAdmin && onSwitchToAdmin(); return; }
+      go('venture');
+    },350);
+  };
 
   const marqueeItems=[
     {icon:'fa-layer-group', value:'11',   label:'Specialist desks'},
@@ -2453,7 +2472,7 @@ function VentureHome({go,onSwitchToAdmin}){
   ];
 
   const handlePillarClick=(p)=>{
-    if(p.label==='Administrative Services Support'){ onSwitchToAdmin&&onSwitchToAdmin(); return; }
+    if(p.label==='Administrative Services Support'){ onSwitchToAdmin && onSwitchToAdmin(); return; }
     go('venture');
   };
 
@@ -2482,6 +2501,7 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>}
 
+    {/* ===================== HERO ===================== */}
     <section style={{position:'relative',overflow:'hidden'}}>
       <div className="orb-pulse" style={{position:'absolute',top:-180,right:-180,width:640,height:640,background:'radial-gradient(circle, rgba(232,115,15,.22), transparent 62%)',pointerEvents:'none'}}/>
       <div className="orb-pulse" style={{position:'absolute',bottom:-240,left:-200,width:640,height:640,background:'radial-gradient(circle, rgba(245,166,35,.10), transparent 65%)',pointerEvents:'none',animationDelay:'-3s'}}/>
@@ -2507,6 +2527,91 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
+    {/* ===================== ASK ENTREPRENEURS — immediately after hero ===================== */}
+    <section style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.18)',background:'linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.1))'}}>
+      <div style={{position:'absolute',top:-100,left:'10%',width:400,height:400,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
+      <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,8vw,88px) 24px',position:'relative',zIndex:1}}>
+        <div style={{textAlign:'center',maxWidth:760,margin:'0 auto 44px'}}>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14}}>Ask entrepreneurs</span>
+          <h2 className="serif" style={{fontSize:'clamp(1.9rem,4.6vw,3rem)',lineHeight:1.1,marginBottom:16,color:'#fff'}}>What help do you need with today?</h2>
+          <p style={{fontSize:15,lineHeight:1.7,color:'rgba(255,255,255,.65)',margin:0}}>Pick the situation that fits you. We'll open the right service on the platform — or route you to our Administrative Services Desk where relevant.</p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{maxWidth:1160,margin:'0 auto'}}>
+          {helpOptions.map(o=>{
+            const picked = helpPick === o.id;
+            return (
+              <button
+                key={o.id}
+                onClick={()=>handleHelp(o)}
+                style={{
+                  background: picked ? o.color+'26' : 'rgba(255,255,255,.04)',
+                  border: '1px solid ' + (picked ? o.color+'aa' : 'rgba(255,255,255,.12)'),
+                  borderRadius: 16,
+                  padding: '26px 22px',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  textAlign: 'left',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 14,
+                  transition: 'all .25s',
+                  transform: picked ? 'translateY(-3px)' : 'none',
+                  position: 'relative'
+                }}
+                onMouseEnter={e=>{ if(!picked){ e.currentTarget.style.transform='translateY(-3px)'; e.currentTarget.style.borderColor=o.color+'88'; e.currentTarget.style.background='rgba(255,255,255,.07)'; } }}
+                onMouseLeave={e=>{ if(!picked){ e.currentTarget.style.transform='none'; e.currentTarget.style.borderColor='rgba(255,255,255,.12)'; e.currentTarget.style.background='rgba(255,255,255,.04)'; } }}
+              >
+                <span style={{
+                  width: 50, height: 50, borderRadius: 13,
+                  background: o.color+'24', color: o.color,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20, flexShrink: 0
+                }}>
+                  <i className={`fas ${o.icon}`}></i>
+                </span>
+
+                <h4 className="serif" style={{fontSize:16,fontWeight:700,color:'#fff',lineHeight:1.3,margin:0}}>
+                  {o.label}
+                </h4>
+
+                <p style={{fontSize:12.5,color:'rgba(255,255,255,.6)',lineHeight:1.55,margin:0,flex:1}}>
+                  {o.desc}
+                </p>
+
+                <span style={{
+                  display:'inline-flex', alignItems:'center', gap:8,
+                  fontSize:11, letterSpacing:'.1em', textTransform:'uppercase',
+                  fontWeight:800, color:o.color,
+                  paddingTop:12, borderTop:'1px solid rgba(255,255,255,.08)',
+                  marginTop:'auto'
+                }}>
+                  {picked ? 'Opening…' : (o.admin ? 'Open Administrative Desk' : 'Open service')}
+                  <Arrow/>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Quick escape to admin desk */}
+        <div style={{textAlign:'center',marginTop:36}}>
+          <a
+            href={waUrl('Hello StartEasy — I need help working out which service applies to me.')}
+            target="_blank" rel="noopener noreferrer"
+            style={{
+              display:'inline-flex', alignItems:'center', gap:10,
+              padding:'13px 24px', background:'#25D366', color:'#fff',
+              borderRadius:10, fontSize:13.5, fontWeight:700, textDecoration:'none'
+            }}
+          >
+            <i className="fab fa-whatsapp"></i> Ask an officer first
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== MARQUEE STATS ===================== */}
     <section style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(255,255,255,.08)',borderBottom:'1px solid rgba(255,255,255,.08)',padding:'clamp(28px,4vw,44px) 0'}}>
       <div className="marquee-mask">
         <div className="marquee-track">
@@ -2521,6 +2626,7 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
+    {/* ===================== SHARED CAPABILITIES ===================== */}
     <section style={{background:'rgba(0,0,0,.25)',borderTop:'1px solid rgba(245,166,35,.15)',position:'relative',overflow:'hidden'}}>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(64px,9vw,96px) 24px clamp(48px,7vw,72px)',position:'relative',zIndex:1}}>
         <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 44px'}}>
@@ -2571,6 +2677,7 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
+    {/* ===================== CLOSING ===================== */}
     <section style={{background:'#0A1F12',color:'#fff',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
       <div style={{maxWidth:1000,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px',textAlign:'center',position:'relative',zIndex:1}}>
         <div className="micro" style={{color:'#F5A623',marginBottom:28,letterSpacing:'.26em'}}>At StartEasy Zambia</div>
@@ -2591,7 +2698,7 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
   </div>;
-}
+                                  }
 
 /* VENTURE DETAIL PAGE */
 function VenturePage({go,onSwitchToAdmin}){
