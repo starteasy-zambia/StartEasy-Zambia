@@ -58,19 +58,10 @@ input:focus,select:focus,textarea:focus{outline:none}
 .feebox .row+.row{border-top:1px dashed #E0D08A}
 .feebox .l{color:#666;font-weight:600}
 .feebox .v{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:800;color:#0A1F12;white-space:nowrap}
-.step{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:1.5px solid rgba(10,31,18,.1);border-radius:99px;font-size:12px;font-weight:600;color:rgba(10,31,18,.5);font-family:inherit;transition:all .25s;flex-shrink:0}
-.step.done{background:rgba(30,123,60,.1);color:#1E7B3C;border-color:rgba(30,123,60,.3);cursor:pointer}
-.step.active{background:#0A1F12;color:#fff;border-color:#0A1F12}
-.step .n{width:20px;height:20px;border-radius:50%;background:rgba(10,31,18,.08);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
-.step.active .n{background:rgba(255,255,255,.2)}
-.step.done .n{background:rgba(30,123,60,.2);color:#1E7B3C}
 .inp{width:100%;background:#fff;border:2px solid rgba(10,31,18,.12);border-radius:12px;padding:16px 20px;font-size:14.5px;color:#0A1F12;font-family:inherit;transition:all .2s;line-height:1.5}
 .inp:focus{border-color:#E8730F;box-shadow:0 0 0 4px rgba(232,115,15,.08)}
 .inp-select{width:100%;background:#fff;border:2px solid rgba(10,31,18,.12);border-radius:12px;padding:16px 44px 16px 20px;font-size:14.5px;color:#0A1F12;font-family:inherit;transition:all .2s;line-height:1.5;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%235E7A67' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 20px center}
 .inp-select:focus{border-color:#E8730F;box-shadow:0 0 0 4px rgba(232,115,15,.08)}
-.dchip{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;background:#fff;border:1.5px solid rgba(10,31,18,.12);border-radius:99px;font-size:12.5px;font-weight:600;color:rgba(10,31,18,.75);cursor:pointer;font-family:inherit;transition:all .2s}
-.dchip:hover{border-color:#E8730F;color:#E8730F}
-.dchip.on{background:#E8730F;color:#fff;border-color:#E8730F}
 .iti{background:#fff;border:2px solid rgba(10,31,18,.1);border-radius:12px;padding:16px 18px;text-align:left;cursor:pointer;font-family:inherit;transition:all .22s;position:relative}
 .iti:hover{border-color:#E8730F;transform:translateY(-2px)}
 .iti.sel{border-color:#E8730F;background:linear-gradient(135deg,rgba(232,115,15,.05),rgba(245,166,35,.02))}
@@ -81,18 +72,14 @@ input:focus,select:focus,textarea:focus{outline:none}
 .rpt .rh .brand{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:800;color:#0A1F12;letter-spacing:1px}
 .rpt .rh .brand em{font-style:normal;color:#E8730F}
 .rpt .rh .sub{font-size:9.5px;color:#8A6828;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-top:4px}
-.rpt .rh .dt{font-family:'Playfair Display',Georgia,serif;font-size:13px;font-weight:800;color:#E8730F;letter-spacing:1.2px;text-align:right}
-.rpt .rh .mt{font-size:10.5px;color:#666;text-align:right;margin-top:6px}
 .rpt h5{font-family:'Playfair Display',Georgia,serif;font-size:13px;color:#0A1F12;font-weight:700;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #E0E0E0}
-.rpt h5:first-of-type{margin-top:0}
 .rpt .row{display:flex;justify-content:space-between;gap:16px;padding:7px 0;font-size:12px;border-bottom:1px dashed #EEE}
-.rpt .row:last-child{border-bottom:none}
-.rpt .row .k{color:#666;font-weight:600;flex-shrink:0}
+.rpt .row .k{color:#666;font-weight:600}
 .rpt .row .v{color:#0A1F12;font-weight:700;text-align:right;max-width:65%}
 .rpt ol.names{list-style:none;padding:0;margin:0;counter-reset:rn}
 .rpt ol.names li{display:flex;gap:12px;padding:9px 0;font-size:12.5px;counter-increment:rn;border-bottom:1px dashed #EEE}
-.rpt ol.names li:last-child{border-bottom:none}
 .rpt ol.names li::before{content:counter(rn);width:22px;height:22px;border-radius:50%;background:#0A1F12;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',Georgia,serif}
+.rpt ol.names li .nm{font-family:Consolas,monospace;font-weight:700;color:#0A1F12}
 .rpt .foot{margin-top:22px;padding-top:16px;border-top:2px solid #0A1F12;font-size:10.5px;color:#666;line-height:1.6}
 .el{background:#fff;border:1px solid #D0D0D0;border-radius:8px;padding:34px 42px;font-size:13px;line-height:1.65;color:#222}
 .el .eh{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:3px solid #0A1F12;margin-bottom:22px;flex-wrap:wrap}
@@ -100,9 +87,7 @@ input:focus,select:focus,textarea:focus{outline:none}
 .el .eh .brand em{font-style:normal;color:#E8730F}
 .el .eh .sub{font-size:9.5px;color:#8A6828;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-top:4px}
 .el .eh .dt{font-family:'Playfair Display',Georgia,serif;font-size:14px;font-weight:800;color:#E8730F;letter-spacing:1.2px;text-align:right}
-.el .eh .mt{font-size:11px;color:#666;text-align:right;margin-top:6px}
 .el h4{font-family:'Playfair Display',Georgia,serif;font-size:15px;color:#0A1F12;font-weight:700;margin:22px 0 10px}
-.el h4:first-of-type{margin-top:0}
 .el p{margin:0 0 12px}
 .el ul{margin:0 0 14px;padding-left:22px}
 .el li{margin-bottom:6px;font-size:12.5px}
@@ -117,7 +102,7 @@ input:focus,select:focus,textarea:focus{outline:none}
 .mbh{background:#0A1F12;padding:18px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(245,166,35,.15)}
 .mbb{padding:26px 30px}
 .paygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-.pmc{background:#fff;border:2px solid rgba(10,31,18,.12);border-radius:12px;padding:16px 12px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;position:relative;transition:all .22s}
+.pmc{background:#fff;border:2px solid rgba(10,31,18,.12);border-radius:12px;padding:16px 12px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;transition:all .22s}
 .pmc:hover{border-color:#F5A623;transform:translateY(-2px)}
 .pmc.sel{border-color:#F5A623;box-shadow:0 0 0 4px rgba(245,166,35,.14)}
 .pmc .lg{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
@@ -128,10 +113,6 @@ input:focus,select:focus,textarea:focus{outline:none}
 .pm-bank .lg{background:linear-gradient(135deg,#1B5E8C,#0D3D5E);color:#fff;font-size:20px}
 .pm-paypal .lg{background:linear-gradient(135deg,#003087,#009CDE);color:#fff;font-size:18px}
 .pm-crypto .lg{background:linear-gradient(135deg,#F7931A,#E2761B);color:#fff;font-size:20px}
-.tl{list-style:none;padding:0;margin:0}
-.tl li{position:relative;padding:0 0 22px 42px;border-left:2px solid rgba(255,255,255,.18);margin-left:16px}
-.tl li:last-child{border-left-color:transparent;padding-bottom:0}
-.tl li::before{content:attr(data-step);position:absolute;left:-13px;top:0;width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid #F5A623;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#E8730F;font-family:'Playfair Display',Georgia,serif}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
 .pill.review{background:rgba(245,166,35,.15);color:#8A6828;border:1px solid rgba(245,166,35,.35)}
 .pill.approved{background:rgba(30,123,60,.12);color:#0F5C2A;border:1px solid rgba(30,123,60,.3)}
@@ -142,6 +123,73 @@ input:focus,select:focus,textarea:focus{outline:none}
 .floaty{animation:floaty 6s ease-in-out infinite}
 @keyframes orbPulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:.85;transform:scale(1.08)}}
 .orb-pulse{animation:orbPulse 8s ease-in-out infinite}
+
+/* ===================================================
+   HORIZONTAL MARQUEE — sliding stats strip
+   =================================================== */
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-mask{
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+.marquee-track{
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 45s linear infinite;
+  will-change: transform;
+}
+.marquee-mask:hover .marquee-track{
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce){
+  .marquee-track{ animation: none !important; }
+}
+.stat-item{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 clamp(24px, 4vw, 48px);
+  border-left: 1px solid rgba(255,255,255,.08);
+  min-width: 220px;
+  flex-shrink: 0;
+}
+.stat-item:first-child{ border-left: none; }
+.stat-value{
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  color: #F5A623;
+  line-height: 1;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.stat-label{
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(255,255,255,.55);
+}
+.stat-icon{
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(245,166,35,.18);
+  color: #F5A623;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  margin-bottom: 10px;
+}
 </style>
 </head>
 <body>
@@ -194,13 +242,11 @@ async function addPayment(rec){
   if(!firebaseReady) return null;
   const record = { ...rec, status: 'under_review', submittedAt: Date.now(),
     history: [{ status: 'under_review', at: Date.now(), note: 'Payment reference received. Awaiting officer verification.' }] };
-  try { await db.collection(SE_PAYMENTS).doc(rec.ref).set(record); return record; }
-  catch(e) { return null; }
+  try { await db.collection(SE_PAYMENTS).doc(rec.ref).set(record); return record; } catch(e) { return null; }
 }
 async function findPaymentByRef(ref){
   if(!firebaseReady || !ref) return null;
-  try { const key = ref.toUpperCase().trim(); const snap = await db.collection(SE_PAYMENTS).doc(key).get(); return snap.exists ? { id: snap.id, ...snap.data() } : null; }
-  catch(e) { return null; }
+  try { const key = ref.toUpperCase().trim(); const snap = await db.collection(SE_PAYMENTS).doc(key).get(); return snap.exists ? { id: snap.id, ...snap.data() } : null; } catch(e) { return null; }
 }
 async function updatePaymentStatus(ref, status, note){
   if(!firebaseReady) return null;
@@ -224,78 +270,68 @@ async function adminSignIn(email, pw){
 }
 async function adminSignOut(){ try { await auth.signOut(); } catch(e) {} }
 
-/* ============================================================
-   CONSTANTS — SF now includes EIZ & NCC StartEasy fees
-   EIZ and NCC service fees = authority fee ÷ 2
-   ============================================================ */
 const SF={
-  micro:{zm:'K25',usd:'$1.49',label:'Service Fee · Micro'},
-  basic:{zm:'K250',usd:'$25',label:'Service Fee · Basic'},
-  standard:{zm:'K400',usd:'$40',label:'Service Fee · Standard'},
-  complex:{zm:'K750',usd:'$75',label:'Service Fee · Complex'},
-  checkup:{zm:'K750',usd:'$75',label:'Service Fee · Compliance Check-Up'},
-  regularise:{zm:'From K1,500',usd:'From $150',label:'Service Fee · Regularisation'},
-  venture_plan:{zm:'K750',usd:'$75',label:'Service Fee · Business Plan'},
-  venture_brand:{zm:'K1,000',usd:'$100',label:'Service Fee · Branding & Website'},
-  /* NEW: EIZ and NCC service fees = authority fee ÷ 2 */
-  eiz_c3:{zm:'K1,750',usd:'$175',label:'Service Fee · EIZ Class C3'},
-  eiz_c2:{zm:'K2,250',usd:'$225',label:'Service Fee · EIZ Class C2'},
-  eiz_c1:{zm:'K2,750',usd:'$275',label:'Service Fee · EIZ Class C1'},
-  ncc_g6:{zm:'K1,250',usd:'$125',label:'Service Fee · NCC Grade 6'},
-  ncc_g5:{zm:'K1,750',usd:'$175',label:'Service Fee · NCC Grade 5'},
-  ncc_g4:{zm:'K2,750',usd:'$275',label:'Service Fee · NCC Grade 4'}
+  micro:{zm:'K25',label:'Service Fee · Micro'},
+  basic:{zm:'K250',label:'Service Fee · Basic'},
+  standard:{zm:'K400',label:'Service Fee · Standard'},
+  complex:{zm:'K750',label:'Service Fee · Complex'},
+  checkup:{zm:'K750',label:'Service Fee · Compliance Check-Up'},
+  regularise:{zm:'From K1,500',label:'Service Fee · Regularisation'},
+  venture_plan:{zm:'K750',label:'Service Fee · Business Plan'},
+  venture_brand:{zm:'K1,000',label:'Service Fee · Branding & Website'},
+  eiz_c3:{zm:'K1,750',label:'Service Fee · EIZ Class C3'},
+  eiz_c2:{zm:'K2,250',label:'Service Fee · EIZ Class C2'},
+  eiz_c1:{zm:'K2,750',label:'Service Fee · EIZ Class C1'},
+  ncc_g6:{zm:'K1,250',label:'Service Fee · NCC Grade 6'},
+  ncc_g5:{zm:'K1,750',label:'Service Fee · NCC Grade 5'},
+  ncc_g4:{zm:'K2,750',label:'Service Fee · NCC Grade 4'}
 };
 const ONGOING={
-  filing:{zm:'K250',usd:'$25',label:'Ongoing · Filing'},
-  standard:{zm:'K500',usd:'$50',label:'Ongoing · Standard'},
-  managed:{zm:'K1,200',usd:'$120',label:'Ongoing · Managed'},
-  marketing:{zm:'K400',usd:'$40',label:'Ongoing · Marketing Support'}
+  filing:{zm:'K250',label:'Ongoing · Filing'},
+  standard:{zm:'K500',label:'Ongoing · Standard'},
+  managed:{zm:'K1,200',label:'Ongoing · Managed'},
+  marketing:{zm:'K400',label:'Ongoing · Marketing Support'}
 };
 
 const PAYMENT_METHODS={
-  airtel:{label:'Airtel Money',cls:'pm-airtel',icon:'fa-mobile-alt',title:'Airtel Money',sub:'ZMW · Zambian Kwacha',ussd:'*115#',ussdLbl:'Open Airtel',
+  airtel:{label:'Airtel Money',cls:'pm-airtel',icon:'fa-mobile-alt',title:'Airtel Money',sub:'ZMW · Zambian Kwacha',
     rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Recipient Note',v:'On behalf of StartEasy',plain:true},{l:'Airtel Number',v:'+260 975 914 001',copy:'+260975914001'}],
-    steps:['Dial <strong>*115#</strong>','Select <strong>Send Money</strong> → <strong>Airtel Money</strong>','Enter <strong>+260 975 914 001</strong>','Enter the amount','Confirm recipient','Save the transaction ID'],note:'Available to all applicants.'},
-  mtn:{label:'MTN MoMo',cls:'pm-mtn',icon:'fa-mobile-alt',title:'MTN Mobile Money',sub:'ZMW · Zambian Kwacha',ussd:'*303#',ussdLbl:'Open MTN',
+    steps:['Dial *115#','Select Send Money → Airtel Money','Enter +260 975 914 001','Enter the amount','Confirm recipient','Save the transaction ID']},
+  mtn:{label:'MTN MoMo',cls:'pm-mtn',icon:'fa-mobile-alt',title:'MTN Mobile Money',sub:'ZMW · Zambian Kwacha',
     rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Recipient Note',v:'On behalf of StartEasy',plain:true},{l:'MTN Number',v:'076 852 6191',copy:'0768526191'}],
-    steps:['Dial <strong>*303#</strong>','Select <strong>Send Money</strong> → <strong>MTN MoMo</strong>','Enter <strong>076 852 6191</strong>','Enter the amount','Confirm recipient','Save the transaction ID'],note:'Available to all applicants.'},
+    steps:['Dial *303#','Select Send Money → MTN MoMo','Enter 076 852 6191','Enter the amount','Confirm recipient','Save the transaction ID']},
   bank:{label:'Bank / Visa',cls:'pm-bank',icon:'fa-university',title:'Bank or Visa Card',sub:'Standard Chartered',
-    rows:[{l:'Bank',v:'Standard Chartered',plain:true},{l:'Account Name',v:'StartEasy (Mwaba Lewis)',plain:true},{l:'Account Number',v:'0152502166700',copy:'0152502166700'},{l:'Reference',v:'Your Full Name + "SE"',plain:true}],
-    steps:['Log into your online banking','Use the account details shown','Transfer the amount','Use your full name + "SE" as reference','Save your receipt'],note:'For Visa card payments, use your bank card-to-account service.'},
+    rows:[{l:'Bank',v:'Standard Chartered',plain:true},{l:'Account Name',v:'StartEasy (Mwaba Lewis)',plain:true},{l:'Account Number',v:'0152502166700',copy:'0152502166700'}],
+    steps:['Log into your online banking','Use the account details shown','Transfer the amount','Use your full name + "SE" as reference','Save your receipt']},
   paypal:{label:'PayPal',cls:'pm-paypal',icon:'fa-paypal',iconSet:'fab',title:'PayPal',sub:'USD · International',
-    rows:[{l:'Recipient Email',v:'lewismwaba@gmail.com',copy:'lewismwaba@gmail.com'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Payment Type',v:'Send to a friend',plain:true}],
-    steps:['Log into PayPal','Choose <strong>Send & Request</strong>','Enter <strong>lewismwaba@gmail.com</strong>','Enter the amount in USD','Add your name + "SE" in the note','Save the transaction ID'],note:'Ideal for international applicants.'},
-  crypto:{label:'Crypto',cls:'pm-crypto',icon:'fa-bitcoin',iconSet:'fab',title:'Cryptocurrency',sub:'International applicants',
-    rows:[{l:'Accepted Coins',v:'BTC · ETH · USDT (TRC20 / ERC20)',plain:true},{l:'User ID',v:'809423171',copy:'809423171'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true}],
-    steps:['Open your crypto wallet','Choose <strong>BTC, ETH, or USDT</strong>','Send to User ID <strong>809423171</strong>','Add your name + "SE"','Save the transaction hash'],note:'Send the equivalent at the time of transfer.'}
+    rows:[{l:'Recipient Email',v:'lewismwaba@gmail.com',copy:'lewismwaba@gmail.com'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true}],
+    steps:['Log into PayPal','Choose Send & Request','Enter lewismwaba@gmail.com','Enter the amount in USD','Save the transaction ID']},
+  crypto:{label:'Crypto',cls:'pm-crypto',icon:'fa-bitcoin',iconSet:'fab',title:'Cryptocurrency',sub:'International',
+    rows:[{l:'Accepted Coins',v:'BTC · ETH · USDT',plain:true},{l:'User ID',v:'809423171',copy:'809423171'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true}],
+    steps:['Open your crypto wallet','Choose BTC, ETH, or USDT','Send to User ID 809423171','Save the transaction hash']}
 };
 
 const PRIMARY_ACTIVITIES=['Advertising','Marketing','Management consulting','Financial advisory','Accounting','Research','Technology','Construction','Agriculture','Trading','Logistics','Manufacturing','Education','Professional services','Media & communications','Healthcare','Hospitality & tourism','Real estate','Energy','Retail','Wholesale & distribution','Transport','Agro-processing','Engineering','Software development','Legal services','Architecture','Insurance','Investment management','Other'];
 const INDUSTRIES=[
   {key:'consulting',isic:'M',label:'Consulting & Professional Advisory',icon:'fa-user-tie',color:'#2E9C4A',blurb:'Professional advice, consulting, strategy.',descriptors:['Consulting','Advisory','Associates','Professionals','Management','Strategy','Solutions','Services','Corporate','Business','Partners','Consultancy','Group','Enterprises']},
   {key:'technology',isic:'J',label:'Technology & Digital',icon:'fa-microchip',color:'#1B6CA8',blurb:'Software, digital, data, AI, platforms.',descriptors:['Technologies','Technology','Digital','Systems','Software','Solutions','Innovations','Labs','Data','AI','Networks','Platforms','Cyber','Cloud','InfoTech','Tech','Analytics']},
-  {key:'construction',isic:'F',label:'Construction & Engineering',icon:'fa-helmet-safety',color:'#B8564F',blurb:'Construction, contractors, civil works, infrastructure.',descriptors:['Construction','Contractors','Engineering','Infrastructure','Projects','Developments','Builders','Civil Works','Technical Services','Plant Hire','Construction Services']},
-  {key:'trading',isic:'G',label:'Trading & General Commerce',icon:'fa-store',color:'#0E7C7B',blurb:'Retail, wholesale, distribution, general dealing.',descriptors:['Trading','Enterprises','Merchants','Supplies','Distributors','Distribution','Commerce','General Dealers','Retail','Wholesale','Traders','Suppliers','Commercial']},
-  {key:'marketing',isic:'M',label:'Marketing, Advertising & Communications',icon:'fa-bullhorn',color:'#E8730F',blurb:'Advertising, branding, PR, media, digital.',descriptors:['Marketing','Advertising','Communications','Creative','Media','Digital','Branding','Creative Agency','Media Solutions','Public Relations','Content','Studio','Agency']},
-  {key:'agriculture',isic:'A',label:'Agriculture & Agribusiness',icon:'fa-seedling',color:'#2E9C4A',blurb:'Farming, agro-processing, horticulture, livestock.',descriptors:['Agriculture','Agribusiness','Farms','Farming','Agro','Foods','Produce','Commodities','Agro-Processing','Horticulture','Livestock','Estates']},
-  {key:'logistics',isic:'H',label:'Logistics, Transport & Supply Chain',icon:'fa-truck',color:'#1B6CA8',blurb:'Transport, freight, courier, warehousing.',descriptors:['Logistics','Transport','Freight','Haulage','Distribution','Couriers','Supply Chain','Warehousing','Cargo','Mobility','Trucking','Express','Transporters']},
-  {key:'financial',isic:'K',label:'Financial Services',icon:'fa-piggy-bank',color:'#B8564F',blurb:'Financial, capital, investment, advisory.',descriptors:['Financial','Finance','Capital','Investment','Advisory','Wealth','Asset','Credit','Fintech','Financial Services','Capital Partners','Investments','Holdings']},
-  {key:'education',isic:'P',label:'Education & Training',icon:'fa-graduation-cap',color:'#E8730F',blurb:'Schools, colleges, training, skills.',descriptors:['Education','Academy','Institute','Training','Learning','Skills','College','School','Development','Educational Services','Training Centre']},
+  {key:'construction',isic:'F',label:'Construction & Engineering',icon:'fa-helmet-safety',color:'#B8564F',blurb:'Construction, contractors, civil works.',descriptors:['Construction','Contractors','Engineering','Infrastructure','Projects','Developments','Builders','Civil Works','Technical Services','Plant Hire','Construction Services']},
+  {key:'trading',isic:'G',label:'Trading & General Commerce',icon:'fa-store',color:'#0E7C7B',blurb:'Retail, wholesale, distribution.',descriptors:['Trading','Enterprises','Merchants','Supplies','Distributors','Distribution','Commerce','General Dealers','Retail','Wholesale','Traders','Suppliers','Commercial']},
+  {key:'marketing',isic:'M',label:'Marketing, Advertising & Communications',icon:'fa-bullhorn',color:'#E8730F',blurb:'Advertising, branding, PR, media.',descriptors:['Marketing','Advertising','Communications','Creative','Media','Digital','Branding','Creative Agency','Media Solutions','Public Relations','Content','Studio','Agency']},
+  {key:'agriculture',isic:'A',label:'Agriculture & Agribusiness',icon:'fa-seedling',color:'#2E9C4A',blurb:'Farming, agro-processing, livestock.',descriptors:['Agriculture','Agribusiness','Farms','Farming','Agro','Foods','Produce','Commodities','Horticulture','Livestock','Estates']},
+  {key:'logistics',isic:'H',label:'Logistics, Transport & Supply Chain',icon:'fa-truck',color:'#1B6CA8',blurb:'Transport, freight, warehousing.',descriptors:['Logistics','Transport','Freight','Haulage','Distribution','Couriers','Supply Chain','Warehousing','Cargo','Mobility','Trucking','Express','Transporters']},
+  {key:'financial',isic:'K',label:'Financial Services',icon:'fa-piggy-bank',color:'#B8564F',blurb:'Financial, capital, investment.',descriptors:['Financial','Finance','Capital','Investment','Advisory','Wealth','Asset','Credit','Fintech','Financial Services','Capital Partners','Investments','Holdings']},
+  {key:'education',isic:'P',label:'Education & Training',icon:'fa-graduation-cap',color:'#E8730F',blurb:'Schools, colleges, training.',descriptors:['Education','Academy','Institute','Training','Learning','Skills','College','School','Development','Educational Services','Training Centre']},
   {key:'health',isic:'Q',label:'Health & Wellness',icon:'fa-heart-pulse',color:'#B8564F',blurb:'Clinics, wellness, medical, diagnostics.',descriptors:['Health','Wellness','Care','Medical','Clinic','Pharmacy','Laboratory','Diagnostics','Allied Health','Rehab','Health Services']},
   {key:'other',isic:'—',label:'Other / Not sure',icon:'fa-circle-question',color:'#5E7A67',blurb:'Let us assess your activity.',descriptors:['Services','Solutions','Enterprises','Group','Holdings','Ventures','Zambia','Company','Business','Corporation']}
 ];
 
-const LEGAL_ENDINGS={
-  NONE:{key:'NONE',label:'No legal ending',display:''},
-  LIMITED:{key:'LIMITED',label:'LIMITED',display:'LIMITED'},
-  UNLIMITED:{key:'UNLIMITED',label:'UNLIMITED',display:'UNLIMITED'},
-  PLC:{key:'PLC',label:'PLC',display:'PLC'}
-};
+const LEGAL_ENDINGS={ NONE:{display:''}, LIMITED:{display:'LIMITED'}, UNLIMITED:{display:'UNLIMITED'}, PLC:{display:'PLC'} };
 const STRUCTURES=[
-  {key:'bn',label:'Statutory Business Name',icon:'fa-store',desc:'A trading name registered with PACRA.',endings:['NONE'],endingRule:'none'},
-  {key:'ltd',label:'Private Company Limited by Shares',icon:'fa-building',desc:'An incorporated company with shares.',endings:['LIMITED'],endingRule:'fixed',rec:true},
-  {key:'ltdg',label:'Company Limited by Guarantee',icon:'fa-people-group',desc:'Members guarantee a fixed amount.',endings:['LIMITED','NONE','UNLIMITED'],endingRule:'choice'},
-  {key:'plc',label:'Public Company (PLC)',icon:'fa-chart-line',desc:'Shares may be offered to the public.',endings:['PLC'],endingRule:'fixed'}
+  {key:'bn',label:'Statutory Business Name',desc:'A trading name registered with PACRA.',endings:['NONE'],endingRule:'none'},
+  {key:'ltd',label:'Private Company Limited by Shares',desc:'An incorporated company with shares.',endings:['LIMITED'],endingRule:'fixed',rec:true},
+  {key:'ltdg',label:'Company Limited by Guarantee',desc:'Members guarantee a fixed amount.',endings:['LIMITED','NONE','UNLIMITED'],endingRule:'choice'},
+  {key:'plc',label:'Public Company (PLC)',desc:'Shares may be offered to the public.',endings:['PLC'],endingRule:'fixed'}
 ];
 function resolveLegalEnding(structure,choice){
   if(!structure)return '';
@@ -303,19 +339,15 @@ function resolveLegalEnding(structure,choice){
   if(structure.endingRule==='choice'){if(choice==='NONE')return '';if(choice==='UNLIMITED')return 'UNLIMITED';return 'LIMITED';}
   return structure.endings[0]||'';
 }
-
 function analyseName(name){
   const n=(name||'').trim().toLowerCase();
   if(!n)return{score:0,issues:[]};
   const issues=[];let score=100;
   if(n.length<3){score-=40;issues.push({level:'crit',text:'Name is too short to be distinctive.'})}
   if(/^\d+$/.test(n)){score-=40;issues.push({level:'crit',text:'A name of only numbers is unlikely.'})}
-  if(n.length>30){score-=10;issues.push({level:'warn',text:'Unusually long.'})}
   score=Math.max(0,Math.min(100,Math.round(score)));
   return{score,issues};
 }
-function label(s){if(s>=80)return'Strong';if(s>=60)return'Moderate';if(s>=40)return'Weak';return'Needs work'}
-function color(s){if(s>=80)return'#1E7B3C';if(s>=60)return'#E8730F';return'#B8564F'}
 function buildSixNames(distinctive,descriptor,industryData,legalEnding){
   if(!distinctive||!descriptor||!industryData)return[];
   const distinct=distinctive.trim().toUpperCase();
@@ -331,7 +363,7 @@ function buildSixNames(distinctive,descriptor,industryData,legalEnding){
 function Btn({children,onClick,variant='primary',size='md',className='',type='button',disabled}){
   const base='inline-flex items-center justify-center gap-2.5 transition-all duration-300 tracking-wide disabled:opacity-30 disabled:cursor-not-allowed rounded-sm font-semibold';
   const sizes={sm:'text-[12px] px-4 py-2.5',md:'text-[13px] px-6 py-3.5',lg:'text-[13.5px] px-8 py-4'};
-  const variants={primary:'bg-gradient-to-br from-[#E8730F] to-[#F5A623] text-white',ghost:'border border-[#0A1F12]/20 text-[#0A1F12]',ghostLt:'border border-white/20 text-white'};
+  const variants={primary:'bg-gradient-to-br from-[#E8730F] to-[#F5A623] text-white',ghost:'border border-[#0A1F12]/20 text-[#0A1F12]'};
   return <button type={type} onClick={onClick} disabled={disabled} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}>{children}</button>;
 }
 function Arrow(){return <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M9 1L13 5L9 9M13 5H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
@@ -342,7 +374,7 @@ function Mark({size=36}){
 }
 function NotReg({tone='light'}){return <div style={{background:tone==='dark'?'rgba(255,255,255,.05)':'linear-gradient(135deg,#FFF4E0,#FFF9EE)',border:tone==='dark'?'1px solid rgba(245,166,35,.3)':'1px solid #E8730F',borderRadius:12,padding:'14px 18px',display:'flex',gap:14,alignItems:'flex-start'}}>
   <span style={{width:34,height:34,borderRadius:9,background:tone==='dark'?'rgba(245,166,35,.2)':'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-info-circle" style={{color:tone==='dark'?'#F5A623':'#fff',fontSize:14}}></i></span>
-  <div><p style={{fontSize:12.5,fontWeight:800,letterSpacing:'.04em',color:tone==='dark'?'#F5A623':'#8A6828',marginBottom:4,textTransform:'uppercase'}}>We act on your behalf — we are not a regulator</p><p style={{fontSize:12.5,lineHeight:1.55,color:tone==='dark'?'rgba(255,255,255,.7)':'rgba(10,31,18,.7)'}}>StartEasy is an administrative services desk. We prepare, coordinate, submit and track filings with PACRA, ZRA, NAPSA, NHIMA, WCFCB, EIZ, NCC, councils and sector regulators — but we are not a government authority, and we do not give legal, tax or audit advice.</p></div>
+  <div><p style={{fontSize:12.5,fontWeight:800,letterSpacing:'.04em',color:tone==='dark'?'#F5A623':'#8A6828',marginBottom:4,textTransform:'uppercase'}}>We act on your behalf — we are not a regulator</p><p style={{fontSize:12.5,lineHeight:1.55,color:tone==='dark'?'rgba(255,255,255,.7)':'rgba(10,31,18,.7)'}}>StartEasy is an administrative services desk. We prepare, coordinate, submit and track filings with PACRA, ZRA, NAPSA, NHIMA, WCFCB, EIZ, NCC, councils and sector regulators — but we are not a government authority.</p></div>
 </div>;}
 const INP={width:'100%',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,padding:'12px 14px',fontSize:14,color:'#0A1F12',fontFamily:'inherit'};
 function TIn({value,onChange,placeholder,type='text'}){return <input type={type} value={value||''} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={INP}/>;}
@@ -352,33 +384,26 @@ function Head({eyebrow,title,sub,style}){return <div style={style}>
   {sub&&<p style={{marginTop:20,fontSize:15.5,lineHeight:1.6,maxWidth:'42rem',color:'rgba(10,31,18,.55)'}}>{sub}</p>}
 </div>;}
 
-/* ============================================================
-   DESKS — Licensing Desk now includes EIZ & NCC option
-   ============================================================ */
 const DESKS={
   pacra:{id:'pacra',code:'1',title:'PACRA Desk',subtitle:'Business Registration & Corporate Compliance',authority:'Patents and Companies Registration Agency',color:'#2E9C4A',icon:'fa-building',intro:'Register, amend and keep your company legally active.',options:[
     {v:'structure',t:'Business Structure Advisory',d:'Self-service wizard — K25.',icon:'fa-compass',wizard:'structure'},
     {v:'name',t:'Name Preparation & Clearance',d:'Self-service wizard — K25.',icon:'fa-tag',wizard:'names'},
     {v:'inc',t:'Company Incorporation',d:'Directors, shareholders, certificate.',icon:'fa-building',services:['p_inc']},
-    {v:'bn',t:'Business Name Registration',d:'BN Form III — trading name.',icon:'fa-store',services:['p_bn']},
-    {v:'amend',t:'Company Amendments',d:'Directors, address, activities, name.',icon:'fa-pen',services:['p_amend']},
-    {v:'annual',t:'Annual Return & Statutory Filings',d:'Annual return + status check.',icon:'fa-calendar-check',services:['p_annual']}
+    {v:'bn',t:'Business Name Registration',d:'BN Form III — trading name.',icon:'fa-store',services:['p_bn']}
   ]},
   zra:{id:'zra',code:'2',title:'ZRA Desk',subtitle:'Tax Registration & Tax Compliance',authority:'Zambia Revenue Authority',color:'#1B6CA8',icon:'fa-file-invoice-dollar',intro:'Register with ZRA, file recurring returns.',options:[
     {v:'tpin',t:'Get a TPIN',d:'Taxpayer Identification Number.',icon:'fa-id-card',services:['z_tpin']},
-    {v:'file',t:'File recurring returns',d:'PAYE, VAT, Turnover Tax, WHT.',icon:'fa-file-export',services:['z_file']},
-    {v:'clear',t:'Get tax clearance',d:'Account sweep and certificate.',icon:'fa-certificate',services:['z_clear']},
-    {v:'behind',t:'I am behind on tax',d:'Backlog filing and regularisation.',icon:'fa-wrench',services:['z_recover']}
+    {v:'file',t:'File recurring returns',d:'PAYE, VAT, Turnover Tax.',icon:'fa-file-export',services:['z_file']},
+    {v:'clear',t:'Get tax clearance',d:'Account sweep and certificate.',icon:'fa-certificate',services:['z_clear']}
   ]},
   napsa:{id:'napsa',code:'3',title:'NAPSA Desk',subtitle:'Employer & Pension Compliance',authority:'National Pension Scheme Authority',color:'#7A4FA3',icon:'fa-users',intro:'Register as an employer, register employees.',options:[
     {v:'reg',t:'Register as an employer',d:'Employer account and portal.',icon:'fa-briefcase',services:['n_reg']},
     {v:'emp',t:'Register employees',d:'Individual employee records.',icon:'fa-user-plus',services:['n_emp']},
-    {v:'monthly',t:'Monthly contributions',d:'Prepare, remit, reconcile.',icon:'fa-calendar-check',services:['n_monthly']},
-    {v:'behind',t:'Clean up / arrears',d:'Reconciliation and regularisation.',icon:'fa-wrench',services:['n_cleanup']}
+    {v:'monthly',t:'Monthly contributions',d:'Prepare, remit, reconcile.',icon:'fa-calendar-check',services:['n_monthly']}
   ]},
   wcfcb:{id:'wcfcb',code:'4',title:'WCFCB Desk',subtitle:"Workers' Compensation Compliance",authority:"Workers' Compensation Fund Control Board",color:'#B8564F',icon:'fa-helmet-safety',intro:'Register your establishment and keep assessments current.',options:[
     {v:'reg',t:'Register as an employer',d:'Establishment registration.',icon:'fa-clipboard-check',services:['w_reg']},
-    {v:'assess',t:'Annual assessment',d:'Earnings declaration and assessment.',icon:'fa-file-invoice',services:['w_assess']}
+    {v:'assess',t:'Annual assessment',d:'Earnings declaration.',icon:'fa-file-invoice',services:['w_assess']}
   ]},
   nhima:{id:'nhima',code:'5',title:'NHIMA Desk',subtitle:'National Health Insurance Compliance',authority:'National Health Insurance Management Authority',color:'#0E7C7B',icon:'fa-heart-pulse',intro:'Register as an employer, register employees.',options:[
     {v:'reg',t:'Register as an employer',d:'Employer account and portal.',icon:'fa-user-plus',services:['h_reg']},
@@ -389,7 +414,6 @@ const DESKS={
     {v:'trading',t:'Council trading licence',d:'Business levy and trading licence.',icon:'fa-store',services:['l_trading']},
     {v:'health',t:'Health & food handling',d:'Restaurants, food handlers.',icon:'fa-utensils',services:['l_health']},
     {v:'fire',t:'Fire certificate',d:'Fire inspection and certificate.',icon:'fa-fire-extinguisher',services:['l_fire']},
-    /* NEW: Engineering & Construction option contains EIZ + NCC */
     {v:'engineering',t:'Engineering & Construction',d:'EIZ for engineers · NCC for contractors.',icon:'fa-helmet-safety',services:['l_eiz','l_ncc']},
     {v:'renew',t:'Renew existing licences',d:'Prevent lapses — 60 days ahead.',icon:'fa-rotate',services:['l_renew']}
   ]},
@@ -428,24 +452,17 @@ const DESKS={
   ]}
 };
 
-/* ============================================================
-   SERVICES — EIZ and NCC added with ÷2 fees
-   ============================================================ */
 const S={
   p_structure:{code:'P0',desk:'pacra',title:'Business Structure Advisory',clientDesc:'Self-service wizard to determine the right legal structure.',whatsCovered:['Guided question flow','Industry classification','Legal structure recommendation','Instant assessment report'],service:'micro',timeline:'Done within 1 hour',wizardEntry:true,wizardScope:'structure',popular:true},
   p_name:{code:'P1',desk:'pacra',title:'Name Preparation & Clearance',clientDesc:'Self-service wizard developing six fully-constructed candidate names.',whatsCovered:['Descriptive word library','Six-name proposal','Name distinctiveness score','Submission on your behalf'],service:'micro',timeline:'Done within 1 hour',wizardEntry:true,wizardScope:'names',popular:true},
   p_inc:{code:'P2',desk:'pacra',title:'Company Incorporation',clientDesc:'Full administrative preparation of a private limited company incorporation.',whatsCovered:['Company information compiled','Director and shareholder particulars','Certificate of Incorporation'],service:'complex',timeline:'3–14 working days',popular:true},
   p_bn:{code:'P3',desk:'pacra',title:'Business Name Registration',clientDesc:'Administrative preparation and submission support.',whatsCovered:['Application preparation','Submission on your behalf','Certificate processing'],service:'standard',timeline:'2–7 working days'},
-  p_amend:{code:'P4',desk:'pacra',title:'Company Amendments',clientDesc:'Administrative preparation of amendment filings.',whatsCovered:['Amendment confirmed','Correct form identified','Submission on your behalf'],service:'standard',timeline:'3–10 working days'},
-  p_annual:{code:'P5',desk:'pacra',title:'Annual Return & Statutory Filings',clientDesc:'Administrative preparation and filing of your annual return.',whatsCovered:['Statutory registers updated','Filing on your behalf','Acknowledgement retained'],service:'standard',ongoing:'filing',timeline:'Filed within statutory window',popular:true},
   z_tpin:{code:'Z1',desk:'zra',title:'TPIN Registration',clientDesc:'Administrative support to obtain a Taxpayer Identification Number.',whatsCovered:['Identification documents verified','Registration submitted','TPIN recorded'],service:'basic',timeline:'1–10 working days',popular:true},
   z_file:{code:'Z3',desk:'zra',title:'Recurring Return Filing',clientDesc:'Prepare and file recurring returns.',whatsCovered:['Return preparation','Filing on your behalf','Payment coordination'],ongoing:'filing',timeline:'Recurring monthly/quarterly',popular:true},
   z_clear:{code:'Z4',desk:'zra',title:'Tax Clearance Certificate',clientDesc:'Administrative support for obtaining tax clearance.',whatsCovered:['Tax account reviewed','Regularisation support','Clearance application'],service:'standard',timeline:'Varies'},
-  z_recover:{code:'Z5',desk:'zra',title:'Tax Compliance Recovery',clientDesc:'Structured programme to bring tax position up to date.',whatsCovered:['ZRA status check','Outstanding returns review','Filing backlog coordination'],service:'complex',ongoing:'standard',timeline:'Varies',popular:true},
   n_reg:{code:'N1',desk:'napsa',title:'Employer Registration',clientDesc:'Administrative support to register as an employer with NAPSA.',whatsCovered:['Employer registration','Account setup','Contribution calendar'],service:'basic',timeline:'Varies',popular:true},
   n_emp:{code:'N2',desk:'napsa',title:'Employee Registration',clientDesc:'Administrative support to register individual employees.',whatsCovered:['Employee registration','ID verification','Schedule maintained'],service:'basic',timeline:'Ongoing'},
   n_monthly:{code:'N3',desk:'napsa',title:'Monthly Contribution Administration',clientDesc:'Prepare monthly contribution schedules.',whatsCovered:['Monthly schedule','Payment coordination','Reconciliation'],ongoing:'filing',timeline:'Ongoing monthly'},
-  n_cleanup:{code:'N4',desk:'napsa',title:'Compliance Clean-Up',clientDesc:'For businesses that have fallen behind.',whatsCovered:['Account status check','Reconciliation','Updates'],service:'standard',ongoing:'filing',timeline:'Varies'},
   w_reg:{code:'W1',desk:'wcfcb',title:'WCFCB Employer Registration',clientDesc:'Administrative support to register your establishment with WCFCB.',whatsCovered:['WCFCB employer registration','Account setup','Registration documentation'],service:'basic',timeline:'Varies',popular:true},
   w_assess:{code:'W2',desk:'wcfcb',title:'Annual Assessment Support',clientDesc:'Administrative support for earnings declaration.',whatsCovered:['Earnings declaration','Assessment administration','Deadline monitoring'],service:'standard',timeline:'Annual'},
   h_reg:{code:'H1',desk:'nhima',title:'NHIMA Employer Registration',clientDesc:'Administrative support to register as an employer with NHIMA.',whatsCovered:['NHIMA employer registration','Portal registration','Account setup'],service:'basic',timeline:'Varies',popular:true},
@@ -455,43 +472,8 @@ const S={
   l_health:{code:'L2',desk:'licensing',title:'Health & Food Handling Permit',clientDesc:'Administrative support for health-related approval.',whatsCovered:['Health requirements','Food handler certification','Health permit renewal'],service:'standard',timeline:'Varies',popular:true},
   l_fire:{code:'L3',desk:'licensing',title:'Fire Certificate',clientDesc:'Administrative support to obtain or renew fire certificate.',whatsCovered:['Fire certificate application','Fire inspection','Renewal'],service:'basic',timeline:'Varies'},
   l_renew:{code:'L5',desk:'licensing',title:'Licence & Permit Renewal',clientDesc:'Administrative support to renew licences, permits and registrations.',whatsCovered:['Licence register built','Renewal started 60 days ahead','Next renewal reminder set'],service:'basic',ongoing:'filing',timeline:'Start 60 days before expiry'},
-
-  /* =====================================================
-     NEW: EIZ — Engineering Institution of Zambia
-     Authority fees: C3 K3,500 · C2 K4,500 · C1 K5,500
-     StartEasy fees (÷2): C3 K1,750 · C2 K2,250 · C1 K2,750
-     ===================================================== */
-  l_eiz:{code:'L7',desk:'licensing',title:'EIZ Engineering Registration',
-    clientDesc:'Administrative support for first-time registration with the Engineering Institution of Zambia (EIZ) — for engineers and engineering companies. Class tiers (StartEasy service fee — half the authority fee): Class C3 — K1,750 · Class C2 — K2,250 · Class C1 — K2,750.',
-    whatsCovered:[
-      'EIZ application preparation and document compilation',
-      'Class assessment support (Class C3, Class C2, Class C1)',
-      'Qualification and academic transcript verification',
-      'Exact-name consistency across all documents',
-      'Application submitted on your behalf',
-      'Certificate collection and delivery coordination',
-      'Renewal reminder set for next cycle'
-    ],
-    service:'eiz_c3',timeline:'Varies — usually several weeks',popular:true},
-
-  /* =====================================================
-     NEW: NCC — National Council for Construction
-     Authority fees: Gr6 K2,500 · Gr5 K3,500 · Gr4 K5,500
-     StartEasy fees (÷2): Gr6 K1,250 · Gr5 K1,750 · Gr4 K2,750
-     ===================================================== */
-  l_ncc:{code:'L8',desk:'licensing',title:'NCC Contractor Registration',
-    clientDesc:'Administrative support for first-time registration with the National Council for Construction (NCC) — for contractors and construction companies. Grade tiers (StartEasy service fee — half the authority fee): Grade 6 — K1,250 · Grade 5 — K1,750 · Grade 4 — K2,750.',
-    whatsCovered:[
-      'NCC application preparation and document compilation',
-      'Grade assessment support (Grade 6, Grade 5, Grade 4)',
-      'Contractor qualification and capacity verification',
-      'Equipment and personnel documentation review',
-      'Application submitted on your behalf',
-      'Certificate collection and delivery coordination',
-      'Renewal reminder set for next cycle'
-    ],
-    service:'ncc_g6',timeline:'Varies — usually several weeks',popular:true},
-
+  l_eiz:{code:'L7',desk:'licensing',title:'EIZ Engineering Registration',clientDesc:'Administrative support for first-time registration with the Engineering Institution of Zambia (EIZ) — for engineers and engineering companies. Class tiers (StartEasy service fee — half the authority fee): Class C3 — K1,750 · Class C2 — K2,250 · Class C1 — K2,750.',whatsCovered:['EIZ application preparation','Class assessment (C3, C2, C1)','Qualification and academic transcript verification','Application submitted on your behalf','Certificate collection and delivery','Renewal reminder set'],service:'eiz_c3',timeline:'Varies — usually several weeks',popular:true},
+  l_ncc:{code:'L8',desk:'licensing',title:'NCC Contractor Registration',clientDesc:'Administrative support for first-time registration with the National Council for Construction (NCC) — for contractors and construction companies. Grade tiers (StartEasy service fee — half the authority fee): Grade 6 — K1,250 · Grade 5 — K1,750 · Grade 4 — K2,750.',whatsCovered:['NCC application preparation','Grade assessment (Gr 6, Gr 5, Gr 4)','Contractor qualification and capacity verification','Equipment and personnel documentation review','Application submitted on your behalf','Certificate collection and delivery','Renewal reminder set'],service:'ncc_g6',timeline:'Varies — usually several weeks',popular:true},
   s_zda:{code:'S1',desk:'sector',title:'ZDA Investment Registration',clientDesc:'Administrative support for ZDA registrations.',whatsCovered:['ZDA registration','Investment licence application','Compliance administration'],service:'complex',timeline:'Varies'},
   s_zema:{code:'S2',desk:'sector',title:'ZEMA Environmental Compliance',clientDesc:'Administrative support for environmental registration.',whatsCovered:['Environmental registration','Licence administration','Renewal monitoring'],service:'complex',timeline:'Varies'},
   s_tourism:{code:'S3',desk:'sector',title:'Tourism Enterprise Registration',clientDesc:'Administrative support for tourism enterprise registration.',whatsCovered:['Tourism registration','Licence application support','Licence renewals'],service:'standard',timeline:'Varies'},
@@ -518,16 +500,13 @@ const ALL_SERVICES=Object.entries(S).map(([k,v])=>({key:k,...v}));
 const findServiceByKey=key=>S[key]?{key,...S[key]}:null;
 const getDesk=id=>DESKS[id];
 
-/* ============================================================
-   MODAL, ServiceDetail, Engagement, Payment
-   ============================================================ */
 function Modal({open,onClose,eyebrow,children,maxWidth='46rem'}){
   useEffect(()=>{if(open)document.body.style.overflow='hidden';else document.body.style.overflow='';return()=>{document.body.style.overflow=''}},[open]);
   if(!open)return null;
   return <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 mf" style={{background:'rgba(10,31,18,0.88)'}} onClick={onClose}>
     <div className="mb mc" style={{maxWidth}} onClick={e=>e.stopPropagation()}>
       <div className="mbh">
-        <div style={{display:'flex',alignItems:'center',gap:12,minWidth:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
           <span style={{width:8,height:8,borderRadius:'50%',background:'#F5A623'}} className="pulse"></span>
           <span style={{fontSize:10.5,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:700,color:'#F5A623'}}>{eyebrow||'StartEasy'}</span>
         </div>
@@ -541,73 +520,47 @@ function Modal({open,onClose,eyebrow,children,maxWidth='46rem'}){
 function ServiceDetail({service,onClose,onProceed,onWizard}){
   if(!service)return null;
   const s=service;const desk=getDesk(s.desk);const sf=s.service?SF[s.service]:null;const og=s.ongoing?ONGOING[s.ongoing]:null;
-  /* For EIZ and NCC, show the class/grade tier breakdown */
-  const isEIZ = s.code==='L7';
-  const isNCC = s.code==='L8';
+  const isEIZ = s.code==='L7', isNCC = s.code==='L8';
   return <Modal open={!!s} onClose={onClose} eyebrow={desk?desk.title:'StartEasy'}>
     <div className="fadein">
       <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:18}}>
         <span style={{width:52,height:52,borderRadius:14,background:desk?desk.color+'18':'#E8730F18',color:desk?desk.color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className={`fas ${desk?desk.icon:'fa-file'}`} style={{fontSize:20}}></i></span>
-        <div className="min-w-0"><span style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:700,display:'block',marginBottom:4,color:desk?desk.color:'#E8730F'}}>{s.code} · {desk?desk.title:'StartEasy'}</span><h2 className="serif" style={{fontSize:'clamp(1.4rem,3.2vw,1.8rem)',lineHeight:1.2,color:'#0A1F12'}}>{s.title}</h2></div>
+        <div><span style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:700,display:'block',marginBottom:4,color:desk?desk.color:'#E8730F'}}>{s.code} · {desk?desk.title:'StartEasy'}</span><h2 className="serif" style={{fontSize:'clamp(1.4rem,3.2vw,1.8rem)',lineHeight:1.2,color:'#0A1F12'}}>{s.title}</h2></div>
       </div>
       <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.7)',marginBottom:22}}>{s.clientDesc}</p>
       <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:20,marginBottom:20}}>
         <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)',marginBottom:14}}>What is covered</div>
         <ul style={{listStyle:'none',padding:0,margin:0}}>{s.whatsCovered.map((d,i)=><li key={i} style={{display:'flex',alignItems:'flex-start',gap:12,fontSize:13.5,color:'rgba(10,31,18,.8)',lineHeight:1.6,marginBottom:10}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={desk?desk.color:'#E8730F'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{marginTop:4,flexShrink:0}}><path d="M20 6L9 17l-5-5"/></svg><span>{d}</span></li>)}</ul>
       </div>
-      <div style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',background:'rgba(10,31,18,.04)',borderRadius:8,marginBottom:20}}>
-        <i className="fas fa-clock" style={{color:'#8A6828',fontSize:14}}></i>
-        <div><div style={{fontSize:10.5,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:2}}>Typical timeline</div><div style={{fontSize:13.5,color:'#0A1F12',fontWeight:600}}>{s.timeline}</div></div>
-      </div>
-
-      {/* EIZ tier breakdown */}
       {isEIZ&&<div style={{background:'linear-gradient(135deg,#FFF9E6,#FFFCF0)',border:'1px solid #F0E0A0',borderRadius:10,padding:'18px 20px',marginBottom:20}}>
         <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:14}}>EIZ Class Tiers · StartEasy Service Fee</div>
         <div style={{display:'grid',gap:10}}>
-          <div style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid rgba(10,31,18,.08)'}}>
-            <div><div style={{fontSize:12,fontWeight:700,color:'#0A1F12'}}>Class C3</div><div style={{fontSize:10.5,color:'rgba(10,31,18,.5)'}}>Authority fee K3,500</div></div>
-            <div className="serif" style={{fontSize:20,fontWeight:800,color:'#E8730F'}}>K1,750</div>
-          </div>
-          <div style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid rgba(10,31,18,.08)'}}>
-            <div><div style={{fontSize:12,fontWeight:700,color:'#0A1F12'}}>Class C2</div><div style={{fontSize:10.5,color:'rgba(10,31,18,.5)'}}>Authority fee K4,500</div></div>
-            <div className="serif" style={{fontSize:20,fontWeight:800,color:'#E8730F'}}>K2,250</div>
-          </div>
-          <div style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid rgba(10,31,18,.08)'}}>
-            <div><div style={{fontSize:12,fontWeight:700,color:'#0A1F12'}}>Class C1</div><div style={{fontSize:10.5,color:'rgba(10,31,18,.5)'}}>Authority fee K5,500</div></div>
-            <div className="serif" style={{fontSize:20,fontWeight:800,color:'#E8730F'}}>K2,750</div>
-          </div>
+          {[{c:'Class C3',auth:'K3,500',fee:'K1,750'},{c:'Class C2',auth:'K4,500',fee:'K2,250'},{c:'Class C1',auth:'K5,500',fee:'K2,750'}].map((x,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid rgba(10,31,18,.08)'}}>
+              <div><div style={{fontSize:12,fontWeight:700,color:'#0A1F12'}}>{x.c}</div><div style={{fontSize:10.5,color:'rgba(10,31,18,.5)'}}>Authority fee {x.auth}</div></div>
+              <div className="serif" style={{fontSize:20,fontWeight:800,color:'#E8730F'}}>{x.fee}</div>
+            </div>
+          )}
         </div>
-        <div style={{marginTop:12,paddingTop:10,borderTop:'1px solid #E0D08A',fontSize:11,color:'rgba(10,31,18,.55)',fontStyle:'italic'}}>StartEasy service fee shown. Government / authority fee is separate.</div>
       </div>}
-
-      {/* NCC tier breakdown */}
       {isNCC&&<div style={{background:'linear-gradient(135deg,#FFF9E6,#FFFCF0)',border:'1px solid #F0E0A0',borderRadius:10,padding:'18px 20px',marginBottom:20}}>
         <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:14}}>NCC Grade Tiers · StartEasy Service Fee</div>
         <div style={{display:'grid',gap:10}}>
-          <div style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid rgba(10,31,18,.08)'}}>
-            <div><div style={{fontSize:12,fontWeight:700,color:'#0A1F12'}}>Grade 6</div><div style={{fontSize:10.5,color:'rgba(10,31,18,.5)'}}>Authority fee K2,500</div></div>
-            <div className="serif" style={{fontSize:20,fontWeight:800,color:'#E8730F'}}>K1,250</div>
-          </div>
-          <div style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid rgba(10,31,18,.08)'}}>
-            <div><div style={{fontSize:12,fontWeight:700,color:'#0A1F12'}}>Grade 5</div><div style={{fontSize:10.5,color:'rgba(10,31,18,.5)'}}>Authority fee K3,500</div></div>
-            <div className="serif" style={{fontSize:20,fontWeight:800,color:'#E8730F'}}>K1,750</div>
-          </div>
-          <div style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid rgba(10,31,18,.08)'}}>
-            <div><div style={{fontSize:12,fontWeight:700,color:'#0A1F12'}}>Grade 4</div><div style={{fontSize:10.5,color:'rgba(10,31,18,.5)'}}>Authority fee K5,500</div></div>
-            <div className="serif" style={{fontSize:20,fontWeight:800,color:'#E8730F'}}>K2,750</div>
-          </div>
+          {[{c:'Grade 6',auth:'K2,500',fee:'K1,250'},{c:'Grade 5',auth:'K3,500',fee:'K1,750'},{c:'Grade 4',auth:'K5,500',fee:'K2,750'}].map((x,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid rgba(10,31,18,.08)'}}>
+              <div><div style={{fontSize:12,fontWeight:700,color:'#0A1F12'}}>{x.c}</div><div style={{fontSize:10.5,color:'rgba(10,31,18,.5)'}}>Authority fee {x.auth}</div></div>
+              <div className="serif" style={{fontSize:20,fontWeight:800,color:'#E8730F'}}>{x.fee}</div>
+            </div>
+          )}
         </div>
-        <div style={{marginTop:12,paddingTop:10,borderTop:'1px solid #E0D08A',fontSize:11,color:'rgba(10,31,18,.55)',fontStyle:'italic'}}>StartEasy service fee shown. Government / authority fee is separate.</div>
       </div>}
-
       {(sf||og)&&!isEIZ&&!isNCC&&<div className="feebox">
         <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>Fee structure</div>
         {sf&&<div className="row"><span className="l">{sf.label}</span><span className="v">{sf.zm}</span></div>}
         {og&&<div className="row"><span className="l">{og.label} (monthly)</span><span className="v">{og.zm}/mo</span></div>}
-        <div style={{marginTop:14,paddingTop:12,borderTop:'1px solid #E0D08A',fontSize:11.5,color:'rgba(10,31,18,.6)',lineHeight:1.55,fontStyle:'italic'}}>Fees are for StartEasy administrative work only and are separate from any government or regulator fee.</div>
       </div>}
       <div style={{display:'flex',flexWrap:'wrap',gap:12,marginTop:22}}>
-        {!s.wizardEntry&&<button onClick={()=>onProceed(s)} style={{flex:'1 1 220px',padding:'15px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}><i className="fas fa-file-signature"></i> Proceed to engagement proposal</button>}
+        {!s.wizardEntry&&<button onClick={()=>onProceed(s)} style={{flex:'1 1 220px',padding:'15px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><i className="fas fa-file-signature"></i> Proceed to engagement proposal</button>}
         <a href={waUrl('Hello StartEasy — I would like to ask about '+s.code+' '+s.title+'.')} target="_blank" rel="noopener noreferrer" style={{flex:'1 1 220px',padding:'15px 24px',background:'#25D366',color:'#fff',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9,textDecoration:'none'}}><i className="fab fa-whatsapp"></i> Ask a question first</a>
       </div>
     </div>
@@ -622,9 +575,9 @@ function Engagement({service,onClose,onAgreed}){
   const s=service;
   const proceed=()=>{
     setError('');
-    if(!client.name.trim()){setError('Please enter your full name.');return}
-    if(!client.email.trim()){setError('Please enter your email.');return}
-    if(!agreed){setError('Please confirm you agree to the engagement terms.');return}
+    if(!client.name.trim()){setError('Enter your full name.');return}
+    if(!client.email.trim()){setError('Enter your email.');return}
+    if(!agreed){setError('Confirm the engagement terms.');return}
     onAgreed({client,service:s});
   };
   const sf=s.service?SF[s.service]:null;const og=s.ongoing?ONGOING[s.ongoing]:null;
@@ -632,29 +585,21 @@ function Engagement({service,onClose,onAgreed}){
     <div className="el printable">
       <div className="eh">
         <div><div className="brand">Start<em>Easy</em></div><div className="sub">Administrative Services Desk · Zambia</div></div>
-        <div><div className="dt">ENGAGEMENT PROPOSAL</div><div className="mt">{new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div></div>
+        <div><div className="dt">ENGAGEMENT PROPOSAL</div></div>
       </div>
       <p><strong>Dear {client.name||'[Client]'},</strong></p>
       <p>Thank you for considering StartEasy for your <strong>{s.title}</strong>.</p>
-      <h4>1. Scope</h4>
-      <p>{s.clientDesc}</p>
-      <h4>2. What we will deliver</h4>
-      <ul>{s.whatsCovered.map((d,i)=><li key={i}>{d}</li>)}</ul>
+      <h4>1. Scope</h4><p>{s.clientDesc}</p>
+      <h4>2. What we will deliver</h4><ul>{s.whatsCovered.map((d,i)=><li key={i}>{d}</li>)}</ul>
       <h4>3. Fees</h4>
       <div className="feebox">
         {sf&&<div className="row"><span className="l">{sf.label}</span><span className="v">{sf.zm}</span></div>}
-        {og&&<div className="row"><span className="l">{og.label} (per month)</span><span className="v">{og.zm}/mo</span></div>}
+        {og&&<div className="row"><span className="l">{og.label}</span><span className="v">{og.zm}/mo</span></div>}
       </div>
-      <h4>4. Terms</h4>
-      <ul>
-        <li>StartEasy provides administrative preparation, coordination, submission and tracking services.</li>
-        <li>Where a matter requires legal, tax, audit or other regulated professional advice, StartEasy will refer you to an appropriately qualified professional.</li>
-      </ul>
       <div className="sign">
-        <div><div className="sigval">{SIGNATORY_NAME}</div><div className="lbl">For StartEasy Administrative Services Desk</div></div>
+        <div><div className="sigval">{SIGNATORY_NAME}</div><div className="lbl">For StartEasy</div></div>
         <div><div className="sigval">{client.name||'[Client]'}</div><div className="lbl">For the Client</div></div>
       </div>
-      <div className="ft"><strong>StartEasy Administrative Services Desk</strong> · Lusaka, Zambia · {CONTACT_EMAIL}</div>
     </div>
     <div style={{marginTop:22,background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:24}}>
       <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:14}}>Client details</div>
@@ -666,7 +611,7 @@ function Engagement({service,onClose,onAgreed}){
       </div>
       <label style={{display:'flex',gap:12,alignItems:'flex-start',fontSize:13,color:'rgba(10,31,18,.85)',cursor:'pointer',lineHeight:1.6,marginTop:18}}>
         <input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} style={{width:18,height:18,accentColor:'#E8730F',flexShrink:0,marginTop:3,cursor:'pointer'}}/>
-        <span>I have read and agree to the engagement proposal, scope, fees and terms above.</span>
+        <span>I have read and agree to the engagement proposal.</span>
       </label>
       {error&&<div style={{background:'rgba(220,53,69,.08)',border:'1px solid rgba(220,53,69,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#B8564F',fontSize:12.5}}>{error}</div>}
       <div style={{display:'flex',flexWrap:'wrap',gap:12,marginTop:20}}>
@@ -696,18 +641,13 @@ function Payment({service,client,onClose,onDone}){
   const buildMsg=r=>['*STARTEASY — FEE SUBMITTED*','','*Ref:* '+r,'*Client:* '+client.name,'*Email:* '+client.email,'','*Engagement:* '+s.title,'','*Payment:*','Method: '+(PAYMENT_METHODS[method]?PAYMENT_METHODS[method].label:'—'),'Amount: '+amountDue,'Sender: '+senderName,'Contact: '+senderContact,'TxID: '+userRef].join('\n');
   const confirm=async()=>{
     setErrorMsg('');
-    if(!method){setErrorMsg('Select a payment method.');return}
-    if(!senderName.trim()){setErrorMsg('Enter the name on the payment.');return}
-    if(!senderContact.trim()){setErrorMsg('Enter the phone or email used.');return}
-    if(!userRef.trim()){setErrorMsg('Enter your transaction reference.');return}
-    if(!agree){setErrorMsg('Tick the confirmation box.');return}
+    if(!method||!senderName.trim()||!senderContact.trim()||!userRef.trim()||!agree){setErrorMsg('Please complete all fields.');return}
     setSaving(true);
     const rcpt='SE-'+(s.code||'ADV')+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
-    const record = { ref:rcpt, clientName:client.name, clientEmail:client.email, clientPhone:client.phone||'', clientBusiness:client.business||'',
+    await addPayment({ ref:rcpt, clientName:client.name, clientEmail:client.email, clientPhone:client.phone||'', clientBusiness:client.business||'',
       serviceCode:s.code||'ADV', serviceTitle:s.title, serviceDesk:s.desk||'pacra',
       serviceClientDesc:s.clientDesc, serviceTimeline:s.timeline, serviceFee:sf?sf.zm:og.zm, serviceFeeLabel:sf?sf.label:og.label,
-      whatsCovered:s.whatsCovered||[], amount:amountDue, method:PAYMENT_METHODS[method]?.label||method, senderName, senderContact, txRef:userRef };
-    await addPayment(record);
+      whatsCovered:s.whatsCovered||[], amount:amountDue, method:PAYMENT_METHODS[method]?.label||method, senderName, senderContact, txRef:userRef });
     rememberMyRef(rcpt);
     trackEvent('payment_submit',{ref:rcpt,serviceCode:s.code,amount:amountDue});
     setReceiptNo(rcpt);
@@ -759,9 +699,6 @@ function Payment({service,client,onClose,onDone}){
   </div>;
 }
 
-/* ============================================================
-   WIZARD (simplified)
-   ============================================================ */
 function Wizard({initialScope,onExit,onOrderFormal}){
   const [scope,setScope]=useState(initialScope||null);
   const [idea,setIdea]=useState('');
@@ -775,20 +712,11 @@ function Wizard({initialScope,onExit,onOrderFormal}){
   const current=stepsArr[step];
   const industryData=industry?INDUSTRIES.find(i=>i.key===industry):null;
   const structureData=structure?STRUCTURES.find(x=>x.key===structure):null;
-  const analysis=useMemo(()=>analyseName(distinctive),[distinctive]);
   const names=useMemo(()=>buildSixNames(distinctive,descriptor,industryData,resolveLegalEnding(structureData,'')),[distinctive,descriptor,industryData,structureData]);
   const next=()=>setStep(s=>Math.min(s+1,stepsArr.length-1));
   const back=()=>setStep(s=>Math.max(0,s-1));
-  const can=()=>{if(current==='scope')return!!scope;if(current==='idea')return idea.trim().length>=15;if(current==='structure')return!!structure;if(current==='activity')return!!primaryActivity;if(current==='industry')return!!industry;if(current==='descriptor')return !!descriptor && descriptor.length>=3;if(current==='distinctive')return distinctive.trim().length>=3;return true;};
-  const order=()=>{
-    onOrderFormal({
-      code:'ADV',desk:'pacra',title:'Business Structure & Name Advisory',
-      clientDesc:'Self-service wizard completed. Formal report delivered within 1 hour.',
-      whatsCovered:['Wizard answers captured','Industry classification','Legal structure recommendation','Six-name proposal','Formal report'],
-      service:'micro',timeline:'Delivered within 1 hour',
-      _wizardData:{scope,idea,primaryActivity,industry:industryData,structure:structureData,descriptor,distinctive,names,analysis}
-    });
-  };
+  const can=()=>{if(current==='scope')return!!scope;if(current==='idea')return idea.trim().length>=15;if(current==='structure')return!!structure;if(current==='activity')return!!primaryActivity;if(current==='industry')return!!industry;if(current==='descriptor')return !!descriptor;if(current==='distinctive')return distinctive.trim().length>=3;return true;};
+  const order=()=>{onOrderFormal({code:'ADV',desk:'pacra',title:'Business Structure & Name Advisory',clientDesc:'Self-service wizard completed.',whatsCovered:['Wizard answers','Industry classification','Legal structure recommendation','Six-name proposal','Formal report'],service:'micro',timeline:'Delivered within 1 hour',_wizardData:{scope,idea,primaryActivity,industry:industryData,structure:structureData,descriptor,distinctive,names}});};
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',paddingBottom:60}}>
     <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',padding:'40px 24px 32px'}}>
       <div style={{maxWidth:1240,margin:'0 auto'}}>
@@ -830,10 +758,10 @@ function Wizard({initialScope,onExit,onOrderFormal}){
 }
 
 const STATUS_META={
-  under_review:{label:'Under Review',pill:'review',icon:'fa-clock',userLine:'Your payment reference has been received and is queued for officer verification.'},
-  approved:{label:'Approved',pill:'approved',icon:'fa-circle-check',userLine:'Your payment has been verified. Your engagement is now active.'},
-  reverted:{label:'Reverted — Action Needed',pill:'reverted',icon:'fa-rotate-left',userLine:'We need a small correction from you before we can proceed.'},
-  declined:{label:'Declined',pill:'declined',icon:'fa-circle-xmark',userLine:'Your payment could not be verified and the engagement has been closed.'}
+  under_review:{label:'Under Review',pill:'review',icon:'fa-clock',userLine:'Your payment reference has been received.'},
+  approved:{label:'Approved',pill:'approved',icon:'fa-circle-check',userLine:'Your payment has been verified.'},
+  reverted:{label:'Reverted',pill:'reverted',icon:'fa-rotate-left',userLine:'We need a small correction from you.'},
+  declined:{label:'Declined',pill:'declined',icon:'fa-circle-xmark',userLine:'Your payment could not be verified.'}
 };
 function StatusPill({status}){
   const m=STATUS_META[status]||STATUS_META.under_review;
@@ -882,9 +810,6 @@ function TrackSubmission({go}){
   </div>;
 }
 
-/* ============================================================
-   ADMIN
-   ============================================================ */
 function AdminPortal({onExit}){
   const [authed,setAuthed]=useState(false);
   const [authChecked,setAuthChecked]=useState(false);
@@ -899,14 +824,12 @@ function AdminPortal({onExit}){
   const [filter,setFilter]=useState('all');
   const checkIsAdmin = useCallback(async (user) => {
     if(!user || !firebaseReady) return false;
-    try { const snap = await db.collection(SE_ADMINS).doc(user.uid).get(); return snap.exists; }
-    catch(e) { return false; }
+    try { const snap = await db.collection(SE_ADMINS).doc(user.uid).get(); return snap.exists; } catch(e) { return false; }
   },[]);
   useEffect(()=>{
     if(!firebaseReady){setAuthChecked(true);return}
     const unsub = auth.onAuthStateChanged(async user => {
-      if(user){ const isAdmin = await checkIsAdmin(user); setAuthed(isAdmin); }
-      else { setAuthed(false); }
+      if(user){ const isAdmin = await checkIsAdmin(user); setAuthed(isAdmin); } else { setAuthed(false); }
       setAuthChecked(true);
     });
     return unsub;
@@ -919,40 +842,33 @@ function AdminPortal({onExit}){
   },[authed]);
   const handleSignIn = async () => {
     setPwErr('');
-    if(!email.trim() || !pw){ setPwErr('Enter your email and password.'); return; }
+    if(!email.trim() || !pw){ setPwErr('Enter email and password.'); return; }
     setSigningIn(true);
     try {
       const res = await adminSignIn(email, pw);
       if(!res.ok){ setPwErr(res.error || 'Sign-in failed.'); return; }
       const user = auth.currentUser;
-      if(!user){ setPwErr('Signed in but no session.'); return; }
+      if(!user){ setPwErr('No session.'); return; }
       const isAdmin = await checkIsAdmin(user);
-      if(!isAdmin){ await auth.signOut(); setPwErr('This account is not listed as an admin.'); return; }
+      if(!isAdmin){ await auth.signOut(); setPwErr('Not an admin.'); return; }
       setAuthed(true);
     } catch(e) { setPwErr('Unexpected error.'); }
     finally { setSigningIn(false); }
   };
   const handleSignOut = async () => { await adminSignOut(); setAuthed(false); onExit(); };
-  const setStatus=async(status)=>{
-    if(!review)return;
-    await updatePaymentStatus(review.ref,status,note||'');
-    trackEvent('payment_reviewed',{ref:review.ref,status});
-    setReview(null);setNote('');
-  };
+  const setStatus=async(status)=>{ if(!review)return; await updatePaymentStatus(review.ref,status,note||''); setReview(null);setNote(''); };
   if(!authChecked){
-    return <div className="fadein" style={{minHeight:'100vh',background:'linear-gradient(135deg,#0A1F12,#123A1F)',display:'flex',alignItems:'center',justifyContent:'center',padding:'40px 20px'}}>
-      <div style={{textAlign:'center',color:'#fff'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#F5A623'}}></i><p style={{marginTop:14,fontSize:13}}>Loading…</p></div>
+    return <div className="fadein" style={{minHeight:'100vh',background:'linear-gradient(135deg,#0A1F12,#123A1F)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#F5A623'}}></i>
     </div>;
   }
   if(!authed){
     return <div className="fadein" style={{minHeight:'100vh',background:'linear-gradient(135deg,#0A1F12,#123A1F)',display:'flex',alignItems:'center',justifyContent:'center',padding:'40px 20px'}}>
       <div style={{background:'#fff',borderRadius:14,padding:'34px 32px',maxWidth:440,width:'100%'}}>
         <Mark size={42}/>
-        <h2 className="serif" style={{fontSize:20,fontWeight:800,color:'#0A1F12',marginTop:12,marginBottom:16}}>Admin Portal</h2>
-        <label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Email</label>
-        <input type="email" value={email} onChange={e=>setEmail(e.target.value)} style={{width:'100%',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 18px',fontSize:15,marginBottom:14}}/>
-        <label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Password</label>
-        <input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')handleSignIn()}} style={{width:'100%',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 18px',fontSize:15}}/>
+        <h2 className="serif" style={{fontSize:20,fontWeight:800,marginTop:12,marginBottom:16}}>Admin Portal</h2>
+        <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" style={{width:'100%',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 18px',fontSize:15,marginBottom:14}}/>
+        <input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')handleSignIn()}} placeholder="Password" style={{width:'100%',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 18px',fontSize:15}}/>
         {pwErr&&<div style={{marginTop:10,fontSize:12.5,color:'#B8564F'}}>{pwErr}</div>}
         <button onClick={handleSignIn} disabled={signingIn} style={{width:'100%',marginTop:20,padding:'14px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,cursor:'pointer'}}>{signingIn?'Signing in…':'Sign in'}</button>
         <button onClick={onExit} style={{width:'100%',marginTop:10,padding:'12px 20px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13.5,cursor:'pointer'}}>Cancel</button>
@@ -962,10 +878,7 @@ function AdminPortal({onExit}){
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6'}}>
     <section style={{background:'#0A1F12',color:'#fff',padding:'24px'}}>
       <div style={{maxWidth:1240,margin:'0 auto',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <div style={{display:'flex',alignItems:'center',gap:14}}>
-          <Mark size={42}/>
-          <div className="serif" style={{fontSize:24,fontWeight:800}}>Admin Portal</div>
-        </div>
+        <div style={{display:'flex',alignItems:'center',gap:14}}><Mark size={42}/><div className="serif" style={{fontSize:24,fontWeight:800}}>Admin Portal</div></div>
         <button onClick={handleSignOut} style={{padding:'10px 18px',background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer'}}>Sign out</button>
       </div>
     </section>
@@ -974,7 +887,7 @@ function AdminPortal({onExit}){
         <h2 className="serif" style={{fontSize:'clamp(1.5rem,3.2vw,2rem)',color:'#0A1F12',marginBottom:20}}>Payment queue</h2>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:20}}>
           {[['all','All'],['under_review','Under review'],['approved','Approved'],['reverted','Reverted'],['declined','Declined']].map(([k,l])=>
-            <button key={k} onClick={()=>setFilter(k)} style={{padding:'8px 14px',borderRadius:99,cursor:'pointer',fontSize:12,fontWeight:700,border:filter===k?'none':'1px solid rgba(10,31,18,.12)',background:filter===k?'#0A1F12':'#fff',color:filter===k?'#fff':'rgba(10,31,18,.7)'}}>{l}</button>
+            <button key={k} onClick={()=>setFilter(k)} style={{padding:'8px 14px',borderRadius:99,cursor:'pointer',fontSize:12,fontWeight:700,border:filter===k?'none':'1px solid rgba(10,31,18,.12)',background:filter===k?'#0A1F12':'#fff',color:filter===k?'#fff':'rgba(10,31,18,.7)',fontFamily:'inherit'}}>{l}</button>
           )}
         </div>
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,overflow:'hidden'}}>
@@ -986,7 +899,7 @@ function AdminPortal({onExit}){
               <td style={{padding:'14px 16px',fontSize:12.5}}>{p.serviceTitle}</td>
               <td style={{padding:'14px 16px',fontSize:12.5,fontWeight:700}}>{p.amount}</td>
               <td style={{padding:'14px 16px'}}><StatusPill status={p.status}/></td>
-              <td style={{padding:'14px 16px'}}><button onClick={()=>{setReview(p);setNote(p.adminNote||'')}} style={{padding:'8px 14px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:6,fontSize:12,fontWeight:700,cursor:'pointer'}}>Open</button></td>
+              <td style={{padding:'14px 16px'}}><button onClick={()=>{setReview(p);setNote(p.adminNote||'')}} style={{padding:'8px 14px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:6,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Open</button></td>
             </tr>)}</tbody>
           </table></div>
         </div>
@@ -998,7 +911,6 @@ function AdminPortal({onExit}){
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:10,padding:'18px 20px',marginBottom:20,display:'grid',gap:8}}>
           <div style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px dashed rgba(10,31,18,.06)'}}><span style={{fontSize:12,color:'rgba(10,31,18,.5)',fontWeight:600}}>Name</span><span style={{fontSize:13,fontWeight:700}}>{review.clientName}</span></div>
           <div style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px dashed rgba(10,31,18,.06)'}}><span style={{fontSize:12,color:'rgba(10,31,18,.5)',fontWeight:600}}>Email</span><span style={{fontSize:13,fontWeight:700}}>{review.clientEmail}</span></div>
-          <div style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px dashed rgba(10,31,18,.06)'}}><span style={{fontSize:12,color:'rgba(10,31,18,.5)',fontWeight:600}}>Service</span><span style={{fontSize:13,fontWeight:700}}>{review.serviceTitle}</span></div>
           <div style={{display:'flex',justifyContent:'space-between',padding:'8px 0'}}><span style={{fontSize:12,color:'rgba(10,31,18,.5)',fontWeight:600}}>Amount</span><span style={{fontSize:13,fontWeight:700}}>{review.amount}</span></div>
         </div>
         <label style={{display:'block',fontSize:12.5,fontWeight:700,marginBottom:8}}>Officer note</label>
@@ -1013,13 +925,7 @@ function AdminPortal({onExit}){
   </div>;
 }
 
-/* ============================================================
-   NAV & FOOTER
-   ============================================================ */
-const NAV=[
-  ['home','Home'],['venture','Venture Building'],['desks','Desks'],['services','Services'],
-  ['orientation','Orientation'],['track','Track'],['pricing','Pricing'],['about','About']
-];
+const NAV=[['home','Home'],['venture','Venture Building'],['desks','Desks'],['services','Services'],['orientation','Orientation'],['track','Track'],['pricing','Pricing'],['about','About']];
 function Nav({route,go}){
   const [open,setOpen]=useState(false);
   const nav=r=>{setOpen(false);go(r)};
@@ -1085,8 +991,7 @@ function Footer({go}){
         </div>
       </div>
       <div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
-        <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.75,maxWidth:900}}><strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is a venture building service platform and administrative services desk. We prepare, coordinate, submit and track your filings with PACRA, ZRA, NAPSA, NHIMA, WCFCB, EIZ, NCC, councils and sector regulators — but we are not a government authority or a regulator. Service fees shown are for StartEasy administrative work and are separate from any government or regulator fee.</p>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap',marginTop:20}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
           <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia.</p>
           <button onClick={()=>go('admin')} style={{background:'none',border:'none',color:'rgba(255,255,255,.25)',fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:700,cursor:'pointer',fontFamily:'inherit',padding:0}}><i className="fas fa-lock" style={{marginRight:6}}></i> Admin</button>
         </div>
@@ -1118,7 +1023,7 @@ function ServiceCard({serviceKey,onClick}){
 }
 
 /* ============================================================
-   HOME
+   HOME — with the NEW horizontal sliding stats marquee
    ============================================================ */
 function Home({go,onResume}){
   const [snap,setSnap]=useState(()=>readSnapshot());
@@ -1126,6 +1031,18 @@ function Home({go,onResume}){
   const resumable=hasResumableWizard(snap);
   const savedLabel=snap&&snap.savedAt?timeAgo(snap.savedAt):'';
   useEffect(()=>{trackEvent('page_view',{route:'home'});},[]);
+
+  /* NEW: marquee items — more values to make the slide feel rich */
+  const marqueeItems=[
+    {icon:'fa-layer-group', value:'11',   label:'Specialist desks'},
+    {icon:'fa-file-lines',  value:'40+',  label:'Published services'},
+    {icon:'fa-bolt',        value:'1 hr', label:'Report delivery'},
+    {icon:'fa-landmark',    value:'8',    label:'Regulators coordinated'},
+    {icon:'fa-check-double',value:'100%', label:'Administrative follow-up'},
+    {icon:'fa-tag',         value:'K25',  label:'Structure & Name advisory'},
+    {icon:'fa-clock',       value:'4 hr', label:'Officer verification'},
+    {icon:'fa-shield-halved',value:'24/7', label:'WhatsApp support'}
+  ];
 
   const capabilities=[
     {icon:'fa-magnifying-glass',label:'Idea validation'},
@@ -1153,7 +1070,7 @@ function Home({go,onResume}){
     {resumable&&<section style={{maxWidth:1240,margin:'0 auto',padding:'24px 24px 0'}}>
       <div className="fadein" style={{background:'linear-gradient(135deg,#FFF9E6,#FFFCF0)',border:'1.5px solid #F0E0A0',borderRadius:12,padding:'16px 20px',display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}}>
         <span style={{width:38,height:38,borderRadius:10,background:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-rotate-left" style={{color:'#fff',fontSize:14}}></i></span>
-        <div style={{flex:'1 1 260px',minWidth:0}}>
+        <div style={{flex:'1 1 260px'}}>
           <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:3}}>Welcome back</div>
           <div style={{fontSize:13.5,color:'#0A1F12',fontWeight:600}}>You have an assessment in progress{savedLabel?` — saved ${savedLabel}`:''}.</div>
         </div>
@@ -1166,7 +1083,7 @@ function Home({go,onResume}){
     {myRefs.length>0&&<section style={{maxWidth:1240,margin:'0 auto',padding:'16px 24px 0'}}>
       <div style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(245,166,35,.3)',borderRadius:12,padding:'14px 20px',display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}}>
         <span style={{width:38,height:38,borderRadius:10,background:'rgba(245,166,35,.2)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-magnifying-glass" style={{fontSize:14}}></i></span>
-        <div style={{flex:'1 1 260px',minWidth:0}}>
+        <div style={{flex:'1 1 260px'}}>
           <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#F5A623',marginBottom:3}}>Track a submission</div>
           <div style={{fontSize:13,color:'rgba(255,255,255,.85)',fontWeight:600}}>You have {myRefs.length} submission{myRefs.length!==1?'s':''} on this device.</div>
         </div>
@@ -1174,10 +1091,11 @@ function Home({go,onResume}){
       </div>
     </section>}
 
+    {/* HERO */}
     <section style={{position:'relative',overflow:'hidden'}}>
       <div className="orb-pulse" style={{position:'absolute',top:-180,right:-180,width:640,height:640,background:'radial-gradient(circle, rgba(232,115,15,.22), transparent 62%)',pointerEvents:'none'}}/>
       <div className="orb-pulse" style={{position:'absolute',bottom:-240,left:-200,width:640,height:640,background:'radial-gradient(circle, rgba(245,166,35,.10), transparent 65%)',pointerEvents:'none',animationDelay:'-3s'}}/>
-      <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px clamp(56px,9vw,100px)',position:'relative',zIndex:1}}>
+      <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px clamp(40px,6vw,72px)',position:'relative',zIndex:1}}>
         <span className="micro" style={{color:'#F5A623',display:'inline-flex',alignItems:'center',gap:10,marginBottom:32,padding:'9px 18px',background:'rgba(245,166,35,.12)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:10.5}}>
           <span className="pulse" style={{width:7,height:7,borderRadius:'50%',background:'#F5A623'}}/>
           Venture Building Service Platform · Zambia
@@ -1189,18 +1107,36 @@ function Home({go,onResume}){
           StartEasy Zambia is a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.
         </p>
         <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-          <button onClick={()=>go('venture')} style={{padding:'17px 34px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12,boxShadow:'0 14px 38px rgba(232,115,15,.38)'}}><i className="fas fa-rocket" style={{fontSize:14}}/> Explore the platform <Arrow/></button>
-          <button onClick={()=>go('desks')} style={{padding:'17px 34px',background:'rgba(255,255,255,.05)',color:'#fff',border:'1px solid rgba(255,255,255,.22)',borderRadius:11,fontSize:15,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12}}><i className="fas fa-layer-group" style={{fontSize:14}}/> Browse all desks</button>
-        </div>
-        <div style={{marginTop:'clamp(56px,8vw,88px)',paddingTop:36,borderTop:'1px solid rgba(255,255,255,.1)',display:'flex',flexWrap:'wrap',gap:'clamp(20px,4vw,44px)',alignItems:'center'}}>
-          {[{v:'11',l:'Specialist desks'},{v:'40+',l:'Published services'},{v:'1 hr',l:'Report delivery'}].map((x,i)=><div key={i}>
-            <div className="serif" style={{fontSize:'clamp(1.5rem,2.6vw,2rem)',fontWeight:800,color:'#F5A623',lineHeight:1,marginBottom:6}}>{x.v}</div>
-            <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.5)'}}>{x.l}</div>
-          </div>)}
+          <button onClick={()=>go('venture')} style={{padding:'17px 34px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12,boxShadow:'0 14px 38px rgba(232,115,15,.38)'}}>
+            <i className="fas fa-rocket" style={{fontSize:14}}/> Explore the platform <Arrow/>
+          </button>
+          <button onClick={()=>go('desks')} style={{padding:'17px 34px',background:'rgba(255,255,255,.05)',color:'#fff',border:'1px solid rgba(255,255,255,.22)',borderRadius:11,fontSize:15,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12}}>
+            <i className="fas fa-layer-group" style={{fontSize:14}}/> Browse all desks
+          </button>
         </div>
       </div>
     </section>
 
+    {/* ============================================================
+        NEW: HORIZONTAL SLIDING STATS MARQUEE
+        ============================================================ */}
+    <section style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(255,255,255,.08)',borderBottom:'1px solid rgba(255,255,255,.08)',padding:'clamp(28px,4vw,44px) 0'}}>
+      <div style={{position:'absolute',top:0,left:'20%',width:400,height:400,background:'radial-gradient(circle, rgba(232,115,15,.08), transparent 65%)',transform:'translateY(-50%)',pointerEvents:'none'}}/>
+      <div className="marquee-mask">
+        <div className="marquee-track">
+          {/* Duplicate the array twice for a seamless -50% loop */}
+          {[...marqueeItems, ...marqueeItems].map((item,i)=>(
+            <div key={i} className="stat-item">
+              <span className="stat-icon"><i className={`fas ${item.icon}`}/></span>
+              <div className="stat-value">{item.value}</div>
+              <div className="stat-label">{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* CAPABILITIES */}
     <section style={{background:'rgba(0,0,0,.25)',borderTop:'1px solid rgba(245,166,35,.15)',position:'relative',overflow:'hidden'}}>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(64px,9vw,96px) 24px clamp(48px,7vw,72px)',position:'relative',zIndex:1}}>
         <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 44px'}}>
@@ -1251,6 +1187,7 @@ function Home({go,onResume}){
       </div>
     </section>
 
+    {/* CLOSING */}
     <section style={{background:'#0A1F12',color:'#fff',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
       <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:900,height:900,background:'radial-gradient(circle, rgba(232,115,15,.14), transparent 65%)',pointerEvents:'none'}}/>
       <div style={{maxWidth:1000,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px',textAlign:'center',position:'relative',zIndex:1}}>
@@ -1281,13 +1218,13 @@ function VenturePage({go,onWizard}){
   useEffect(()=>{trackEvent('page_view',{route:'venture'});},[]);
   const [helpPick,setHelpPick]=useState(null);
   const helpOptions=[
-    {id:'plan',icon:'fa-file-lines',color:'#E8730F',label:'Developing a business plan',desc:'A full written business plan, reviewed by an officer.',action:'desk:venture'},
-    {id:'register',icon:'fa-building',color:'#2E9C4A',label:'Registering the company',desc:'Redirects to the StartEasy Administrative Services Desk.',action:'desk:pacra'},
-    {id:'suppliers',icon:'fa-truck-field',color:'#1B6CA8',label:'Finding suppliers and equipment',desc:'Identify, verify and engage suppliers and vendors.',action:'desk:venture'},
-    {id:'brand',icon:'fa-palette',color:'#7A4FA3',label:'Creating a brand and marketing strategy',desc:'Brand identity and website — includes domain registration.',action:'desk:venture'},
-    {id:'financial',icon:'fa-chart-line',color:'#B8564F',label:'Building financial projections',desc:'3-year financial model, cash flow.',action:'desk:venture'},
-    {id:'investors',icon:'fa-hand-holding-dollar',color:'#0E7C7B',label:'Finding potential investors',desc:'Funder matching and introductions.',action:'desk:venture'},
-    {id:'sales',icon:'fa-bullhorn',color:'#5E7A67',label:'Developing sales channels',desc:'Ongoing marketing and sales channel support.',action:'desk:venture'}
+    {id:'plan',icon:'fa-file-lines',color:'#E8730F',label:'Developing a business plan',action:'desk:venture'},
+    {id:'register',icon:'fa-building',color:'#2E9C4A',label:'Registering the company',action:'desk:pacra'},
+    {id:'suppliers',icon:'fa-truck-field',color:'#1B6CA8',label:'Finding suppliers and equipment',action:'desk:venture'},
+    {id:'brand',icon:'fa-palette',color:'#7A4FA3',label:'Creating a brand and marketing strategy',action:'desk:venture'},
+    {id:'financial',icon:'fa-chart-line',color:'#B8564F',label:'Building financial projections',action:'desk:venture'},
+    {id:'investors',icon:'fa-hand-holding-dollar',color:'#0E7C7B',label:'Finding potential investors',action:'desk:venture'},
+    {id:'sales',icon:'fa-bullhorn',color:'#5E7A67',label:'Developing sales channels',action:'desk:venture'}
   ];
   const platformServices=[
     {icon:'fa-lightbulb',color:'#E8730F',title:'Idea validation',desc:'Determine whether customers actually need the product.'},
@@ -1299,18 +1236,15 @@ function VenturePage({go,onWizard}){
     {icon:'fa-gears',color:'#5E7A67',title:'Business operations',desc:'Provide systems, processes, performance tracking.'}
   ];
   const atAGlance=[
-    {icon:'fa-file-lines',color:'#E8730F',name:'Business plan',price:'K750',desc:'Full written business plan, reviewed by an officer.'},
-    {icon:'fa-palette',color:'#7A4FA3',name:'Branding and website',price:'K1,000',desc:'Brand identity + website. Domain registration included.'},
-    {icon:'fa-building',color:'#2E9C4A',name:'Business registration support',price:'K400 · K750',desc:'Business Name K400. Company Incorporation K750.'},
+    {icon:'fa-file-lines',color:'#E8730F',name:'Business plan',price:'K750',desc:'Full written business plan.'},
+    {icon:'fa-palette',color:'#7A4FA3',name:'Branding and website',price:'K1,000',desc:'Brand identity + website. Domain included.'},
+    {icon:'fa-building',color:'#2E9C4A',name:'Business registration support',price:'K400 · K750',desc:'Business Name K400. Incorporation K750.'},
     {icon:'fa-bullhorn',color:'#0E7C7B',name:'Marketing support',price:'K400/mo',desc:'Ongoing monthly marketing retainer.'}
   ];
   const capabilities=[
-    {icon:'fa-magnifying-glass',label:'Idea validation'},
-    {icon:'fa-flask',label:'Product development'},
-    {icon:'fa-users',label:'Talent and teams'},
-    {icon:'fa-landmark',label:'Business formation'},
-    {icon:'fa-wallet',label:'Funding connections'},
-    {icon:'fa-chart-line',label:'Growth and execution'}
+    {icon:'fa-magnifying-glass',label:'Idea validation'},{icon:'fa-flask',label:'Product development'},
+    {icon:'fa-users',label:'Talent and teams'},{icon:'fa-landmark',label:'Business formation'},
+    {icon:'fa-wallet',label:'Funding connections'},{icon:'fa-chart-line',label:'Growth and execution'}
   ];
   const pillars=[
     {icon:'fa-briefcase',color:'#E8730F',label:'Business strategy',desc:'Positioning, business model, plan.'},
@@ -1326,10 +1260,6 @@ function VenturePage({go,onWizard}){
       <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Venture Building Service Platform · Zambia</span>
       <h2 className="serif" style={{fontSize:'clamp(2rem,5vw,3.2rem)',lineHeight:1.08,marginBottom:20,maxWidth:'46rem'}}>A one-stop shop for building businesses.</h2>
       <p style={{fontSize:16,lineHeight:1.7,color:'rgba(255,255,255,.7)',maxWidth:'46rem',marginBottom:20}}>StartEasy Zambia is a <strong style={{color:'#F5A623'}}>venture building service platform</strong> — a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p>
-      <div style={{display:'flex',flexWrap:'wrap',gap:12}}>
-        <button onClick={()=>{const el=document.getElementById('what-help');if(el)el.scrollIntoView({behavior:'smooth'})}} style={{padding:'14px 26px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:10}}><i className="fas fa-compass"></i> What help do you need today?</button>
-        <button onClick={()=>go('desk','venture')} style={{padding:'14px 26px',background:'rgba(255,255,255,.06)',color:'#fff',border:'1px solid rgba(255,255,255,.2)',borderRadius:9,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:10}}><i className="fas fa-rocket"></i> Open Venture Building Desk</button>
-      </div>
     </div>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'24px 24px 56px',position:'relative',zIndex:1}}>
       <div style={{marginBottom:28}}>
@@ -1338,7 +1268,7 @@ function VenturePage({go,onWizard}){
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {platformServices.map((p,i)=><div key={i} style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:12,padding:'20px 18px',display:'flex',flexDirection:'column',gap:12}}>
-          <span style={{width:42,height:42,borderRadius:11,background:p.color+'22',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className={`fas ${p.icon}`}></i></span>
+          <span style={{width:42,height:42,borderRadius:11,background:p.color+'22',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17}}><i className={`fas ${p.icon}`}></i></span>
           <h4 className="serif" style={{fontSize:15,fontWeight:700,color:'#fff',lineHeight:1.25,margin:0}}>{p.title}</h4>
           <p style={{fontSize:12.5,color:'rgba(255,255,255,.6)',lineHeight:1.55,margin:0}}>{p.desc}</p>
         </div>)}
@@ -1368,7 +1298,7 @@ function VenturePage({go,onWizard}){
         <div style={{textAlign:'center',marginBottom:28}}><h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,color:'#fff',margin:0}}>Shared venture-building capabilities</h3></div>
         <div className="grid sm:grid-cols-2 gap-x-10 gap-y-5">
           {capabilities.map((c,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'8px 0'}}>
-            <span style={{width:42,height:42,borderRadius:11,background:'rgba(245,166,35,.13)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,flexShrink:0}}><i className={`fas ${c.icon}`}></i></span>
+            <span style={{width:42,height:42,borderRadius:11,background:'rgba(245,166,35,.13)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}><i className={`fas ${c.icon}`}></i></span>
             <span style={{fontSize:15.5,color:'rgba(255,255,255,.88)',fontWeight:500}}>{c.label}</span>
           </div>)}
         </div>
@@ -1378,11 +1308,11 @@ function VenturePage({go,onWizard}){
         <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,margin:0,color:'#fff'}}>Capabilities in focus.</h3>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" style={{maxWidth:1280,margin:'0 auto'}}>
-        {pillars.map((p,i)=><button key={i} onClick={()=>go('desk',p.desk||(p.label==='Administrative Services Support'?'pacra':'venture'))}
+        {pillars.map((p,i)=><button key={i} onClick={()=>go('desk',p.label==='Administrative Services Support'?'pacra':'venture')}
           style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:16,padding:'28px 20px',cursor:'pointer',fontFamily:'inherit',textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:14}}
           onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.borderColor=p.color+'88'}}
           onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor='rgba(255,255,255,.1)'}}>
-          <span style={{width:54,height:54,borderRadius:15,background:p.color+'22',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}><i className={`fas ${p.icon}`}></i></span>
+          <span style={{width:54,height:54,borderRadius:15,background:p.color+'22',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}><i className={`fas ${p.icon}`}></i></span>
           <h4 className="serif" style={{fontSize:15.5,fontWeight:700,color:'#fff',lineHeight:1.25,margin:0}}>{p.label}</h4>
           <p style={{fontSize:11.5,color:'rgba(255,255,255,.55)',lineHeight:1.5,margin:0}}>{p.desc}</p>
         </button>)}
@@ -1398,20 +1328,17 @@ function VenturePage({go,onWizard}){
           {helpOptions.map(o=>{
             const picked=helpPick===o.id;
             return <button key={o.id} onClick={()=>handleHelp(o)} style={{background:picked?o.color+'22':'rgba(255,255,255,.04)',border:'1px solid '+(picked?o.color+'88':'rgba(255,255,255,.12)'),borderRadius:12,padding:'22px 20px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',display:'flex',flexDirection:'column',gap:12}}>
-              <span style={{width:46,height:46,borderRadius:12,background:o.color+'22',color:o.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:19,flexShrink:0}}><i className={`fas ${o.icon}`}></i></span>
+              <span style={{width:46,height:46,borderRadius:12,background:o.color+'22',color:o.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:19}}><i className={`fas ${o.icon}`}></i></span>
               <h4 className="serif" style={{fontSize:15,fontWeight:700,color:'#fff',lineHeight:1.25,margin:0}}>{o.label}</h4>
-              <p style={{fontSize:12,color:'rgba(255,255,255,.55)',lineHeight:1.5,margin:0}}>{o.desc}</p>
             </button>;
           })}
         </div>
       </div>
     </div>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px',position:'relative',zIndex:1}}>
-      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'space-between',alignItems:'flex-end',gap:16,marginBottom:28}}>
-        <div style={{flex:'1 1 320px'}}>
-          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:10}}>At a glance</span>
-          <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,margin:0}}>Published fees for our venture building services.</h3>
-        </div>
+      <div style={{marginBottom:28}}>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:10}}>At a glance</span>
+        <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,margin:0}}>Published fees for our venture building services.</h3>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {atAGlance.map((s,i)=><div key={i} style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:12,padding:'22px 20px',display:'flex',flexDirection:'column',gap:12,borderTopWidth:4,borderTopColor:s.color}}>
@@ -1431,13 +1358,13 @@ function OrientationPage({go}){
     <div style={{maxWidth:1240,margin:'0 auto'}}>
       <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:16}}>Orientation Services · Start here</span>
       <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,color:'#0A1F12',marginBottom:16}}>What challenge do you have?</h1>
-      <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',maxWidth:'46rem',marginBottom:40}}>Pick the situation that best describes you. Every answer points to a real StartEasy desk, service or assessment.</p>
+      <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',maxWidth:'46rem',marginBottom:40}}>Pick the situation that best describes you.</p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          {icon:'fa-rocket',color:'#2E9C4A',title:'Business Start-Up',text:'Registration + tax + statutory registrations + documentation + guidance.',desk:'pacra'},
-          {icon:'fa-shield-halved',color:'#E8730F',title:'Compliance & Administration',text:'Filing, renewals, records, compliance calendar and follow-up.',desk:'compliance'},
-          {icon:'fa-briefcase',color:'#7A4FA3',title:'Outsourced Administrative Department',text:'StartEasy becomes the organisation\'s external administrative office.',desk:'outsourcing'},
-          {icon:'fa-user',color:'#1B6CA8',title:'Personal Administrative Services',text:'Documents, applications, certificates, follow-up, CVs and government portals.',desk:'personal'}
+          {icon:'fa-rocket',color:'#2E9C4A',title:'Business Start-Up',text:'Registration + tax + statutory registrations.',desk:'pacra'},
+          {icon:'fa-shield-halved',color:'#E8730F',title:'Compliance & Administration',text:'Filing, renewals, records, calendar.',desk:'compliance'},
+          {icon:'fa-briefcase',color:'#7A4FA3',title:'Outsourced Administrative Department',text:'External administrative office.',desk:'outsourcing'},
+          {icon:'fa-user',color:'#1B6CA8',title:'Personal Administrative Services',text:'Documents, applications, certificates.',desk:'personal'}
         ].map((p,i)=><button key={i} onClick={()=>go('desk',p.desk)} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'24px 22px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',borderTopWidth:4,borderTopColor:p.color,display:'flex',flexDirection:'column',gap:14}}>
           <span style={{width:46,height:46,borderRadius:12,background:p.color+'18',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}><i className={`fas ${p.icon}`}></i></span>
           <h4 className="serif" style={{fontSize:16.5,fontWeight:700,color:'#0A1F12',margin:0}}>{p.title}</h4>
@@ -1481,8 +1408,8 @@ function DeskDetail({deskId,go,onServiceClick,onWizard}){
   const selected=choice?desk.options.find(o=>o.v===choice):null;
   const askOnly=selected&&selected.services&&selected.services.length===0;
   return <div className="fadein" style={{background:'#F5FAF6'}}>
-    <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative'}}>
-      <div style={{maxWidth:1240,margin:'0 auto',padding:'48px 24px 40px'}}>
+    <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',padding:'48px 24px 40px'}}>
+      <div style={{maxWidth:1240,margin:'0 auto'}}>
         <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:16}}>
           <span style={{width:52,height:52,borderRadius:14,background:desk.color+'25',color:desk.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}><i className={`fas ${desk.icon}`}></i></span>
           <span style={{fontSize:10.5,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,padding:'6px 14px',borderRadius:99,background:desk.color+'25',border:'1px solid '+desk.color+'55'}}>{desk.authority}</span>
@@ -1493,7 +1420,6 @@ function DeskDetail({deskId,go,onServiceClick,onWizard}){
     </section>
     <section style={{maxWidth:1240,margin:'0 auto',padding:'40px 24px 0'}}><NotReg/></section>
     <section style={{maxWidth:1240,margin:'0 auto',padding:'48px 24px 32px'}}>
-      <span className="micro" style={{color:'rgba(10,31,18,.5)',display:'block',marginBottom:12}}>Step 1 · Guided exploration</span>
       <h2 className="serif" style={{fontSize:'clamp(1.5rem,3.2vw,2rem)',color:'#0A1F12',marginBottom:20}}>What are you trying to do?</h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {desk.options.map(o=><button key={o.v} onClick={()=>{if(o.wizard){onWizard(o.wizard)}else{setChoice(o.v)}}} className={`gtile ${choice===o.v?'sel':''}`}>
@@ -1503,13 +1429,6 @@ function DeskDetail({deskId,go,onServiceClick,onWizard}){
       </div>
     </section>
     {choice&&selected&&!askOnly&&selected.services&&selected.services.length>0&&<section style={{maxWidth:1240,margin:'0 auto',padding:'0 24px 56px'}}>
-      <div style={{background:'linear-gradient(135deg,#FFF9E6,#FFFCF0)',border:'1.5px solid #F0E0A0',borderRadius:12,padding:'18px 22px',marginBottom:26}}>
-        <div style={{display:'flex',gap:14,alignItems:'flex-start'}}>
-          <span style={{width:36,height:36,borderRadius:10,background:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-lightbulb" style={{color:'#fff',fontSize:15}}></i></span>
-          <div><div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:5}}>Your guidance</div>
-          <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.75)',margin:0}}>For <strong>{selected.t}</strong>, these are the StartEasy services that apply.</p></div>
-        </div>
-      </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {selected.services.map(key=>{const s=findServiceByKey(key);if(!s)return null;return <ServiceCard key={key} serviceKey={key} onClick={onServiceClick}/>})}
       </div>
@@ -1549,7 +1468,7 @@ function ServicesPage({onServiceClick}){
   </div>;
 }
 
-function PricingPage({go}){
+function PricingPage(){
   useEffect(()=>{trackEvent('page_view',{route:'pricing'});},[]);
   return <div className="fadein" style={{background:'#F5FAF6',padding:'56px 24px'}}>
     <div style={{maxWidth:1240,margin:'0 auto'}}>
@@ -1578,7 +1497,7 @@ function AboutPage(){
       <div style={{maxWidth:1240,margin:'0 auto'}}>
         <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>About Us</span>
         <h1 className="serif" style={{fontSize:'clamp(1.9rem,5vw,3rem)',lineHeight:1.08,marginBottom:20}}>StartEasy Zambia</h1>
-        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.6)',maxWidth:'52rem',marginBottom:28}}>A central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses. Helpful for finance, technology, marketing, and administrative support.</p>
+        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.6)',maxWidth:'52rem',marginBottom:28}}>A central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p>
         <NotReg tone="dark"/>
       </div>
     </section>
@@ -1633,7 +1552,7 @@ function App(){
       case 'services': return <ServicesPage onServiceClick={handleServiceClick}/>;
       case 'track': return <TrackSubmission go={go}/>;
       case 'admin': return <AdminPortal onExit={()=>go('home')}/>;
-      case 'pricing': return <PricingPage go={go}/>;
+      case 'pricing': return <PricingPage/>;
       case 'about': return <AboutPage/>;
       default: return <Home go={go} onResume={()=>openWizard(null)}/>;
     }
