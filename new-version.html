@@ -2608,28 +2608,32 @@ function VentureHome({go,onSwitchToAdmin}){
       title:'Financial Support',
       intro:'We help businesses manage their money, plan their finances, and make informed financial decisions.',
       services:['Bookkeeping — daily income, expenses, sales and purchases','Budget preparation — planning how to spend money wisely','Financial planning — setting financial goals and growth planning','Cash flow management — tracking money coming in and going out','Invoice and payment management — preparing invoices and tracking payments','Financial reports — clear summaries of business performance','Business funding guidance — preparing documents for funding applications'],
-      goal:'To help businesses manage their finances better, reduce unnecessary costs, and build financial stability.'
+      goal:'To help businesses manage their finances better, reduce unnecessary costs, and build financial stability.',
+      ctaService:'financial', ctaLabel:'See Financial Projections'
     },
     {
       key:'tech', icon:'fa-laptop-code', color:'#1B6CA8', label:'Technology',
       title:'Technology Support',
       intro:'We help businesses use technology to simplify their operations, improve productivity, and serve customers more effectively.',
       services:['Computer and software support — everyday business applications','Digital business setup — business email, online tools, digital workflows','Website support — establishing or improving your online presence','Productivity tools — documents, spreadsheets, presentations, task management','Data organisation — digital records, customer information, business files','Technology training — teaching owners and staff to use digital tools','Digital process improvement — reducing manual work with simple solutions'],
-      goal:'To make technology accessible, practical, and useful for businesses of all sizes.'
+      goal:'To make technology accessible, practical, and useful for businesses of all sizes.',
+      ctaService:'brand', ctaLabel:'See Brand & Website'
     },
     {
       key:'marketing', icon:'fa-bullhorn', color:'#E8730F', label:'Marketing',
       title:'Marketing Support',
       intro:'We help businesses promote their products and services, reach their target customers, and build a recognisable brand.',
       services:['Brand development — identity, messaging, professional image','Social media management — pages, content planning, regular posting','Content creation — captions, flyers, posters, marketing materials','Digital marketing — online campaigns and digital customer engagement','Marketing strategy — target audience and suitable promotional methods','Market research — customer needs, competitors, market opportunities','Customer engagement — attracting customers and encouraging repeat business','Promotional campaigns — activities to increase awareness and sales'],
-      goal:'To help businesses become more visible, attract the right customers, and grow their sales.'
+      goal:'To help businesses become more visible, attract the right customers, and grow their sales.',
+      ctaService:'sales', ctaLabel:'See Sales Channels'
     },
     {
       key:'admin', icon:'fa-folder-open', color:'#7A4FA3', label:'Administration',
       title:'Administrative Support',
       intro:'We help businesses manage daily office tasks, organise records, and maintain smooth operations so owners can focus on growing their businesses.',
       services:['Document preparation — letters, reports, proposals, business documents','Data entry — entering and updating business information accurately','Email management — organising business emails and preparing responses','Scheduling and appointments — coordinating meetings and reminders','Filing and record keeping — organising physical and digital records','Business registration assistance — requirements and documentation','Proposal and report writing — proposals, company profiles, progress reports','General office support — routine tasks that keep activities organised'],
-      goal:'To save businesses time, improve organisation, and make everyday operations more efficient.'
+      goal:'To save businesses time, improve organisation, and make everyday operations more efficient.',
+      ctaService:'register', ctaLabel:'See Company Registration'
     }
   ];
 
@@ -2789,6 +2793,17 @@ function VentureHome({go,onSwitchToAdmin}){
                   <div style={{fontSize:12.5,fontStyle:'italic',lineHeight:1.65,color:'rgba(255,255,255,.72)'}}>{area.goal}</div>
                 </div>
               </div>
+
+              <div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:4}}>
+                <a href={waUrl(`Hello StartEasy — I would like help with ${area.title} (${area.label}).`)} target="_blank" rel="noopener noreferrer"
+                   style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 18px',background:'#25D366',color:'#fff',borderRadius:9,fontSize:12.5,fontWeight:700,textDecoration:'none'}}>
+                  <i className="fab fa-whatsapp"></i> Talk to an officer
+                </a>
+                <button onClick={()=>handlePick(area.ctaService)}
+                  style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 18px',background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:9,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                  {area.ctaLabel} <Arrow/>
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -2827,54 +2842,6 @@ function VentureHome({go,onSwitchToAdmin}){
              style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 30px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:11,fontSize:14.5,fontWeight:700,textDecoration:'none',boxShadow:'0 14px 38px -12px rgba(232,115,15,.5)'}}>
             <i className="fab fa-whatsapp"></i> Talk to an officer about your situation
           </a>
-        </div>
-      </div>
-    </section>
-
-    <section style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',padding:'clamp(72px,10vw,120px) 24px',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
-      <div style={{position:'absolute',top:-140,left:'20%',width:560,height:560,background:'radial-gradient(circle, rgba(245,166,35,.14), transparent 65%)',pointerEvents:'none'}}/>
-      <div style={{position:'absolute',bottom:-160,right:'-8%',width:520,height:520,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
-
-      <div style={{maxWidth:920,margin:'0 auto',textAlign:'center',position:'relative',zIndex:1}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>About StartEasy Zambia</span>
-
-        <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.12,marginBottom:26,color:'#fff',maxWidth:'42rem',marginLeft:'auto',marginRight:'auto'}}>
-          A venture building &<br/>
-          <em style={{fontStyle:'italic',color:'#F5A623'}}>business support platform.</em>
-        </h2>
-
-        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.75)',marginBottom:22,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
-          StartEasy Zambia helps entrepreneurs, startups, small businesses and established organisations operate efficiently and grow sustainably.
-        </p>
-
-        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.72)',marginBottom:40,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
-          Through financial organisation and planning, digital solutions, marketing strategies and administrative assistance, we help our clients simplify operations, improve productivity, strengthen their market presence, and make informed decisions.
-        </p>
-
-        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginBottom:44}}>
-          {[
-            {icon:'fa-wallet',      label:'Finance',        color:'#2E9C4A'},
-            {icon:'fa-laptop-code', label:'Technology',     color:'#1B6CA8'},
-            {icon:'fa-bullhorn',    label:'Marketing',      color:'#E8730F'},
-            {icon:'fa-folder-open', label:'Administration', color:'#7A4FA3'}
-          ].map((x,i)=>
-            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'12px 22px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.92rem,1.35vw,1.05rem)',fontWeight:700,color:'#fff'}}>
-              <span style={{width:32,height:32,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
-                <i className={`fas ${x.icon}`}/>
-              </span>
-              {x.label}
-            </span>
-          )}
-        </div>
-
-        <div style={{display:'inline-flex',alignItems:'center',gap:16,padding:'18px 34px',background:'rgba(245,166,35,.1)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:'clamp(.98rem,1.5vw,1.12rem)',fontWeight:700,color:'#F5A623',fontFamily:"'Playfair Display',Georgia,serif",fontStyle:'italic',maxWidth:'100%',flexWrap:'wrap',justifyContent:'center',textAlign:'center'}}>
-          <i className="fas fa-quote-left" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
-          <span>Making Business Easier, One Step at a Time.</span>
-          <i className="fas fa-quote-right" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
-        </div>
-
-        <div style={{maxWidth:640,margin:'44px auto 0'}}>
-          <NotReg tone="dark"/>
         </div>
       </div>
     </section>
@@ -3350,14 +3317,55 @@ function VenturePricing(){
 function VentureAbout(){
   useEffect(()=>{trackEvent('page_view',{route:'about'});},[]);
   return <div className="fadein" style={{background:'#F5FAF6'}}>
-    <section style={{background:'#0A1F12',color:'#fff',padding:'clamp(56px,8vw,80px) 24px'}}>
-      <div style={{maxWidth:1240,margin:'0 auto'}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>About</span>
-        <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,marginBottom:20,maxWidth:'48rem'}}>StartEasy Zambia</h1>
-        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:'52rem',marginBottom:28}}>A venture building service platform — a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p>
-        <NotReg tone="dark"/>
+
+    <section style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',padding:'clamp(72px,10vw,120px) 24px',position:'relative',overflow:'hidden'}}>
+      <div style={{position:'absolute',top:-140,left:'20%',width:560,height:560,background:'radial-gradient(circle, rgba(245,166,35,.14), transparent 65%)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',bottom:-160,right:'-8%',width:520,height:520,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
+
+      <div style={{maxWidth:920,margin:'0 auto',textAlign:'center',position:'relative',zIndex:1}}>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>About StartEasy Zambia</span>
+
+        <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.12,marginBottom:26,color:'#fff',maxWidth:'42rem',marginLeft:'auto',marginRight:'auto'}}>
+          A venture building &<br/>
+          <em style={{fontStyle:'italic',color:'#F5A623'}}>business support platform.</em>
+        </h2>
+
+        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.75)',marginBottom:22,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
+          StartEasy Zambia helps entrepreneurs, startups, small businesses and established organisations operate efficiently and grow sustainably.
+        </p>
+
+        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.72)',marginBottom:40,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
+          Through financial organisation and planning, digital solutions, marketing strategies and administrative assistance, we help our clients simplify operations, improve productivity, strengthen their market presence, and make informed decisions.
+        </p>
+
+        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginBottom:44}}>
+          {[
+            {icon:'fa-wallet',      label:'Finance',        color:'#2E9C4A'},
+            {icon:'fa-laptop-code', label:'Technology',     color:'#1B6CA8'},
+            {icon:'fa-bullhorn',    label:'Marketing',      color:'#E8730F'},
+            {icon:'fa-folder-open', label:'Administration', color:'#7A4FA3'}
+          ].map((x,i)=>
+            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'12px 22px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.92rem,1.35vw,1.05rem)',fontWeight:700,color:'#fff'}}>
+              <span style={{width:32,height:32,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
+                <i className={`fas ${x.icon}`}/>
+              </span>
+              {x.label}
+            </span>
+          )}
+        </div>
+
+        <div style={{display:'inline-flex',alignItems:'center',gap:16,padding:'18px 34px',background:'rgba(245,166,35,.1)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:'clamp(.98rem,1.5vw,1.12rem)',fontWeight:700,color:'#F5A623',fontFamily:"'Playfair Display',Georgia,serif",fontStyle:'italic',maxWidth:'100%',flexWrap:'wrap',justifyContent:'center',textAlign:'center'}}>
+          <i className="fas fa-quote-left" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
+          <span>Making Business Easier, One Step at a Time.</span>
+          <i className="fas fa-quote-right" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
+        </div>
       </div>
     </section>
+
+    <section style={{maxWidth:1240,margin:'0 auto',padding:'48px 24px 64px'}}>
+      <NotReg/>
+    </section>
+
   </div>;
 }
 
