@@ -206,11 +206,11 @@ try {
   __SE_AUTH = firebase.auth();
   __SE_READY = true;
   __SE_AUTH.signInAnonymously().catch(e => console.warn('[StartEasy] anon auth:', e && e.message));
-  console.log('[StartEasy] ✅ Shared Firebase ready — project:', __SE_FIREBASE_CONFIG.projectId);
-} catch (e) { console.error('[StartEasy] ❌ Firebase init failed:', e); }
+  console.log('[StartEasy] Shared Firebase ready — project:', __SE_FIREBASE_CONFIG.projectId);
+} catch (e) { console.error('[StartEasy] Firebase init failed:', e); }
 
 /* ============================================================
-   ██  ORIGINAL APP — Administrative Services Desk (embedded)
+   ADMINISTRATIVE SERVICES DESK — unchanged IIFE
    ============================================================ */
 window.StartEasyAdminDesk = (function () {
   const { useState, useEffect, useMemo, useCallback, useRef } = React;
@@ -258,7 +258,7 @@ window.StartEasyAdminDesk = (function () {
     const record = { ...rec, status: 'under_review', submittedAt: Date.now(),
       history: [{ status: 'under_review', at: Date.now(), note: 'Payment reference received. Awaiting officer verification.' }] };
     try { await db.collection(SE_PAYMENTS).doc(rec.ref).set(record); return record; }
-    catch(e) { console.error('[StartEasy] ❌ addPayment failed:', e && e.code, e && e.message); return null; }
+    catch(e) { console.error('[StartEasy] addPayment failed:', e && e.code, e && e.message); return null; }
   }
   async function findPaymentByRef(ref){
     if(!firebaseReady || !ref) return null;
@@ -1443,19 +1443,21 @@ window.StartEasyAdminDesk = (function () {
                   <div key={e.id||i} style={{display:'flex',gap:14,alignItems:'flex-start',padding:'12px 0',borderBottom:i<recentActivity.length-1?'1px dashed rgba(10,31,18,.08)':'none'}}>
                     <span style={{width:32,height:32,borderRadius:8,background:'rgba(232,115,15,.1)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                       <i className={`fas ${{
-                        visit:'fa-eye',page_view:'fa-compass',wizard_start:'fa-wand-magic-sparkles',wizard_step:'fa-shoe-prints',wizard_complete:'fa-circle-check',service_view:'fa-file',payment_submit:'fa-receipt',payment_reviewed:'fa-gavel',survey_submit:'fa-poll'
+                        visit:'fa-eye',page_view:'fa-compass',wizard_start:'fa-wand-magic-sparkles',wizard_step:'fa-shoe-prints',wizard_complete:'fa-circle-check',service_view:'fa-file',payment_submit:'fa-receipt',payment_reviewed:'fa-gavel',survey_submit:'fa-poll',service_click:'fa-arrow-pointer',engagement_start:'fa-file-signature',venture_submit:'fa-paper-plane'
                       }[e.type]||'fa-circle'}`} style={{fontSize:11}}></i>
                     </span>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:13,fontWeight:700,color:'#0A1F12',marginBottom:2}}>{e.type.replace(/_/g,' ')}</div>
                       <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)',lineHeight:1.5,wordBreak:'break-word'}}>
                         {e.route&&<>route: <strong>{e.route}</strong> · </>}
+                        {e.key&&<>key: <strong>{e.key}</strong> · </>}
                         {e.current&&<>step: <strong>{e.current}</strong> · </>}
                         {e.scope&&<>scope: <strong>{e.scope}</strong> · </>}
                         {e.ref&&<>ref: <strong style={{fontFamily:'Consolas,monospace'}}>{e.ref}</strong> · </>}
                         {e.status&&<>status: <strong>{e.status}</strong> · </>}
                         {e.filled!==undefined&&<>answers: <strong>{e.filled}</strong> · </>}
                         {e.serviceCode&&<>service: <strong>{e.serviceCode}</strong></>}
+                        {e.serviceKey&&<>service: <strong>{e.serviceKey}</strong></>}
                         {e.visitorId&&<span style={{color:'rgba(10,31,18,.35)',fontFamily:'Consolas,monospace'}}> · {e.visitorId}</span>}
                       </div>
                     </div>
@@ -1798,7 +1800,7 @@ window.StartEasyAdminDesk = (function () {
       <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px 8px'}}>
         <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:16}}>Orientation Services · Start here</span>
         <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,color:'#0A1F12',marginBottom:16,maxWidth:'48rem'}}>What challenge do you have?</h2>
-        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',maxWidth:'46rem',margin:0}}>Pick the situation that best describes you. Every answer points to a real StartEasy desk, service or assessment — so you don't have to guess what to register for, what documents you need, or who should follow up.</p>
+        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',maxWidth:'46rem',margin:0}}>Pick the situation that best describes you. Every answer points to a real StartEasy desk, service or assessment.</p>
       </div>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'32px 24px 16px'}}>
         <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -2298,47 +2300,366 @@ window.StartEasyAdminDesk = (function () {
 /* ============================================================
    ██  VENTURE BUILDING PLATFORM (top-level outer shell)
    ============================================================ */
-const ADMIN_WHATSAPP='260768526191';
-const CONTACT_EMAIL='engagements@starteasyzambia.com';
+const ADMIN_WHATSAPP = '260768526191';
+const CONTACT_EMAIL  = 'engagements@starteasyzambia.com';
 
 function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
 function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
+
 const { useState, useEffect, useMemo, useCallback } = React;
 const FIREBASE_CONFIG = __SE_FIREBASE_CONFIG;
 const db = __SE_DB, auth = __SE_AUTH, firebaseReady = __SE_READY;
-const SE_EVENTS = 'se_events';
+const SE_EVENTS  = 'se_events';
+const SE_VENTURE = 'se_venture';
 
-const VISITOR_KEY='starteasy.visitor.v1';
-function getVisitor(){try{let v=JSON.parse(localStorage.getItem(VISITOR_KEY)||'null');if(!v){v={id:'v_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),firstSeen:Date.now(),visits:0,lastSeen:Date.now()};}v.visits=(v.visits||0)+1;v.lastSeen=Date.now();localStorage.setItem(VISITOR_KEY,JSON.stringify(v));return v;}catch(e){return {id:'anon_'+Date.now().toString(36),firstSeen:Date.now(),visits:1,lastSeen:Date.now()}}}
-function readVisitor(){try{return JSON.parse(localStorage.getItem(VISITOR_KEY)||'null')}catch(e){return null}}
-function clearSnapshot(){try{localStorage.removeItem('starteasy.session.v1')}catch(e){}}
-function readSnapshot(){try{const raw=localStorage.getItem('starteasy.session.v1');if(!raw)return null;return JSON.parse(raw);}catch(e){return null}}
-function hasResumableWizard(snap){if(!snap||!snap.wizard)return false;const w=snap.wizard;return !!(w.scope||(w.idea&&String(w.idea).trim().length>0)||w.distinctive||w.industry||w.primaryActivity||w.structure);}
-function timeAgo(ts){if(!ts)return '';const s=Math.max(0,Math.floor((Date.now()-ts)/1000));if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+' min ago';if(s<86400)return Math.floor(s/3600)+' hr ago';const d=Math.floor(s/86400);return d+' day'+(d>1?'s':'')+' ago';}
-function trackEvent(type, payload){ if(!firebaseReady) return; try { const visitor = readVisitor(); db.collection(SE_EVENTS).add({ type, at: Date.now(), visitorId: visitor ? visitor.id : null, ...(payload || {}) }).catch(()=>{}); } catch(e) {} }
-
-function Btn({children,onClick,variant='primary',size='md',className='',type='button',disabled}){
-  const base='inline-flex items-center justify-center gap-2.5 transition-all duration-300 tracking-wide disabled:opacity-30 disabled:cursor-not-allowed rounded-sm font-semibold';
-  const sizes={sm:'text-[12px] px-4 py-2.5',md:'text-[13px] px-6 py-3.5',lg:'text-[13.5px] px-8 py-4'};
-  const variants={primary:'bg-gradient-to-br from-[#E8730F] to-[#F5A623] text-white',ghost:'border border-[#0A1F12]/20 text-[#0A1F12]'};
-  return <button type={type} onClick={onClick} disabled={disabled} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}>{children}</button>;
+/* ---------- visitor + tracking ---------- */
+const VISITOR_KEY = 'starteasy.visitor.v1';
+function getVisitor(){
+  try{
+    let v=JSON.parse(localStorage.getItem(VISITOR_KEY)||'null');
+    if(!v){v={id:'v_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),firstSeen:Date.now(),visits:0,lastSeen:Date.now()};}
+    v.visits=(v.visits||0)+1; v.lastSeen=Date.now();
+    localStorage.setItem(VISITOR_KEY,JSON.stringify(v));
+    return v;
+  }catch(e){return {id:'anon_'+Date.now().toString(36),firstSeen:Date.now(),visits:1,lastSeen:Date.now()};}
 }
-function Arrow(){return <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M9 1L13 5L9 9M13 5H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+function readVisitor(){try{return JSON.parse(localStorage.getItem(VISITOR_KEY)||'null')}catch(e){return null}}
+function trackEvent(type,payload){
+  if(!firebaseReady) return;
+  try{const visitor=readVisitor();db.collection(SE_EVENTS).add({type,at:Date.now(),visitorId:visitor?visitor.id:null,...(payload||{})}).catch(()=>{});}catch(e){}
+}
+function vTimeAgo(ts){
+  if(!ts) return '';
+  const s=Math.max(0,Math.floor((Date.now()-ts)/1000));
+  if(s<60) return 'just now';
+  if(s<3600) return Math.floor(s/60)+' min ago';
+  if(s<86400) return Math.floor(s/3600)+' hr ago';
+  const d=Math.floor(s/86400); return d+' day'+(d>1?'s':'')+' ago';
+}
+
+/* ---------- venture localStorage ---------- */
+const VENTURE_REFS_KEY = 'starteasy.venturerefs.v1';
+function rememberVentureRef(ref){try{const l=JSON.parse(localStorage.getItem(VENTURE_REFS_KEY)||'[]');if(!l.includes(ref)){l.unshift(ref);localStorage.setItem(VENTURE_REFS_KEY,JSON.stringify(l.slice(0,20)));}}catch(e){}}
+function readVentureRefs(){try{return JSON.parse(localStorage.getItem(VENTURE_REFS_KEY)||'[]')}catch(e){return []}}
+
+async function addVenture(rec){
+  if(!firebaseReady) return null;
+  const record = {
+    ...rec,
+    status: 'under_review',
+    submittedAt: Date.now(),
+    history: [{ status:'under_review', at: Date.now(), note:'Venture engagement submitted. Awaiting officer review.' }]
+  };
+  try { await db.collection(SE_VENTURE).doc(rec.ref).set(record); return record; }
+  catch(e){ console.error('[StartEasy] addVenture failed:', e && e.code, e && e.message); return null; }
+}
+async function findVentureByRef(ref){
+  if(!firebaseReady || !ref) return null;
+  try{
+    const key = ref.toUpperCase().trim();
+    const snap = await db.collection(SE_VENTURE).doc(key).get();
+    return snap.exists ? { id: snap.id, ...snap.data() } : null;
+  }catch(e){ return null; }
+}
+
+/* ============================================================
+   PAYMENT METHODS (venture — same destinations as admin desk)
+   ============================================================ */
+const V_PAYMENTS = {
+  airtel:{label:'Airtel Money',cls:'pm-airtel',icon:'fa-mobile-alt',title:'Airtel Money',sub:'ZMW · Zambian Kwacha',
+    rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Airtel Number',v:'+260 975 914 001',copy:'+260975914001'}],
+    steps:['Dial <strong>*115#</strong>','Select <strong>Send Money</strong> → <strong>Airtel Money</strong>','Enter <strong>+260 975 914 001</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID']},
+  mtn:{label:'MTN MoMo',cls:'pm-mtn',icon:'fa-mobile-alt',title:'MTN Mobile Money',sub:'ZMW · Zambian Kwacha',
+    rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'MTN Number',v:'076 852 6191',copy:'0768526191'}],
+    steps:['Dial <strong>*303#</strong>','Select <strong>Send Money</strong> → <strong>MTN MoMo</strong>','Enter <strong>076 852 6191</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID']},
+  bank:{label:'Bank / Visa',cls:'pm-bank',icon:'fa-university',title:'Bank or Visa Card',sub:'Standard Chartered',
+    rows:[{l:'Bank',v:'Standard Chartered',plain:true},{l:'Account Name',v:'StartEasy (Mwaba Lewis)',plain:true},{l:'Account Number',v:'0152502166700',copy:'0152502166700'},{l:'Reference',v:'Your Full Name + "VE"',plain:true}],
+    steps:['Log into your online banking or visit any branch','Transfer the amount shown','Use <strong>your full name + "VE"</strong> as reference','Save your receipt']},
+  paypal:{label:'PayPal',cls:'pm-paypal',icon:'fa-paypal',iconSet:'fab',title:'PayPal',sub:'USD · International',
+    rows:[{l:'Recipient Email',v:'lewismwaba@gmail.com',copy:'lewismwaba@gmail.com'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true}],
+    steps:['Log into PayPal','Choose <strong>Send & Request</strong> → <strong>Send to a friend</strong>','Enter <strong>lewismwaba@gmail.com</strong>','Enter the amount in USD','Add <strong>your name + "VE"</strong> in the note','Save the transaction ID']},
+  crypto:{label:'Crypto',cls:'pm-crypto',icon:'fa-bitcoin',iconSet:'fab',title:'Cryptocurrency',sub:'International applicants',
+    rows:[{l:'Accepted Coins',v:'BTC · ETH · USDT (TRC20 / ERC20)',plain:true},{l:'User ID',v:'809423171',copy:'809423171'}],
+    steps:['Open your wallet or exchange app','Choose BTC, ETH or USDT','Send to User ID <strong>809423171</strong>','Save the transaction hash','Return here and paste as reference']}
+};
+
+/* ============================================================
+   VENTURE SERVICES CATALOG — each situation gets its own page
+   ============================================================ */
+const VENTURE_SERVICES = {
+  plan: {
+    key: 'plan',
+    icon: 'fa-file-lines',
+    color: '#E8730F',
+    title: 'Business Plan Development',
+    tagline: 'A full written business plan, ready to take to funders.',
+    lead: 'You have an idea. We turn it into a structured, funder-ready document that explains what you are building, who it serves, how it makes money, and what it needs to grow.',
+    price: 'K750',
+    priceUsd: '~ $75',
+    timeline: '7–14 working days',
+    audience: 'Aspiring founders · SMEs · Organizations',
+    whatsCovered: [
+      'Executive summary crafted with you',
+      'Business description and value proposition',
+      'Market and competitor analysis',
+      'Customer segments and positioning',
+      'Operating model and delivery plan',
+      'Marketing and sales strategy',
+      'Management and staffing outline',
+      'Three-year financial projections (revenue, cost, cash flow)',
+      'Funding requirement and use of funds',
+      'Risks and mitigation',
+      'Formatted PDF, ready to share with banks, investors or grant providers'
+    ],
+    process: [
+      { t:'Kickoff call', d:'A 30-minute session to understand your idea, sector and target market.' },
+      { t:'Outline review', d:'We draft the structure and share an outline for your sign-off.' },
+      { t:'Drafting', d:'We build out the plan, including financial projections.' },
+      { t:'Your review', d:'You read, comment, and we revise once.' },
+      { t:'Delivery', d:'Final PDF delivered by email. Editable copy on request.' }
+    ],
+    faq: [
+      { q:'Do you need my financial records?', a:'If you have them, yes. If not, we build projections from assumptions we agree together.' },
+      { q:'Can you present to my bank or investor?', a:'We prepare the document. Presentation is your responsibility — but we can coach you.' },
+      { q:'How many revisions are included?', a:'One full revision round after you review the first draft. Further rounds are quoted separately.' }
+    ]
+  },
+  register: {
+    key: 'register',
+    icon: 'fa-building',
+    color: '#2E9C4A',
+    title: 'Company Registration Support',
+    tagline: 'Name clearance, incorporation, and everything that makes it official.',
+    lead: 'We prepare and submit your registration with PACRA — name clearance, incorporation, or business name — and hand you the certificate. This service runs on our Administrative Services Desk, where it is fully integrated with PACRA submissions, tax registration and statutory compliance.',
+    price: 'K400 · K750',
+    priceUsd: '$40 · $75',
+    timeline: '7–21 working days',
+    audience: 'Founders · SMEs',
+    crossLinkAdmin: true,
+    whatsCovered: [
+      'Guided name clearance with six-name proposal',
+      'Company incorporation (private limited by shares)',
+      'Or business name registration (BN Form III)',
+      'Director, shareholder and secretary capture',
+      'Registered office evidence preparation',
+      'Pre-submission quality check',
+      'Submission on your behalf and reference tracking',
+      'Certificate of Incorporation delivered by email'
+    ],
+    process: [
+      { t:'Choose your structure', d:'Business Name, Private Limited, or Guarantee — we advise.' },
+      { t:'Name clearance', d:'Self-service wizard — K25, delivered within 1 hour.' },
+      { t:'Prepare documents', d:'We compile the full application pack.' },
+      { t:'Submit to PACRA', d:'On your behalf, tracked end-to-end.' },
+      { t:'Certificate', d:'Digital copy delivered as soon as it issues.' }
+    ],
+    faq: [
+      { q:'What is the difference between a business name and a company?', a:'A business name is a trading name — the owner remains personally liable. A company is an incorporated entity with limited liability and shares.' },
+      { q:'Do I need a lawyer?', a:'No. We handle the administrative side. If legal advice is needed, we refer you to a qualified professional.' }
+    ]
+  },
+  suppliers: {
+    key: 'suppliers',
+    icon: 'fa-truck-field',
+    color: '#1B6CA8',
+    title: 'Supplier & Equipment Sourcing',
+    tagline: 'Identify, verify and engage suppliers and vendors.',
+    lead: 'We identify suppliers, verify their legitimacy, obtain quotes, and help you negotiate terms — so you are not buying blind or overpaying.',
+    price: 'From K600',
+    priceUsd: 'From $60',
+    timeline: '5–14 working days',
+    audience: 'Founders · SMEs',
+    whatsCovered: [
+      'Scope of supply confirmed with you',
+      'Shortlist of vetted suppliers per category',
+      'Legitimacy verification (registration, references, track record)',
+      'Comparative quotes and pricing breakdown',
+      'Sample or trial coordination where feasible',
+      'Terms negotiation support',
+      'Delivery and payment terms documented',
+      'Contact list and next-step brief'
+    ],
+    process: [
+      { t:'Scope', d:'We agree the categories, quantities, quality and budget.' },
+      { t:'Research', d:'We identify and screen potential suppliers.' },
+      { t:'Shortlist', d:'You receive a vetted shortlist with quotes.' },
+      { t:'Negotiate', d:'We help you negotiate terms and delivery.' },
+      { t:'Engage', d:'You place the order, we coordinate follow-up.' }
+    ],
+    faq: [
+      { q:'Do you handle international sourcing?', a:'Yes. We source from local and international suppliers. Import duties and clearance are separate.' },
+      { q:'Are you responsible for supplier performance?', a:'We verify and shortlist. Final engagement and performance are the supplier\u2019s responsibility — but we help coordinate disputes.' }
+    ]
+  },
+  brand: {
+    key: 'brand',
+    icon: 'fa-palette',
+    color: '#7A4FA3',
+    title: 'Brand & Marketing Strategy',
+    tagline: 'Brand identity and website — domain registration included.',
+    lead: 'We design your brand identity, create your marketing strategy, and launch your website with domain registration included.',
+    price: 'K1,000',
+    priceUsd: '~ $100',
+    timeline: '14–28 working days',
+    audience: 'Founders · SMEs · Organizations',
+    whatsCovered: [
+      'Brand discovery workshop',
+      'Logo design (3 concepts, 1 final)',
+      'Colour palette and typography system',
+      'Basic brand guidelines PDF',
+      'Messaging and tone of voice',
+      'Marketing strategy with channel mix',
+      'Website design and build (5–7 pages)',
+      'Domain registration included (1 year)',
+      'Basic hosting setup guidance',
+      'Handover session with your team'
+    ],
+    process: [
+      { t:'Discovery', d:'We learn your business, audience and goals.' },
+      { t:'Concepts', d:'Logo and identity concepts presented.' },
+      { t:'Refine', d:'One round of revisions on the chosen direction.' },
+      { t:'Build', d:'Website designed and built.' },
+      { t:'Handover', d:'Files, guidelines and training delivered.' }
+    ],
+    faq: [
+      { q:'What if I already have a logo?', a:'We can work with your existing identity and focus on strategy and website — pricing is adjusted.' },
+      { q:'Who owns the brand assets?', a:'You do. Full ownership and source files are transferred on final payment.' },
+      { q:'Is hosting included?', a:'Domain registration is included. Hosting is paid directly to the host by you — usually K100–K400 per year.' }
+    ]
+  },
+  financial: {
+    key: 'financial',
+    icon: 'fa-chart-line',
+    color: '#B8564F',
+    title: 'Financial Projections',
+    tagline: '3-year financial model, cash flow and break-even analysis.',
+    lead: 'We build a three-year financial model — revenue, costs, cash flow and break-even — that supports loan applications, investor discussions and internal planning.',
+    price: 'K800',
+    priceUsd: '~ $80',
+    timeline: '7–14 working days',
+    audience: 'SMEs · Organizations',
+    whatsCovered: [
+      'Revenue assumptions discussed and documented',
+      'Cost of goods and operating expenses modelled',
+      'Monthly cash flow forecast (12 months)',
+      'Three-year annual projections',
+      'Break-even analysis',
+      'Sensitivity scenarios (best / base / worst)',
+      'Key ratios and business metrics',
+      'Excel model delivered with editable assumptions'
+    ],
+    process: [
+      { t:'Assumptions', d:'We agree revenue, costs, margins and growth assumptions.' },
+      { t:'Modelling', d:'We build the model in Excel.' },
+      { t:'Review', d:'You review and we adjust once.' },
+      { t:'Delivery', d:'Editable Excel file and PDF summary.' }
+    ],
+    faq: [
+      { q:'Does this include accounting or audit work?', a:'No. This is forward-looking financial modelling, not historical accounting, audit or tax computation.' },
+      { q:'Can you use my actuals?', a:'Yes — send us your management accounts and we build from there.' }
+    ]
+  },
+  investors: {
+    key: 'investors',
+    icon: 'fa-hand-holding-dollar',
+    color: '#0E7C7B',
+    title: 'Investor Readiness & Introductions',
+    tagline: 'Funder matching, pitch preparation and warm introductions.',
+    lead: 'We help you prepare your pitch, identify funders that match your sector and stage, and make warm introductions where possible.',
+    price: 'From K1,200',
+    priceUsd: 'From $120',
+    timeline: '21–45 working days',
+    audience: 'Growth-stage founders',
+    whatsCovered: [
+      'Pitch deck review and redesign',
+      'Executive summary prepared',
+      'Financial model alignment',
+      'Funder mapping against your sector and stage',
+      'Shortlist of 5–10 relevant funders',
+      'Warm introductions where available',
+      'Meeting preparation and Q&A rehearsal',
+      'Follow-up templates and support'
+    ],
+    process: [
+      { t:'Readiness audit', d:'We review your pitch, deck, model and traction.' },
+      { t:'Improve', d:'We redesign the deck and tighten the narrative.' },
+      { t:'Map funders', d:'We identify the right funders for your stage.' },
+      { t:'Introduce', d:'Warm introductions to relevant contacts.' },
+      { t:'Support', d:'We help you prepare for meetings.' }
+    ],
+    faq: [
+      { q:'Do you guarantee funding?', a:'No. We prepare and introduce. Investment decisions are made by funders.' },
+      { q:'What stage do you work with?', a:'Usually pre-seed to Series A. Very early ideas may be better served by our business plan service first.' }
+    ]
+  },
+  sales: {
+    key: 'sales',
+    icon: 'fa-bullhorn',
+    color: '#5E7A67',
+    title: 'Sales Channel Development',
+    tagline: 'Ongoing marketing and sales channel support.',
+    lead: 'We help you build and manage sales channels — direct, retail, digital, partner — and grow your revenue consistently.',
+    price: 'K400/mo',
+    priceUsd: '~ $40/mo',
+    timeline: 'Ongoing monthly',
+    audience: 'SMEs · Growth-stage founders',
+    whatsCovered: [
+      'Sales audit — current channels and performance',
+      'Priority channel selection',
+      'Channel playbook per channel',
+      'Weekly content and campaign support',
+      'Lead generation execution',
+      'CRM setup (if needed)',
+      'Monthly performance report',
+      'Quarterly strategy review'
+    ],
+    process: [
+      { t:'Audit', d:'We examine what is working and what is not.' },
+      { t:'Plan', d:'We agree priority channels and 90-day goals.' },
+      { t:'Execute', d:'We run campaigns and coordinate outreach.' },
+      { t:'Review', d:'Monthly report with adjustments.' }
+    ],
+    faq: [
+      { q:'Can I pause?', a:'Yes. Month-to-month — 30 days notice to stop.' },
+      { q:'Is ad spend included?', a:'No. Ad spend is paid by you directly to the platforms. Our fee covers the work.' }
+    ]
+  }
+};
+
+/* ============================================================
+   SHARED UI primitives
+   ============================================================ */
+function Arrow({className=''}){return <svg className={className} width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M9 1L13 5L9 9M13 5H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 function Mark({size=36}){
   return <span className="rounded-full overflow-hidden flex-shrink-0" style={{width:size,height:size,boxShadow:'0 4px 12px -4px rgba(10,31,18,.5)',background:'#fff'}}>
     <img src="ChatGPT Image Feb 11, 2026, 04_49_20 PM.png" alt="StartEasy" style={{display:'block',width:'100%',height:'100%',objectFit:'cover'}}/>
   </span>;
 }
-function NotReg({tone='light'}){return <div style={{background:tone==='dark'?'rgba(255,255,255,.05)':'linear-gradient(135deg,#FFF4E0,#FFF9EE)',border:tone==='dark'?'1px solid rgba(245,166,35,.3)':'1px solid #E8730F',borderRadius:12,padding:'14px 18px',display:'flex',gap:14,alignItems:'flex-start'}}>
-  <span style={{width:34,height:34,borderRadius:9,background:tone==='dark'?'rgba(245,166,35,.2)':'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-info-circle" style={{color:tone==='dark'?'#F5A623':'#fff',fontSize:14}}></i></span>
-  <div><p style={{fontSize:12.5,fontWeight:800,letterSpacing:'.04em',color:tone==='dark'?'#F5A623':'#8A6828',marginBottom:4,textTransform:'uppercase'}}>We act on your behalf — we are not a regulator</p><p style={{fontSize:12.5,lineHeight:1.55,color:tone==='dark'?'rgba(255,255,255,.7)':'rgba(10,31,18,.7)'}}>StartEasy is a venture building service platform and administrative services desk. Where a matter crosses into legal, tax, audit or other regulated professional advice, we refer you to a qualified professional.</p></div>
-</div>;}
+function NotReg({tone='light'}){
+  return <div style={{background:tone==='dark'?'rgba(255,255,255,.05)':'linear-gradient(135deg,#FFF4E0,#FFF9EE)',border:tone==='dark'?'1px solid rgba(245,166,35,.3)':'1px solid #E8730F',borderRadius:12,padding:'14px 18px',display:'flex',gap:14,alignItems:'flex-start'}}>
+    <span style={{width:34,height:34,borderRadius:9,background:tone==='dark'?'rgba(245,166,35,.2)':'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-info-circle" style={{color:tone==='dark'?'#F5A623':'#fff',fontSize:14}}></i></span>
+    <div>
+      <p style={{fontSize:12.5,fontWeight:800,letterSpacing:'.04em',color:tone==='dark'?'#F5A623':'#8A6828',marginBottom:4,textTransform:'uppercase'}}>We are a venture service platform — not a regulator</p>
+      <p style={{fontSize:12.5,lineHeight:1.55,color:tone==='dark'?'rgba(255,255,255,.7)':'rgba(10,31,18,.7)'}}>StartEasy provides venture-building, administrative and coordination services. Where a matter crosses into legal, tax, audit or other regulated professional advice, we refer you to a qualified professional.</p>
+    </div>
+  </div>;
+}
 
-/* VENTURE BUILDING NAV & FOOTER */
-const NAV=[['home','Home'],['venture','Venture Building'],['administrative','Administrative Desk'],['orientation','Orientation'],['pricing','Pricing'],['about','About']];
+/* ============================================================
+   NAV & FOOTER
+   ============================================================ */
+const NAV_ITEMS = [
+  ['home','Home'],
+  ['venture','Services'],
+  ['track','Track'],
+  ['orientation','Orientation'],
+  ['pricing','Pricing'],
+  ['about','About']
+];
+
 function Nav({route,go,onSwitchToAdmin}){
   const [open,setOpen]=useState(false);
-  const nav=r=>{setOpen(false);if(r==='administrative'){onSwitchToAdmin&&onSwitchToAdmin();return}go(r)};
+  const nav=r=>{setOpen(false); if(r==='administrative'){onSwitchToAdmin&&onSwitchToAdmin();return;} go(r);};
   return <header className="sticky top-0 z-50 bg-[#0A1F12] border-b border-[#F5A623]/10">
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
@@ -2350,10 +2671,16 @@ function Nav({route,go,onSwitchToAdmin}){
           </span>
         </button>
         <nav className="hidden xl:flex" style={{gap:22}}>
-          {NAV.map(([r,label])=><button key={r} onClick={()=>nav(r)} style={{fontSize:12.5,position:'relative',padding:'4px 0',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',color:route===r?'#F5A623':'rgba(255,255,255,.55)'}}>{label}{route===r&&<span style={{position:'absolute',bottom:-2,left:0,right:0,height:2,background:'#F5A623',borderRadius:99}}/>}</button>)}
+          {NAV_ITEMS.map(([r,label])=>
+            <button key={r} onClick={()=>nav(r)} style={{fontSize:12.5,position:'relative',padding:'4px 0',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',color:route===r?'#F5A623':'rgba(255,255,255,.55)'}}>
+              {label}{route===r&&<span style={{position:'absolute',bottom:-2,left:0,right:0,height:2,background:'#F5A623',borderRadius:99}}/>}
+            </button>
+          )}
         </nav>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
-          <Btn size="sm" variant="primary" onClick={()=>onSwitchToAdmin&&onSwitchToAdmin()} className="hidden sm:inline-flex">Administrative Desk <Arrow/></Btn>
+          <button onClick={()=>onSwitchToAdmin&&onSwitchToAdmin()} className="hidden sm:inline-flex" style={{padding:'10px 18px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:8}}>
+            Administrative Desk <Arrow/>
+          </button>
           <button onClick={()=>setOpen(!open)} className="xl:hidden" style={{width:36,height:36,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'none',border:'none',cursor:'pointer'}} aria-label="Menu">
             <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(45deg) translateY(3.5px)':'none',transition:'transform .2s'}}/>
             <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(-45deg) translateY(-3.5px)':'none',transition:'transform .2s'}}/>
@@ -2363,11 +2690,16 @@ function Nav({route,go,onSwitchToAdmin}){
     </div>
     {open&&<div className="xl:hidden" style={{borderTop:'1px solid rgba(255,255,255,.1)',background:'#0A1F12'}}>
       <div style={{padding:'16px 24px',maxHeight:'70vh',overflowY:'auto'}}>
-        {NAV.map(([r,label])=><button key={r} onClick={()=>nav(r)} style={{width:'100%',display:'flex',padding:'14px 0',borderBottom:'1px solid rgba(255,255,255,.05)',textAlign:'left',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}><span style={{fontSize:14,color:route===r?'#F5A623':'rgba(255,255,255,.6)'}}>{label}</span></button>)}
+        {NAV_ITEMS.map(([r,label])=>
+          <button key={r} onClick={()=>nav(r)} style={{width:'100%',display:'flex',padding:'14px 0',borderBottom:'1px solid rgba(255,255,255,.05)',textAlign:'left',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}>
+            <span style={{fontSize:14,color:route===r?'#F5A623':'rgba(255,255,255,.6)'}}>{label}</span>
+          </button>
+        )}
       </div>
     </div>}
   </header>;
 }
+
 function Footer({go,onSwitchToAdmin}){
   return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
@@ -2386,8 +2718,8 @@ function Footer({go,onSwitchToAdmin}){
         <div>
           <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Explore</span>
           <div style={{display:'flex',flexDirection:'column',gap:12}}>
-            {[['venture','Venture Building'],['administrative','Administrative Desk'],['orientation','Orientation'],['pricing','Pricing'],['about','About Us']].map(([r,l])=>
-              <button key={l} onClick={()=>{if(r==='administrative'){onSwitchToAdmin&&onSwitchToAdmin();return}go(r)}} style={{display:'block',fontSize:13,color:'rgba(255,255,255,.5)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left',padding:0}}>{l}</button>
+            {[['venture','All Services'],['track','Track Submission'],['orientation','Orientation'],['pricing','Pricing'],['about','About Us'],['administrative','Administrative Desk']].map(([r,l])=>
+              <button key={l} onClick={()=>{if(r==='administrative'){onSwitchToAdmin&&onSwitchToAdmin();return;} go(r);}} style={{display:'block',fontSize:13,color:'rgba(255,255,255,.5)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left',padding:0}}>{l}</button>
             )}
           </div>
         </div>
@@ -2401,103 +2733,78 @@ function Footer({go,onSwitchToAdmin}){
         </div>
       </div>
       <div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
-          <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia · Venture Building Service Platform.</p>
-        </div>
+        <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia · Venture Building Service Platform.</p>
       </div>
     </div>
   </footer>;
 }
 
-/* VENTURE HOME */
-function VentureHome({go,onSwitchToAdmin}){
-  const [snap,setSnap]=useState(()=>readSnapshot());
-  const [myRefs,setMyRefs]=useState(()=>{try{return JSON.parse(localStorage.getItem('starteasy.myrefs.v1')||'[]')}catch(e){return []}});
-  const [helpPick,setHelpPick]=useState(null);
-  const resumable=hasResumableWizard(snap);
-  const savedLabel=snap&&snap.savedAt?timeAgo(snap.savedAt):'';
-  useEffect(()=>{trackEvent('page_view',{route:'home'});},[]);
+/* ============================================================
+   REUSABLE MODAL
+   ============================================================ */
+function VModal({open,onClose,eyebrow,children,maxWidth='52rem'}){
+  useEffect(()=>{if(open)document.body.style.overflow='hidden';else document.body.style.overflow='';return()=>{document.body.style.overflow='';}},[open]);
+  if(!open) return null;
+  return <div className="fixed inset-0 z-[200] flex items-center justify-center p-3" style={{background:'rgba(10,31,18,0.88)'}} onClick={onClose}>
+    <div style={{background:'#F5FAF6',borderRadius:12,width:'100%',maxWidth,maxHeight:'92vh',overflowY:'auto',boxShadow:'0 30px 80px rgba(0,0,0,.35)'}} onClick={e=>e.stopPropagation()}>
+      <div style={{background:'#0A1F12',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:10}}>
+        <span style={{fontSize:10.5,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:700,color:'#F5A623'}}>{eyebrow}</span>
+        <button onClick={onClose} style={{background:'none',border:'none',color:'rgba(255,255,255,.5)',cursor:'pointer',padding:4}} aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        </button>
+      </div>
+      <div style={{padding:'24px 26px'}}>{children}</div>
+    </div>
+  </div>;
+}
 
-  const helpOptions=[
-    {id:'plan',     icon:'fa-file-lines',          color:'#E8730F', label:'Developing a business plan',              desc:'A full written business plan, reviewed by an officer.',    admin:false},
-    {id:'register', icon:'fa-building',            color:'#2E9C4A', label:'Registering the company',                 desc:'Redirects to the StartEasy Administrative Services Desk.',  admin:true },
-    {id:'suppliers',icon:'fa-truck-field',         color:'#1B6CA8', label:'Finding suppliers and equipment',         desc:'Identify, verify and engage suppliers and vendors.',        admin:false},
-    {id:'brand',    icon:'fa-palette',             color:'#7A4FA3', label:'Creating a brand and marketing strategy', desc:'Brand identity and website — domain registration included.',admin:false},
-    {id:'financial',icon:'fa-chart-line',          color:'#B8564F', label:'Building financial projections',          desc:'3-year financial model, cash flow and break-even.',         admin:false},
-    {id:'investors',icon:'fa-hand-holding-dollar', color:'#0E7C7B', label:'Finding potential investors',             desc:'Funder matching and introductions.',                        admin:false},
-    {id:'sales',    icon:'fa-bullhorn',            color:'#5E7A67', label:'Developing sales channels',               desc:'Ongoing marketing and sales channel support.',              admin:false}
-  ];
-  const handleHelp=(opt)=>{
-    setHelpPick(opt.id);
-    setTimeout(()=>{
-      if(opt.admin){ onSwitchToAdmin && onSwitchToAdmin(); return; }
-      go('venture');
-    },350);
-  };
+/* ============================================================
+   VENTURE HOME
+   ============================================================ */
+function VentureHome({go,onSwitchToAdmin}){
+  const [myRefs] = useState(()=>readVentureRefs());
+
+  useEffect(()=>{trackEvent('page_view',{route:'venture-home'});},[]);
 
   const marqueeItems=[
-    {icon:'fa-layer-group', value:'11',   label:'Specialist desks'},
-    {icon:'fa-file-lines',  value:'40+',  label:'Published services'},
-    {icon:'fa-bolt',        value:'1 hr', label:'Report delivery'},
-    {icon:'fa-landmark',    value:'8',    label:'Regulators coordinated'},
-    {icon:'fa-check-double',value:'100%', label:'Administrative follow-up'},
-    {icon:'fa-tag',         value:'K25',  label:'Structure & Name advisory'},
-    {icon:'fa-clock',       value:'4 hr', label:'Officer verification'},
-    {icon:'fa-shield-halved',value:'24/7', label:'WhatsApp support'}
-  ];
-  const capabilities=[
-    {icon:'fa-magnifying-glass',label:'Idea validation'},
-    {icon:'fa-flask',label:'Product development'},
-    {icon:'fa-users',label:'Talent and teams'},
-    {icon:'fa-landmark',label:'Business formation'},
-    {icon:'fa-wallet',label:'Funding connections'},
-    {icon:'fa-chart-line',label:'Growth and execution'}
-  ];
-  const pillars=[
-    {icon:'fa-briefcase',color:'#E8730F',label:'Business strategy',desc:'Positioning, business model, plan.'},
-    {icon:'fa-code',color:'#7A4FA3',label:'Product development',desc:'Websites, apps, digital systems.'},
-    {icon:'fa-wallet',color:'#2E9C4A',label:'Finance support',desc:'Projections, funder connections.'},
-    {icon:'fa-bullhorn',color:'#1B6CA8',label:'Marketing and sales',desc:'Brand, campaign, channels.'},
-    {icon:'fa-clipboard-check',color:'#B8564F',label:'Administrative Services Support',desc:'Company formation, business registration, compliance, and more.'}
-  ];
-  const helpfulPills=[
-    {icon:'fa-chart-line',label:'Finance',color:'#2E9C4A'},
-    {icon:'fa-microchip',label:'Technology',color:'#1B6CA8'},
-    {icon:'fa-bullhorn',label:'Marketing',color:'#E8730F'},
-    {icon:'fa-clipboard-check',label:'Administration',color:'#7A4FA3'}
+    {icon:'fa-layer-group', value:'7',    label:'Venture services'},
+    {icon:'fa-bolt',        value:'1 hr', label:'Response time'},
+    {icon:'fa-users',       value:'100+', label:'Founders served'},
+    {icon:'fa-file-lines',  value:'K750', label:'Business plan'},
+    {icon:'fa-clock',       value:'7–21', label:'Working days'},
+    {icon:'fa-shield-halved',value:'24/7',label:'WhatsApp support'}
   ];
 
-  const handlePillarClick=(p)=>{
-    if(p.label==='Administrative Services Support'){ onSwitchToAdmin && onSwitchToAdmin(); return; }
-    go('venture');
+  const pillars=[
+    {icon:'fa-file-lines', color:'#E8730F', key:'plan',      label:'Business plan',      desc:'Funder-ready written plan.'},
+    {icon:'fa-building',   color:'#2E9C4A', key:'register',  label:'Company registration',desc:'Name, company, business name.'},
+    {icon:'fa-truck-field',color:'#1B6CA8', key:'suppliers', label:'Supplier sourcing',   desc:'Vetted, quoted, negotiated.'},
+    {icon:'fa-palette',    color:'#7A4FA3', key:'brand',     label:'Brand & marketing',   desc:'Identity, strategy, website.'},
+    {icon:'fa-chart-line', color:'#B8564F', key:'financial', label:'Financial model',     desc:'3-year projections.'},
+    {icon:'fa-hand-holding-dollar', color:'#0E7C7B', key:'investors', label:'Investor readiness', desc:'Pitch, funders, intros.'},
+    {icon:'fa-bullhorn',   color:'#5E7A67', key:'sales',     label:'Sales channels',      desc:'Ongoing revenue support.'}
+  ];
+
+  const handlePick=(key)=>{
+    trackEvent('service_click',{serviceKey:key});
+    if(key==='register'){ onSwitchToAdmin && onSwitchToAdmin(); return; }
+    go('service', key);
   };
 
   return <div className="fadein" style={{background:'#0A1F12',color:'#fff'}}>
-    {resumable&&<section style={{maxWidth:1240,margin:'0 auto',padding:'24px 24px 0'}}>
-      <div className="fadein" style={{background:'linear-gradient(135deg,#FFF9E6,#FFFCF0)',border:'1.5px solid #F0E0A0',borderRadius:12,padding:'16px 20px',display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}}>
-        <span style={{width:38,height:38,borderRadius:10,background:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-rotate-left" style={{color:'#fff',fontSize:14}}></i></span>
-        <div style={{flex:'1 1 260px'}}>
-          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:3}}>Welcome back</div>
-          <div style={{fontSize:13.5,color:'#0A1F12',fontWeight:600}}>You have an assessment in progress{savedLabel?` — saved ${savedLabel}`:''}.</div>
-        </div>
-        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-          <button onClick={()=>onSwitchToAdmin&&onSwitchToAdmin()} style={{padding:'9px 16px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Continue</button>
-          <button onClick={()=>{clearSnapshot();setSnap(null)}} style={{padding:'9px 16px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:12.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>Start fresh</button>
-        </div>
-      </div>
-    </section>}
+
     {myRefs.length>0&&<section style={{maxWidth:1240,margin:'0 auto',padding:'16px 24px 0'}}>
       <div style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(245,166,35,.3)',borderRadius:12,padding:'14px 20px',display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}}>
         <span style={{width:38,height:38,borderRadius:10,background:'rgba(245,166,35,.2)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-magnifying-glass" style={{fontSize:14}}></i></span>
         <div style={{flex:'1 1 260px'}}>
           <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#F5A623',marginBottom:3}}>Track a submission</div>
-          <div style={{fontSize:13,color:'rgba(255,255,255,.85)',fontWeight:600}}>You have {myRefs.length} submission{myRefs.length!==1?'s':''} on this device.</div>
+          <div style={{fontSize:13,color:'rgba(255,255,255,.85)',fontWeight:600}}>You have {myRefs.length} venture submission{myRefs.length!==1?'s':''} on this device.</div>
         </div>
-        <button onClick={()=>onSwitchToAdmin&&onSwitchToAdmin()} style={{padding:'9px 16px',background:'#F5A623',color:'#0A1F12',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Open track page <Arrow/></button>
+        <button onClick={()=>go('track')} style={{padding:'9px 16px',background:'#F5A623',color:'#0A1F12',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Open track page <Arrow/></button>
       </div>
     </section>}
 
-    {/* ===================== HERO ===================== */}
+    {/* HERO */}
     <section style={{position:'relative',overflow:'hidden'}}>
       <div className="orb-pulse" style={{position:'absolute',top:-180,right:-180,width:640,height:640,background:'radial-gradient(circle, rgba(232,115,15,.22), transparent 62%)',pointerEvents:'none'}}/>
       <div className="orb-pulse" style={{position:'absolute',bottom:-240,left:-200,width:640,height:640,background:'radial-gradient(circle, rgba(245,166,35,.10), transparent 65%)',pointerEvents:'none',animationDelay:'-3s'}}/>
@@ -2513,100 +2820,54 @@ function VentureHome({go,onSwitchToAdmin}){
           StartEasy Zambia is a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.
         </p>
         <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-          <button onClick={()=>onSwitchToAdmin&&onSwitchToAdmin()} style={{padding:'17px 34px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12,boxShadow:'0 14px 38px rgba(232,115,15,.38)'}}>
-            <i className="fas fa-rocket" style={{fontSize:14}}/> Explore the platform <Arrow/>
+          <button onClick={()=>{const el=document.getElementById('choose-situation');el&&el.scrollIntoView({behavior:'smooth'});}} style={{padding:'17px 34px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12,boxShadow:'0 14px 38px rgba(232,115,15,.38)'}}>
+            <i className="fas fa-rocket" style={{fontSize:14}}/> Choose your situation <Arrow/>
           </button>
           <button onClick={()=>go('venture')} style={{padding:'17px 34px',background:'rgba(255,255,255,.05)',color:'#fff',border:'1px solid rgba(255,255,255,.22)',borderRadius:11,fontSize:15,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12}}>
-            <i className="fas fa-layer-group" style={{fontSize:14}}/> Browse capabilities
+            <i className="fas fa-layer-group" style={{fontSize:14}}/> See all services
           </button>
         </div>
       </div>
     </section>
 
-    {/* ===================== ASK ENTREPRENEURS ===================== */}
-    <section style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.18)',background:'linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.1))'}}>
+    {/* CHOOSE YOUR SITUATION */}
+    <section id="choose-situation" style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.18)',background:'linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.1))'}}>
       <div style={{position:'absolute',top:-100,left:'10%',width:400,height:400,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,8vw,88px) 24px',position:'relative',zIndex:1}}>
         <div style={{textAlign:'center',maxWidth:760,margin:'0 auto 44px'}}>
-          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14}}>Ask entrepreneurs</span>
-          <h2 className="serif" style={{fontSize:'clamp(1.9rem,4.6vw,3rem)',lineHeight:1.1,marginBottom:16,color:'#fff'}}>What help do you need with today?</h2>
-          <p style={{fontSize:15,lineHeight:1.7,color:'rgba(255,255,255,.65)',margin:0}}>Pick the situation that fits you. We'll open the right service on the platform — or route you to our Administrative Services Desk where relevant.</p>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14}}>Start here</span>
+          <h2 className="serif" style={{fontSize:'clamp(1.9rem,4.6vw,3rem)',lineHeight:1.1,marginBottom:16,color:'#fff'}}>Choose your situation.</h2>
+          <p style={{fontSize:15,lineHeight:1.7,color:'rgba(255,255,255,.65)',margin:0}}>Pick the situation that best matches where you are. Each opens a dedicated page with what is covered, the process, pricing and a direct engagement form.</p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{maxWidth:1160,margin:'0 auto'}}>
-          {helpOptions.map(o=>{
-            const picked = helpPick === o.id;
-            return (
-              <button
-                key={o.id}
-                onClick={()=>handleHelp(o)}
-                style={{
-                  background: picked ? o.color+'26' : 'rgba(255,255,255,.04)',
-                  border: '1px solid ' + (picked ? o.color+'aa' : 'rgba(255,255,255,.12)'),
-                  borderRadius: 16,
-                  padding: '26px 22px',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  textAlign: 'left',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 14,
-                  transition: 'all .25s',
-                  transform: picked ? 'translateY(-3px)' : 'none',
-                  position: 'relative'
-                }}
-                onMouseEnter={e=>{ if(!picked){ e.currentTarget.style.transform='translateY(-3px)'; e.currentTarget.style.borderColor=o.color+'88'; e.currentTarget.style.background='rgba(255,255,255,.07)'; } }}
-                onMouseLeave={e=>{ if(!picked){ e.currentTarget.style.transform='none'; e.currentTarget.style.borderColor='rgba(255,255,255,.12)'; e.currentTarget.style.background='rgba(255,255,255,.04)'; } }}
-              >
-                <span style={{
-                  width: 50, height: 50, borderRadius: 13,
-                  background: o.color+'24', color: o.color,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 20, flexShrink: 0
-                }}>
-                  <i className={`fas ${o.icon}`}></i>
-                </span>
-
-                <h4 className="serif" style={{fontSize:16,fontWeight:700,color:'#fff',lineHeight:1.3,margin:0}}>
-                  {o.label}
-                </h4>
-
-                <p style={{fontSize:12.5,color:'rgba(255,255,255,.6)',lineHeight:1.55,margin:0,flex:1}}>
-                  {o.desc}
-                </p>
-
-                <span style={{
-                  display:'inline-flex', alignItems:'center', gap:8,
-                  fontSize:11, letterSpacing:'.1em', textTransform:'uppercase',
-                  fontWeight:800, color:o.color,
-                  paddingTop:12, borderTop:'1px solid rgba(255,255,255,.08)',
-                  marginTop:'auto'
-                }}>
-                  {picked ? 'Opening…' : (o.admin ? 'Open Administrative Desk' : 'Open service')}
-                  <Arrow/>
-                </span>
-              </button>
-            );
-          })}
+          {pillars.map(p=>(
+            <button key={p.key} onClick={()=>handlePick(p.key)}
+              style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:16,padding:'26px 22px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',display:'flex',flexDirection:'column',gap:14,transition:'all .25s'}}
+              onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.borderColor=p.color+'88';e.currentTarget.style.background='rgba(255,255,255,.07)';}}
+              onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor='rgba(255,255,255,.12)';e.currentTarget.style.background='rgba(255,255,255,.04)';}}>
+              <span style={{width:50,height:50,borderRadius:13,background:p.color+'24',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>
+                <i className={`fas ${p.icon}`}></i>
+              </span>
+              <h4 className="serif" style={{fontSize:16,fontWeight:700,color:'#fff',lineHeight:1.3,margin:0}}>{p.label}</h4>
+              <p style={{fontSize:12.5,color:'rgba(255,255,255,.6)',lineHeight:1.55,margin:0,flex:1}}>{p.desc}</p>
+              <span style={{display:'inline-flex',alignItems:'center',gap:8,fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:p.color,paddingTop:12,borderTop:'1px solid rgba(255,255,255,.08)',marginTop:'auto'}}>
+                Open service <Arrow/>
+              </span>
+            </button>
+          ))}
         </div>
 
         <div style={{textAlign:'center',marginTop:36}}>
-          <a
-            href={waUrl('Hello StartEasy — I need help working out which service applies to me.')}
-            target="_blank" rel="noopener noreferrer"
-            style={{
-              display:'inline-flex', alignItems:'center', gap:10,
-              padding:'13px 24px', background:'#25D366', color:'#fff',
-              borderRadius:10, fontSize:13.5, fontWeight:700, textDecoration:'none'
-            }}
-          >
+          <a href={waUrl('Hello StartEasy — I need help working out which venture service applies to me.')} target="_blank" rel="noopener noreferrer"
+             style={{display:'inline-flex',alignItems:'center',gap:10,padding:'13px 24px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:13.5,fontWeight:700,textDecoration:'none'}}>
             <i className="fab fa-whatsapp"></i> Ask an officer first
           </a>
         </div>
       </div>
     </section>
 
-    {/* ===================== MARQUEE STATS ===================== */}
+    {/* MARQUEE */}
     <section style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(255,255,255,.08)',borderBottom:'1px solid rgba(255,255,255,.08)',padding:'clamp(28px,4vw,44px) 0'}}>
       <div className="marquee-mask">
         <div className="marquee-track">
@@ -2621,263 +2882,683 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
-    {/* ===================== SHARED CAPABILITIES ===================== */}
-    <section style={{background:'rgba(0,0,0,.25)',borderTop:'1px solid rgba(245,166,35,.15)',position:'relative',overflow:'hidden'}}>
-      <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(64px,9vw,96px) 24px clamp(48px,7vw,72px)',position:'relative',zIndex:1}}>
-        <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 44px'}}>
-          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14}}>Who we serve · What we build</span>
-          <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.4rem)',lineHeight:1.15,marginBottom:14,color:'#fff'}}>Two audiences. Shared capabilities.</h2>
-          <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',margin:0}}>Whether you are starting from zero or running an established organisation, the same venture-building toolkit is behind you.</p>
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4" style={{maxWidth:880,margin:'0 auto 8px'}}>
-          <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:18,padding:'32px 26px',textAlign:'center'}}>
-            <span style={{width:56,height:56,borderRadius:16,background:'rgba(232,115,15,.2)',color:'#F5A623',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:24,marginBottom:16}}><i className="fas fa-user"></i></span>
-            <h3 className="serif" style={{fontSize:22,fontWeight:800,color:'#fff',margin:'0 0 10px'}}>Individuals</h3>
-            <p style={{fontSize:14,color:'rgba(255,255,255,.7)',margin:0,lineHeight:1.6}}>Aspiring founders and entrepreneurs</p>
-          </div>
-          <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:18,padding:'32px 26px',textAlign:'center'}}>
-            <span style={{width:56,height:56,borderRadius:16,background:'rgba(122,79,163,.22)',color:'#B99FE0',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:24,marginBottom:16}}><i className="fas fa-building"></i></span>
-            <h3 className="serif" style={{fontSize:22,fontWeight:800,color:'#fff',margin:'0 0 10px'}}>Organizations</h3>
-            <p style={{fontSize:14,color:'rgba(255,255,255,.7)',margin:0,lineHeight:1.6}}>Companies, institutions and venture teams</p>
-          </div>
-        </div>
-        <div style={{textAlign:'center',margin:'14px 0 28px'}}>
-          <span className="floaty" style={{display:'inline-flex',width:48,height:48,borderRadius:'50%',background:'rgba(245,166,35,.16)',border:'1px solid rgba(245,166,35,.4)',alignItems:'center',justifyContent:'center',color:'#F5A623',fontSize:18}}><i className="fas fa-arrow-down"></i></span>
-        </div>
-        <div style={{maxWidth:880,margin:'0 auto 64px',background:'rgba(255,255,255,.03)',border:'1px solid rgba(245,166,35,.3)',borderRadius:20,padding:'clamp(28px,4vw,44px)'}}>
-          <div style={{textAlign:'center',marginBottom:30}}>
-            <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,color:'#fff',margin:0}}>Shared venture-building capabilities</h3>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-x-10 gap-y-5">
-            {capabilities.map((c,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:16,padding:'10px 0'}}>
-              <span style={{width:46,height:46,borderRadius:12,background:'rgba(245,166,35,.14)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className={`fas ${c.icon}`}></i></span>
-              <span style={{fontSize:15.5,color:'rgba(255,255,255,.9)',fontWeight:500,lineHeight:1.35}}>{c.label}</span>
-            </div>)}
-          </div>
-        </div>
-        <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 32px'}}>
-          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:12}}>Where we go deep</span>
-          <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,margin:0,color:'#fff'}}>Capabilities in focus.</h3>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" style={{maxWidth:1280,margin:'0 auto'}}>
-          {pillars.map((p,i)=><button key={i} onClick={()=>handlePillarClick(p)}
-            style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:18,padding:'30px 20px',cursor:'pointer',fontFamily:'inherit',textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:14,transition:'all .25s'}}
-            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.borderColor=p.color+'99';e.currentTarget.style.background='rgba(255,255,255,.07)'}}
-            onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor='rgba(255,255,255,.1)';e.currentTarget.style.background='rgba(255,255,255,.04)'}}>
-            <span style={{width:58,height:58,borderRadius:16,background:p.color+'26',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:23,flexShrink:0}}><i className={`fas ${p.icon}`}></i></span>
-            <h4 className="serif" style={{fontSize:15.5,fontWeight:700,color:'#fff',lineHeight:1.25,margin:0}}>{p.label}</h4>
-            <p style={{fontSize:12,color:'rgba(255,255,255,.55)',lineHeight:1.5,margin:0}}>{p.desc}</p>
-          </button>)}
-        </div>
-      </div>
-    </section>
-
-    {/* ===================== CLOSING ===================== */}
+    {/* CLOSING */}
     <section style={{background:'#0A1F12',color:'#fff',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
       <div style={{maxWidth:1000,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px',textAlign:'center',position:'relative',zIndex:1}}>
         <div className="micro" style={{color:'#F5A623',marginBottom:28,letterSpacing:'.26em'}}>At StartEasy Zambia</div>
         <p className="serif" style={{fontSize:'clamp(1.65rem,4.2vw,2.8rem)',lineHeight:1.28,color:'#fff',margin:'0 auto 48px',maxWidth:'50rem',fontWeight:700}}>
           We are helpful for <em style={{color:'#F5A623',fontStyle:'italic'}}>finance</em>, <em style={{color:'#F5A623',fontStyle:'italic'}}>technology</em>, <em style={{color:'#F5A623',fontStyle:'italic'}}>marketing</em>, and <em style={{color:'#F5A623',fontStyle:'italic'}}>administrative support</em>.
         </p>
-        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:14}}>
-          {helpfulPills.map((x,i)=>
-            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:12,padding:'15px 28px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.95rem,1.4vw,1.08rem)',fontWeight:700,color:'#fff'}}>
-              <span style={{width:36,height:36,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:15}}><i className={`fas ${x.icon}`}/></span>
-              {x.label}
-            </span>
-          )}
-        </div>
-        <p style={{marginTop:'clamp(56px,8vw,80px)',fontSize:12,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)'}}>
-          StartEasy Zambia · Venture Building Service Platform
-        </p>
+      </div>
+    </section>
+
+  </div>;
+}
+
+/* ============================================================
+   SERVICE DIRECTORY
+   ============================================================ */
+function VentureServices(){
+  useEffect(()=>{trackEvent('page_view',{route:'venture'});},[]);
+  const list = Object.values(VENTURE_SERVICES);
+  return <div className="fadein" style={{background:'#F5FAF6'}}>
+    <section style={{background:'#0A1F12',color:'#fff',padding:'clamp(56px,8vw,80px) 24px'}}>
+      <div style={{maxWidth:1240,margin:'0 auto'}}>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Service directory</span>
+        <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,marginBottom:20,maxWidth:'46rem'}}>Every venture-building service StartEasy provides.</h1>
+        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:'44rem',marginBottom:24}}>Click any service to see the full breakdown, the process, pricing and a direct engagement form.</p>
+        <NotReg tone="dark"/>
+      </div>
+    </section>
+    <section style={{maxWidth:1240,margin:'0 auto',padding:'48px 24px 64px'}}>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {list.map(s=><ServiceCard key={s.key} service={s}/>)}
       </div>
     </section>
   </div>;
-                                  }
-
-/* VENTURE DETAIL PAGE */
-function VenturePage({go,onSwitchToAdmin}){
-  useEffect(()=>{trackEvent('page_view',{route:'venture'});},[]);
-  const [helpPick,setHelpPick]=useState(null);
-  const helpOptions=[
-    {id:'plan',icon:'fa-file-lines',color:'#E8730F',label:'Developing a business plan',desc:'Full written business plan, reviewed by an officer.'},
-    {id:'register',icon:'fa-building',color:'#2E9C4A',label:'Registering the company',desc:'StartEasy Administrative Services Desk.',admin:true},
-    {id:'suppliers',icon:'fa-truck-field',color:'#1B6CA8',label:'Finding suppliers and equipment',desc:'Identify, verify and engage suppliers.'},
-    {id:'brand',icon:'fa-palette',color:'#7A4FA3',label:'Creating a brand and marketing strategy',desc:'Brand identity and website — domain included.'},
-    {id:'financial',icon:'fa-chart-line',color:'#B8564F',label:'Building financial projections',desc:'3-year financial model, cash flow, break-even.'},
-    {id:'investors',icon:'fa-hand-holding-dollar',color:'#0E7C7B',label:'Finding potential investors',desc:'Funder matching and introductions.'},
-    {id:'sales',icon:'fa-bullhorn',color:'#5E7A67',label:'Developing sales channels',desc:'Ongoing marketing and sales channel support.'}
-  ];
-  const capabilities=[
-    {icon:'fa-magnifying-glass',label:'Idea validation'},
-    {icon:'fa-flask',label:'Product development'},
-    {icon:'fa-users',label:'Talent and teams'},
-    {icon:'fa-landmark',label:'Business formation'},
-    {icon:'fa-wallet',label:'Funding connections'},
-    {icon:'fa-chart-line',label:'Growth and execution'}
-  ];
-  const pillars=[
-    {icon:'fa-briefcase',color:'#E8730F',label:'Business strategy',desc:'Positioning, business model, plan.'},
-    {icon:'fa-code',color:'#7A4FA3',label:'Product development',desc:'Websites, apps, digital systems.'},
-    {icon:'fa-wallet',color:'#2E9C4A',label:'Finance support',desc:'Projections, funder connections.'},
-    {icon:'fa-bullhorn',color:'#1B6CA8',label:'Marketing and sales',desc:'Brand, campaign, channels.'},
-    {icon:'fa-clipboard-check',color:'#B8564F',label:'Administrative Services Support',desc:'Company formation, business registration, compliance, and more.',admin:true}
-  ];
-  const handleHelp=(opt)=>{
-    setHelpPick(opt.id);
-    setTimeout(()=>{ if(opt.admin){onSwitchToAdmin&&onSwitchToAdmin();} },350);
-  };
-  const handlePillarClick=(p)=>{if(p.admin){onSwitchToAdmin&&onSwitchToAdmin();return}go('venture');};
-  return <section style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden'}}>
-    <div style={{position:'absolute',top:-120,right:-120,width:500,height:500,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'72px 24px 40px',position:'relative',zIndex:1}}>
-      <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Venture Building Service Platform · Zambia</span>
-      <h2 className="serif" style={{fontSize:'clamp(2rem,5vw,3.2rem)',lineHeight:1.08,marginBottom:20,maxWidth:'46rem'}}>A one-stop shop for building businesses.</h2>
-      <p style={{fontSize:16,lineHeight:1.7,color:'rgba(255,255,255,.7)',maxWidth:'46rem',marginBottom:32}}>StartEasy Zambia is a <strong style={{color:'#F5A623'}}>venture building service platform</strong> — a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p>
-      <button onClick={()=>onSwitchToAdmin&&onSwitchToAdmin()} style={{padding:'14px 26px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:10}}><i className="fas fa-building"></i> Open Administrative Services Desk</button>
-    </div>
-
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'24px 24px 56px',position:'relative',zIndex:1}}>
-      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 36px'}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:12}}>Who we serve · What we build</span>
-        <h3 className="serif" style={{fontSize:'clamp(1.6rem,3.6vw,2.2rem)',lineHeight:1.15,marginBottom:12}}>Two audiences. Shared capabilities.</h3>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-4" style={{maxWidth:880,margin:'0 auto 8px'}}>
-        <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:16,padding:'28px 24px',textAlign:'center'}}>
-          <span style={{width:52,height:52,borderRadius:14,background:'rgba(232,115,15,.18)',color:'#F5A623',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:22,marginBottom:14}}><i className="fas fa-user"></i></span>
-          <h4 className="serif" style={{fontSize:20,fontWeight:800,color:'#fff',margin:'0 0 8px'}}>Individuals</h4>
-          <p style={{fontSize:13.5,color:'rgba(255,255,255,.65)',margin:0}}>Aspiring founders and entrepreneurs</p>
-        </div>
-        <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:16,padding:'28px 24px',textAlign:'center'}}>
-          <span style={{width:52,height:52,borderRadius:14,background:'rgba(122,79,163,.22)',color:'#B99FE0',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:22,marginBottom:14}}><i className="fas fa-building"></i></span>
-          <h4 className="serif" style={{fontSize:20,fontWeight:800,color:'#fff',margin:'0 0 8px'}}>Organizations</h4>
-          <p style={{fontSize:13.5,color:'rgba(255,255,255,.65)',margin:0}}>Companies, institutions and venture teams</p>
-        </div>
-      </div>
-      <div style={{textAlign:'center',margin:'8px 0 24px'}}>
-        <span style={{display:'inline-flex',width:40,height:40,borderRadius:'50%',background:'rgba(245,166,35,.15)',border:'1px solid rgba(245,166,35,.35)',alignItems:'center',justifyContent:'center',color:'#F5A623',fontSize:16}}><i className="fas fa-arrow-down"></i></span>
-      </div>
-      <div style={{maxWidth:880,margin:'0 auto 56px',background:'rgba(255,255,255,.03)',border:'1px solid rgba(245,166,35,.28)',borderRadius:18,padding:'clamp(26px,3.5vw,40px)'}}>
-        <div style={{textAlign:'center',marginBottom:28}}><h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,color:'#fff',margin:0}}>Shared venture-building capabilities</h3></div>
-        <div className="grid sm:grid-cols-2 gap-x-10 gap-y-5">
-          {capabilities.map((c,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'8px 0'}}>
-            <span style={{width:42,height:42,borderRadius:11,background:'rgba(245,166,35,.13)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}><i className={`fas ${c.icon}`}></i></span>
-            <span style={{fontSize:15.5,color:'rgba(255,255,255,.88)',fontWeight:500}}>{c.label}</span>
-          </div>)}
-        </div>
-      </div>
-      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 32px'}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:12}}>Where we go deep</span>
-        <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,margin:0,color:'#fff'}}>Capabilities in focus.</h3>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" style={{maxWidth:1280,margin:'0 auto 56px'}}>
-        {pillars.map((p,i)=><button key={i} onClick={()=>handlePillarClick(p)}
-          style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:16,padding:'28px 20px',cursor:'pointer',fontFamily:'inherit',textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:14}}
-          onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.borderColor=p.color+'88'}}
-          onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor='rgba(255,255,255,.1)'}}>
-          <span style={{width:54,height:54,borderRadius:15,background:p.color+'22',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}><i className={`fas ${p.icon}`}></i></span>
-          <h4 className="serif" style={{fontSize:15.5,fontWeight:700,color:'#fff',lineHeight:1.25,margin:0}}>{p.label}</h4>
-          <p style={{fontSize:11.5,color:'rgba(255,255,255,.55)',lineHeight:1.5,margin:0}}>{p.desc}</p>
-        </button>)}
-      </div>
-
-      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 36px'}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:12}}>Interactive chooser</span>
-        <h3 className="serif" style={{fontSize:'clamp(1.6rem,3.6vw,2.2rem)',lineHeight:1.15,marginBottom:12}}>What help do you need with today?</h3>
-      </div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {helpOptions.map(o=>{
-          const picked=helpPick===o.id;
-          return <button key={o.id} onClick={()=>handleHelp(o)} style={{background:picked?o.color+'22':'rgba(255,255,255,.04)',border:'1px solid '+(picked?o.color+'88':'rgba(255,255,255,.12)'),borderRadius:12,padding:'22px 20px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',display:'flex',flexDirection:'column',gap:12}}>
-            <span style={{width:46,height:46,borderRadius:12,background:o.color+'22',color:o.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:19}}><i className={`fas ${o.icon}`}></i></span>
-            <h4 className="serif" style={{fontSize:15,fontWeight:700,color:'#fff',lineHeight:1.25,margin:0}}>{o.label}</h4>
-            <p style={{fontSize:12,color:'rgba(255,255,255,.55)',lineHeight:1.5,margin:0}}>{o.desc}</p>
-          </button>;
-        })}
-      </div>
-    </div>
-  </section>;
 }
 
-/* VENTURE ORIENTATION PAGE */
+function ServiceCard({service}){
+  return <a href={`#/service/${service.key}`}
+    style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:0,textDecoration:'none',display:'flex',flexDirection:'column',overflow:'hidden',transition:'all .25s',height:'100%'}}
+    onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.boxShadow='0 14px 34px rgba(0,0,0,.08)';e.currentTarget.style.borderColor=service.color+'66';}}
+    onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';e.currentTarget.style.borderColor='rgba(10,31,18,.08)';}}>
+    <div style={{height:4,background:service.color}}></div>
+    <div style={{padding:'24px 22px',display:'flex',flexDirection:'column',gap:14,flex:1}}>
+      <span style={{width:46,height:46,borderRadius:12,background:service.color+'18',color:service.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>
+        <i className={`fas ${service.icon}`}></i>
+      </span>
+      <h3 className="serif" style={{fontSize:18,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{service.title}</h3>
+      <p style={{fontSize:12.5,color:'rgba(10,31,18,.6)',lineHeight:1.55,margin:0,flex:1}}>{service.tagline}</p>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',gap:12,paddingTop:14,borderTop:'1px solid rgba(10,31,18,.06)'}}>
+        <div>
+          <div style={{fontSize:9.5,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.4)',marginBottom:3}}>Price</div>
+          <div className="serif" style={{fontSize:17,fontWeight:800,color:service.color,lineHeight:1}}>{service.price}</div>
+          <div style={{fontSize:10.5,color:'rgba(10,31,18,.4)',marginTop:3}}>{service.timeline}</div>
+        </div>
+        <span style={{display:'flex',alignItems:'center',gap:6,fontSize:10.5,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:700,color:service.color,flexShrink:0}}>
+          Open <Arrow/>
+        </span>
+      </div>
+    </div>
+  </a>;
+}
+
+/* ============================================================
+   SERVICE DETAIL PAGE
+   ============================================================ */
+function VentureServiceDetail({serviceKey,go,onSwitchToAdmin}){
+  const service = VENTURE_SERVICES[serviceKey];
+
+  useEffect(()=>{trackEvent('page_view',{route:'service',key:serviceKey});},[serviceKey]);
+  useEffect(()=>{window.scrollTo({top:0,behavior:'auto'});},[serviceKey]);
+
+  const [showEngagement,setShowEngagement]=useState(false);
+
+  if(!service){
+    return <div style={{padding:'80px 24px',textAlign:'center',background:'#F5FAF6'}}>
+      <h2 className="serif" style={{fontSize:24,color:'#0A1F12',marginBottom:12}}>Service not found</h2>
+      <button onClick={()=>go('venture')} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>See all services</button>
+    </div>;
+  }
+
+  const related = Object.values(VENTURE_SERVICES).filter(s=>s.key!==service.key).slice(0,3);
+
+  const startEngagement=()=>{
+    if(service.crossLinkAdmin){ onSwitchToAdmin && onSwitchToAdmin(); return; }
+    setShowEngagement(true);
+    trackEvent('engagement_start',{serviceKey:service.key,title:service.title});
+  };
+
+  return <div className="fadein" style={{background:'#F5FAF6'}}>
+    {/* HERO */}
+    <section style={{background:`linear-gradient(135deg,#0A1F12 0%,${service.color}22 100%)`,color:'#fff',padding:'clamp(56px,8vw,88px) 24px clamp(40px,6vw,56px)',position:'relative',overflow:'hidden'}}>
+      <div style={{position:'absolute',top:-120,right:-120,width:500,height:500,background:`radial-gradient(circle, ${service.color}33, transparent 65%)`,pointerEvents:'none'}}/>
+      <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
+        <button onClick={()=>go('venture')} style={{background:'none',border:'none',color:'rgba(255,255,255,.6)',fontSize:11.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:700,cursor:'pointer',fontFamily:'inherit',marginBottom:24,display:'inline-flex',alignItems:'center',gap:8}}>
+          <i className="fas fa-arrow-left"></i> All services
+        </button>
+        <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:20,flexWrap:'wrap'}}>
+          <span style={{width:64,height:64,borderRadius:18,background:service.color+'33',border:`1px solid ${service.color}66`,display:'flex',alignItems:'center',justifyContent:'center',color:service.color,fontSize:26,flexShrink:0}}>
+            <i className={`fas ${service.icon}`}></i>
+          </span>
+          <span style={{fontSize:10.5,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,padding:'7px 14px',borderRadius:99,background:service.color+'26',color:'#fff',border:`1px solid ${service.color}55`}}>
+            {service.audience}
+          </span>
+        </div>
+        <h1 className="serif" style={{fontSize:'clamp(2rem,4.8vw,3.2rem)',lineHeight:1.08,marginBottom:16,maxWidth:'46rem'}}>{service.title}</h1>
+        <p style={{fontSize:'clamp(1rem,1.6vw,1.2rem)',lineHeight:1.7,color:'rgba(255,255,255,.75)',maxWidth:'44rem',marginBottom:28}}>{service.tagline}</p>
+
+        <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
+          <div style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.14)',borderRadius:12,padding:'14px 20px',minWidth:170}}>
+            <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:'rgba(255,255,255,.5)',marginBottom:5}}>Service Fee</div>
+            <div className="serif" style={{fontSize:24,fontWeight:800,color:service.color,lineHeight:1}}>{service.price}</div>
+            <div style={{fontSize:11.5,color:'rgba(255,255,255,.55)',marginTop:5}}>{service.priceUsd}</div>
+          </div>
+          <div style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.14)',borderRadius:12,padding:'14px 20px',minWidth:170}}>
+            <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:'rgba(255,255,255,.5)',marginBottom:5}}>Timeline</div>
+            <div className="serif" style={{fontSize:20,fontWeight:800,color:'#fff',lineHeight:1}}>{service.timeline}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* BODY */}
+    <section style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px 40px'}}>
+      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-10">
+        <div style={{minWidth:0}}>
+          <p style={{fontSize:16,lineHeight:1.75,color:'rgba(10,31,18,.75)',marginBottom:36}}>{service.lead}</p>
+
+          <h2 className="serif" style={{fontSize:'clamp(1.3rem,2.6vw,1.6rem)',color:'#0A1F12',marginBottom:16}}>What is covered</h2>
+          <ul style={{listStyle:'none',padding:0,margin:'0 0 40px'}}>
+            {service.whatsCovered.map((w,i)=>
+              <li key={i} style={{display:'flex',gap:12,fontSize:14,color:'rgba(10,31,18,.8)',lineHeight:1.6,marginBottom:11,alignItems:'flex-start'}}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={service.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{marginTop:4,flexShrink:0}}><path d="M20 6L9 17l-5-5"/></svg>
+                <span>{w}</span>
+              </li>
+            )}
+          </ul>
+
+          <h2 className="serif" style={{fontSize:'clamp(1.3rem,2.6vw,1.6rem)',color:'#0A1F12',marginBottom:20}}>How the process works</h2>
+          <ol style={{listStyle:'none',padding:0,margin:'0 0 40px'}}>
+            {service.process.map((p,i)=>
+              <li key={i} style={{display:'flex',gap:16,marginBottom:18,alignItems:'flex-start'}}>
+                <span style={{width:30,height:30,borderRadius:'50%',background:service.color,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Playfair Display',Georgia,serif",fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</span>
+                <div>
+                  <div style={{fontSize:14,fontWeight:700,color:'#0A1F12',marginBottom:3}}>{p.t}</div>
+                  <div style={{fontSize:13,color:'rgba(10,31,18,.65)',lineHeight:1.6}}>{p.d}</div>
+                </div>
+              </li>
+            )}
+          </ol>
+
+          <h2 className="serif" style={{fontSize:'clamp(1.3rem,2.6vw,1.6rem)',color:'#0A1F12',marginBottom:16}}>Frequently asked</h2>
+          <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:36}}>
+            {service.faq.map((f,i)=>
+              <details key={i} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:'14px 18px'}}>
+                <summary style={{cursor:'pointer',fontSize:13.5,fontWeight:700,color:'#0A1F12',lineHeight:1.5}}>{f.q}</summary>
+                <p style={{fontSize:13,color:'rgba(10,31,18,.7)',lineHeight:1.65,marginTop:10,marginBottom:0}}>{f.a}</p>
+              </details>
+            )}
+          </div>
+
+          <NotReg/>
+        </div>
+
+        {/* STICKY ENGAGEMENT CARD */}
+        <aside style={{position:'sticky',top:100,height:'fit-content',display:'flex',flexDirection:'column',gap:16}}>
+          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'26px 24px',boxShadow:'0 14px 40px -20px rgba(10,31,18,.15)'}}>
+            <span style={{display:'inline-block',fontSize:10,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:800,color:service.color,marginBottom:12}}>Start engagement</span>
+            <h3 className="serif" style={{fontSize:20,fontWeight:800,color:'#0A1F12',lineHeight:1.2,marginBottom:8}}>{service.title}</h3>
+            <p style={{fontSize:12.5,color:'rgba(10,31,18,.6)',lineHeight:1.6,marginBottom:18}}>Ready to begin? Start the engagement — tell us about your business and we will confirm details, timeline and payment.</p>
+
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',padding:'14px 0',borderTop:'1px dashed rgba(10,31,18,.1)',borderBottom:'1px dashed rgba(10,31,18,.1)',marginBottom:18}}>
+              <span style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)'}}>Service fee</span>
+              <span className="serif" style={{fontSize:22,fontWeight:800,color:service.color}}>{service.price}</span>
+            </div>
+
+            <button onClick={startEngagement} style={{width:'100%',padding:'15px 22px',background:`linear-gradient(135deg,${service.color},${service.color}cc)`,color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9,marginBottom:10}}>
+              <i className={`fas ${service.crossLinkAdmin?'fa-arrow-up-right-from-square':'fa-file-signature'}`}></i>
+              {service.crossLinkAdmin?'Open Administrative Desk':'Start engagement'}
+            </button>
+            <a href={waUrl(`Hello StartEasy — I have a question about the ${service.title} service.`)} target="_blank" rel="noopener noreferrer"
+               style={{display:'flex',alignItems:'center',justifyContent:'center',gap:9,width:'100%',padding:'13px 18px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:13.5,fontWeight:700,textDecoration:'none'}}>
+              <i className="fab fa-whatsapp"></i> Ask a question first
+            </a>
+          </div>
+
+          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'20px 22px'}}>
+            <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:12}}>What happens next</div>
+            <ol style={{listStyle:'none',padding:0,margin:0}}>
+              {['Submit your brief and contact details',
+                'We confirm scope within 4 working hours',
+                'You pay the service fee (WhatsApp / bank / Airtel / MTN / PayPal / crypto)',
+                'An officer is assigned and work begins',
+                'Deliverables sent by email; you track progress on our Track page'].map((t,i)=>
+                <li key={i} style={{display:'flex',gap:10,fontSize:12.5,color:'rgba(10,31,18,.75)',lineHeight:1.55,marginBottom:9,alignItems:'flex-start'}}>
+                  <span style={{width:20,height:20,borderRadius:'50%',background:'rgba(232,115,15,.12)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:10,flexShrink:0,fontFamily:"'Playfair Display',Georgia,serif",marginTop:1}}>{i+1}</span>
+                  <span>{t}</span>
+                </li>
+              )}
+            </ol>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    {/* RELATED */}
+    <section style={{maxWidth:1240,margin:'0 auto',padding:'0 24px 64px'}}>
+      <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',gap:16,marginBottom:24,flexWrap:'wrap'}}>
+        <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',color:'#0A1F12',margin:0}}>Other services you may need</h2>
+        <button onClick={()=>go('venture')} style={{background:'none',border:'none',color:'#E8730F',fontWeight:800,fontSize:12.5,letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:6}}>See all <Arrow/></button>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {related.map(s=><ServiceCard key={s.key} service={s}/>)}
+      </div>
+    </section>
+
+    {showEngagement && <VentureEngagementModal service={service} onClose={()=>setShowEngagement(false)} onDone={()=>{setShowEngagement(false); go('track');}}/>}
+  </div>;
+}
+
+/* ============================================================
+   ENGAGEMENT MODAL — brief → contact → payment → confirm
+   ============================================================ */
+function VentureEngagementModal({service,onClose,onDone}){
+  const [step,setStep]=useState('brief');
+  const [brief,setBrief]=useState({goals:'',timeline:'Flexible',notes:''});
+  const [client,setClient]=useState({name:'',email:'',phone:'',business:''});
+  const [method,setMethod]=useState(null);
+  const [senderName,setSenderName]=useState('');
+  const [senderContact,setSenderContact]=useState('');
+  const [txRef,setTxRef]=useState('');
+  const [agree,setAgree]=useState(false);
+  const [error,setError]=useState('');
+  const [saving,setSaving]=useState(false);
+  const [ref,setRef]=useState('');
+  const [cloudSaved,setCloudSaved]=useState(null);
+  const [copied,setCopied]=useState('');
+
+  const copy=(t,k)=>{const done=()=>{setCopied(k);setTimeout(()=>setCopied(''),1500);};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done).catch(done);}else done();};
+
+  const nextStep=()=>{
+    setError('');
+    if(step==='brief'){
+      if(!brief.goals.trim()||brief.goals.trim().length<20){setError('Tell us a bit more about what you need — at least a couple of sentences.');return;}
+      setStep('contact');return;
+    }
+    if(step==='contact'){
+      if(!client.name.trim()){setError('Please enter your full name.');return;}
+      if(!client.email.trim()||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email)){setError('Please enter a valid email.');return;}
+      setSenderName(client.name);setSenderContact(client.phone||client.email);
+      setStep('payment');return;
+    }
+  };
+  const backStep=()=>{setError('');setStep(step==='payment'?'contact':'brief');};
+
+  const submit=async()=>{
+    setError('');
+    if(!method){setError('Choose a payment method.');return;}
+    if(!senderName.trim()){setError('Enter the name on the payment.');return;}
+    if(!senderContact.trim()){setError('Enter the phone or email used.');return;}
+    if(!txRef.trim()){setError('Enter your transaction reference.');return;}
+    if(!agree){setError('Please confirm the payment and terms.');return;}
+    setSaving(true);
+
+    const rcpt='SE-VE-'+service.key.toUpperCase()+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
+    const dt=new Date().toLocaleString('en-GB',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+
+    const record={
+      ref:rcpt,
+      serviceKey:service.key,
+      serviceTitle:service.title,
+      servicePrice:service.price,
+      clientName:client.name,
+      clientEmail:client.email,
+      clientPhone:client.phone||'',
+      clientBusiness:client.business||'',
+      brief:{ goals:brief.goals, timeline:brief.timeline, notes:brief.notes },
+      method:V_PAYMENTS[method]?.label||method,
+      senderName,senderContact,txRef,
+      receiptDate:dt
+    };
+
+    const saved=await addVenture(record);
+    setCloudSaved(saved?'ok':'fail');
+    rememberVentureRef(rcpt);
+    trackEvent('venture_submit',{ref:rcpt,serviceKey:service.key});
+    setRef(rcpt);
+    setSaving(false);
+    setStep('done');
+  };
+
+  const whatsappMsg=()=>{
+    const lines=['*STARTEASY — VENTURE ENGAGEMENT*','','*Ref:* '+ref,'*Service:* '+service.title,'','*Client:* '+client.name,'*Email:* '+client.email];
+    if(client.business) lines.push('*Business:* '+client.business);
+    lines.push('','*Brief:*',brief.goals);
+    lines.push('','*Payment*','Method: '+(V_PAYMENTS[method]?.label||method),'Sender: '+senderName,'TxRef: '+txRef);
+    return lines.join('\n');
+  };
+
+  return <VModal open onClose={onClose} eyebrow={`Engagement · ${service.title}`} maxWidth="56rem">
+    {step!=='done'&&<div style={{display:'flex',gap:8,marginBottom:22,flexWrap:'wrap'}}>
+      {['brief','contact','payment'].map((s,i)=>{
+        const labels={brief:'Brief',contact:'Contact',payment:'Payment'};
+        const isPast = ['brief','contact','payment'].indexOf(step) > i;
+        const isActive = step===s;
+        return <button key={s} disabled={!isPast&&!isActive} onClick={()=>isPast&&setStep(s)}
+          style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 14px',borderRadius:99,fontSize:12,fontWeight:700,cursor:isPast?'pointer':'default',fontFamily:'inherit',border:isActive?'none':'1.5px solid '+(isPast?service.color+'44':'rgba(10,31,18,.1)'),background:isActive?'#0A1F12':isPast?service.color+'12':'#fff',color:isActive?'#fff':isPast?service.color:'rgba(10,31,18,.5)'}}>
+          <span style={{width:20,height:20,borderRadius:'50%',background:isActive?'rgba(255,255,255,.2)':isPast?service.color+'22':'rgba(10,31,18,.08)',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800}}>{isPast?'✓':i+1}</span>
+          {labels[s]}
+        </button>;
+      })}
+    </div>}
+
+    {step==='brief'&&<div>
+      <h3 className="serif" style={{fontSize:20,color:'#0A1F12',marginBottom:8}}>Tell us about your project</h3>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.65)',lineHeight:1.65,marginBottom:20}}>The more detail you give us here, the faster we can start.</p>
+
+      <div style={{marginBottom:16}}>
+        <label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:8}}>Project brief *</label>
+        <textarea value={brief.goals} onChange={e=>setBrief({...brief,goals:e.target.value})} rows={6} placeholder="What do you need from us? What is the business? What are you trying to achieve?" style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 16px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit',resize:'vertical',lineHeight:1.55}}/>
+      </div>
+
+      <div style={{marginBottom:16}}>
+        <label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:8}}>Preferred timeline</label>
+        <select value={brief.timeline} onChange={e=>setBrief({...brief,timeline:e.target.value})} style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:10,padding:'12px 16px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}>
+          {['Flexible','Within 2 weeks','Within 4 weeks','Urgent (as soon as possible)'].map(o=><option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+
+      <div style={{marginBottom:22}}>
+        <label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:8}}>Anything else (optional)</label>
+        <textarea value={brief.notes} onChange={e=>setBrief({...brief,notes:e.target.value})} rows={3} placeholder="Links, references, questions, special requirements…" style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:10,padding:'12px 16px',fontSize:13,color:'#0A1F12',fontFamily:'inherit',resize:'vertical',lineHeight:1.55}}/>
+      </div>
+    </div>}
+
+    {step==='contact'&&<div>
+      <h3 className="serif" style={{fontSize:20,color:'#0A1F12',marginBottom:8}}>How can we reach you?</h3>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.65)',lineHeight:1.65,marginBottom:20}}>An officer will reply within 4 working hours to confirm scope and timeline.</p>
+      <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))'}}>
+        <div><label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:7}}>Full name *</label><input value={client.name} onChange={e=>setClient({...client,name:e.target.value})} placeholder="Your full name" style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'11px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/></div>
+        <div><label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:7}}>Email *</label><input type="email" value={client.email} onChange={e=>setClient({...client,email:e.target.value})} placeholder="you@company.com" style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'11px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/></div>
+        <div><label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:7}}>Phone / WhatsApp</label><input value={client.phone} onChange={e=>setClient({...client,phone:e.target.value})} placeholder="+260 …" style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'11px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/></div>
+        <div><label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:7}}>Business name</label><input value={client.business} onChange={e=>setClient({...client,business:e.target.value})} placeholder="If applicable" style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'11px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/></div>
+      </div>
+    </div>}
+
+    {step==='payment'&&<div>
+      <div style={{background:`linear-gradient(135deg,#0A1F12,${service.color}33)`,borderRadius:12,padding:'18px 20px',color:'#fff',marginBottom:18,display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12}}>
+        <div>
+          <div style={{fontSize:10.5,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:service.color,marginBottom:4}}>Service fee due</div>
+          <div className="serif" style={{fontSize:28,fontWeight:800,color:service.color,lineHeight:1}}>{service.price}</div>
+          <div style={{fontSize:12,color:'rgba(255,255,255,.7)',marginTop:6}}>{service.title} · {service.timeline}</div>
+        </div>
+        <i className="fas fa-shield-alt" style={{fontSize:38,color:service.color,opacity:.5}}></i>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',gap:10,marginBottom:18}}>
+        {Object.entries(V_PAYMENTS).map(([k,pm])=>
+          <button key={k} type="button" onClick={()=>setMethod(k)}
+            style={{background:'#fff',border:method===k?`2px solid ${service.color}`:'2px solid rgba(10,31,18,.12)',borderRadius:12,padding:'14px 10px',cursor:'pointer',fontFamily:'inherit',display:'flex',flexDirection:'column',alignItems:'center',gap:6,textAlign:'center',position:'relative'}}>
+            <div style={{width:44,height:44,borderRadius:11,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,flexShrink:0,background:k==='airtel'?'#E40000':k==='mtn'?'#FFCC00':k==='bank'?'linear-gradient(135deg,#1B5E8C,#0D3D5E)':k==='paypal'?'linear-gradient(135deg,#003087,#009CDE)':'linear-gradient(135deg,#F7931A,#E2761B)',color:k==='mtn'?'#000':'#fff',fontSize:16}}>
+              {k==='airtel'?'airtel':k==='mtn'?'MTN':k==='bank'?<i className="fas fa-university"></i>:k==='paypal'?<i className="fab fa-paypal"></i>:<i className="fab fa-bitcoin"></i>}
+            </div>
+            <div style={{fontSize:12,fontWeight:800,color:'#0A1F12'}}>{pm.label}</div>
+            <div style={{fontSize:10,color:'rgba(10,31,18,.5)'}}>{pm.sub}</div>
+          </button>
+        )}
+      </div>
+
+      {method&&(()=>{
+        const m=V_PAYMENTS[method];
+        return <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:12,padding:'16px 18px',marginBottom:18}}>
+          <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>Pay to</div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {m.rows.map((r,i)=>
+              <div key={i} style={{background:'#F7FAF8',border:'1px solid rgba(10,31,18,.08)',borderRadius:8,padding:'11px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:10,letterSpacing:'1.2px',textTransform:'uppercase',color:'#8A6828',fontWeight:800,marginBottom:2}}>{r.l}</div>
+                  <div style={{fontSize:13.5,fontWeight:700,color:'#0A1F12',fontFamily:r.plain?'inherit':'Consolas,monospace',wordBreak:'break-all'}}>{r.v}</div>
+                </div>
+                {r.copy&&<button type="button" onClick={()=>copy(r.copy,r.l)} style={{background:'rgba(245,166,35,.15)',border:'none',color:'#8A6828',width:34,height:34,borderRadius:8,cursor:'pointer',fontSize:12,flexShrink:0}}><i className={`fas ${copied===r.l?'fa-check':'fa-copy'}`}></i></button>}
+              </div>
+            )}
+          </div>
+          <div style={{marginTop:12,fontSize:12,color:'rgba(10,31,18,.6)',lineHeight:1.6}}>
+            <strong style={{color:'#0A1F12'}}>How to pay:</strong> {m.steps.map((s,i)=><span key={i} dangerouslySetInnerHTML={{__html:(i>0?' · ':' ')+s}}/>)}
+          </div>
+        </div>;
+      })()}
+
+      <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',marginBottom:14}}>
+        <div><label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:7}}>Name on payment *</label><input value={senderName} onChange={e=>setSenderName(e.target.value)} style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'11px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/></div>
+        <div><label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:7}}>Phone / email used *</label><input value={senderContact} onChange={e=>setSenderContact(e.target.value)} style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'11px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/></div>
+      </div>
+
+      <div style={{marginBottom:14}}>
+        <label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:7}}>Transaction reference *</label>
+        <input value={txRef} onChange={e=>setTxRef(e.target.value)} placeholder="e.g. 10683000119" style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'11px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/>
+      </div>
+
+      <label style={{display:'flex',gap:12,alignItems:'flex-start',fontSize:12.5,color:'rgba(10,31,18,.8)',cursor:'pointer',lineHeight:1.55,marginBottom:6}}>
+        <input type="checkbox" checked={agree} onChange={e=>setAgree(e.target.checked)} style={{width:18,height:18,accentColor:service.color,flexShrink:0,marginTop:2,cursor:'pointer'}}/>
+        <span>I confirm I have sent <strong>{service.price}</strong> to the account shown, and I understand an officer will verify it manually before work begins.</span>
+      </label>
+    </div>}
+
+    {step==='done'&&<div style={{textAlign:'center'}}>
+      <div style={{width:72,height:72,borderRadius:'50%',background:`linear-gradient(135deg,${service.color},${service.color}cc)`,display:'inline-flex',alignItems:'center',justifyContent:'center',marginBottom:20}}>
+        <i className="fas fa-check" style={{color:'#fff',fontSize:30}}></i>
+      </div>
+      <h3 className="serif" style={{fontSize:24,color:'#0A1F12',marginBottom:10}}>Engagement submitted</h3>
+      <p style={{fontSize:14,color:'rgba(10,31,18,.7)',lineHeight:1.65,marginBottom:18}}>Your reference is <strong style={{fontFamily:'Consolas,monospace',color:service.color,fontSize:15}}>{ref}</strong>. An officer will verify your payment within 4 working hours.</p>
+
+      {cloudSaved==='ok'&&<p style={{fontSize:12,color:'#1E7B3C',marginBottom:14,fontWeight:600}}><i className="fas fa-cloud-upload-alt" style={{marginRight:6}}></i>Synced to StartEasy records.</p>}
+      {cloudSaved==='fail'&&<p style={{fontSize:12,color:'#B8564F',marginBottom:14,fontWeight:600}}><i className="fas fa-triangle-exclamation" style={{marginRight:6}}></i>Cloud sync delayed — please send on WhatsApp below.</p>}
+
+      <div style={{background:'#fff',border:'1px dashed #25D366',borderRadius:12,padding:16,marginBottom:16,textAlign:'left'}}>
+        <div style={{fontSize:12,fontWeight:800,letterSpacing:'.6px',color:'#075E54',marginBottom:10,display:'flex',alignItems:'center',gap:8,textTransform:'uppercase'}}>
+          <i className="fab fa-whatsapp" style={{color:'#25D366',fontSize:16}}></i> Send to officer on WhatsApp
+        </div>
+        <a href={waUrl(whatsappMsg())} target="_blank" rel="noopener noreferrer"
+           style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#25D366',color:'#fff',padding:'12px 20px',borderRadius:10,fontSize:13.5,fontWeight:700,textDecoration:'none'}}>
+          <i className="fab fa-whatsapp"></i> Open WhatsApp
+        </a>
+      </div>
+
+      <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
+        <button onClick={onDone} style={{padding:'13px 22px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:10,fontSize:13.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Go to Track page</button>
+        <button onClick={onClose} style={{padding:'13px 22px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>Close</button>
+      </div>
+    </div>}
+
+    {error&&<div style={{background:'rgba(220,53,69,.08)',border:'1px solid rgba(220,53,69,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#B8564F',fontSize:12.5,display:'flex',alignItems:'center',gap:8}}><i className="fas fa-exclamation-circle"></i> {error}</div>}
+
+    {step!=='done'&&<div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:22,justifyContent:'space-between'}}>
+      <button onClick={step==='brief'?onClose:backStep} style={{padding:'12px 20px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:9,fontSize:13.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
+        {step==='brief'?'Cancel':'← Back'}
+      </button>
+      {step!=='payment'
+        ? <button onClick={nextStep} style={{padding:'13px 26px',background:`linear-gradient(135deg,${service.color},${service.color}cc)`,color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:9}}>Continue <Arrow/></button>
+        : <button onClick={submit} disabled={saving} style={{padding:'13px 26px',background:saving?'rgba(10,31,18,.15)':`linear-gradient(135deg,${service.color},${service.color}cc)`,color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700,cursor:saving?'wait':'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:9}}>
+            <i className={`fas ${saving?'fa-spinner fa-spin':'fa-paper-plane'}`}></i> {saving?'Saving…':'Submit engagement'}
+          </button>
+      }
+    </div>}
+  </VModal>;
+}
+
+/* ============================================================
+   VENTURE TRACK PAGE
+   ============================================================ */
+function VentureTrack({go}){
+  const [ref,setRef]=useState('');
+  const [record,setRecord]=useState(null);
+  const [trackedRef,setTrackedRef]=useState(null);
+  const [error,setError]=useState('');
+  const [looking,setLooking]=useState(false);
+  const [myRefs]=useState(()=>readVentureRefs());
+
+  useEffect(()=>{trackEvent('page_view',{route:'track'});},[]);
+
+  useEffect(()=>{
+    if(!trackedRef || !firebaseReady) return;
+    const unsub = db.collection(SE_VENTURE).doc(trackedRef).onSnapshot(
+      snap => { if(snap.exists) setRecord({ id: snap.id, ...snap.data() }); },
+      err => console.warn('[StartEasy] venture track listener:', err && err.message)
+    );
+    return unsub;
+  },[trackedRef]);
+
+  const lookup=async(r)=>{
+    setError('');
+    const k=(r||'').toUpperCase().trim();
+    if(!k){ setError('Please enter your reference.'); return; }
+    setLooking(true);
+    const found=await findVentureByRef(k);
+    setLooking(false);
+    if(!found){ setRecord(null); setTrackedRef(null); setError('No venture submission found with that reference.'); return; }
+    setRecord(found);
+    setTrackedRef(k);
+  };
+
+  const STATUS = {
+    under_review: { label:'Under Review', color:'#8A6828', icon:'fa-clock', userLine:'Your engagement is queued for officer verification.' },
+    confirmed:    { label:'Confirmed',    color:'#1E7B3C', icon:'fa-circle-check', userLine:'Payment verified. Your engagement is active and work has begun.' },
+    in_progress:  { label:'In Progress',  color:'#1B6CA8', icon:'fa-spinner', userLine:'Your officer is actively working on your engagement.' },
+    delivered:    { label:'Delivered',    color:'#1E7B3C', icon:'fa-box-open', userLine:'Your deliverables have been sent. Check your email.' },
+    reverted:     { label:'Action Needed',color:'#7A4FA3', icon:'fa-rotate-left', userLine:'We need a small correction before we can proceed.' },
+    declined:     { label:'Declined',     color:'#B8564F', icon:'fa-circle-xmark', userLine:'This engagement could not proceed.' }
+  };
+
+  const meta = record ? (STATUS[record.status] || STATUS.under_review) : null;
+
+  return <div className="fadein" style={{background:'#F5FAF6',minHeight:'100vh',padding:'48px 24px 80px'}}>
+    <div style={{maxWidth:760,margin:'0 auto'}}>
+      <span className="micro" style={{color:'rgba(10,31,18,.5)',display:'block',marginBottom:16}}>Venture submissions</span>
+      <h1 className="serif" style={{fontSize:'clamp(1.8rem,4.2vw,2.6rem)',lineHeight:1.1,color:'#0A1F12',marginBottom:12}}>Track your engagement</h1>
+      <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',marginBottom:32,maxWidth:620}}>Enter the reference you received when you submitted your venture engagement. This page updates live.</p>
+
+      <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:12,padding:'22px 24px',marginBottom:24}}>
+        <label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:10}}>Engagement reference</label>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+          <input value={ref} onChange={e=>setRef(e.target.value.toUpperCase())} placeholder="SE-VE-PLAN-2026-12345" style={{flex:'1 1 240px',background:'#fff',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 18px',fontSize:14,fontFamily:'Consolas,monospace',fontWeight:700,color:'#0A1F12'}} onKeyDown={e=>{if(e.key==='Enter')lookup(ref);}}/>
+          <button onClick={()=>lookup(ref)} disabled={looking} style={{padding:'14px 24px',background:looking?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,cursor:looking?'wait':'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:8}}>
+            <i className={`fas ${looking?'fa-spinner fa-spin':'fa-magnifying-glass'}`}></i> {looking?'Looking…':'Check status'}
+          </button>
+        </div>
+        {myRefs.length>0&&<div style={{marginTop:16}}>
+          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)',marginBottom:10}}>Your recent submissions</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+            {myRefs.map(r=><button key={r} onClick={()=>{setRef(r);lookup(r);}} style={{padding:'8px 14px',background:'rgba(10,31,18,.05)',border:'1px solid rgba(10,31,18,.1)',borderRadius:99,fontSize:11,fontFamily:'Consolas,monospace',fontWeight:700,color:'#0A1F12',cursor:'pointer'}}>{r}</button>)}
+          </div>
+        </div>}
+      </div>
+
+      {error&&<div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:10,padding:'14px 18px',marginBottom:24,color:'#7C2318',fontSize:13,display:'flex',gap:10,alignItems:'flex-start'}}>
+        <i className="fas fa-circle-exclamation" style={{marginTop:2}}></i><span>{error}</span>
+      </div>}
+
+      {record&&meta&&<div className="fadein" style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:12,padding:'24px 26px'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:16,flexWrap:'wrap',marginBottom:16}}>
+          <div>
+            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)',marginBottom:6}}>Reference</div>
+            <div style={{fontFamily:'Consolas,monospace',fontSize:15,fontWeight:800,color:'#0A1F12'}}>{record.ref}</div>
+          </div>
+          <span style={{display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',borderRadius:99,fontSize:11,fontWeight:800,letterSpacing:'.06em',textTransform:'uppercase',background:meta.color+'15',color:meta.color,border:`1px solid ${meta.color}44`}}>
+            <i className={`fas ${meta.icon}`} style={{fontSize:10}}></i> {meta.label}
+          </span>
+        </div>
+        <div style={{paddingTop:14,borderTop:'1px dashed rgba(10,31,18,.1)',fontSize:13.5,color:'rgba(10,31,18,.75)',lineHeight:1.7,marginBottom:20}}>{meta.userLine}</div>
+
+        <div style={{display:'grid',gap:10,marginBottom:20}}>
+          {[
+            ['Service', record.serviceTitle],
+            ['Client', record.clientName],
+            ['Amount', record.servicePrice],
+            ['Payment method', record.method],
+            ['Transaction reference', record.txRef],
+            ['Submitted', vTimeAgo(record.submittedAt)]
+          ].map(([k,v],i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',gap:16,padding:'8px 0',borderBottom:'1px dashed rgba(10,31,18,.06)'}}>
+              <span style={{fontSize:12,color:'rgba(10,31,18,.5)',fontWeight:600}}>{k}</span>
+              <span style={{fontSize:13,color:'#0A1F12',fontWeight:700,textAlign:'right'}}>{v}</span>
+            </div>
+          )}
+        </div>
+
+        {record.brief&&record.brief.goals&&<div style={{background:'#F7FAF8',border:'1px solid rgba(10,31,18,.06)',borderRadius:10,padding:'14px 16px',marginBottom:18}}>
+          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:8}}>Your brief</div>
+          <div style={{fontSize:13,color:'rgba(10,31,18,.75)',lineHeight:1.65}}>{record.brief.goals}</div>
+        </div>}
+
+        <div style={{background:'linear-gradient(135deg,#0A1F12,#123A1F)',borderRadius:12,padding:'18px 20px',color:'#fff',marginBottom:18}}>
+          <div style={{fontSize:11,fontWeight:800,letterSpacing:'.14em',textTransform:'uppercase',color:'#F5A623',marginBottom:10}}>Progress</div>
+          <ol style={{listStyle:'none',padding:0,margin:0}}>
+            {(record.history||[]).map((h,i)=>{
+              const hm=STATUS[h.status]||STATUS.under_review;
+              return <li key={i} style={{display:'flex',gap:12,padding:'8px 0',fontSize:13,alignItems:'flex-start'}}>
+                <span style={{width:22,height:22,borderRadius:'50%',background:'rgba(245,166,35,.2)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800,flexShrink:0,fontFamily:"'Playfair Display',Georgia,serif",marginTop:1}}>{i+1}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700,marginBottom:2}}>{hm.label}</div>
+                  <div style={{fontSize:12,color:'rgba(255,255,255,.7)',lineHeight:1.5}}>{h.note||hm.userLine}</div>
+                  <div style={{fontSize:10.5,color:'rgba(245,166,35,.75)',marginTop:4,fontWeight:600}}>{new Date(h.at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+                </div>
+              </li>;
+            })}
+          </ol>
+        </div>
+
+        <a href={waUrl(`Hello StartEasy — about venture submission ${record.ref}. I would like an update.`)} target="_blank" rel="noopener noreferrer"
+           style={{display:'inline-flex',alignItems:'center',gap:9,padding:'12px 20px',background:'#25D366',color:'#fff',borderRadius:9,fontSize:13.5,fontWeight:700,textDecoration:'none'}}>
+          <i className="fab fa-whatsapp"></i> Message your officer
+        </a>
+      </div>}
+
+      <button onClick={()=>go('home')} style={{marginTop:24,padding:'12px 22px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit',color:'#0A1F12'}}>← Back to home</button>
+    </div>
+  </div>;
+}
+
+/* ============================================================
+   ORIENTATION / PRICING / ABOUT
+   ============================================================ */
 function VentureOrientation({go,onSwitchToAdmin}){
   useEffect(()=>{trackEvent('page_view',{route:'orientation'});},[]);
+  const items=[
+    {icon:'fa-rocket',color:'#2E9C4A',title:'I am starting a business',desc:'Registration, structure, tax and statutory setup.',target:'register'},
+    {icon:'fa-file-lines',color:'#E8730F',title:'I need a business plan',desc:'Funder-ready plan and projections.',target:'plan'},
+    {icon:'fa-truck-field',color:'#1B6CA8',title:'I need suppliers',desc:'Vetted and quoted suppliers.',target:'suppliers'},
+    {icon:'fa-palette',color:'#7A4FA3',title:'I need a brand and website',desc:'Identity, strategy and website.',target:'brand'},
+    {icon:'fa-chart-line',color:'#B8564F',title:'I need financial projections',desc:'3-year model and cash flow.',target:'financial'},
+    {icon:'fa-hand-holding-dollar',color:'#0E7C7B',title:'I am ready for investors',desc:'Pitch, funders, introductions.',target:'investors'},
+    {icon:'fa-bullhorn',color:'#5E7A67',title:'I need to grow sales',desc:'Channels and campaigns.',target:'sales'}
+  ];
+  const pick=(key)=>{
+    if(key==='register'){ onSwitchToAdmin && onSwitchToAdmin(); return; }
+    go('service',key);
+  };
   return <div className="fadein" style={{background:'#F5FAF6'}}>
-    <section style={{background:'#0A1F12',color:'#fff',padding:'56px 24px'}}>
+    <section style={{background:'#0A1F12',color:'#fff',padding:'clamp(56px,8vw,88px) 24px'}}>
       <div style={{maxWidth:1240,margin:'0 auto'}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:24}}>Orientation Services</span>
-        <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,marginBottom:16}}>What challenge do you have?</h1>
-        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:'46rem',marginBottom:32}}>Pick the situation that best describes you. Every answer points to a real StartEasy desk, service or assessment.</p>
-        <button onClick={()=>onSwitchToAdmin&&onSwitchToAdmin()} style={{padding:'14px 26px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:10}}><i className="fas fa-clipboard-list"></i> Open Administrative Services Desk</button>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Orientation</span>
+        <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,marginBottom:16,maxWidth:'46rem'}}>What are you trying to achieve?</h1>
+        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:'44rem'}}>Pick the situation closest to where you are. Each opens a dedicated page with full details and a direct engagement form.</p>
       </div>
     </section>
     <section style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          {icon:'fa-rocket',color:'#2E9C4A',title:'Business Start-Up',text:'Registration + tax + statutory registrations.',admin:true},
-          {icon:'fa-shield-halved',color:'#E8730F',title:'Compliance & Administration',text:'Filing, renewals, records, calendar.',admin:true},
-          {icon:'fa-briefcase',color:'#7A4FA3',title:'Outsourced Administrative Department',text:'External administrative office.',admin:true},
-          {icon:'fa-user',color:'#1B6CA8',title:'Personal Administrative Services',text:'Documents, applications, certificates.',admin:true}
-        ].map((p,i)=><button key={i} onClick={()=>p.admin&&onSwitchToAdmin&&onSwitchToAdmin()} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'24px 22px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',borderTopWidth:4,borderTopColor:p.color,display:'flex',flexDirection:'column',gap:14}}>
-          <span style={{width:46,height:46,borderRadius:12,background:p.color+'18',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}><i className={`fas ${p.icon}`}></i></span>
-          <h4 className="serif" style={{fontSize:16.5,fontWeight:700,color:'#0A1F12',margin:0}}>{p.title}</h4>
-          <p style={{fontSize:13,color:'rgba(10,31,18,.7)',lineHeight:1.6,margin:0}}>{p.text}</p>
-        </button>)}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((it,i)=>
+          <button key={i} onClick={()=>pick(it.target)} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'26px 22px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',borderTopWidth:4,borderTopColor:it.color,display:'flex',flexDirection:'column',gap:12,transition:'all .25s'}}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.boxShadow='0 12px 30px rgba(0,0,0,.08)';}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';}}>
+            <span style={{width:48,height:48,borderRadius:12,background:it.color+'18',color:it.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:19}}><i className={`fas ${it.icon}`}></i></span>
+            <h3 className="serif" style={{fontSize:17,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{it.title}</h3>
+            <p style={{fontSize:13,color:'rgba(10,31,18,.65)',lineHeight:1.6,margin:0,flex:1}}>{it.desc}</p>
+            <span style={{display:'inline-flex',alignItems:'center',gap:8,fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:it.color,paddingTop:12,borderTop:'1px solid rgba(10,31,18,.06)',marginTop:'auto'}}>Open <Arrow/></span>
+          </button>
+        )}
       </div>
     </section>
   </div>;
 }
 
-/* VENTURE PRICING */
 function VenturePricing(){
   useEffect(()=>{trackEvent('page_view',{route:'pricing'});},[]);
-  return <div className="fadein" style={{background:'#F5FAF6',padding:'56px 24px'}}>
+  return <div className="fadein" style={{background:'#F5FAF6',padding:'clamp(56px,8vw,80px) 24px'}}>
     <div style={{maxWidth:1240,margin:'0 auto'}}>
       <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:16}}>Fee structure</span>
-      <h1 className="serif" style={{fontSize:'clamp(1.8rem,4.2vw,2.7rem)',lineHeight:1.1,color:'#0A1F12',marginBottom:32}}>Venture building services.</h1>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          {icon:'fa-file-lines',color:'#E8730F',name:'Business plan',price:'K750',desc:'Full written business plan, reviewed by an officer.'},
-          {icon:'fa-palette',color:'#7A4FA3',name:'Branding and website',price:'K1,000',desc:'Brand identity + website. Domain registration included.'},
-          {icon:'fa-building',color:'#2E9C4A',name:'Business registration support',price:'K400 · K750',desc:'Business Name K400. Company Incorporation K750.'},
-          {icon:'fa-bullhorn',color:'#0E7C7B',name:'Marketing support',price:'K400/mo',desc:'Ongoing monthly marketing retainer.'}
-        ].map((s,i)=><div key={i} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 20px',display:'flex',flexDirection:'column',gap:12,borderTopWidth:4,borderTopColor:s.color}}>
-          <span style={{width:40,height:40,borderRadius:10,background:s.color+'22',color:s.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}><i className={`fas ${s.icon}`}></i></span>
-          <h4 className="serif" style={{fontSize:15,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{s.name}</h4>
-          <div className="serif" style={{fontSize:'clamp(1.4rem,2.6vw,1.7rem)',fontWeight:800,color:'#F5A623',lineHeight:1}}>{s.price}</div>
-          <p style={{fontSize:12,color:'rgba(10,31,18,.6)',lineHeight:1.5,margin:0}}>{s.desc}</p>
-        </div>)}
+      <h1 className="serif" style={{fontSize:'clamp(1.8rem,4.2vw,2.7rem)',lineHeight:1.1,color:'#0A1F12',marginBottom:14,maxWidth:'42rem'}}>Venture building fees — clear from the start.</h1>
+      <p style={{fontSize:15,lineHeight:1.7,color:'rgba(10,31,18,.65)',maxWidth:'42rem',marginBottom:32}}>Every service has a published StartEasy fee. These are service fees for our work — separate from any third-party cost.</p>
+      <NotReg/>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{marginTop:32}}>
+        {Object.values(VENTURE_SERVICES).map(s=>
+          <div key={s.key} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 20px',borderTopWidth:4,borderTopColor:s.color,display:'flex',flexDirection:'column',gap:12}}>
+            <span style={{width:40,height:40,borderRadius:10,background:s.color+'18',color:s.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17}}><i className={`fas ${s.icon}`}></i></span>
+            <h3 className="serif" style={{fontSize:15.5,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{s.title}</h3>
+            <div className="serif" style={{fontSize:24,fontWeight:800,color:s.color,lineHeight:1}}>{s.price}</div>
+            <div style={{fontSize:12,color:'rgba(10,31,18,.55)'}}>{s.timeline}</div>
+          </div>
+        )}
       </div>
     </div>
   </div>;
 }
 
-/* VENTURE ABOUT */
 function VentureAbout(){
+  useEffect(()=>{trackEvent('page_view',{route:'about'});},[]);
   return <div className="fadein" style={{background:'#F5FAF6'}}>
-    <section style={{background:'#0A1F12',color:'#fff',padding:'64px 24px'}}>
+    <section style={{background:'#0A1F12',color:'#fff',padding:'clamp(56px,8vw,80px) 24px'}}>
       <div style={{maxWidth:1240,margin:'0 auto'}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>About Us</span>
-        <h1 className="serif" style={{fontSize:'clamp(1.9rem,5vw,3rem)',lineHeight:1.08,marginBottom:20}}>StartEasy Zambia</h1>
-        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.6)',maxWidth:'52rem',marginBottom:28}}>A venture building service platform — a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>About</span>
+        <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,marginBottom:20,maxWidth:'48rem'}}>StartEasy Zambia</h1>
+        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:'52rem',marginBottom:28}}>A venture building service platform — a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p>
+        <NotReg tone="dark"/>
       </div>
     </section>
   </div>;
 }
 
-/* VENTURE FLOATING ASSISTANT */
+/* ============================================================
+   FLOATING ASSISTANT
+   ============================================================ */
 function VentureFloatingAssistant(){
   const [open,setOpen]=useState(false);
   return <div className="fixed" style={{bottom:24,right:24,zIndex:100,display:'flex',flexDirection:'column',alignItems:'flex-end'}}>
     {open&&<div style={{marginBottom:14,width:'18rem',background:'#fff',borderRadius:10,boxShadow:'0 20px 60px rgba(0,0,0,.2)',padding:18}}>
-      <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',marginBottom:14}}>Pick a desk to explore, or message us directly with what you are trying to do.</p>
-      <a href={waUrl('Hello StartEasy — I need help choosing the right service.')} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:9,background:'#25D366',color:'#fff',padding:'12px 18px',borderRadius:8,fontSize:13,fontWeight:700,textDecoration:'none'}}><i className="fab fa-whatsapp"></i> Chat on WhatsApp</a>
+      <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',marginBottom:14}}>Pick a service, or message us directly with what you are trying to do.</p>
+      <a href={waUrl('Hello StartEasy — I need help choosing the right venture service.')} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:9,background:'#25D366',color:'#fff',padding:'12px 18px',borderRadius:8,fontSize:13,fontWeight:700,textDecoration:'none'}}><i className="fab fa-whatsapp"></i> Chat on WhatsApp</a>
     </div>}
-    <button onClick={()=>setOpen(!open)} style={{width:52,height:52,borderRadius:'50%',background:'linear-gradient(135deg,#E8730F,#F5A623)',boxShadow:'0 4px 20px rgba(232,115,15,.45)',display:'flex',alignItems:'center',justifyContent:'center',border:'none',cursor:'pointer'}} aria-label="Help"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    <button onClick={()=>setOpen(!open)} style={{width:52,height:52,borderRadius:'50%',background:'linear-gradient(135deg,#E8730F,#F5A623)',boxShadow:'0 4px 20px rgba(232,115,15,.45)',display:'flex',alignItems:'center',justifyContent:'center',border:'none',cursor:'pointer'}} aria-label="Help">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
   </div>;
 }
 
-/* OUTER ROOT — swaps between Venture Building and Administrative Desk */
+/* ============================================================
+   ROOT — routes venture mode vs admin mode
+   ============================================================ */
 function Root(){
   const [mode,setMode]=useState('venture');
   const [route,setRoute]=useState('home');
@@ -2885,13 +3566,47 @@ function Root(){
 
   useEffect(()=>{
     getVisitor();
-    const t = setTimeout(()=>{ trackEvent('visit',{ua:(navigator.userAgent||'').slice(0,120)}); }, 1200);
+    const t=setTimeout(()=>{ trackEvent('visit',{ua:(navigator.userAgent||'').slice(0,120)}); },1200);
     return ()=>clearTimeout(t);
   },[]);
 
-  const go=useCallback((r,arg)=>{setRoute(r);setRouteArg(arg||null);window.scrollTo({top:0,behavior:'auto'});trackEvent('page_view',{route:r,arg:arg||null})},[]);
-  const switchToAdmin=useCallback(()=>{setMode('administrative');window.scrollTo({top:0,behavior:'auto'});trackEvent('page_view',{route:'administrative'});},[]);
-  const switchToVenture=useCallback(()=>{setMode('venture');setRoute('home');setRouteArg(null);window.scrollTo({top:0,behavior:'auto'});},[]);
+  useEffect(()=>{
+    const raw=(location.hash||'').replace(/^#\/?/,'');
+    const parts=raw.split('/').filter(Boolean);
+    if(parts[0]) setRoute(parts[0]);
+    if(parts[1]) setRouteArg(parts[1]);
+  },[]);
+
+  const go=useCallback((r,arg)=>{
+    setRoute(r); setRouteArg(arg||null);
+    try{ location.hash='#/'+r+(arg?'/'+arg:''); }catch(e){}
+    window.scrollTo({top:0,behavior:'auto'});
+    trackEvent('page_view',{route:r,arg:arg||null});
+  },[]);
+
+  useEffect(()=>{
+    const h=()=>{
+      const raw=(location.hash||'').replace(/^#\/?/,'');
+      const parts=raw.split('/').filter(Boolean);
+      setRoute(parts[0]||'home');
+      setRouteArg(parts[1]||null);
+    };
+    window.addEventListener('hashchange',h);
+    return ()=>window.removeEventListener('hashchange',h);
+  },[]);
+
+  const switchToAdmin=useCallback(()=>{
+    setMode('administrative');
+    window.scrollTo({top:0,behavior:'auto'});
+    trackEvent('page_view',{route:'administrative'});
+  },[]);
+
+  const switchToVenture=useCallback(()=>{
+    setMode('venture');
+    setRoute('home');
+    setRouteArg(null);
+    window.scrollTo({top:0,behavior:'auto'});
+  },[]);
 
   if(mode==='administrative'){
     return <window.StartEasyAdminDesk onExit={switchToVenture}/>;
@@ -2899,11 +3614,13 @@ function Root(){
 
   const view=()=>{
     switch(route){
-      case 'venture': return <VenturePage go={go} onSwitchToAdmin={switchToAdmin}/>;
+      case 'venture':     return <VentureServices/>;
+      case 'service':     return <VentureServiceDetail serviceKey={routeArg||'plan'} go={go} onSwitchToAdmin={switchToAdmin}/>;
+      case 'track':       return <VentureTrack go={go}/>;
       case 'orientation': return <VentureOrientation go={go} onSwitchToAdmin={switchToAdmin}/>;
-      case 'pricing': return <VenturePricing/>;
-      case 'about': return <VentureAbout/>;
-      default: return <VentureHome go={go} onSwitchToAdmin={switchToAdmin}/>;
+      case 'pricing':     return <VenturePricing/>;
+      case 'about':       return <VentureAbout/>;
+      default:            return <VentureHome go={go} onSwitchToAdmin={switchToAdmin}/>;
     }
   };
 
