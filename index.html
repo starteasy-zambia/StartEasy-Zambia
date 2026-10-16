@@ -176,6 +176,30 @@ input:focus,select:focus,textarea:focus{outline:none}
 .stat-value{font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:clamp(1.6rem,2.8vw,2.2rem);color:#F5A623;line-height:1;margin-bottom:8px;letter-spacing:-0.01em}
 .stat-label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.55)}
 .stat-icon{width:20px;height:20px;border-radius:50%;background:rgba(245,166,35,.18);color:#F5A623;display:inline-flex;align-items:center;justify-content:center;font-size:10px;margin-bottom:10px}
+
+/* Hero video slides */
+.hero-slides{position:relative;overflow:hidden;background:#0A1F12;min-height:min(94vh,880px);isolation:isolate}
+.hero-slides__media{position:absolute;inset:0;z-index:0}
+.hero-slides__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.05);transition:opacity 1400ms ease-in-out, transform 9000ms linear;will-change:opacity,transform;filter:saturate(.9) brightness(.85)}
+.hero-slides__video.is-active{opacity:1;transform:scale(1.0)}
+.hero-slides__tint{position:absolute;inset:0;z-index:1;background:linear-gradient(135deg, rgba(10,31,18,.94) 0%, rgba(10,31,18,.78) 42%, rgba(10,31,18,.5) 72%, rgba(10,31,18,.9) 100%);pointer-events:none}
+.hero-slides__glow{position:absolute;top:-25%;right:-12%;width:70vw;height:70vw;max-width:900px;max-height:900px;z-index:1;background:radial-gradient(circle, rgba(232,115,15,.28), transparent 62%);pointer-events:none}
+.hero-slides__bottomfade{position:absolute;left:0;right:0;bottom:0;height:45%;z-index:1;background:linear-gradient(to top, #0A1F12 4%, rgba(10,31,18,.5) 55%, transparent 100%);pointer-events:none}
+.hero-slides__content{position:relative;z-index:3}
+.hero-slides__chip{display:inline-flex;align-items:center;gap:10px;padding:9px 18px;background:rgba(245,166,35,.14);border:1px solid rgba(245,166,35,.45);border-radius:99px;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:#F5A623;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.hero-slides__dot{width:12px;height:6px;border-radius:99px;background:rgba(255,255,255,.28);border:none;cursor:pointer;padding:0;transition:all .45s cubic-bezier(.22,.61,.36,1)}
+.hero-slides__dot.is-active{width:48px;background:linear-gradient(90deg,#E8730F,#F5A623);box-shadow:0 0 18px rgba(232,115,15,.6)}
+.hero-slides__dot:hover{background:rgba(255,255,255,.55)}
+.hero-slides__dot.is-active:hover{background:linear-gradient(90deg,#E8730F,#F5A623)}
+.hero-slides__label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:rgba(255,255,255,.7);min-width:90px;display:inline-block;transition:opacity .4s ease}
+@media (max-width:768px){
+  .hero-slides{min-height:auto}
+  .hero-slides__video{filter:saturate(.85) brightness(.75)}
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-slides__video{transition:opacity 400ms ease-in-out;transform:none!important}
+  .hero-slides__glow{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -2296,7 +2320,7 @@ const CONTACT_EMAIL  = 'engagements@starteasyzambia.com';
 function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
 function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
 
-const { useState, useEffect, useMemo, useCallback } = React;
+const { useState, useEffect, useMemo, useCallback, useRef } = React;
 const FIREBASE_CONFIG = __SE_FIREBASE_CONFIG;
 const db = __SE_DB, auth = __SE_AUTH, firebaseReady = __SE_READY;
 const SE_EVENTS = 'se_events';
@@ -2571,6 +2595,119 @@ function Footer({go,onSwitchToAdmin}){
   </footer>;
 }
 
+/* ============================================================
+   HERO VIDEO SLIDES — background video carousel
+   ============================================================ */
+function HeroVideoSlides({go}){
+  const VIDEOS = [
+    { src:'t.mp4',       label:'Building' },
+    { src:'re.mp4',      label:'Growing' },
+    { src:'eets .mp4',   label:'Managing' },
+    { src:'innova.mp4',  label:'Innovating' }
+  ];
+  const SLIDE_MS = 8000;
+  const [idx,setIdx] = useState(0);
+  const refs = useRef([]);
+
+  useEffect(()=>{
+    const t = setInterval(()=>setIdx(i=>(i+1)%VIDEOS.length), SLIDE_MS);
+    return ()=>clearInterval(t);
+  },[VIDEOS.length]);
+
+  useEffect(()=>{
+    refs.current.forEach((v,i)=>{
+      if(!v) return;
+      if(i===idx){
+        try{ v.currentTime = 0; }catch(e){}
+        const p = v.play();
+        if(p && p.catch) p.catch(()=>{});
+      } else {
+        try{ v.pause(); }catch(e){}
+      }
+    });
+  },[idx]);
+
+  return <section className="hero-slides" aria-label="StartEasy introduction">
+
+    {/* Video layers */}
+    <div className="hero-slides__media" aria-hidden="true">
+      {VIDEOS.map((v,i)=>(
+        <video
+          key={i}
+          ref={el=>{ refs.current[i]=el; }}
+          className={`hero-slides__video${i===idx?' is-active':''}`}
+          src={v.src}
+          muted
+          loop
+          playsInline
+          preload={i===0 ? 'auto' : 'metadata'}
+          disablePictureInPicture
+        />
+      ))}
+    </div>
+
+    {/* Overlay gradients */}
+    <div className="hero-slides__tint" aria-hidden="true"/>
+    <div className="hero-slides__glow orb-pulse" aria-hidden="true"/>
+    <div className="hero-slides__bottomfade" aria-hidden="true"/>
+
+    {/* Content */}
+    <div className="hero-slides__content">
+      <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(90px,13vw,150px) 24px clamp(70px,9vw,110px)'}}>
+
+        <span className="hero-slides__chip fadein">
+          <span className="pulse" style={{width:7,height:7,borderRadius:'50%',background:'#F5A623',flexShrink:0}}/>
+          Venture Building Service Platform · Zambia
+        </span>
+
+        <h1 className="serif fadein" style={{fontSize:'clamp(2.4rem,6.6vw,4.8rem)',lineHeight:1.04,fontWeight:800,letterSpacing:'-0.015em',maxWidth:'56rem',margin:'clamp(24px,3.2vw,34px) 0 clamp(24px,3.2vw,32px)',color:'#fff',textShadow:'0 6px 30px rgba(0,0,0,.45)'}}>
+          A one-stop shop<br/>
+          <span style={{fontStyle:'italic',color:'#F5A623',fontWeight:800}}>for starting, building, and managing businesses.</span>
+        </h1>
+
+        <div className="fadein" style={{maxWidth:'48rem',marginBottom:'clamp(28px,3.6vw,42px)'}}>
+          <p style={{fontSize:'clamp(1.05rem,1.7vw,1.28rem)',lineHeight:1.75,color:'rgba(255,255,255,.88)',margin:'0 0 16px',fontWeight:400,textShadow:'0 2px 14px rgba(0,0,0,.4)'}}>
+            StartEasy Zambia is a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.
+          </p>
+          <p style={{fontSize:'clamp(1.05rem,1.7vw,1.28rem)',lineHeight:1.75,color:'rgba(255,255,255,.94)',margin:0,fontWeight:500,textShadow:'0 2px 14px rgba(0,0,0,.4)'}}>
+            StartEasy Zambia helps founders, professionals, diaspora clients and foreign investors set up, activate, and operate in Zambia — without dealing with the paperwork, government offices, or technical complexity themselves.
+          </p>
+        </div>
+
+        <div className="fadein" style={{display:'flex',flexWrap:'wrap',gap:14,marginBottom:'clamp(38px,5vw,60px)'}}>
+          <button onClick={()=>{const el=document.getElementById('choose-situation');el&&el.scrollIntoView({behavior:'smooth'});}}
+            style={{padding:'17px 34px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12,boxShadow:'0 16px 42px rgba(232,115,15,.42)'}}>
+            <i className="fas fa-rocket" style={{fontSize:14}}/> Choose your situation <Arrow/>
+          </button>
+          <button onClick={()=>go('venture')}
+            style={{padding:'17px 34px',background:'rgba(255,255,255,.08)',color:'#fff',border:'1px solid rgba(255,255,255,.3)',borderRadius:11,fontSize:15,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12,backdropFilter:'blur(10px)',WebkitBackdropFilter:'blur(10px)'}}>
+            <i className="fas fa-layer-group" style={{fontSize:14}}/> See all services
+          </button>
+        </div>
+
+        {/* Slide indicators */}
+        <div className="fadein" style={{display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
+          <div style={{display:'flex',gap:8,alignItems:'center'}} role="tablist" aria-label="Hero video slides">
+            {VIDEOS.map((v,i)=>(
+              <button
+                key={i}
+                type="button"
+                className={`hero-slides__dot${i===idx?' is-active':''}`}
+                onClick={()=>setIdx(i)}
+                aria-label={`Play ${v.label} slide`}
+                aria-selected={i===idx}
+                role="tab"
+              />
+            ))}
+          </div>
+          <span className="hero-slides__label" aria-live="polite">{VIDEOS[idx].label}</span>
+        </div>
+
+      </div>
+    </div>
+  </section>;
+}
+
 function VentureHome({go,onSwitchToAdmin}){
   const [myRefs] = useState(()=>readMyRefs());
   useEffect(()=>{trackEvent('page_view',{route:'venture-home'});},[]);
@@ -2659,33 +2796,8 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>}
 
-    <section style={{position:'relative',overflow:'hidden'}}>
-      <div className="orb-pulse" style={{position:'absolute',top:-180,right:-180,width:640,height:640,background:'radial-gradient(circle, rgba(232,115,15,.22), transparent 62%)',pointerEvents:'none'}}/>
-      <div className="orb-pulse" style={{position:'absolute',bottom:-240,left:-200,width:640,height:640,background:'radial-gradient(circle, rgba(245,166,35,.10), transparent 65%)',pointerEvents:'none',animationDelay:'-3s'}}/>
-      <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px clamp(40px,6vw,72px)',position:'relative',zIndex:1}}>
-        <span className="micro" style={{color:'#F5A623',display:'inline-flex',alignItems:'center',gap:10,marginBottom:32,padding:'9px 18px',background:'rgba(245,166,35,.12)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:10.5}}>
-          <span className="pulse" style={{width:7,height:7,borderRadius:'50%',background:'#F5A623'}}/>
-          Venture Building Service Platform · Zambia
-        </span>
-        <h1 className="serif" style={{fontSize:'clamp(2.6rem,7vw,5rem)',lineHeight:1.02,fontWeight:800,letterSpacing:'-0.015em',maxWidth:'54rem',margin:'0 0 32px'}}>
-          A one-stop shop<br/><span style={{fontStyle:'italic',color:'#F5A623',fontWeight:800}}>for starting, building, and managing businesses.</span>
-        </h1>
-        <p style={{fontSize:'clamp(1.05rem,1.7vw,1.28rem)',lineHeight:1.75,color:'rgba(255,255,255,.7)',maxWidth:'44rem',margin:'0 0 18px',fontWeight:400}}>
-          StartEasy Zambia is a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.
-        </p>
-        <p style={{fontSize:'clamp(1.05rem,1.7vw,1.28rem)',lineHeight:1.75,color:'rgba(255,255,255,.78)',maxWidth:'46rem',margin:'0 0 44px',fontWeight:500}}>
-          StartEasy Zambia helps founders, professionals, diaspora clients and foreign investors set up, activate, and operate in Zambia — without dealing with the papework, government offices, or technical complexity themselves.
-        </p>
-        <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-          <button onClick={()=>{const el=document.getElementById('choose-situation');el&&el.scrollIntoView({behavior:'smooth'});}} style={{padding:'17px 34px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12,boxShadow:'0 14px 38px rgba(232,115,15,.38)'}}>
-            <i className="fas fa-rocket" style={{fontSize:14}}/> Choose your situation <Arrow/>
-          </button>
-          <button onClick={()=>go('venture')} style={{padding:'17px 34px',background:'rgba(255,255,255,.05)',color:'#fff',border:'1px solid rgba(255,255,255,.22)',borderRadius:11,fontSize:15,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12}}>
-            <i className="fas fa-layer-group" style={{fontSize:14}}/> See all services
-          </button>
-        </div>
-      </div>
-    </section>
+    {/* ============ HERO VIDEO SLIDES ============ */}
+    <HeroVideoSlides go={go}/>
 
     <section id="choose-situation" style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.18)',background:'linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.1))'}}>
       <div style={{position:'absolute',top:-100,left:'10%',width:400,height:400,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
