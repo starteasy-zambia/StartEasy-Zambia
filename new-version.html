@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700;1,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -163,6 +163,10 @@ input:focus,select:focus,textarea:focus{outline:none}
 .pill.reverted{background:rgba(122,79,163,.12);color:#5A3A7B;border:1px solid rgba(122,79,163,.3)}
 .pill.declined{background:rgba(184,86,79,.12);color:#7C2318;border:1px solid rgba(184,86,79,.3)}
 @media print{body.pr *{visibility:hidden!important}body.pr .printable,body.pr .printable *{visibility:visible!important}body.pr .printable{position:absolute;left:0;top:0;width:100%;padding:20px;background:#fff}body.pr .no-print{display:none!important}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.floaty{animation:floaty 6s ease-in-out infinite}
+@keyframes orbPulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:.85;transform:scale(1.08)}}
+.orb-pulse{animation:orbPulse 8s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -211,9 +215,6 @@ const SE_PAYMENTS = 'se_payments';
 const SE_EVENTS   = 'se_events';
 const SE_ADMINS   = 'se_admins';
 
-/* ============================================================
-   LOCAL PERSISTENCE
-   ============================================================ */
 const LS_KEY='starteasy.session.v1';
 const VISITOR_KEY='starteasy.visitor.v1';
 const MY_REFS_KEY='starteasy.myrefs.v1';
@@ -237,10 +238,6 @@ function readVisitor(){try{return JSON.parse(localStorage.getItem(VISITOR_KEY)||
 function rememberMyRef(ref){try{const l=JSON.parse(localStorage.getItem(MY_REFS_KEY)||'[]');if(!l.includes(ref)){l.unshift(ref);localStorage.setItem(MY_REFS_KEY,JSON.stringify(l.slice(0,20)));}}catch(e){}}
 function readMyRefs(){try{return JSON.parse(localStorage.getItem(MY_REFS_KEY)||'[]')}catch(e){return []}}
 
-/* ============================================================
-   FIRESTORE HELPERS
-   ============================================================ */
-
 async function addPayment(rec){
   if(!firebaseReady) return null;
   const record = {
@@ -249,14 +246,8 @@ async function addPayment(rec){
     submittedAt: Date.now(),
     history: [{ status: 'under_review', at: Date.now(), note: 'Payment reference received. Awaiting officer verification.' }]
   };
-  try {
-    await db.collection(SE_PAYMENTS).doc(rec.ref).set(record);
-    console.log('[StartEasy] ✅ Payment saved:', rec.ref);
-    return record;
-  } catch(e) {
-    console.error('[StartEasy] ❌ addPayment failed:', e && e.code, e && e.message);
-    return null;
-  }
+  try { await db.collection(SE_PAYMENTS).doc(rec.ref).set(record); return record; }
+  catch(e) { console.error('[StartEasy] ❌ addPayment failed:', e && e.code, e && e.message); return null; }
 }
 
 async function readPayments(){
@@ -264,10 +255,7 @@ async function readPayments(){
   try {
     const snap = await db.collection(SE_PAYMENTS).orderBy('submittedAt','desc').limit(500).get();
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch(e) {
-    console.error('[StartEasy] ❌ readPayments failed:', e && e.code, e && e.message);
-    return [];
-  }
+  } catch(e) { return []; }
 }
 
 async function findPaymentByRef(ref){
@@ -276,10 +264,7 @@ async function findPaymentByRef(ref){
     const key = ref.toUpperCase().trim();
     const snap = await db.collection(SE_PAYMENTS).doc(key).get();
     return snap.exists ? { id: snap.id, ...snap.data() } : null;
-  } catch(e) {
-    console.error('[StartEasy] ❌ findPaymentByRef failed:', e && e.code, e && e.message);
-    return null;
-  }
+  } catch(e) { return null; }
 }
 
 async function updatePaymentStatus(ref, status, note){
@@ -292,33 +277,15 @@ async function updatePaymentStatus(ref, status, note){
     const history = [...(cur.history||[]), { status, at: Date.now(), note: note||'' }];
     await docRef.update({ status, adminNote: note||'', reviewedAt: Date.now(), history });
     return { id: ref, ...cur, status, adminNote: note||'', history };
-  } catch(e) {
-    console.error('[StartEasy] ❌ updatePaymentStatus failed:', e && e.code, e && e.message);
-    return null;
-  }
+  } catch(e) { return null; }
 }
 
 function trackEvent(type, payload){
   if(!firebaseReady) return;
   try {
     const visitor = readVisitor();
-    db.collection(SE_EVENTS).add({
-      type, at: Date.now(),
-      visitorId: visitor ? visitor.id : null,
-      ...(payload || {})
-    }).catch(()=>{});
+    db.collection(SE_EVENTS).add({ type, at: Date.now(), visitorId: visitor ? visitor.id : null, ...(payload || {}) }).catch(()=>{});
   } catch(e) {}
-}
-
-async function readEvents(){
-  if(!firebaseReady) return [];
-  try {
-    const snap = await db.collection(SE_EVENTS).orderBy('at','desc').limit(2000).get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch(e) {
-    console.error('[StartEasy] ❌ readEvents failed:', e && e.code, e && e.message);
-    return [];
-  }
 }
 
 async function clearAllEvents(){
@@ -329,44 +296,32 @@ async function clearAllEvents(){
     snap.docs.forEach(d => batch.delete(d.ref));
     await batch.commit();
     return true;
-  } catch(e) {
-    console.error('[StartEasy] ❌ clearAllEvents failed:', e && e.code, e && e.message);
-    return false;
-  }
+  } catch(e) { return false; }
 }
 
-/* ============================================================
-   FIREBASE AUTH
-   ============================================================ */
 async function adminSignIn(email, pw){
   if(!firebaseReady) return { ok:false, error:'Authentication service unavailable.' };
   try {
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('__timeout__')), 15000));
-    await Promise.race([
-      auth.signInWithEmailAndPassword(email.trim(), pw),
-      timeout
-    ]);
+    await Promise.race([ auth.signInWithEmailAndPassword(email.trim(), pw), timeout ]);
     return { ok:true };
   } catch(e) {
     const code = e && e.code ? e.code : '';
     const msg  = e && e.message ? e.message : '';
-    console.warn('[StartEasy] adminSignIn failed:', code || msg);
     if(msg === '__timeout__') return { ok:false, error:'Sign-in timed out. Check your internet connection and try again.' };
     if(code === 'auth/wrong-password')       return { ok:false, error:'Incorrect password.' };
     if(code === 'auth/user-not-found')       return { ok:false, error:'No account with that email.' };
     if(code === 'auth/invalid-credential')   return { ok:false, error:'Incorrect email or password.' };
     if(code === 'auth/invalid-email')        return { ok:false, error:'That email address is not valid.' };
-    if(code === 'auth/operation-not-allowed')return { ok:false, error:'Email/password sign-in is NOT enabled. Enable it in Firebase Console → Authentication → Sign-in method.' };
-    if(code === 'auth/unauthorized-domain')  return { ok:false, error:'This domain is not authorised. Add it in Firebase Console → Authentication → Settings → Authorized domains.' };
+    if(code === 'auth/operation-not-allowed')return { ok:false, error:'Email/password sign-in is NOT enabled.' };
+    if(code === 'auth/unauthorized-domain')  return { ok:false, error:'This domain is not authorised.' };
     if(code === 'auth/too-many-requests')    return { ok:false, error:'Too many attempts. Wait a few minutes and try again.' };
     if(code === 'auth/network-request-failed') return { ok:false, error:'Network error. Check your connection and try again.' };
     return { ok:false, error: 'Sign-in failed: ' + (code || msg || 'unknown error') };
   }
 }
 
-async function adminSignOut(){
-  try { await auth.signOut(); } catch(e) {}
-}
+async function adminSignOut(){ try { await auth.signOut(); } catch(e) {} }
 
 /* ============================================================
    CONSTANTS
@@ -391,24 +346,19 @@ const ONGOING={
 const PAYMENT_METHODS={
   airtel:{label:'Airtel Money',cls:'pm-airtel',icon:'fa-mobile-alt',title:'Airtel Money',sub:'ZMW · Zambian Kwacha',recipient:'+260 975 914 001 (Airtel)',ussd:'*115#',ussdLbl:'Open Airtel',
     rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Recipient Note',v:'On behalf of StartEasy',plain:true},{l:'Airtel Number',v:'+260 975 914 001',copy:'+260975914001'}],
-    steps:['Dial <strong>*115#</strong>','Select <strong>Send Money</strong> → <strong>Airtel Money</strong>','Enter <strong>+260 975 914 001</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID'],
-    note:'Available to all applicants.'},
+    steps:['Dial <strong>*115#</strong>','Select <strong>Send Money</strong> → <strong>Airtel Money</strong>','Enter <strong>+260 975 914 001</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID'],note:'Available to all applicants.'},
   mtn:{label:'MTN MoMo',cls:'pm-mtn',icon:'fa-mobile-alt',title:'MTN Mobile Money',sub:'ZMW · Zambian Kwacha',recipient:'076 852 6191 (MTN)',ussd:'*303#',ussdLbl:'Open MTN',
     rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Recipient Note',v:'On behalf of StartEasy',plain:true},{l:'MTN Number',v:'076 852 6191',copy:'0768526191'}],
-    steps:['Dial <strong>*303#</strong>','Select <strong>Send Money</strong> → <strong>MTN MoMo</strong>','Enter <strong>076 852 6191</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID'],
-    note:'Available to all applicants.'},
+    steps:['Dial <strong>*303#</strong>','Select <strong>Send Money</strong> → <strong>MTN MoMo</strong>','Enter <strong>076 852 6191</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID'],note:'Available to all applicants.'},
   bank:{label:'Bank / Visa',cls:'pm-bank',icon:'fa-university',title:'Bank or Visa Card',sub:'Standard Chartered',recipient:'Standard Chartered · 0152502166700',
     rows:[{l:'Bank',v:'Standard Chartered',plain:true},{l:'Account Name',v:'StartEasy (Mwaba Lewis)',plain:true},{l:'Account Number',v:'0152502166700',copy:'0152502166700'},{l:'Reference',v:'Your Full Name + "SE"',plain:true}],
-    steps:['Log into your online banking, or visit any branch','Use the account details shown','Transfer the amount above','Use <strong>your full name + "SE"</strong> as reference','Save your receipt'],
-    note:'For Visa card payments, use your bank card-to-account service.'},
+    steps:['Log into your online banking, or visit any branch','Use the account details shown','Transfer the amount above','Use <strong>your full name + "SE"</strong> as reference','Save your receipt'],note:'For Visa card payments, use your bank card-to-account service.'},
   paypal:{label:'PayPal',cls:'pm-paypal',icon:'fa-paypal',iconSet:'fab',title:'PayPal',sub:'USD · International',recipient:'lewismwaba@gmail.com (PayPal)',
     rows:[{l:'Recipient Email',v:'lewismwaba@gmail.com',copy:'lewismwaba@gmail.com'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Payment Type',v:'Send to a friend',plain:true}],
-    steps:['Log into PayPal','Choose <strong>Send & Request</strong> → <strong>Send to a friend</strong>','Enter <strong>lewismwaba@gmail.com</strong>','Enter the amount above in USD','Add <strong>your name + "SE"</strong> in the note','Save the transaction ID'],
-    note:'Ideal for international applicants.'},
+    steps:['Log into PayPal','Choose <strong>Send & Request</strong> → <strong>Send to a friend</strong>','Enter <strong>lewismwaba@gmail.com</strong>','Enter the amount above in USD','Add <strong>your name + "SE"</strong> in the note','Save the transaction ID'],note:'Ideal for international applicants.'},
   crypto:{label:'Crypto',cls:'pm-crypto',icon:'fa-bitcoin',iconSet:'fab',title:'Cryptocurrency',sub:'International applicants',recipient:'User ID: 809423171',
     rows:[{l:'Accepted Coins',v:'BTC · ETH · USDT (TRC20 / ERC20)',plain:true},{l:'User ID',v:'809423171',copy:'809423171'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true}],
-    steps:['Open your crypto wallet or exchange app','Choose <strong>BTC, ETH, or USDT</strong>','Send to User ID <strong>809423171</strong>','Add a note with <strong>your name + "SE"</strong>','Save the transaction hash','Return here and paste as reference'],
-    note:'Send the equivalent at the time of transfer.'}
+    steps:['Open your crypto wallet or exchange app','Choose <strong>BTC, ETH, or USDT</strong>','Send to User ID <strong>809423171</strong>','Add a note with <strong>your name + "SE"</strong>','Save the transaction hash','Return here and paste as reference'],note:'Send the equivalent at the time of transfer.'}
 };
 
 const PRIMARY_ACTIVITIES=['Advertising','Marketing','Management consulting','Financial advisory','Accounting','Research','Technology','Construction','Agriculture','Trading','Logistics','Manufacturing','Education','Professional services','Media & communications','Healthcare','Hospitality & tourism','Real estate','Energy','Retail','Wholesale & distribution','Transport','Agro-processing','Engineering','Software development','Legal services','Architecture','Insurance','Investment management','Other'];
@@ -897,9 +847,6 @@ function Payment({service,client,onClose,onDone}){
   </div>;
 }
 
-/* ============================================================
-   WIZARD
-   ============================================================ */
 function Wizard({initialScope,onExit,onOrderFormal}){
   const boot=useMemo(()=>{
     const snap=readSnapshot();
@@ -1156,9 +1103,6 @@ function WizardSidebar({scope,idea,primaryActivity,secondaryActivities,industryD
 }
 function SideRow({label,value,done,color:c}){return <div style={{display:'flex',justifyContent:'space-between',gap:12,padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',alignItems:'flex-start'}}><span style={{fontSize:11.5,color:'rgba(10,31,18,.45)',fontWeight:600,flexShrink:0}}>{label}</span><span style={{fontSize:11.5,color:done?(c||'#0A1F12'):'rgba(10,31,18,.3)',fontWeight:done?700:400,textAlign:'right',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'65%'}}>{value}</span></div>;}
 
-/* ============================================================
-   TRACK SUBMISSION PAGE
-   ============================================================ */
 const STATUS_META={
   under_review:{label:'Under Review',pill:'review',icon:'fa-clock',color:'#8A6828',userLine:'Your payment reference has been received and is queued for officer verification.'},
   approved:{label:'Approved',pill:'approved',icon:'fa-circle-check',color:'#1E7B3C',userLine:'Your payment has been verified. Your engagement is now active and the formal engagement letter can be printed or downloaded.'},
@@ -1326,9 +1270,6 @@ function TrackSubmission({go}){
 }
 function RowKV({k,v,mono}){return <div style={{display:'flex',justifyContent:'space-between',gap:16,padding:'8px 0',borderBottom:'1px dashed rgba(10,31,18,.06)'}}><span style={{fontSize:12,color:'rgba(10,31,18,.5)',fontWeight:600}}>{k}</span><span style={{fontSize:13,color:'#0A1F12',fontWeight:700,textAlign:'right',fontFamily:mono?'Consolas,monospace':'inherit'}}>{v}</span></div>;}
 
-/* ============================================================
-   ADMIN PORTAL
-   ============================================================ */
 function MiniBarChart({data,height=140}){
   const max=Math.max(1,...data.map(d=>d.value));
   const w=Math.max(320,data.length*34+30);
@@ -1381,21 +1322,14 @@ function AdminPortal({onExit}){
       const snap = await db.collection(SE_ADMINS).doc(user.uid).get();
       console.log('[StartEasy] admin check for', user.uid, '→', snap.exists ? 'GRANTED' : 'NOT FOUND in se_admins');
       return snap.exists;
-    } catch(e) {
-      console.error('[StartEasy] admin check FAILED for', user.uid, ':', e && e.code, e && e.message);
-      return false;
-    }
+    } catch(e) { return false; }
   },[]);
 
   useEffect(()=>{
     if(!firebaseReady){setAuthChecked(true);return}
     const unsub = auth.onAuthStateChanged(async user => {
-      if(user){
-        const isAdmin = await checkIsAdmin(user);
-        setAuthed(isAdmin);
-      } else {
-        setAuthed(false);
-      }
+      if(user){ const isAdmin = await checkIsAdmin(user); setAuthed(isAdmin); }
+      else { setAuthed(false); }
       setAuthChecked(true);
     });
     return unsub;
@@ -1404,22 +1338,14 @@ function AdminPortal({onExit}){
   useEffect(()=>{
     if(!authed || !firebaseReady) return;
     const unsub = db.collection(SE_PAYMENTS).orderBy('submittedAt','desc').limit(500)
-      .onSnapshot(snap=>{
-        setPayments(snap.docs.map(d=>({ id: d.id, ...d.data() })));
-        setLoading(false);
-      }, err=>{
-        console.warn('[StartEasy] payments listener:', err && err.message);
-        setLoading(false);
-      });
+      .onSnapshot(snap=>{ setPayments(snap.docs.map(d=>({ id: d.id, ...d.data() }))); setLoading(false); }, err=>{ setLoading(false); });
     return unsub;
   },[authed]);
 
   useEffect(()=>{
     if(!authed || !firebaseReady) return;
     const unsub = db.collection(SE_EVENTS).orderBy('at','desc').limit(2000)
-      .onSnapshot(snap=>{
-        setEvents(snap.docs.map(d=>({ id: d.id, ...d.data() })));
-      }, err=>console.warn('[StartEasy] events listener:', err && err.message));
+      .onSnapshot(snap=>{ setEvents(snap.docs.map(d=>({ id: d.id, ...d.data() }))); });
     return unsub;
   },[authed]);
 
@@ -1429,50 +1355,34 @@ function AdminPortal({onExit}){
     setSigningIn(true);
     try {
       const res = await adminSignIn(email, pw);
-      if(!res.ok){
-        setPwErr(res.error || 'Sign-in failed.');
-        return;
-      }
+      if(!res.ok){ setPwErr(res.error || 'Sign-in failed.'); return; }
       const user = auth.currentUser;
-      if(!user){
-        setPwErr('Signed in but no session. Please try again.');
-        return;
-      }
+      if(!user){ setPwErr('Signed in but no session. Please try again.'); return; }
       const isAdmin = await checkIsAdmin(user);
-      if(!isAdmin){
-        await auth.signOut();
-        setPwErr('This account is not listed as an admin. Add a document to se_admins with this user\'s UID.');
-        return;
-      }
+      if(!isAdmin){ await auth.signOut(); setPwErr('This account is not listed as an admin. Add a document to se_admins with this user\'s UID.'); return; }
       setAuthed(true);
-    } catch(e) {
-      setPwErr('Unexpected error: ' + ((e && e.message) || 'unknown'));
-    } finally {
-      setSigningIn(false);
-    }
+    } catch(e) { setPwErr('Unexpected error: ' + ((e && e.message) || 'unknown')); }
+    finally { setSigningIn(false); }
   };
 
-  const handleSignOut = async () => {
-    await adminSignOut();
-    setAuthed(false);
-    onExit();
-  };
+  const handleSignOut = async () => { await adminSignOut(); setAuthed(false); onExit(); };
 
   const stats=useMemo(()=>{
     const since=Date.now()-14*24*3600*1000;
     const inWindow=events.filter(e=>e.at>=since);
-    const visits=inWindow.filter(e=>e.type==='visit').length;
-    const uniqueVisitors=new Set(inWindow.map(e=>e.visitorId).filter(Boolean)).size;
-    const pageViews=inWindow.filter(e=>e.type==='page_view').length;
-    const wizardStarts=inWindow.filter(e=>e.type==='wizard_start').length;
-    const wizardCompletes=inWindow.filter(e=>e.type==='wizard_complete').length;
-    const serviceViews=inWindow.filter(e=>e.type==='service_view').length;
-    const paymentsSubmitted=payments.length;
-    const underReview=payments.filter(p=>p.status==='under_review').length;
-    const approved=payments.filter(p=>p.status==='approved').length;
-    const reverted=payments.filter(p=>p.status==='reverted').length;
-    const declined=payments.filter(p=>p.status==='declined').length;
-    return {visits,uniqueVisitors,pageViews,wizardStarts,wizardCompletes,serviceViews,paymentsSubmitted,underReview,approved,reverted,declined};
+    return {
+      visits:inWindow.filter(e=>e.type==='visit').length,
+      uniqueVisitors:new Set(inWindow.map(e=>e.visitorId).filter(Boolean)).size,
+      pageViews:inWindow.filter(e=>e.type==='page_view').length,
+      wizardStarts:inWindow.filter(e=>e.type==='wizard_start').length,
+      wizardCompletes:inWindow.filter(e=>e.type==='wizard_complete').length,
+      serviceViews:inWindow.filter(e=>e.type==='service_view').length,
+      paymentsSubmitted:payments.length,
+      underReview:payments.filter(p=>p.status==='under_review').length,
+      approved:payments.filter(p=>p.status==='approved').length,
+      reverted:payments.filter(p=>p.status==='reverted').length,
+      declined:payments.filter(p=>p.status==='declined').length
+    };
   },[events,payments]);
 
   const chartData=useMemo(()=>{
@@ -1480,26 +1390,18 @@ function AdminPortal({onExit}){
     for(let i=days-1;i>=0;i--){
       const d=new Date();d.setDate(d.getDate()-i);d.setHours(0,0,0,0);
       const next=new Date(d);next.setDate(next.getDate()+1);
-      const label=d.toLocaleDateString('en-GB',{day:'2-digit'});
-      const value=events.filter(e=>e.type==='visit'&&e.at>=d.getTime()&&e.at<next.getTime()).length;
-      out.push({label,value,at:d.getTime()});
+      out.push({label:d.toLocaleDateString('en-GB',{day:'2-digit'}),value:events.filter(e=>e.type==='visit'&&e.at>=d.getTime()&&e.at<next.getTime()).length,at:d.getTime()});
     }
     return out;
   },[events]);
 
-  const filteredPayments=useMemo(()=>{
-    if(filter==='all')return payments;
-    return payments.filter(p=>p.status===filter);
-  },[payments,filter]);
-
+  const filteredPayments=useMemo(()=>filter==='all'?payments:payments.filter(p=>p.status===filter),[payments,filter]);
   const recentActivity=useMemo(()=>[...events].sort((a,b)=>b.at-a.at).slice(0,25),[events]);
 
   const setStatus=async(status)=>{
     if(!review)return;
     const updated=await updatePaymentStatus(review.ref,status,note||'');
-    if(updated){
-      trackEvent('payment_reviewed',{ref:review.ref,status});
-    }
+    if(updated){ trackEvent('payment_reviewed',{ref:review.ref,status}); }
     setReview(null);setNote('');
   };
 
@@ -1706,28 +1608,21 @@ function AdminPortal({onExit}){
         {(()=>{
           const byVisitor={};
           events.forEach(e=>{if(!e.visitorId)return;(byVisitor[e.visitorId]=byVisitor[e.visitorId]||[]).push(e)});
-          const entries=Object.entries(byVisitor).sort((a,b)=>{
-            const la=Math.max(...a[1].map(e=>e.at)),lb=Math.max(...b[1].map(e=>e.at));
-            return lb-la;
-          });
+          const entries=Object.entries(byVisitor).sort((a,b)=>Math.max(...b[1].map(e=>e.at))-Math.max(...a[1].map(e=>e.at)));
           if(entries.length===0)return <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:56,textAlign:'center'}}><p style={{fontSize:14,color:'rgba(10,31,18,.55)',margin:0}}>No visitors recorded yet.</p></div>;
           return <div style={{display:'flex',flexDirection:'column',gap:14}}>
             {entries.map(([vid,evs])=>{
-              const pages=evs.filter(e=>e.route).map(e=>e.route);
-              const uniquePages=[...new Set(pages)];
-              const lastAt=Math.max(...evs.map(e=>e.at));
-              const firstAt=Math.min(...evs.map(e=>e.at));
+              const pages=[...new Set(evs.filter(e=>e.route).map(e=>e.route))];
+              const lastAt=Math.max(...evs.map(e=>e.at));const firstAt=Math.min(...evs.map(e=>e.at));
               return <div key={vid} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'20px 22px'}}>
                 <div style={{display:'flex',justifyContent:'space-between',gap:16,flexWrap:'wrap',marginBottom:12}}>
                   <div>
                     <div style={{fontFamily:'Consolas,monospace',fontSize:12.5,fontWeight:800,color:'#0A1F12'}}>{vid}</div>
                     <div style={{fontSize:11.5,color:'rgba(10,31,18,.5)',marginTop:4}}>{evs.length} event{evs.length!==1?'s':''} · last active {timeAgo(lastAt)}</div>
                   </div>
-                  <div style={{textAlign:'right'}}>
-                    <div style={{fontSize:11,color:'rgba(10,31,18,.45)'}}>First seen {timeAgo(firstAt)}</div>
-                  </div>
+                  <div style={{textAlign:'right'}}><div style={{fontSize:11,color:'rgba(10,31,18,.45)'}}>First seen {timeAgo(firstAt)}</div></div>
                 </div>
-                {uniquePages.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:8}}>{uniquePages.map(p=><span key={p} style={{padding:'4px 10px',background:'rgba(10,31,18,.05)',borderRadius:99,fontSize:11,fontWeight:600,color:'rgba(10,31,18,.7)'}}>{p}</span>)}</div>}
+                {pages.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:8}}>{pages.map(p=><span key={p} style={{padding:'4px 10px',background:'rgba(10,31,18,.05)',borderRadius:99,fontSize:11,fontWeight:600,color:'rgba(10,31,18,.7)'}}>{p}</span>)}</div>}
               </div>;
             })}
           </div>;
@@ -1741,7 +1636,7 @@ function AdminPortal({onExit}){
         </div>
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 24px',marginBottom:16}}>
           <div style={{fontSize:12.5,fontWeight:800,color:'#0A1F12',marginBottom:10}}>Authentication</div>
-          <p style={{fontSize:13,lineHeight:1.7,color:'rgba(10,31,18,.7)',margin:0}}>This portal is gated by Firebase Authentication, then by a Firestore document in the <code style={{fontFamily:'Consolas,monospace',background:'rgba(10,31,18,.06)',padding:'2px 6px',borderRadius:4,fontSize:12}}>se_admins</code> collection whose ID matches your user ID. To add a new admin: create the account in Firebase Console → Authentication → Users, then create a matching document in Firestore → se_admins with the new user's UID as the document ID and an <code style={{fontFamily:'Consolas,monospace',background:'rgba(10,31,18,.06)',padding:'2px 6px',borderRadius:4,fontSize:12}}>email</code> field.</p>
+          <p style={{fontSize:13,lineHeight:1.7,color:'rgba(10,31,18,.7)',margin:0}}>This portal is gated by Firebase Authentication, then by a Firestore document in the <code style={{fontFamily:'Consolas,monospace',background:'rgba(10,31,18,.06)',padding:'2px 6px',borderRadius:4,fontSize:12}}>se_admins</code> collection whose ID matches your user ID.</p>
         </div>
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 24px',marginBottom:16}}>
           <div style={{fontSize:12.5,fontWeight:800,color:'#0A1F12',marginBottom:10}}>Cloud data</div>
@@ -1752,12 +1647,12 @@ function AdminPortal({onExit}){
             <RowKV k="Collections" v="se_payments · se_events · se_admins" mono/>
           </div>
           <div style={{display:'flex',gap:10,marginTop:16,flexWrap:'wrap'}}>
-            <button onClick={async()=>{if(confirm('Delete up to 500 of the newest analytics events from Firestore? This cannot be undone.')){const ok=await clearAllEvents();if(ok)alert('Cleared.');else alert('Could not clear events — check rules and try again.');}}} style={{padding:'10px 18px',background:'#fff',border:'1px solid rgba(184,86,79,.3)',color:'#B8564F',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><i className="fas fa-trash"></i> Clear recent analytics</button>
+            <button onClick={async()=>{if(confirm('Delete up to 500 of the newest analytics events from Firestore? This cannot be undone.')){const ok=await clearAllEvents();if(ok)alert('Cleared.');else alert('Could not clear events.');}}} style={{padding:'10px 18px',background:'#fff',border:'1px solid rgba(184,86,79,.3)',color:'#B8564F',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><i className="fas fa-trash"></i> Clear recent analytics</button>
           </div>
         </div>
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 24px'}}>
           <div style={{fontSize:12.5,fontWeight:800,color:'#0A1F12',marginBottom:10}}>Project</div>
-          <p style={{fontSize:13,lineHeight:1.7,color:'rgba(10,31,18,.7)',margin:0}}>StartEasy runs on its own Firebase project: <span style={{fontFamily:'Consolas,monospace'}}>starteasy-zambia</span>. All data lives in the collections <span style={{fontFamily:'Consolas,monospace'}}>se_payments</span>, <span style={{fontFamily:'Consolas,monospace'}}>se_events</span> and <span style={{fontFamily:'Consolas,monospace'}}>se_admins</span>.</p>
+          <p style={{fontSize:13,lineHeight:1.7,color:'rgba(10,31,18,.7)',margin:0}}>StartEasy runs on Firebase project <span style={{fontFamily:'Consolas,monospace'}}>starteasy-zambia</span>. Data lives in <span style={{fontFamily:'Consolas,monospace'}}>se_payments</span>, <span style={{fontFamily:'Consolas,monospace'}}>se_events</span> and <span style={{fontFamily:'Consolas,monospace'}}>se_admins</span>.</p>
         </div>
       </div>}
       </>}
@@ -1782,38 +1677,17 @@ function AdminPortal({onExit}){
           </div>
         </div>
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:10,padding:'18px 20px',marginBottom:20}}>
-          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:12}}>Engagement</div>
+          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:12}}>Engagement & payment</div>
           <div style={{display:'grid',gap:8}}>
             <RowKV k="Service" v={review.serviceTitle}/>
             <RowKV k="Code" v={review.serviceCode} mono/>
             <RowKV k="Amount due" v={review.amount}/>
-            <RowKV k="Fee label" v={review.serviceFeeLabel||'—'}/>
-          </div>
-        </div>
-        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:10,padding:'18px 20px',marginBottom:20}}>
-          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:12}}>Payment claim</div>
-          <div style={{display:'grid',gap:8}}>
             <RowKV k="Method" v={review.method}/>
-            <RowKV k="Sender name" v={review.senderName}/>
-            <RowKV k="Sender contact" v={review.senderContact}/>
+            <RowKV k="Sender" v={review.senderName}/>
             <RowKV k="Transaction reference" v={review.txRef} mono/>
             <RowKV k="Submitted" v={new Date(review.submittedAt).toLocaleString('en-GB')}/>
           </div>
         </div>
-        {review.wizardData&&<div style={{background:'#FFF9E6',border:'1px solid #F0E0A0',borderRadius:10,padding:'18px 20px',marginBottom:20}}>
-          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Wizard summary</div>
-          <div style={{display:'grid',gap:8}}>
-            {review.wizardData.idea&&<RowKV k="Idea" v={review.wizardData.idea}/>}
-            {review.wizardData.structure&&<RowKV k="Structure" v={review.wizardData.structure.label}/>}
-            {review.wizardData.legalEnding!==undefined&&<RowKV k="Legal ending" v={review.wizardData.legalEnding||'(none)'} mono/>}
-            {review.wizardData.distinctive&&<RowKV k="Distinctive" v={review.wizardData.distinctive} mono/>}
-            {review.wizardData.descriptor&&<RowKV k="Descriptor" v={review.wizardData.descriptor} mono/>}
-          </div>
-          {review.wizardData.names&&review.wizardData.names.length>0&&<div style={{marginTop:14,paddingTop:14,borderTop:'1px dashed rgba(138,104,40,.3)'}}>
-            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>Six-name proposal</div>
-            <ol style={{paddingLeft:20,margin:0}}>{review.wizardData.names.map((n,i)=><li key={i} style={{fontFamily:'Consolas,monospace',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:4}}>{n}</li>)}</ol>
-          </div>}
-        </div>}
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:10,padding:'18px 20px',marginBottom:20}}>
           <label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:8}}>Officer note (visible to the client on the status page)</label>
           <textarea value={note} onChange={e=>setNote(e.target.value)} rows={4} placeholder="Optional. Explain any revert/decline reason, or confirm the approval." style={{width:'100%',background:'#fff',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 16px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit',resize:'vertical',lineHeight:1.55}}/>
@@ -1823,49 +1697,92 @@ function AdminPortal({onExit}){
           <button onClick={()=>setStatus('reverted')} style={{flex:'1 1 180px',padding:'14px 22px',background:'linear-gradient(135deg,#7A4FA3,#9A6BC0)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}><i className="fas fa-rotate-left"></i> Revert for correction</button>
           <button onClick={()=>setStatus('declined')} style={{flex:'1 1 180px',padding:'14px 22px',background:'linear-gradient(135deg,#B8564F,#C86A5E)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}><i className="fas fa-circle-xmark"></i> Decline</button>
         </div>
-        <div style={{fontSize:11.5,color:'rgba(10,31,18,.5)',textAlign:'center',lineHeight:1.6}}>The client's Track page updates instantly. If they have provided a WhatsApp number, follow up there too.</div>
+        <div style={{fontSize:11.5,color:'rgba(10,31,18,.5)',textAlign:'center',lineHeight:1.6}}>The client's Track page updates instantly.</div>
       </div>
     </Modal>}
   </div>;
 }
 
-const NAV=[['home','Home'],['wizard','Structure & Name'],['desks','Desks'],['services','Services'],['track','Track'],['orientation','Orientation'],['engagement','How it works'],['pricing','Pricing'],['about','About']];
+/* ============================================================
+   NAV & FOOTER
+   ============================================================ */
+const NAV=[
+  ['home','Home'],
+  ['venture','Venture Building'],
+  ['desks','Desks'],
+  ['services','Services'],
+  ['orientation','Orientation'],
+  ['track','Track'],
+  ['pricing','Pricing'],
+  ['about','About']
+];
 function Nav({route,go}){
   const [open,setOpen]=useState(false);
-  const nav=r=>{setOpen(false);if(r==='orientation'){try{document.getElementById('orientation-services')?.scrollIntoView({behavior:'smooth'})}catch(e){}}go(r)};
+  const nav=r=>{setOpen(false);go(r)};
   return <header className="sticky top-0 z-50 bg-[#0A1F12] border-b border-[#F5A623]/10">
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
         <button onClick={()=>nav('home')} style={{display:'flex',alignItems:'center',gap:12,background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}>
           <Mark size={38}/>
-          <span className="hidden sm:block" style={{textAlign:'left',lineHeight:1}}><span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Venture Building Platform</span><span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span></span>
+          <span className="hidden sm:block" style={{textAlign:'left',lineHeight:1}}>
+            <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Venture Building Platform</span>
+            <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+          </span>
         </button>
         <nav className="hidden xl:flex" style={{gap:22}}>
           {NAV.map(([r,label])=><button key={r} onClick={()=>nav(r)} style={{fontSize:12.5,letterSpacing:'.04em',transition:'all .2s',position:'relative',padding:'4px 0',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',color:route===r?'#F5A623':'rgba(255,255,255,.55)'}}>{label}{route===r&&<span style={{position:'absolute',bottom:-2,left:0,right:0,height:2,background:'#F5A623',borderRadius:99}}/>}</button>)}
         </nav>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
           <Btn size="sm" variant="primary" onClick={()=>nav('wizard')} className="hidden sm:inline-flex">Structure &amp; Name K25 <Arrow/></Btn>
-          <button onClick={()=>setOpen(!open)} className="xl:hidden" style={{width:36,height:36,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'none',border:'none',cursor:'pointer'}} aria-label="Menu"><span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(45deg) translateY(3.5px)':'none',transition:'transform .2s'}}/><span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(-45deg) translateY(-3.5px)':'none',transition:'transform .2s'}}/></button>
+          <button onClick={()=>setOpen(!open)} className="xl:hidden" style={{width:36,height:36,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'none',border:'none',cursor:'pointer'}} aria-label="Menu">
+            <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(45deg) translateY(3.5px)':'none',transition:'transform .2s'}}/>
+            <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(-45deg) translateY(-3.5px)':'none',transition:'transform .2s'}}/>
+          </button>
         </div>
       </div>
     </div>
-    {open&&<div className="xl:hidden" style={{borderTop:'1px solid rgba(255,255,255,.1)',background:'#0A1F12'}}><div style={{padding:'16px 24px',maxHeight:'70vh',overflowY:'auto'}}>{NAV.map(([r,label])=><button key={r} onClick={()=>nav(r)} style={{width:'100%',display:'flex',padding:'14px 0',borderBottom:'1px solid rgba(255,255,255,.05)',textAlign:'left',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}><span style={{fontSize:14,color:route===r?'#F5A623':'rgba(255,255,255,.6)'}}>{label}</span></button>)}</div></div>}
+    {open&&<div className="xl:hidden" style={{borderTop:'1px solid rgba(255,255,255,.1)',background:'#0A1F12'}}>
+      <div style={{padding:'16px 24px',maxHeight:'70vh',overflowY:'auto'}}>
+        {NAV.map(([r,label])=><button key={r} onClick={()=>nav(r)} style={{width:'100%',display:'flex',padding:'14px 0',borderBottom:'1px solid rgba(255,255,255,.05)',textAlign:'left',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}><span style={{fontSize:14,color:route===r?'#F5A623':'rgba(255,255,255,.6)'}}>{label}</span></button>)}
+      </div>
+    </div>}
   </header>;
 }
+
 function Footer({go}){
   return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
       <div className="grid lg:grid-cols-[1.5fr_1fr_1fr] gap-10">
         <div>
-          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}><Mark size={38}/><div style={{lineHeight:1}}><span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Venture Building Platform</span><span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span></div></div>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
+            <Mark size={38}/>
+            <div style={{lineHeight:1}}>
+              <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Venture Building Platform</span>
+              <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+            </div>
+          </div>
           <p style={{fontSize:11,letterSpacing:'.16em',textTransform:'uppercase',color:'#F5A623',fontWeight:700,marginBottom:14}}>A one-stop shop for building businesses.</p>
           <p style={{fontSize:13,lineHeight:1.65,color:'rgba(255,255,255,.5)',maxWidth:340}}>Tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses. Finance · Technology · Marketing · Administration.</p>
         </div>
-        <div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Explore</span><div style={{display:'flex',flexDirection:'column',gap:12}}>{[['wizard','Structure & Name'],['desks','All Desks'],['services','All Services'],['track','Track submission'],['engagement','How it works'],['pricing','Pricing'],['about','About Us']].map(([r,l])=><button key={l} onClick={()=>go(r)} style={{display:'block',fontSize:13,color:'rgba(255,255,255,.5)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left',padding:0}}>{l}</button>)}</div></div>
-        <div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Contact</span><div style={{display:'flex',flexDirection:'column',gap:12,fontSize:13,color:'rgba(255,255,255,.5)'}}><p style={{margin:0}}>{CONTACT_EMAIL}</p><p style={{margin:0}}>+260 768 526 191</p><p style={{margin:0,color:'rgba(255,255,255,.35)',fontSize:12}}>Lusaka, Zambia</p></div></div>
+        <div>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Explore</span>
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            {[['venture','Venture Building'],['desks','All Desks'],['services','All Services'],['orientation','Orientation'],['track','Track submission'],['pricing','Pricing'],['about','About Us']].map(([r,l])=>
+              <button key={l} onClick={()=>go(r)} style={{display:'block',fontSize:13,color:'rgba(255,255,255,.5)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left',padding:0}}>{l}</button>
+            )}
+          </div>
+        </div>
+        <div>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Contact</span>
+          <div style={{display:'flex',flexDirection:'column',gap:12,fontSize:13,color:'rgba(255,255,255,.5)'}}>
+            <p style={{margin:0}}>{CONTACT_EMAIL}</p>
+            <p style={{margin:0}}>+260 768 526 191</p>
+            <p style={{margin:0,color:'rgba(255,255,255,.35)',fontSize:12}}>Lusaka, Zambia</p>
+          </div>
+        </div>
       </div>
       <div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
-        <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.75,maxWidth:900}}><strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is a venture building service platform and administrative services desk. We prepare, coordinate, submit and track your filings with PACRA, ZRA, NAPSA, NHIMA, WCFCB, councils and sector regulators — but we are not a government authority or a regulator, and we do not guarantee regulatory approval. Where a matter crosses into legal, tax, audit or other regulated professional advice, we refer you to a qualified professional. Requirements and fees change — we verify the applicable requirement with the relevant authority before every submission. Service fees shown are for StartEasy administrative work and are separate from any government or regulator fee. A StartEasy officer verifies each payment reference manually.</p>
+        <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.75,maxWidth:900}}><strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is a venture building service platform and administrative services desk. We prepare, coordinate, submit and track your filings with PACRA, ZRA, NAPSA, NHIMA, WCFCB, councils and sector regulators — but we are not a government authority or a regulator, and we do not guarantee regulatory approval. Where a matter crosses into legal, tax, audit or other regulated professional advice, we refer you to a qualified professional. Service fees shown are for StartEasy administrative work and are separate from any government or regulator fee. A StartEasy officer verifies each payment reference manually.</p>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap',marginTop:20}}>
           <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia · Venture Building Service Platform.</p>
           <button onClick={()=>go('admin')} style={{background:'none',border:'none',color:'rgba(255,255,255,.25)',fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:700,cursor:'pointer',fontFamily:'inherit',padding:0}}><i className="fas fa-lock" style={{marginRight:6}}></i> Admin</button>
@@ -1898,8 +1815,226 @@ function ServiceCard({serviceKey,onClick}){
 }
 
 /* ============================================================
-   VENTURE CAPABILITIES ILLUSTRATION
-   Reproduces the audience → shared capabilities flow + 4-pillar grid
+   HOME — DEDICATED FRONT PAGE
+   Only the two bookends: opening + capabilities + closing
+   ============================================================ */
+function Home({go,onResume,onWizard}){
+  const [snap,setSnap]=useState(()=>readSnapshot());
+  const [myRefs,setMyRefs]=useState(()=>readMyRefs());
+  const resumable=hasResumableWizard(snap);
+  const savedLabel=snap&&snap.savedAt?timeAgo(snap.savedAt):'';
+  useEffect(()=>{trackEvent('page_view',{route:'home'});},[]);
+
+  const capabilities=[
+    {icon:'fa-magnifying-glass',label:'Idea validation'},
+    {icon:'fa-flask',label:'Product development'},
+    {icon:'fa-users',label:'Talent and teams'},
+    {icon:'fa-landmark',label:'Business formation'},
+    {icon:'fa-wallet',label:'Funding connections'},
+    {icon:'fa-chart-line',label:'Growth and execution'}
+  ];
+  const pillars=[
+    {icon:'fa-briefcase',color:'#E8730F',label:'Business strategy',desc:'Positioning, business model, plan.'},
+    {icon:'fa-code',color:'#7A4FA3',label:'Product development',desc:'Websites, apps, digital systems.'},
+    {icon:'fa-wallet',color:'#2E9C4A',label:'Finance support',desc:'Projections, funder connections.'},
+    {icon:'fa-bullhorn',color:'#1B6CA8',label:'Marketing and sales',desc:'Brand, campaign, channels.'}
+  ];
+  const helpfulPills=[
+    {icon:'fa-chart-line',label:'Finance',color:'#2E9C4A'},
+    {icon:'fa-microchip',label:'Technology',color:'#1B6CA8'},
+    {icon:'fa-bullhorn',label:'Marketing',color:'#E8730F'},
+    {icon:'fa-clipboard-check',label:'Administration',color:'#7A4FA3'}
+  ];
+
+  return <div className="fadein" style={{background:'#0A1F12',color:'#fff'}}>
+
+    {/* Resume / refs notices */}
+    {resumable&&<section style={{maxWidth:1240,margin:'0 auto',padding:'24px 24px 0'}}>
+      <div className="fadein" style={{background:'linear-gradient(135deg,#FFF9E6,#FFFCF0)',border:'1.5px solid #F0E0A0',borderRadius:12,padding:'16px 20px',display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}}>
+        <span style={{width:38,height:38,borderRadius:10,background:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-rotate-left" style={{color:'#fff',fontSize:14}}></i></span>
+        <div style={{flex:'1 1 260px',minWidth:0}}>
+          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:3}}>Welcome back</div>
+          <div style={{fontSize:13.5,color:'#0A1F12',fontWeight:600,lineHeight:1.5}}>You have an assessment in progress{savedLabel?` — saved ${savedLabel}`:''}.</div>
+        </div>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+          <button onClick={onResume} style={{padding:'9px 16px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Continue</button>
+          <button onClick={()=>{clearSnapshot();setSnap(null)}} style={{padding:'9px 16px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:12.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>Start fresh</button>
+        </div>
+      </div>
+    </section>}
+
+    {myRefs.length>0&&<section style={{maxWidth:1240,margin:'0 auto',padding:'16px 24px 0'}}>
+      <div style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(245,166,35,.3)',borderRadius:12,padding:'14px 20px',display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}}>
+        <span style={{width:38,height:38,borderRadius:10,background:'rgba(245,166,35,.2)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-magnifying-glass" style={{fontSize:14}}></i></span>
+        <div style={{flex:'1 1 260px',minWidth:0}}>
+          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#F5A623',marginBottom:3}}>Track a submission</div>
+          <div style={{fontSize:13,color:'rgba(255,255,255,.85)',fontWeight:600,lineHeight:1.5}}>You have {myRefs.length} submission{myRefs.length!==1?'s':''} on this device.</div>
+        </div>
+        <button onClick={()=>go('track')} style={{padding:'9px 16px',background:'#F5A623',color:'#0A1F12',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:8}}>Open track page <Arrow/></button>
+      </div>
+    </section>}
+
+    {/* HERO — Opening statement */}
+    <section style={{position:'relative',overflow:'hidden'}}>
+      <div className="orb-pulse" style={{position:'absolute',top:-180,right:-180,width:640,height:640,background:'radial-gradient(circle, rgba(232,115,15,.22), transparent 62%)',pointerEvents:'none'}}/>
+      <div className="orb-pulse" style={{position:'absolute',bottom:-240,left:-200,width:640,height:640,background:'radial-gradient(circle, rgba(245,166,35,.10), transparent 65%)',pointerEvents:'none',animationDelay:'-3s'}}/>
+
+      <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px clamp(56px,9vw,100px)',position:'relative',zIndex:1}}>
+        <span className="micro" style={{color:'#F5A623',display:'inline-flex',alignItems:'center',gap:10,marginBottom:32,padding:'9px 18px',background:'rgba(245,166,35,.12)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:10.5}}>
+          <span className="pulse" style={{width:7,height:7,borderRadius:'50%',background:'#F5A623'}}/>
+          Venture Building Service Platform · Zambia
+        </span>
+        <h1 className="serif" style={{fontSize:'clamp(2.6rem,7vw,5rem)',lineHeight:1.02,fontWeight:800,letterSpacing:'-0.015em',maxWidth:'54rem',margin:'0 0 32px'}}>
+          A one-stop shop<br/>
+          <span style={{fontStyle:'italic',color:'#F5A623',fontWeight:800}}>for building businesses.</span>
+        </h1>
+        <p style={{fontSize:'clamp(1.05rem,1.7vw,1.28rem)',lineHeight:1.75,color:'rgba(255,255,255,.7)',maxWidth:'44rem',margin:'0 0 44px',fontWeight:400}}>
+          StartEasy Zambia is a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.
+        </p>
+        <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
+          <button onClick={()=>go('venture')} style={{padding:'17px 34px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12,boxShadow:'0 14px 38px rgba(232,115,15,.38)'}}>
+            <i className="fas fa-rocket" style={{fontSize:14}}/> Explore the platform <Arrow/>
+          </button>
+          <button onClick={()=>go('desks')} style={{padding:'17px 34px',background:'rgba(255,255,255,.05)',color:'#fff',border:'1px solid rgba(255,255,255,.22)',borderRadius:11,fontSize:15,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:12}}>
+            <i className="fas fa-layer-group" style={{fontSize:14}}/> Browse all desks
+          </button>
+        </div>
+
+        {/* Trust strip */}
+        <div style={{marginTop:'clamp(56px,8vw,88px)',paddingTop:36,borderTop:'1px solid rgba(255,255,255,.1)',display:'flex',flexWrap:'wrap',gap:'clamp(20px,4vw,44px)',alignItems:'center'}}>
+          {[
+            {v:'11',l:'Specialist desks'},
+            {v:'40+',l:'Published services'},
+            {v:'1 hr',l:'Report delivery'}
+          ].map((x,i)=><div key={i}>
+            <div className="serif" style={{fontSize:'clamp(1.5rem,2.6vw,2rem)',fontWeight:800,color:'#F5A623',lineHeight:1,marginBottom:6}}>{x.v}</div>
+            <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.5)'}}>{x.l}</div>
+          </div>)}
+        </div>
+      </div>
+    </section>
+
+    {/* CAPABILITIES — Individuals + Organizations → shared capabilities + 4 pillars */}
+    <section style={{background:'rgba(0,0,0,.25)',borderTop:'1px solid rgba(245,166,35,.15)',position:'relative',overflow:'hidden'}}>
+      <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(64px,9vw,96px) 24px clamp(48px,7vw,72px)',position:'relative',zIndex:1}}>
+
+        {/* Header */}
+        <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 44px'}}>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14}}>Who we serve · What we build</span>
+          <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.4rem)',lineHeight:1.15,marginBottom:14,color:'#fff'}}>Two audiences. Shared capabilities.</h2>
+          <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',margin:0}}>Whether you are starting from zero or running an established organisation, the same venture-building toolkit is behind you.</p>
+        </div>
+
+        {/* Audience cards */}
+        <div className="grid sm:grid-cols-2 gap-4" style={{maxWidth:880,margin:'0 auto 8px'}}>
+          <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:18,padding:'32px 26px',textAlign:'center',transition:'all .25s'}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(245,166,35,.5)';e.currentTarget.style.background='rgba(255,255,255,.06)'}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,.12)';e.currentTarget.style.background='rgba(255,255,255,.04)'}}>
+            <span style={{width:56,height:56,borderRadius:16,background:'rgba(232,115,15,.2)',color:'#F5A623',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:24,marginBottom:16}}><i className="fas fa-user"></i></span>
+            <h3 className="serif" style={{fontSize:22,fontWeight:800,color:'#fff',margin:'0 0 10px'}}>Individuals</h3>
+            <p style={{fontSize:14,color:'rgba(255,255,255,.7)',margin:0,lineHeight:1.6}}>Aspiring founders and entrepreneurs</p>
+          </div>
+          <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:18,padding:'32px 26px',textAlign:'center',transition:'all .25s'}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(122,79,163,.55)';e.currentTarget.style.background='rgba(255,255,255,.06)'}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,.12)';e.currentTarget.style.background='rgba(255,255,255,.04)'}}>
+            <span style={{width:56,height:56,borderRadius:16,background:'rgba(122,79,163,.22)',color:'#B99FE0',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:24,marginBottom:16}}><i className="fas fa-building"></i></span>
+            <h3 className="serif" style={{fontSize:22,fontWeight:800,color:'#fff',margin:'0 0 10px'}}>Organizations</h3>
+            <p style={{fontSize:14,color:'rgba(255,255,255,.7)',margin:0,lineHeight:1.6}}>Companies, institutions and venture teams</p>
+          </div>
+        </div>
+
+        {/* Connector arrow */}
+        <div style={{textAlign:'center',margin:'14px 0 28px'}}>
+          <span className="floaty" style={{display:'inline-flex',width:48,height:48,borderRadius:'50%',background:'rgba(245,166,35,.16)',border:'1px solid rgba(245,166,35,.4)',alignItems:'center',justifyContent:'center',color:'#F5A623',fontSize:18}}><i className="fas fa-arrow-down"></i></span>
+        </div>
+
+        {/* Shared capabilities panel */}
+        <div style={{maxWidth:880,margin:'0 auto 64px',background:'rgba(255,255,255,.03)',border:'1px solid rgba(245,166,35,.3)',borderRadius:20,padding:'clamp(28px,4vw,44px)'}}>
+          <div style={{textAlign:'center',marginBottom:30}}>
+            <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,color:'#fff',margin:0}}>Shared venture-building capabilities</h3>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-x-10 gap-y-5">
+            {capabilities.map((c,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:16,padding:'10px 0'}}>
+              <span style={{width:46,height:46,borderRadius:12,background:'rgba(245,166,35,.14)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className={`fas ${c.icon}`}></i></span>
+              <span style={{fontSize:15.5,color:'rgba(255,255,255,.9)',fontWeight:500,lineHeight:1.35}}>{c.label}</span>
+            </div>)}
+          </div>
+        </div>
+
+        {/* Four-pillar grid header */}
+        <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 32px'}}>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:12}}>Where we go deep</span>
+          <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,margin:0,color:'#fff'}}>Capabilities in focus.</h3>
+        </div>
+
+        {/* Four-pillar grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={{maxWidth:1080,margin:'0 auto'}}>
+          {pillars.map((p,i)=><button key={i} onClick={()=>go('desk','venture')}
+            style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:18,padding:'30px 22px',cursor:'pointer',fontFamily:'inherit',textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:14,transition:'all .25s'}}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.borderColor=p.color+'99';e.currentTarget.style.background='rgba(255,255,255,.07)'}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor='rgba(255,255,255,.1)';e.currentTarget.style.background='rgba(255,255,255,.04)'}}>
+            <span style={{width:58,height:58,borderRadius:16,background:p.color+'26',color:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:23,flexShrink:0}}><i className={`fas ${p.icon}`}></i></span>
+            <h4 className="serif" style={{fontSize:17,fontWeight:700,color:'#fff',lineHeight:1.25,margin:0}}>{p.label}</h4>
+            <p style={{fontSize:12.5,color:'rgba(255,255,255,.55)',lineHeight:1.5,margin:0}}>{p.desc}</p>
+          </button>)}
+        </div>
+      </div>
+    </section>
+
+    {/* CLOSING — "At StartEasy Zambia" grand statement */}
+    <section style={{background:'#0A1F12',color:'#fff',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
+      <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:900,height:900,background:'radial-gradient(circle, rgba(232,115,15,.14), transparent 65%)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',bottom:-180,right:-180,width:520,height:520,background:'radial-gradient(circle, rgba(245,166,35,.10), transparent 65%)',pointerEvents:'none'}}/>
+
+      <div style={{maxWidth:1000,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px clamp(80px,11vw,140px)',textAlign:'center',position:'relative',zIndex:1}}>
+        <div className="micro" style={{color:'#F5A623',marginBottom:28,letterSpacing:'.26em'}}>At StartEasy Zambia</div>
+        <p className="serif" style={{fontSize:'clamp(1.65rem,4.2vw,2.8rem)',lineHeight:1.28,color:'#fff',margin:'0 auto 48px',maxWidth:'50rem',fontWeight:700,letterSpacing:'-0.005em'}}>
+          We are helpful for <em style={{color:'#F5A623',fontStyle:'italic'}}>finance</em>, <em style={{color:'#F5A623',fontStyle:'italic'}}>technology</em>, <em style={{color:'#F5A623',fontStyle:'italic'}}>marketing</em>, and <em style={{color:'#F5A623',fontStyle:'italic'}}>administrative support</em>.
+        </p>
+        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:14}}>
+          {helpfulPills.map((x,i)=>
+            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:12,padding:'15px 28px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.95rem,1.4vw,1.08rem)',fontWeight:700,color:'#fff',letterSpacing:'.02em',transition:'all .25s'}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=x.color+'88';e.currentTarget.style.background='rgba(255,255,255,.09)';e.currentTarget.style.transform='translateY(-2px)'}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,.16)';e.currentTarget.style.background='rgba(255,255,255,.055)';e.currentTarget.style.transform='none'}}>
+              <span style={{width:36,height:36,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,flexShrink:0}}>
+                <i className={`fas ${x.icon}`}/>
+              </span>
+              {x.label}
+            </span>
+          )}
+        </div>
+
+        {/* Small closer note */}
+        <p style={{marginTop:'clamp(56px,8vw,80px)',fontSize:12,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)'}}>
+          StartEasy Zambia · Venture Building Service Platform
+        </p>
+      </div>
+    </section>
+  </div>;
+}
+
+/* ============================================================
+   VENTURE PAGE — the full set of venture building materials
+   ============================================================ */
+function VenturePage({go,onWizard}){
+  useEffect(()=>{trackEvent('page_view',{route:'venture'});},[]);
+  return <div className="fadein">
+    <VentureBuildingSection go={go} onWizard={onWizard}/>
+  </div>;
+}
+
+/* ============================================================
+   ORIENTATION PAGE — the full orientation services materials
+   ============================================================ */
+function OrientationPage({go,onWizard}){
+  useEffect(()=>{trackEvent('page_view',{route:'orientation'});},[]);
+  return <div className="fadein">
+    <OrientationServicesSection go={go} onWizard={onWizard}/>
+  </div>;
+}
+
+/* ============================================================
+   VENTURE CAPABILITIES ILLUSTRATION — used inside VentureBuildingSection
    ============================================================ */
 function VentureCapabilitiesIllustration({go}){
   const capabilities=[
@@ -1917,15 +2052,11 @@ function VentureCapabilitiesIllustration({go}){
     {icon:'fa-bullhorn',color:'#1B6CA8',label:'Marketing and sales',desc:'Brand, campaign, channels.',desk:'venture'}
   ];
   return <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px 72px',position:'relative',zIndex:1}}>
-
-    {/* Header */}
     <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 36px'}}>
       <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:12}}>Who we serve · What we build</span>
       <h3 className="serif" style={{fontSize:'clamp(1.6rem,3.6vw,2.2rem)',lineHeight:1.15,marginBottom:12,color:'#fff'}}>Two audiences. Shared capabilities.</h3>
       <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',margin:0}}>Whether you are starting from zero or running an established organisation, the same venture-building toolkit is behind you.</p>
     </div>
-
-    {/* Audience cards */}
     <div className="grid sm:grid-cols-2 gap-4" style={{maxWidth:880,margin:'0 auto 8px'}}>
       <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:16,padding:'28px 24px',textAlign:'center'}}>
         <span style={{width:52,height:52,borderRadius:14,background:'rgba(232,115,15,.18)',color:'#F5A623',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:22,marginBottom:14}}><i className="fas fa-user"></i></span>
@@ -1938,13 +2069,9 @@ function VentureCapabilitiesIllustration({go}){
         <p style={{fontSize:13.5,color:'rgba(255,255,255,.65)',margin:0,lineHeight:1.55}}>Companies, institutions and venture teams</p>
       </div>
     </div>
-
-    {/* Connector arrow */}
     <div style={{textAlign:'center',margin:'8px 0 24px'}}>
       <span style={{display:'inline-flex',width:40,height:40,borderRadius:'50%',background:'rgba(245,166,35,.15)',border:'1px solid rgba(245,166,35,.35)',alignItems:'center',justifyContent:'center',color:'#F5A623',fontSize:16}}><i className="fas fa-arrow-down"></i></span>
     </div>
-
-    {/* Shared capabilities panel */}
     <div style={{maxWidth:880,margin:'0 auto 56px',background:'rgba(255,255,255,.03)',border:'1px solid rgba(245,166,35,.28)',borderRadius:18,padding:'clamp(26px,3.5vw,40px)'}}>
       <div style={{textAlign:'center',marginBottom:28}}>
         <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,color:'#fff',margin:0}}>Shared venture-building capabilities</h3>
@@ -1956,8 +2083,6 @@ function VentureCapabilitiesIllustration({go}){
         </div>)}
       </div>
     </div>
-
-    {/* Four-pillar grid */}
     <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 32px'}}>
       <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:12}}>Where we go deep</span>
       <h3 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.9rem)',lineHeight:1.2,margin:0,color:'#fff'}}>Capabilities in focus.</h3>
@@ -1976,11 +2101,10 @@ function VentureCapabilitiesIllustration({go}){
 }
 
 /* ============================================================
-   VENTURE BUILDING SECTION
+   VENTURE BUILDING SECTION (full) — used on VenturePage
    ============================================================ */
 function VentureBuildingSection({go,onWizard}){
   const [helpPick,setHelpPick]=useState(null);
-
   const helpOptions=[
     {id:'plan',icon:'fa-file-lines',color:'#E8730F',label:'Developing a business plan',desc:'A full written business plan, reviewed by an officer.',action:'desk:venture'},
     {id:'register',icon:'fa-building',color:'#2E9C4A',label:'Registering the company',desc:'Redirects to the StartEasy Administrative Services Desk.',action:'desk:pacra'},
@@ -1990,7 +2114,6 @@ function VentureBuildingSection({go,onWizard}){
     {id:'investors',icon:'fa-hand-holding-dollar',color:'#0E7C7B',label:'Finding potential investors',desc:'Funder matching and introductions.',action:'desk:venture'},
     {id:'sales',icon:'fa-bullhorn',color:'#5E7A67',label:'Developing sales channels',desc:'Ongoing marketing and sales channel support.',action:'desk:venture'}
   ];
-
   const platformServices=[
     {icon:'fa-lightbulb',color:'#E8730F',title:'Idea validation',desc:'Determine whether customers actually need the product or service.'},
     {icon:'fa-diagram-project',color:'#2E9C4A',title:'Business model development',desc:'Design how the business will generate revenue.'},
@@ -2000,26 +2123,19 @@ function VentureBuildingSection({go,onWizard}){
     {icon:'fa-bullhorn',color:'#0E7C7B',title:'Marketing and sales',desc:'Help businesses attract customers and grow.'},
     {icon:'fa-gears',color:'#5E7A67',title:'Business operations',desc:'Provide systems, processes, and performance tracking.'}
   ];
-
   const atAGlance=[
     {icon:'fa-file-lines',color:'#E8730F',name:'Business plan',price:'K750',desc:'Full written business plan, reviewed by an officer.'},
     {icon:'fa-palette',color:'#7A4FA3',name:'Branding and website',price:'K1,000',desc:'Brand identity + website. Includes domain registration.'},
     {icon:'fa-building',color:'#2E9C4A',name:'Business registration support',price:'K400 · K750',desc:'Business Name K400. Company Incorporation K750.'},
     {icon:'fa-bullhorn',color:'#0E7C7B',name:'Marketing support',price:'K400/mo',desc:'Ongoing monthly marketing retainer.'}
   ];
-
   const handleHelp=(opt)=>{
     setHelpPick(opt.id);
-    setTimeout(()=>{
-      if(opt.action.startsWith('desk:')){go('desk',opt.action.slice(5));}
-    },350);
+    setTimeout(()=>{ if(opt.action.startsWith('desk:')){go('desk',opt.action.slice(5));} },350);
   };
-
   return <section style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden'}}>
     <div style={{position:'absolute',top:-120,right:-120,width:500,height:500,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
     <div style={{position:'absolute',bottom:-120,left:-120,width:500,height:500,background:'radial-gradient(circle, rgba(245,166,35,.10), transparent 65%)',pointerEvents:'none'}}/>
-
-    {/* Positioning header */}
     <div style={{maxWidth:1240,margin:'0 auto',padding:'72px 24px 40px',position:'relative',zIndex:1}}>
       <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Venture Building Service Platform · Zambia</span>
       <h2 className="serif" style={{fontSize:'clamp(2rem,5vw,3.2rem)',lineHeight:1.08,marginBottom:20,maxWidth:'46rem'}}>A one-stop shop for building businesses.</h2>
@@ -2030,8 +2146,6 @@ function VentureBuildingSection({go,onWizard}){
         <button onClick={()=>go('desk','venture')} style={{padding:'14px 26px',background:'rgba(255,255,255,.06)',color:'#fff',border:'1px solid rgba(255,255,255,.2)',borderRadius:9,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:10}}><i className="fas fa-rocket"></i> Open Venture Building Desk</button>
       </div>
     </div>
-
-    {/* Platform services grid */}
     <div style={{maxWidth:1240,margin:'0 auto',padding:'24px 24px 56px',position:'relative',zIndex:1}}>
       <div style={{marginBottom:28}}>
         <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:10}}>What the platform offers</span>
@@ -2048,10 +2162,8 @@ function VentureBuildingSection({go,onWizard}){
       </div>
     </div>
 
-    {/* NEW: Venture Capabilities Illustration */}
     <VentureCapabilitiesIllustration go={go}/>
 
-    {/* What help do you need today? */}
     <div id="what-help" style={{background:'rgba(0,0,0,.25)',borderTop:'1px solid rgba(245,166,35,.15)',borderBottom:'1px solid rgba(245,166,35,.15)'}}>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px',position:'relative',zIndex:1}}>
         <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 36px'}}>
@@ -2075,7 +2187,6 @@ function VentureBuildingSection({go,onWizard}){
       </div>
     </div>
 
-    {/* At a glance */}
     <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px',position:'relative',zIndex:1}}>
       <div style={{display:'flex',flexWrap:'wrap',justifyContent:'space-between',alignItems:'flex-end',gap:16,marginBottom:28}}>
         <div style={{flex:'1 1 320px'}}>
@@ -2094,7 +2205,6 @@ function VentureBuildingSection({go,onWizard}){
       </div>
     </div>
 
-    {/* Closing statement */}
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px 72px',position:'relative',zIndex:1}}>
       <div style={{background:'linear-gradient(135deg,rgba(232,115,15,.18),rgba(245,166,35,.08))',border:'1px solid rgba(245,166,35,.35)',borderRadius:14,padding:'clamp(24px,4vw,36px)',display:'flex',flexWrap:'wrap',gap:24,alignItems:'center',justifyContent:'space-between'}}>
         <div style={{flex:'1 1 320px',minWidth:0}}>
@@ -2110,19 +2220,17 @@ function VentureBuildingSection({go,onWizard}){
 }
 
 /* ============================================================
-   ORIENTATION SERVICES SECTION
+   ORIENTATION SERVICES SECTION (full)
    ============================================================ */
 function OrientationServicesSection({go,onWizard}){
   const [open,setOpen]=useState('startup');
   const toggle=id=>setOpen(prev=>prev===id?null:id);
-
   const challenges=[
     {id:'startup',icon:'fa-rocket',color:'#E8730F',tag:'Starting a business',title:'"I don\'t know what I am supposed to register for."',
       lead:'A person starting a business may ask:',
       list:['Do I need a business name or a company?','Do I need a TPIN?','Do I need NAPSA?','Do I need Workers Compensation registration?','Do I need a council trading licence?','Do I need ZABS certification?','Do I need ZICTA approval?','Do I need a health permit?','Do I need a fire certificate?','Do I need VAT?','What happens after registration?'],
       note:'The answer depends on the nature of the organisation and its activities. ZRA itself lists several different tax obligations — including PAYE, VAT, income tax, turnover tax and withholding tax.',
-      cta:[{label:'Run a Compliance Assessment',action:'wizard'}],
-      answer:true},
+      cta:[{label:'Run a Compliance Assessment',action:'wizard'}]},
     {id:'individual',icon:'fa-user',color:'#1B6CA8',tag:'Individual',title:'"I am an individual with administrative problems."',
       lead:'Common personal administrative requests we handle:',
       list:['Obtaining certificates','Document applications','Statutory registrations','Business start-up documentation','Affidavits and supporting documents','Document scanning','Printing and photocopying','Application submissions','Appointment scheduling','Government portal navigation','CV / document preparation','Certified / document-related processes','Correspondence','Application follow-up','Relocation / administrative paperwork'],
@@ -2138,7 +2246,6 @@ function OrientationServicesSection({go,onWizard}){
       note:'Government systems are usually in your favour. Don\'t worry — StartEasy provides administrative follow-up: "We submitted it, we\'re monitoring it, we\'ll tell you when something changes, and we\'ll follow up where necessary."',
       cta:[{label:'Talk to an officer',action:'wa'}]}
   ];
-
   const solutions=[
     ['"I want to start a business."','Business Start-Up Package','pacra'],
     ['"I don\'t know what registrations I need."','Compliance Assessment','wizard'],
@@ -2152,21 +2259,18 @@ function OrientationServicesSection({go,onWizard}){
     ['"I want to bid for contracts."','Tender / Admin Documentation Support','desk:sector'],
     ['"I need help maintaining company records."','Corporate Records Administration','desk:pacra']
   ];
-
   const pillars=[
     {icon:'fa-rocket',color:'#2E9C4A',title:'Business Start-Up',quote:'"I want to start a business but don\'t know where to begin."',text:'Registration + tax + statutory registrations + documentation + guidance.',desk:'pacra'},
     {icon:'fa-shield-halved',color:'#E8730F',title:'Compliance & Administration',quote:'"My business already exists, but keeping everything compliant and organised is difficult."',text:'Filing, renewals, records, compliance calendar and follow-up across every authority.',desk:'compliance'},
     {icon:'fa-briefcase',color:'#7A4FA3',title:'Outsourced Administrative Department',quote:'"We are too small to employ a full-time administrator."',text:'StartEasy becomes the organisation\'s external administrative office.',desk:'outsourcing'},
     {icon:'fa-user',color:'#1B6CA8',title:'Personal Administrative Services',quote:'"I am an individual — I just need help with paperwork."',text:'Documents, applications, certificates, follow-up, CVs and government portals.',desk:'personal'}
   ];
-
   const retainers=[
     {name:'StartEasy Basic',audience:'Individuals / micro-businesses',color:'#0E7C7B',icon:'fa-user',features:['Document preparation support','Government portal assistance','Application follow-up','Compliance calendar reminders']},
     {name:'StartEasy Business',audience:'Small businesses',color:'#1B6CA8',icon:'fa-store',features:['Everything in Basic','PACRA annual returns tracking','ZRA filing calendar','NAPSA / NHIMA / WCFCB reminders','Council licence renewals'],popular:true},
     {name:'StartEasy Organisation',audience:'NGOs, churches, associations, cooperatives',color:'#7A4FA3',icon:'fa-people-group',features:['Everything in Business','Statutory document register','Board / director records','Meeting & minutes administration','Donor & procurement documentation']},
     {name:'StartEasy Executive',audience:'Virtual / outsourced administrative department',color:'#E8730F',icon:'fa-briefcase',features:['Everything in Organisation','Named administrative officer','Defined service package per month','Monthly administrative report','Compliance calendar & tracking','Executive / board pack assembly']}
   ];
-
   const surveyQs=[
     'What administrative task takes the most time?',
     'What government process frustrates you most?',
@@ -2178,20 +2282,15 @@ function OrientationServicesSection({go,onWizard}){
     'If someone could take one administrative responsibility away from you permanently, what would it be?',
     'What would you actually pay someone to handle for you?'
   ];
-
   const [answers,setAnswers]=useState(Array(surveyQs.length).fill(''));
   const [name,setName]=useState('');
   const [role,setRole]=useState('');
-
   const buildSurveyMsg=()=>{
     const lines=['*STARTEASY — ORIENTATION SURVEY*',''];
     if(name.trim())lines.push('*Name:* '+name.trim());
     if(role.trim())lines.push('*I am:* '+role.trim());
     if(name.trim()||role.trim())lines.push('');
-    surveyQs.forEach((q,i)=>{
-      const a=(answers[i]||'').trim();
-      if(a)lines.push('*'+q+'*',''+a,'');
-    });
+    surveyQs.forEach((q,i)=>{ const a=(answers[i]||'').trim(); if(a)lines.push('*'+q+'*',''+a,''); });
     return lines.join('\n');
   };
   const submitSurvey=()=>{
@@ -2200,7 +2299,6 @@ function OrientationServicesSection({go,onWizard}){
     trackEvent('survey_submit',{filled});
     window.open(waUrl(buildSurveyMsg()),'_blank');
   };
-
   const act=(a)=>{
     if(!a)return;
     if(a.action==='wizard'){onWizard&&onWizard(null);return}
@@ -2214,14 +2312,12 @@ function OrientationServicesSection({go,onWizard}){
     if(r&&r.startsWith('desk:')){go('desk',r.slice(5));return}
     go(r);
   };
-
   return <section id="orientation-services" style={{background:'#F5FAF6'}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px 8px'}}>
       <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:16}}>Orientation Services · Start here</span>
       <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,color:'#0A1F12',marginBottom:16,maxWidth:'48rem'}}>What challenge do you have?</h2>
       <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',maxWidth:'46rem',margin:0}}>Pick the situation that best describes you. Every answer points to a real StartEasy desk, service or assessment — so you don't have to guess what to register for, what documents you need, or who should follow up.</p>
     </div>
-
     <div style={{maxWidth:1240,margin:'0 auto',padding:'32px 24px 16px'}}>
       <div style={{display:'flex',flexDirection:'column',gap:12}}>
         {challenges.map(ch=>{
@@ -2252,7 +2348,6 @@ function OrientationServicesSection({go,onWizard}){
         })}
       </div>
     </div>
-
     <div style={{maxWidth:1240,margin:'0 auto',padding:'24px 24px 40px'}}>
       <div style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',borderRadius:16,padding:'clamp(28px,4vw,44px)',color:'#fff',position:'relative',overflow:'hidden'}}>
         <div style={{position:'absolute',top:-80,right:-80,width:340,height:340,background:'radial-gradient(circle, rgba(232,115,15,.22), transparent 65%)',pointerEvents:'none'}}/>
@@ -2278,7 +2373,6 @@ function OrientationServicesSection({go,onWizard}){
         </div>
       </div>
     </div>
-
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px 56px'}}>
       <div style={{display:'flex',alignItems:'baseline',gap:16,marginBottom:28,flexWrap:'wrap'}}>
         <span className="micro" style={{color:'#E8730F'}}>Four StartEasy Services</span>
@@ -2296,7 +2390,6 @@ function OrientationServicesSection({go,onWizard}){
         </button>)}
       </div>
     </div>
-
     <div style={{background:'#fff',borderTop:'1px solid rgba(10,31,18,.06)',borderBottom:'1px solid rgba(10,31,18,.06)'}}>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
         <div style={{display:'flex',flexWrap:'wrap',justifyContent:'space-between',alignItems:'flex-end',gap:16,marginBottom:32}}>
@@ -2332,7 +2425,6 @@ function OrientationServicesSection({go,onWizard}){
         </div>
       </div>
     </div>
-
     <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
       <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 40px'}}>
         <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14}}>Administrative Retainers</span>
@@ -2356,9 +2448,8 @@ function OrientationServicesSection({go,onWizard}){
           <a href={waUrl('Hello StartEasy — I am interested in the '+r.name+' retainer. Please tell me what is covered and how it works.')} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'11px 16px',background:r.color,color:'#fff',borderRadius:8,fontSize:12.5,fontWeight:700,textDecoration:'none',marginTop:6}}><i className="fab fa-whatsapp"></i> Enquire on WhatsApp</a>
         </div>)}
       </div>
-      <p style={{textAlign:'center',fontSize:12,color:'rgba(10,31,18,.5)',fontStyle:'italic',marginTop:22,maxWidth:640,marginLeft:'auto',marginRight:'auto'}}>Retainer prices are quoted after we understand your organisation's scope, records and calendar. No published price until we know what you actually need.</p>
+      <p style={{textAlign:'center',fontSize:12,color:'rgba(10,31,18,.5)',fontStyle:'italic',marginTop:22,maxWidth:640,marginLeft:'auto',marginRight:'auto'}}>Retainer prices are quoted after we understand your organisation's scope, records and calendar.</p>
     </div>
-
     <div style={{background:'#0A1F12',color:'#fff'}}>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
         <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 40px'}}>
@@ -2379,7 +2470,6 @@ function OrientationServicesSection({go,onWizard}){
         </div>
       </div>
     </div>
-
     <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
       <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'clamp(26px,4vw,40px)',boxShadow:'0 20px 60px rgba(10,31,18,.06)'}}>
         <div className="grid lg:grid-cols-[1.1fr_1.6fr] gap-10">
@@ -2411,7 +2501,6 @@ function OrientationServicesSection({go,onWizard}){
         </div>
       </div>
     </div>
-
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px 72px'}}>
       <div style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
         <div style={{fontSize:10.5,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:14}}>StartEasy Administrative Services Desk</div>
@@ -2421,106 +2510,9 @@ function OrientationServicesSection({go,onWizard}){
   </section>;
 }
 
-function Home({go,onResume}){
-  const [snap,setSnap]=useState(()=>readSnapshot());
-  const [myRefs,setMyRefs]=useState(()=>readMyRefs());
-  const resumable=hasResumableWizard(snap);
-  const savedLabel=snap&&snap.savedAt?timeAgo(snap.savedAt):'';
-  useEffect(()=>{trackEvent('page_view',{route:'home'});},[]);
-  const orientation=[
-    {icon:'fa-compass',title:'Business Structure & Name',desc:'Self-service wizard — K25, done within 1 hour.',route:'wizard'},
-    {icon:'fa-rocket',title:'Start a business',desc:'Register a name, incorporate a company.',route:'desk',arg:'pacra'},
-    {icon:'fa-file-invoice-dollar',title:'Tax registration',desc:'TPIN, VAT, PAYE, tax clearance.',route:'desk',arg:'zra'},
-    {icon:'fa-users',title:'Employ staff',desc:'NAPSA, NHIMA, WCFCB, PAYE.',route:'desk',arg:'napsa'},
-    {icon:'fa-id-card',title:'Get a licence',desc:'Council trading, health, fire, sector.',route:'desk',arg:'licensing'},
-    {icon:'fa-sitemap',title:'Sector regulator',desc:'ZDA, ZEMA, Tourism, ZABS, ERB, ZICTA.',route:'desk',arg:'sector'},
-    {icon:'fa-wrench',title:"I'm behind on compliance",desc:'Check-up and regularisation.',route:'desk',arg:'compliance'}
-  ];
-  return <div className="fadein" style={{background:'#F5FAF6'}}>
-    <section style={{background:'#0A1F12',color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
-      <div style={{position:'absolute',top:0,right:0,width:500,height:500,background:'radial-gradient(circle,rgba(232,115,15,.06),transparent 65%)',transform:'translate(30%,-50%)',pointerEvents:'none'}}/>
-      <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px',position:'relative',zIndex:1}}>
-        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:24}}>Venture Building Service Platform · Zambia</span>
-        <h1 className="serif" style={{fontSize:'clamp(2.2rem,5.8vw,3.8rem)',lineHeight:1.05,maxWidth:'48rem',marginBottom:24}}>You Run the Business.<br/><span style={{fontStyle:'italic',color:'#F5A623'}}>We Manage the Paperwork.</span></h1>
-        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.6)',maxWidth:'38rem',marginBottom:40}}>Business compliance and regulatory administration for Zambian entrepreneurs, founders, SMEs and established companies. Tell us what you need — we guide you to the right service, prepare the engagement proposal, and once agreed — we handle it on your behalf.</p>
-        <div style={{display:'flex',flexWrap:'wrap',gap:12}}>
-          <Btn size="lg" variant="primary" onClick={()=>go('wizard')}>Structure &amp; Name advisory — K25 <Arrow/></Btn>
-          <Btn size="lg" variant="ghostLt" onClick={()=>go('desks')}>Browse all desks</Btn>
-        </div>
-      </div>
-    </section>
-
-    <VentureBuildingSection go={go} onWizard={(scope)=>onResume && onResume(scope)}/>
-
-    {resumable&&<section style={{maxWidth:1240,margin:'0 auto',padding:'28px 24px 0'}}>
-      <div className="fadein" style={{background:'linear-gradient(135deg,#FFF9E6,#FFFCF0)',border:'1.5px solid #F0E0A0',borderRadius:12,padding:'20px 24px',display:'flex',gap:16,alignItems:'center',flexWrap:'wrap'}}>
-        <span style={{width:42,height:42,borderRadius:11,background:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-rotate-left" style={{color:'#fff',fontSize:16}}></i></span>
-        <div style={{flex:'1 1 280px',minWidth:0}}>
-          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:4}}>Welcome back</div>
-          <div style={{fontSize:14.5,color:'#0A1F12',fontWeight:600,lineHeight:1.5}}>You have a Structure &amp; Name assessment in progress{savedLabel?` — saved ${savedLabel}`:''}.</div>
-          <div style={{fontSize:12.5,color:'rgba(10,31,18,.6)',marginTop:4,lineHeight:1.55}}>Your answers are stored on this device, so you can pick up exactly where you stopped.</div>
-        </div>
-        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-          <button onClick={onResume} style={{padding:'12px 20px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-play"></i> Continue where I left off</button>
-          <button onClick={()=>{clearSnapshot();setSnap(null)}} style={{padding:'12px 20px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>Start fresh</button>
-        </div>
-      </div>
-    </section>}
-
-    {myRefs.length>0&&<section style={{maxWidth:1240,margin:'0 auto',padding:'20px 24px 0'}}>
-      <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'20px 24px',display:'flex',gap:16,alignItems:'center',flexWrap:'wrap'}}>
-        <span style={{width:42,height:42,borderRadius:11,background:'rgba(232,115,15,.1)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-magnifying-glass" style={{fontSize:16}}></i></span>
-        <div style={{flex:'1 1 280px',minWidth:0}}>
-          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:4}}>Track a submission</div>
-          <div style={{fontSize:13.5,color:'#0A1F12',fontWeight:600,lineHeight:1.5}}>You have {myRefs.length} submission{myRefs.length!==1?'s':''} on this device. Check the current status anytime.</div>
-        </div>
-        <button onClick={()=>go('track')} style={{padding:'12px 20px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:13.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-arrow-right"></i> Open track page</button>
-      </div>
-    </section>}
-
-    <section style={{maxWidth:1240,margin:'0 auto',padding:'40px 24px 0'}}><NotReg/></section>
-    <section style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
-      <Head eyebrow="Start here" title="What brings you to StartEasy today?" sub="Pick the closest match. We will show only what applies to you." style={{marginBottom:40,maxWidth:'42rem'}}/>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {orientation.map((o,i)=><button key={i} onClick={()=>o.route==='desk'?go('desk',o.arg):go(o.route)} className="gtile">
-          <span className="ico"><i className={`fas ${o.icon}`}></i></span>
-          <h3>{o.title}</h3><p>{o.desc}</p>
-        </button>)}
-      </div>
-    </section>
-    <section style={{background:'#fff'}}>
-      <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
-        <Head eyebrow="Or explore by desk" title="Eleven specialist desks." sub="Each desk handles a defined set of administrative services with the relevant authority." style={{marginBottom:40,maxWidth:'42rem'}}/>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Object.values(DESKS).map(g=>{const count=ALL_SERVICES.filter(s=>s.desk===g.id).length;return <button key={g.id} onClick={()=>go('desk',g.id)} className="gtile">
-            <span className="ico" style={{background:g.color+'18',color:g.color}}><i className={`fas ${g.icon}`}></i></span>
-            <h3>{g.title}</h3><p>{g.subtitle}</p>
-            <span style={{fontSize:10.5,color:g.color,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',marginTop:'auto',paddingTop:8}}>{count} services</span>
-          </button>})}
-        </div>
-      </div>
-    </section>
-    <section style={{background:'#0A1F12',color:'#fff'}}>
-      <div style={{maxWidth:1240,margin:'0 auto',padding:'64px 24px'}}>
-        <Head light eyebrow="How engagement works" title="Three steps from question to delivery." style={{marginBottom:48,maxWidth:'42rem'}}/>
-        <div className="grid sm:grid-cols-3" style={{gap:1,background:'rgba(255,255,255,.1)',borderRadius:6,overflow:'hidden'}}>
-          {[{n:'01',t:'Explore',d:'Pick a desk. Answer one question. We show only what applies to you.'},{n:'02',t:'Engagement proposal',d:'We prepare a formal engagement letter with scope, fees and terms. You read, agree, and proceed.'},{n:'03',t:'Delivery',d:'On payment verification, we begin. You track progress. We act on your behalf.'}].map((x,i)=><div key={i} style={{background:'#0A1F12',padding:32}}>
-            <span className="serif" style={{fontSize:13,color:'#F5A623',fontWeight:700,display:'block',marginBottom:16}}>{x.n}</span>
-            <h3 className="serif" style={{fontSize:20,color:'#fff',marginBottom:12}}>{x.t}</h3>
-            <p style={{fontSize:13,lineHeight:1.6,color:'rgba(255,255,255,.5)'}}>{x.d}</p>
-          </div>)}
-        </div>
-        <div style={{marginTop:32,display:'flex',flexWrap:'wrap',gap:12}}>
-          <Btn size="lg" variant="primary" onClick={()=>go('desks')}>Choose a desk <Arrow/></Btn>
-          <Btn size="lg" variant="ghostLt" onClick={()=>go('engagement')}>See the full process</Btn>
-        </div>
-      </div>
-    </section>
-
-    <OrientationServicesSection go={go} onWizard={(scope)=>onResume && onResume(scope)}/>
-  </div>;
-}
-
+/* ============================================================
+   OTHER PAGES
+   ============================================================ */
 function DesksPage({go}){
   useEffect(()=>{trackEvent('page_view',{route:'desks'});},[]);
   return <div className="fadein" style={{background:'#F5FAF6'}}>
@@ -2592,7 +2584,7 @@ function DeskDetail({deskId,go,onServiceClick,onWizard}){
         <div style={{display:'flex',gap:14,alignItems:'flex-start'}}>
           <span style={{width:36,height:36,borderRadius:10,background:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-lightbulb" style={{color:'#fff',fontSize:15}}></i></span>
           <div><div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:5}}>Your guidance</div>
-          <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.75)',margin:0}}>For <strong>{selected.t}</strong>, these are the StartEasy services that apply. Click any service to see exactly what is covered, the fee structure and the timeline.</p></div>
+          <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.75)',margin:0}}>For <strong>{selected.t}</strong>, these are the StartEasy services that apply.</p></div>
         </div>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -2611,7 +2603,7 @@ function DeskDetail({deskId,go,onServiceClick,onWizard}){
       <div style={{background:'linear-gradient(135deg,#0A1F12,#123A1F)',borderRadius:12,padding:'36px 32px',color:'#fff',textAlign:'center'}}>
         <i className="fas fa-comments" style={{fontSize:38,color:'#F5A623',marginBottom:16,display:'block'}}></i>
         <h3 className="serif" style={{fontSize:24,color:'#fff',lineHeight:1.2,marginBottom:12}}>Talk to an officer first.</h3>
-        <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:560,margin:'0 auto 24px'}}>This option works best as a conversation. Message us on WhatsApp with a short description and we will guide you to the right service.</p>
+        <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:560,margin:'0 auto 24px'}}>This option works best as a conversation.</p>
         <a href={waUrl('Hello StartEasy — I have a question about '+desk.title+'.')} target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'#25D366',color:'#fff',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none'}}><i className="fab fa-whatsapp"></i> Chat with an officer</a>
       </div>
     </section>}
@@ -2821,6 +2813,8 @@ function App(){
   const view=()=>{
     switch(route){
       case 'wizard': return <Wizard key={'wz'+wizardSession} initialScope={wizardScope} onExit={()=>go('home')} onOrderFormal={handleWizardOrder}/>;
+      case 'venture': return <VenturePage go={go} onWizard={openWizard}/>;
+      case 'orientation': return <OrientationPage go={go} onWizard={openWizard}/>;
       case 'desks': return <DesksPage go={go}/>;
       case 'desk': return <DeskDetail deskId={routeArg||'pacra'} go={go} onServiceClick={handleServiceClick} onWizard={openWizard}/>;
       case 'services': return <ServicesPage onServiceClick={handleServiceClick}/>;
@@ -2829,7 +2823,7 @@ function App(){
       case 'engagement': return <EngagementPage go={go}/>;
       case 'pricing': return <PricingPage go={go}/>;
       case 'about': return <AboutPage/>;
-      default: return <Home go={go} onResume={()=>openWizard(null)}/>;
+      default: return <Home go={go} onResume={()=>openWizard(null)} onWizard={openWizard}/>;
     }
   };
 
