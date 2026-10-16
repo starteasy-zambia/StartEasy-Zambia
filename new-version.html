@@ -211,8 +211,6 @@ try {
 
 /* ============================================================
    ADMINISTRATIVE SERVICES DESK — IIFE
-   Patched to support amountOverride / feeLabelOverride and
-   initialService (used by Venture flow).
    ============================================================ */
 window.StartEasyAdminDesk = (function () {
   const { useState, useEffect, useMemo, useCallback, useRef } = React;
@@ -450,7 +448,7 @@ window.StartEasyAdminDesk = (function () {
   }
   function NotReg({tone='light'}){return <div style={{background:tone==='dark'?'rgba(255,255,255,.05)':'linear-gradient(135deg,#FFF4E0,#FFF9EE)',border:tone==='dark'?'1px solid rgba(245,166,35,.3)':'1px solid #E8730F',borderRadius:12,padding:'14px 18px',display:'flex',gap:14,alignItems:'flex-start'}}>
     <span style={{width:34,height:34,borderRadius:9,background:tone==='dark'?'rgba(245,166,35,.2)':'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-info-circle" style={{color:tone==='dark'?'#F5A623':'#fff',fontSize:14}}></i></span>
-    <div><p style={{fontSize:12.5,fontWeight:800,letterSpacing:'.04em',color:tone==='dark'?'#F5A623':'#8A6828',marginBottom:4,textTransform:'uppercase'}}>We act on your behalf — we are not a regulator</p><p style={{fontSize:12.5,lineHeight:1.55,color:tone==='dark'?'rgba(255,255,255,.7)':'rgba(10,31,18,.7)'}}>StartEasy is an administrative services desk. We prepare, coordinate, submit and track filings with PACRA, ZRA, NAPSA, NHIMA, WCFCB, councils and sector regulators — but we are not a government authority, and we do not give legal, tax or audit advice. Where such advice is needed, we refer you to a qualified professional.</p></div>
+    <div><p style={{fontSize:12.5,fontWeight:800,letterSpacing:'.04em',color:tone==='dark'?'#F5A623':'#8A6828',marginBottom:4,textTransform:'uppercase'}}>We act on your behalf — we are not a regulator</p><p style={{fontSize:12.5,lineHeight:1.55,color:tone==='dark'?'rgba(255,255,255,.7)':'rgba(10,31,18,.7)'}}>StartEasy is an administrative services desk. We prepare, coordinate, submit and track filings with PACRA, ZRA, NAPSA, NHIMA, WCFCB, councils and sector regulators — but we are not a government authority, and we do not give legal, tax or audit advice.</p></div>
   </div>;}
   const INP={width:'100%',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,padding:'12px 14px',fontSize:14,color:'#0A1F12',fontFamily:'inherit'};
   function TIn({value,onChange,placeholder,type='text'}){return <input type={type} value={value||''} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={INP}/>;}
@@ -599,7 +597,6 @@ window.StartEasyAdminDesk = (function () {
     </Modal>;
   }
 
-  /* ---- PATCH A: EngagementLetterBody — fee overrides ---- */
   function EngagementLetterBody({service,clientName,clientBusiness,clientEmail,wizardData,readOnly}){
     const s=service;const desk=getDesk(s.desk);
     const sf=s.service?SF[s.service]:null;const og=s.ongoing?ONGOING[s.ongoing]:null;
@@ -699,7 +696,6 @@ window.StartEasyAdminDesk = (function () {
     </Modal>;
   }
 
-  /* ---- PATCH B: Payment — fee overrides ---- */
   function Payment({service,client,onClose,onDone}){
     const s=service;
     const sf=s.service?SF[s.service]:null;const og=s.ongoing?ONGOING[s.ongoing]:null;
@@ -1428,7 +1424,6 @@ window.StartEasyAdminDesk = (function () {
           <div style={{marginBottom:24}}>
             <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:8}}>Dashboard · Live</div>
             <h2 className="serif" style={{fontSize:'clamp(1.5rem,3.2vw,2rem)',color:'#0A1F12',lineHeight:1.15,marginBottom:6}}>Platform at a glance</h2>
-            <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>Every payment and event from every visitor, synced from Firestore in real time.</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" style={{marginBottom:24}}>
             <AdminKpi label="Visits (14d)" value={stats.visits} sub={`${stats.uniqueVisitors} unique visitor${stats.uniqueVisitors!==1?'s':''}`} icon="fa-eye"/>
@@ -1646,7 +1641,7 @@ window.StartEasyAdminDesk = (function () {
             </div>
           </div>}
           <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:10,padding:'18px 20px',marginBottom:20}}>
-            <label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:8}}>Officer note (visible to the client on the status page)</label>
+            <label style={{display:'block',fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:8}}>Officer note (visible to the client)</label>
             <textarea value={note} onChange={e=>setNote(e.target.value)} rows={4} placeholder="Optional." style={{width:'100%',background:'#fff',border:'2px solid rgba(10,31,18,.12)',borderRadius:10,padding:'14px 16px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit',resize:'vertical',lineHeight:1.55}}/>
           </div>
           <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:14}}>
@@ -1654,7 +1649,6 @@ window.StartEasyAdminDesk = (function () {
             <button onClick={()=>setStatus('reverted')} style={{flex:'1 1 180px',padding:'14px 22px',background:'linear-gradient(135deg,#7A4FA3,#9A6BC0)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}><i className="fas fa-rotate-left"></i> Revert for correction</button>
             <button onClick={()=>setStatus('declined')} style={{flex:'1 1 180px',padding:'14px 22px',background:'linear-gradient(135deg,#B8564F,#C86A5E)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}><i className="fas fa-circle-xmark"></i> Decline</button>
           </div>
-          <div style={{fontSize:11.5,color:'rgba(10,31,18,.5)',textAlign:'center',lineHeight:1.6}}>The client's Track page updates instantly.</div>
         </div>
       </Modal>}
     </div>;
@@ -1690,13 +1684,11 @@ window.StartEasyAdminDesk = (function () {
           <div>
             <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}><Mark size={38}/><div style={{lineHeight:1}}><span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Administrative Services Desk</span><span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span></div></div>
             <p style={{fontSize:11,letterSpacing:'.16em',textTransform:'uppercase',color:'#F5A623',fontWeight:700,marginBottom:14}}>You Run the Business. We Manage the Paperwork.</p>
-            <p style={{fontSize:13,lineHeight:1.65,color:'rgba(255,255,255,.5)',maxWidth:340}}>Register. File. Renew. Regularise. Stay Compliant.</p>
           </div>
           <div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Explore</span><div style={{display:'flex',flexDirection:'column',gap:12}}>{[['wizard','Structure & Name'],['desks','All Desks'],['services','All Services'],['track','Track submission'],['engagement','How it works'],['pricing','Pricing'],['about','About Us']].map(([r,l])=><button key={l} onClick={()=>go(r)} style={{display:'block',fontSize:13,color:'rgba(255,255,255,.5)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left',padding:0}}>{l}</button>)}</div></div>
           <div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Contact</span><div style={{display:'flex',flexDirection:'column',gap:12,fontSize:13,color:'rgba(255,255,255,.5)'}}><p style={{margin:0}}>{CONTACT_EMAIL}</p><p style={{margin:0}}>+260 762499581</p><p style={{margin:0,color:'rgba(255,255,255,.35)',fontSize:12}}>Lusaka, Zambia</p></div></div>
         </div>
         <div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
-          <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.75,maxWidth:900}}><strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is an administrative services desk. We are not a government authority or a regulator. Service fees shown are for StartEasy work and are separate from any government fee.</p>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap',marginTop:20}}>
             <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy · Zambia.</p>
             <button onClick={()=>go('admin')} style={{background:'none',border:'none',color:'rgba(255,255,255,.25)',fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:700,cursor:'pointer',fontFamily:'inherit',padding:0}}><i className="fas fa-lock" style={{marginRight:6}}></i> Admin</button>
@@ -1799,7 +1791,6 @@ window.StartEasyAdminDesk = (function () {
       <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px 8px'}}>
         <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:16}}>Orientation Services · Start here</span>
         <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,color:'#0A1F12',marginBottom:16,maxWidth:'48rem'}}>What challenge do you have?</h2>
-        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',maxWidth:'46rem',margin:0}}>Pick the situation that best describes you.</p>
       </div>
       <div style={{maxWidth:1240,margin:'0 auto',padding:'32px 24px 16px'}}>
         <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -1925,7 +1916,6 @@ window.StartEasyAdminDesk = (function () {
             <div>
               <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14}}>Help us design your desk</span>
               <h3 className="serif" style={{fontSize:'clamp(1.5rem,3.2vw,2rem)',lineHeight:1.15,color:'#0A1F12',marginBottom:16}}>Tell us what actually slows you down.</h3>
-              <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.65)',marginBottom:22}}>Answer any of these questions.</p>
             </div>
             <div>
               <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',marginBottom:18}}>
@@ -2216,7 +2206,6 @@ window.StartEasyAdminDesk = (function () {
     </div>;
   }
 
-  /* ---- PATCH C: OrigApp — accept initialService ---- */
   function OrigApp({onExit, initialService}){
     const [route,setRoute]=useState('home');
     const [routeArg,setRouteArg]=useState(null);
@@ -2286,8 +2275,6 @@ window.StartEasyAdminDesk = (function () {
 
 /* ============================================================
    VENTURE BUILDING PLATFORM
-   Engagement flows through the Administrative Desk pipeline
-   (se_payments collection — no new Firestore rules needed).
    ============================================================ */
 const ADMIN_WHATSAPP = '260768526191';
 const CONTACT_EMAIL  = 'engagements@starteasyzambia.com';
@@ -2335,9 +2322,6 @@ async function ventureFindPaymentByRef(ref){
   }catch(e){ return null; }
 }
 
-/* ============================================================
-   VENTURE SERVICES
-   ============================================================ */
 const VENTURE_SERVICES = {
   plan: {
     key:'plan', icon:'fa-file-lines', color:'#E8730F',
@@ -2548,6 +2532,9 @@ function Footer({go,onSwitchToAdmin}){
   </footer>;
 }
 
+/* ============================================================
+   VENTURE HOME — with new Support Services sections
+   ============================================================ */
 function VentureHome({go,onSwitchToAdmin}){
   const [myRefs] = useState(()=>readMyRefs());
   useEffect(()=>{trackEvent('page_view',{route:'venture-home'});},[]);
@@ -2575,6 +2562,46 @@ function VentureHome({go,onSwitchToAdmin}){
     trackEvent('service_click',{serviceKey:key});
     go('service', key);
   };
+
+  const supportAreas = [
+    {
+      key:'finance', icon:'fa-wallet', color:'#2E9C4A', label:'Finance',
+      title:'Financial Support',
+      intro:'We help businesses manage their money, plan their finances, and make informed financial decisions.',
+      services:['Bookkeeping — daily income, expenses, sales and purchases','Budget preparation — planning how to spend money wisely','Financial planning — setting financial goals and growth planning','Cash flow management — tracking money coming in and going out','Invoice and payment management — preparing invoices and tracking payments','Financial reports — clear summaries of business performance','Business funding guidance — preparing documents for funding applications'],
+      goal:'To help businesses manage their finances better, reduce unnecessary costs, and build financial stability.'
+    },
+    {
+      key:'tech', icon:'fa-laptop-code', color:'#1B6CA8', label:'Technology',
+      title:'Technology Support',
+      intro:'We help businesses use technology to simplify their operations, improve productivity, and serve customers more effectively.',
+      services:['Computer and software support — everyday business applications','Digital business setup — business email, online tools, digital workflows','Website support — establishing or improving your online presence','Productivity tools — documents, spreadsheets, presentations, task management','Data organisation — digital records, customer information, business files','Technology training — teaching owners and staff to use digital tools','Digital process improvement — reducing manual work with simple solutions'],
+      goal:'To make technology accessible, practical, and useful for businesses of all sizes.'
+    },
+    {
+      key:'marketing', icon:'fa-bullhorn', color:'#E8730F', label:'Marketing',
+      title:'Marketing Support',
+      intro:'We help businesses promote their products and services, reach their target customers, and build a recognisable brand.',
+      services:['Brand development — identity, messaging, professional image','Social media management — pages, content planning, regular posting','Content creation — captions, flyers, posters, marketing materials','Digital marketing — online campaigns and digital customer engagement','Marketing strategy — target audience and suitable promotional methods','Market research — customer needs, competitors, market opportunities','Customer engagement — attracting customers and encouraging repeat business','Promotional campaigns — activities to increase awareness and sales'],
+      goal:'To help businesses become more visible, attract the right customers, and grow their sales.'
+    },
+    {
+      key:'admin', icon:'fa-folder-open', color:'#7A4FA3', label:'Administration',
+      title:'Administrative Support',
+      intro:'We help businesses manage daily office tasks, organise records, and maintain smooth operations so owners can focus on growing their businesses.',
+      services:['Document preparation — letters, reports, proposals, business documents','Data entry — entering and updating business information accurately','Email management — organising business emails and preparing responses','Scheduling and appointments — coordinating meetings and reminders','Filing and record keeping — organising physical and digital records','Business registration assistance — requirements and documentation','Proposal and report writing — proposals, company profiles, progress reports','General office support — routine tasks that keep activities organised'],
+      goal:'To save businesses time, improve organisation, and make everyday operations more efficient.'
+    }
+  ];
+
+  const audiences = [
+    {icon:'fa-lightbulb', color:'#E8730F', label:'Entrepreneurs starting a business'},
+    {icon:'fa-store',     color:'#2E9C4A', label:'Small and medium-sized enterprises (SMEs)'},
+    {icon:'fa-rocket',    color:'#1B6CA8', label:'Startups establishing their operations'},
+    {icon:'fa-user-tie',  color:'#7A4FA3', label:'Self-employed individuals and freelancers'},
+    {icon:'fa-people-group', color:'#0E7C7B', label:'NGOs and community-based organisations'},
+    {icon:'fa-chart-line',   color:'#B8564F', label:'Established businesses seeking better organisation and growth'}
+  ];
 
   return <div className="fadein" style={{background:'#0A1F12',color:'#fff'}}>
 
@@ -2667,14 +2694,155 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
-    <section style={{background:'#0A1F12',color:'#fff',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
-      <div style={{maxWidth:1000,margin:'0 auto',padding:'clamp(80px,11vw,140px) 24px',textAlign:'center',position:'relative',zIndex:1}}>
-        <div className="micro" style={{color:'#F5A623',marginBottom:28,letterSpacing:'.26em'}}>At StartEasy Zambia</div>
-        <p className="serif" style={{fontSize:'clamp(1.65rem,4.2vw,2.8rem)',lineHeight:1.28,color:'#fff',margin:'0 auto 48px',maxWidth:'50rem',fontWeight:700}}>
-          We are helpful for <em style={{color:'#F5A623',fontStyle:'italic'}}>finance</em>, <em style={{color:'#F5A623',fontStyle:'italic'}}>technology</em>, <em style={{color:'#F5A623',fontStyle:'italic'}}>marketing</em>, and <em style={{color:'#F5A623',fontStyle:'italic'}}>administrative support</em>.
-        </p>
+    {/* ============ NEW: FOUR SUPPORT AREAS ============ */}
+    <section style={{background:'#0A1F12',padding:'clamp(64px,9vw,110px) 24px',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
+      <div style={{position:'absolute',top:-140,left:'15%',width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',bottom:-160,right:'-10%',width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.10), transparent 65%)',pointerEvents:'none'}}/>
+
+      <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
+        <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 56px'}}>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Four Support Areas</span>
+          <h2 className="serif" style={{fontSize:'clamp(2rem,4.8vw,3.2rem)',lineHeight:1.1,marginBottom:18,color:'#fff'}}>
+            What we help you <em style={{fontStyle:'italic',color:'#F5A623'}}>actually</em> do.
+          </h2>
+          <p style={{fontSize:15.5,lineHeight:1.75,color:'rgba(255,255,255,.65)',margin:0,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
+            Whether you are just starting out or running an established organisation, our support spans four areas — each with a practical, defined scope, and each delivered by a named officer.
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-5">
+          {supportAreas.map(area=>(
+            <div key={area.key}
+              style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderLeft:`4px solid ${area.color}`,borderRadius:18,padding:'30px 28px',display:'flex',flexDirection:'column',gap:18,transition:'all .25s'}}
+              onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,.06)';e.currentTarget.style.transform='translateY(-3px)';}}
+              onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,.04)';e.currentTarget.style.transform='none';}}>
+              <div style={{display:'flex',alignItems:'center',gap:16}}>
+                <span style={{width:54,height:54,borderRadius:14,background:area.color+'22',border:`1px solid ${area.color}55`,color:area.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
+                  <i className={`fas ${area.icon}`}></i>
+                </span>
+                <div>
+                  <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:area.color,marginBottom:4}}>{area.label}</div>
+                  <h3 className="serif" style={{fontSize:'clamp(1.15rem,2.1vw,1.4rem)',fontWeight:800,color:'#fff',lineHeight:1.15,margin:0}}>{area.title}</h3>
+                </div>
+              </div>
+              <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(255,255,255,.68)',margin:0}}>{area.intro}</p>
+              <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:11}}>
+                {area.services.map((s,i)=>{
+                  const splitAt = s.indexOf(' — ');
+                  const head = splitAt > -1 ? s.slice(0, splitAt) : s;
+                  const tail = splitAt > -1 ? s.slice(splitAt + 3) : '';
+                  return (
+                    <li key={i} style={{display:'flex',gap:11,fontSize:13,color:'rgba(255,255,255,.82)',lineHeight:1.55,alignItems:'flex-start'}}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={area.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{marginTop:5,flexShrink:0}}>
+                        <path d="M20 6L9 17l-5-5"/>
+                      </svg>
+                      <span>
+                        <strong style={{color:'#fff',fontWeight:700}}>{head}</strong>
+                        {tail && <span style={{color:'rgba(255,255,255,.6)'}}> — {tail}</span>}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div style={{marginTop:'auto',paddingTop:18,borderTop:'1px solid rgba(255,255,255,.1)',display:'flex',gap:12,alignItems:'flex-start'}}>
+                <i className="fas fa-bullseye" style={{color:area.color,fontSize:15,marginTop:3,flexShrink:0}}></i>
+                <div>
+                  <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:area.color,marginBottom:5}}>Our goal</div>
+                  <div style={{fontSize:12.5,fontStyle:'italic',lineHeight:1.65,color:'rgba(255,255,255,.72)'}}>{area.goal}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
+
+    {/* ============ NEW: WHO CAN BENEFIT ============ */}
+    <section style={{background:'#fff',color:'#0A1F12',padding:'clamp(64px,9vw,110px) 24px',position:'relative',overflow:'hidden'}}>
+      <div style={{position:'absolute',top:-100,right:'-5%',width:440,height:440,background:'radial-gradient(circle, rgba(232,115,15,.06), transparent 65%)',pointerEvents:'none'}}/>
+      <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
+        <div style={{textAlign:'center',maxWidth:760,margin:'0 auto 52px'}}>
+          <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Who we serve</span>
+          <h2 className="serif" style={{fontSize:'clamp(1.9rem,4.4vw,2.9rem)',lineHeight:1.12,marginBottom:16,color:'#0A1F12'}}>
+            Who can benefit from StartEasy?
+          </h2>
+          <p style={{fontSize:15,lineHeight:1.75,color:'rgba(10,31,18,.65)',margin:0}}>
+            Our support is designed to fit any organisation that has paperwork, deadlines and ambitions — from a one-person operation to an established institution.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {audiences.map((a,i)=>(
+            <div key={i}
+              style={{background:'#F5FAF6',border:'1px solid rgba(10,31,18,.06)',borderTop:`3px solid ${a.color}`,borderRadius:14,padding:'24px 22px',display:'flex',alignItems:'center',gap:16,transition:'all .22s'}}
+              onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.boxShadow='0 14px 34px -14px rgba(10,31,18,.15)';e.currentTarget.style.background='#fff';}}
+              onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';e.currentTarget.style.background='#F5FAF6';}}>
+              <span style={{width:48,height:48,borderRadius:12,background:a.color+'16',color:a.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:19,flexShrink:0}}>
+                <i className={`fas ${a.icon}`}></i>
+              </span>
+              <span style={{fontSize:14,fontWeight:600,color:'#0A1F12',lineHeight:1.45}}>{a.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{textAlign:'center',marginTop:44}}>
+          <a href={waUrl('Hello StartEasy — I would like to discuss how you can support my organisation.')} target="_blank" rel="noopener noreferrer"
+             style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 30px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:11,fontSize:14.5,fontWeight:700,textDecoration:'none',boxShadow:'0 14px 38px -12px rgba(232,115,15,.5)'}}>
+            <i className="fab fa-whatsapp"></i> Talk to an officer about your situation
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* ============ NEW: ABOUT STARTEASY ============ */}
+    <section style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',padding:'clamp(72px,10vw,120px) 24px',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
+      <div style={{position:'absolute',top:-140,left:'20%',width:560,height:560,background:'radial-gradient(circle, rgba(245,166,35,.14), transparent 65%)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',bottom:-160,right:'-8%',width:520,height:520,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
+
+      <div style={{maxWidth:920,margin:'0 auto',textAlign:'center',position:'relative',zIndex:1}}>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>About StartEasy Zambia</span>
+
+        <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.12,marginBottom:26,color:'#fff',maxWidth:'42rem',marginLeft:'auto',marginRight:'auto'}}>
+          A venture building &<br/>
+          <em style={{fontStyle:'italic',color:'#F5A623'}}>business support platform.</em>
+        </h2>
+
+        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.75)',marginBottom:22,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
+          StartEasy Zambia helps entrepreneurs, startups, small businesses and established organisations operate efficiently and grow sustainably.
+        </p>
+
+        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.72)',marginBottom:40,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
+          Through financial organisation and planning, digital solutions, marketing strategies and administrative assistance, we help our clients simplify operations, improve productivity, strengthen their market presence, and make informed decisions.
+        </p>
+
+        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginBottom:44}}>
+          {[
+            {icon:'fa-wallet',      label:'Finance',        color:'#2E9C4A'},
+            {icon:'fa-laptop-code', label:'Technology',     color:'#1B6CA8'},
+            {icon:'fa-bullhorn',    label:'Marketing',      color:'#E8730F'},
+            {icon:'fa-folder-open', label:'Administration', color:'#7A4FA3'}
+          ].map((x,i)=>
+            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'12px 22px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.92rem,1.35vw,1.05rem)',fontWeight:700,color:'#fff'}}>
+              <span style={{width:32,height:32,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
+                <i className={`fas ${x.icon}`}/>
+              </span>
+              {x.label}
+            </span>
+          )}
+        </div>
+
+        <div style={{display:'inline-flex',alignItems:'center',gap:16,padding:'18px 34px',background:'rgba(245,166,35,.1)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:'clamp(.98rem,1.5vw,1.12rem)',fontWeight:700,color:'#F5A623',fontFamily:"'Playfair Display',Georgia,serif",fontStyle:'italic',maxWidth:'100%',flexWrap:'wrap',justifyContent:'center',textAlign:'center'}}>
+          <i className="fas fa-quote-left" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
+          <span>Making Business Easier, One Step at a Time.</span>
+          <i className="fas fa-quote-right" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
+        </div>
+
+        <div style={{maxWidth:640,margin:'44px auto 0'}}>
+          <NotReg tone="dark"/>
+        </div>
+      </div>
+    </section>
+
   </div>;
 }
 
@@ -2921,12 +3089,7 @@ function VentureServiceDetail({serviceKey,go,onSwitchToAdmin}){
           <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'20px 22px'}}>
             <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:12}}>What happens next</div>
             <ol style={{listStyle:'none',padding:0,margin:0}}>
-              {['You click Start — you are taken to our engagement flow',
-                'You read and accept the engagement letter',
-                'You pay the service fee (WhatsApp / bank / Airtel / MTN / PayPal / crypto)',
-                'You submit your transaction reference',
-                'An officer verifies it (usually within 4 working hours)',
-                'Work begins and you track progress on the Track page'].map((t,i)=>
+              {['You click Start — you are taken to our engagement flow','You read and accept the engagement letter','You pay the service fee (WhatsApp / bank / Airtel / MTN / PayPal / crypto)','You submit your transaction reference','An officer verifies it (usually within 4 working hours)','Work begins and you track progress on the Track page'].map((t,i)=>
                 <li key={i} style={{display:'flex',gap:10,fontSize:12.5,color:'rgba(10,31,18,.75)',lineHeight:1.55,marginBottom:9,alignItems:'flex-start'}}>
                   <span style={{width:20,height:20,borderRadius:'50%',background:'rgba(232,115,15,.12)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:10,flexShrink:0,fontFamily:"'Playfair Display',Georgia,serif",marginTop:1}}>{i+1}</span>
                   <span>{t}</span>
