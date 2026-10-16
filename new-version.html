@@ -465,7 +465,19 @@ window.StartEasyAdminDesk = (function () {
     wcfcb:{id:'wcfcb',code:'4',title:'WCFCB Desk',subtitle:"Workers' Compensation Compliance",authority:"Workers' Compensation Fund Control Board",color:'#B8564F',icon:'fa-helmet-safety',intro:'Register your establishment and keep workers\' compensation assessments current.',options:[{v:'reg',t:'Register as an employer',d:'Establishment registration (14 days).',icon:'fa-clipboard-check',services:['w_reg']},{v:'assess',t:'Annual assessment',d:'Earnings declaration and assessment.',icon:'fa-file-invoice',services:['w_assess','w_ongoing']},{v:'injury',t:'Workplace injury documentation',d:'Administrative coordination only.',icon:'fa-briefcase-medical',services:['w_injury']},{v:'behind',t:'Clean up / arrears',d:'Outstanding assessments.',icon:'fa-wrench',services:['w_cleanup']}]},
     nhima:{id:'nhima',code:'5',title:'NHIMA Desk',subtitle:'National Health Insurance Compliance',authority:'National Health Insurance Management Authority',color:'#0E7C7B',icon:'fa-heart-pulse',intro:'Register as an employer, register employees, and administer monthly health insurance premiums.',options:[{v:'reg',t:'Register as an employer',d:'Employer account and portal.',icon:'fa-user-plus',services:['h_reg']},{v:'emp',t:'Register employees',d:'Employee and beneficiary records.',icon:'fa-users',services:['h_emp','h_monthly']},{v:'monthly',t:'Monthly premiums',d:'Schedules, returns, payments.',icon:'fa-calendar-check',services:['h_monthly','h_ongoing']},{v:'behind',t:'Clean up / arrears',d:'Outstanding returns and reconciliation.',icon:'fa-wrench',services:['h_cleanup']}]},
     licensing:{id:'licensing',code:'6',title:'Licensing Desk',subtitle:'Business Licences & Council Compliance',authority:'Local Authorities · Councils',color:'#E8730F',icon:'fa-id-card',intro:'Register, renew and keep your council licences, health permits, fire certificates and premises approvals current.',options:[{v:'trading',t:'Council trading licence',d:'Business levy and trading licence.',icon:'fa-store',services:['l_trading','l_renew']},{v:'health',t:'Health & food handling',d:'Restaurants, food handlers.',icon:'fa-utensils',services:['l_health','l_renew']},{v:'fire',t:'Fire certificate',d:'Fire inspection and certificate.',icon:'fa-fire-extinguisher',services:['l_fire','l_renew']},{v:'premises',t:'Premises approval',d:'Zoning, planning, occupation.',icon:'fa-building',services:['l_premises']},{v:'renew',t:'Renew existing licences',d:'Prevent lapses — 60 days ahead.',icon:'fa-rotate',services:['l_renew','l_ongoing']}]},
-    sector:{id:'sector',code:'7',title:'Sector Regulators Desk',subtitle:'ZDA · ZEMA · ZTA · ZABS · ERB · ZICTA · Cooperatives · CEEC · ZPPA',authority:'Sector Regulators',color:'#1B6CA8',icon:'fa-sitemap',intro:'One desk for your sector regulator registrations, licences and renewals.',options:[{v:'inv',t:'Investment — ZDA',d:'Investment licence, certificate.',icon:'fa-hand-holding-dollar',services:['s_zda']},{v:'env',t:'Environment — ZEMA',d:'Environmental registration.',icon:'fa-leaf',services:['s_zema']},{v:'tourism',t:'Tourism — ZTA',d:'Tourism enterprise and licence.',icon:'fa-plane',services:['s_tourism']},{v:'standards',t:'Standards — ZABS',d:'Product and standards.',icon:'fa-certificate',services:['s_zabs']},{v:'energy',t:'Energy — ERB',d:'Energy sector licences.',icon:'fa-bolt',services:['s_erb']},{v:'ict',t:'ICT — ZICTA',d:'ICT and telecoms licences.',icon:'fa-tower-cell',services:['s_zicta']},{v:'coop',t:'Cooperative',d:'Department of Cooperatives.',icon:'fa-people-group',services:['s_coop']},{v:'ceec',t:'CEEC registration',d:'Citizens Economic Empowerment.',icon:'fa-hand-holding-heart',services:['s_ceec']},{v:'tender',t:'Government tenders — ZPPA',d:'Supplier registration.',icon:'fa-file-signature',services:['s_zppa']}]},
+    sector:{id:'sector',code:'7',title:'Sector Regulators Desk',subtitle:'ZDA · ZEMA · ZTA · ZABS · ERB · ZICTA · EIZ · NCC · Cooperatives · CEEC · ZPPA',authority:'Sector Regulators',color:'#1B6CA8',icon:'fa-sitemap',intro:'One desk for your sector regulator registrations, licences and renewals.',options:[
+      {v:'inv',t:'Investment — ZDA',d:'Investment licence, certificate.',icon:'fa-hand-holding-dollar',services:['s_zda']},
+      {v:'env',t:'Environment — ZEMA',d:'Environmental registration.',icon:'fa-leaf',services:['s_zema']},
+      {v:'tourism',t:'Tourism — ZTA',d:'Tourism enterprise and licence.',icon:'fa-plane',services:['s_tourism']},
+      {v:'standards',t:'Standards — ZABS',d:'Product and standards.',icon:'fa-certificate',services:['s_zabs']},
+      {v:'energy',t:'Energy — ERB',d:'Energy sector licences.',icon:'fa-bolt',services:['s_erb']},
+      {v:'ict',t:'ICT — ZICTA',d:'ICT and telecoms licences.',icon:'fa-tower-cell',services:['s_zicta']},
+      {v:'eiz',t:'Engineering — EIZ',d:'Engineering Institution of Zambia.',icon:'fa-drafting-compass',services:['s_eiz']},
+      {v:'ncc',t:'Construction — NCC',d:'National Council for Construction.',icon:'fa-helmet-safety',services:['s_ncc']},
+      {v:'coop',t:'Cooperative',d:'Department of Cooperatives.',icon:'fa-people-group',services:['s_coop']},
+      {v:'ceec',t:'CEEC registration',d:'Citizens Economic Empowerment.',icon:'fa-hand-holding-heart',services:['s_ceec']},
+      {v:'tender',t:'Government tenders — ZPPA',d:'Supplier registration.',icon:'fa-file-signature',services:['s_zppa']}
+    ]},
     compliance:{id:'compliance',code:'8',title:'Compliance Desk',subtitle:'Ongoing Compliance Management',authority:'Cross-desk coordination',color:'#0E7C7B',icon:'fa-calendar-check',intro:'Your outsourced administrative compliance department — calendar, filings, renewals and coordination.',options:[{v:'audit',t:'Compliance Check-Up',d:'Written status report across all areas.',icon:'fa-magnifying-glass-chart',services:['c_audit']},{v:'behind',t:'I am behind — bring me up to date',d:'Structured regularisation programme.',icon:'fa-wrench',services:['c_regularise','c_ongoing']},{v:'ongoing',t:'Ongoing compliance support',d:'Calendar, filings, renewals, report.',icon:'fa-calendar-check',services:['c_ongoing']},{v:'ask',t:'I have a question',d:'Talk to an officer first.',icon:'fa-comments',services:[]}]},
     personal:{id:'personal',code:'9',title:'Personal Administrative Desk',subtitle:'Administrative help for individuals',authority:'Personal Administrative Services',color:'#1B6CA8',icon:'fa-user',intro:'A dedicated desk for individuals who need administrative work done — documents, applications, certificates, follow-up and government portal navigation.',options:[{v:'docs',t:'Document preparation',d:'CVs, applications, supporting documents.',icon:'fa-file-lines',services:['pe_docs']},{v:'certs',t:'Certificates & statutory documents',d:'Affidavits, certified copies, statements.',icon:'fa-certificate',services:['pe_certs']},{v:'apps',t:'Application submissions',d:'Government portal applications.',icon:'fa-paper-plane',services:['pe_apps']},{v:'follow',t:'Application follow-up',d:'Monitoring and correspondence.',icon:'fa-phone',services:['pe_follow']},{v:'print',t:'Scanning, printing & copies',d:'Document handling and delivery.',icon:'fa-print',services:['pe_print']},{v:'ask',t:'I have a question',d:'Talk to an officer first.',icon:'fa-comments',services:[]}]},
     outsourcing:{id:'outsourcing',code:'10',title:'Outsourced Administrative Desk',subtitle:'For NGOs, churches, associations, cooperatives',authority:'External Administration Department',color:'#7A4FA3',icon:'fa-sitemap',intro:"We become your organisation's external administrative office — records, filings, minutes, renewals and correspondence managed monthly.",options:[{v:'starter',t:'Outsourced desk — Starter',d:'Records + calendar + reminders.',icon:'fa-folder-open',services:['o_starter']},{v:'organisation',t:'Outsourced desk — Organisation',d:'For NGOs, churches, associations.',icon:'fa-people-group',services:['o_org']},{v:'executive',t:'Outsourced desk — Executive',d:'Virtual administrative department.',icon:'fa-briefcase',services:['o_exec']},{v:'oneoff',t:'One-off clean-up',d:'Get disorganised records in order.',icon:'fa-broom',services:['o_cleanup']},{v:'ask',t:'I have a question',d:'Talk to an officer first.',icon:'fa-comments',services:[]}]}
@@ -515,12 +527,14 @@ window.StartEasyAdminDesk = (function () {
     s_zabs:{code:'S4',desk:'sector',title:'ZABS Standards Certification',clientDesc:'Administrative support for standards and product certification.',whatsCovered:['Standards certification administration','Product certification coordination','Inspection coordination','Certification renewals','Standards documentation'],service:'standard',timeline:'Varies'},
     s_erb:{code:'S5',desk:'sector',title:'ERB Energy Licensing',clientDesc:'Administrative support for energy sector licence applications and renewals.',whatsCovered:['Licence application administration','Licence renewal','Regulatory documentation','Compliance calendar','ERB correspondence follow-up'],service:'standard',timeline:'Varies'},
     s_zicta:{code:'S6',desk:'sector',title:'ZICTA ICT Licensing',clientDesc:'Administrative support for ICT and telecommunications licence applications and renewals.',whatsCovered:['Licence application administration','Regulatory documentation','Licence renewal tracking','Compliance administration'],service:'standard',timeline:'Varies'},
-    s_coop:{code:'S7',desk:'sector',title:'Cooperative Registration',clientDesc:'Administrative support for cooperative registration.',whatsCovered:['Cooperative registration administration','Registration documentation','Amendments','Annual / periodic compliance administration','Records maintenance'],service:'standard',timeline:'Varies'},
-    s_ceec:{code:'S8',desk:'sector',title:'CEEC Registration',clientDesc:'Administrative support for CEEC registration and documentation.',whatsCovered:['Registration / application administration','Documentation preparation','Compliance documentation','Application follow-up'],service:'standard',timeline:'Varies'},
-    s_zppa:{code:'S9',desk:'sector',title:'ZPPA Supplier Registration',clientDesc:'Administrative support to register as a supplier for government tenders.',whatsCovered:['Supplier registration support','Supplier profile administration','Documentation coordination','Compliance document management','Tender-readiness administration'],service:'standard',timeline:'Varies'},
+    s_eiz:{code:'S7',desk:'sector',title:'EIZ Registration & Compliance',clientDesc:'Administrative support for registration with the Engineering Institution of Zambia (EIZ) — for engineering practitioners, engineering firms and consultancies. We prepare, submit and follow up on your behalf.',whatsCovered:['Correct EIZ registration category confirmed','Application form and documentation prepared','Identification, qualification and reference documents compiled','Submission to EIZ on your behalf','Reference tracking and EIZ correspondence follow-up','Annual practising certificate renewal support','CPD-related administrative coordination','Records kept for your compliance calendar'],service:'standard',ongoing:'filing',timeline:'Varies',popular:true},
+    s_ncc:{code:'S8',desk:'sector',title:'NCC Contractor Registration',clientDesc:'Administrative support for registration with the National Council for Construction (NCC) — contractor grading, registration and renewals for construction firms, contractors and consultants.',whatsCovered:['Correct NCC contractor grade and category confirmed','Application pack for NCC registration prepared','Company registration, tax, and personnel documents compiled','Equipment and capability schedule prepared','Submission to NCC on your behalf','Reference tracking and inspection coordination','Annual contractor licence renewal support','Grade upgrade applications supported'],service:'standard',ongoing:'filing',timeline:'Varies',popular:true},
+    s_coop:{code:'S9',desk:'sector',title:'Cooperative Registration',clientDesc:'Administrative support for cooperative registration.',whatsCovered:['Cooperative registration administration','Registration documentation','Amendments','Annual / periodic compliance administration','Records maintenance'],service:'standard',timeline:'Varies'},
+    s_ceec:{code:'S10',desk:'sector',title:'CEEC Registration',clientDesc:'Administrative support for CEEC registration and documentation.',whatsCovered:['Registration / application administration','Documentation preparation','Compliance documentation','Application follow-up'],service:'standard',timeline:'Varies'},
+    s_zppa:{code:'S11',desk:'sector',title:'ZPPA Supplier Registration',clientDesc:'Administrative support to register as a supplier for government tenders.',whatsCovered:['Supplier registration support','Supplier profile administration','Documentation coordination','Compliance document management','Tender-readiness administration'],service:'standard',timeline:'Varies'},
     c_audit:{code:'C1',desk:'compliance',title:'Business Compliance Check-Up',clientDesc:'A written Business Compliance Status Report covering every applicable regulatory area.',whatsCovered:['Business identity review','Tax review','Employee review','Premises review','Industry review','Written report with ratings'],service:'checkup',timeline:'Report within 5 business days',popular:true},
     c_regularise:{code:'C2',desk:'compliance',title:'Compliance Regularisation Programme',clientDesc:'A structured programme to bring your business up to date across every applicable authority.',whatsCovered:['PACRA status check and outstanding annual returns','ZRA status check and missing tax returns','NAPSA, NHIMA and WCFCB status checks','Council licence status and expired licences','Missing certificates identified','Employee compliance review','Regulatory correspondence','Compliance backlog filed','Renewals coordinated','Certificate retrieval','Record reconstruction','Compliance calendar created'],service:'regularise',ongoing:'standard',timeline:'Varies depending on backlog',popular:true},
-    c_ongoing:{code:'C3',desk:'compliance',title:'Ongoing Compliance Management',clientDesc:'We become your external administrative compliance department.',whatsCovered:['PACRA — annual returns and corporate changes','ZRA — tax registrations, returns and compliance','NAPSA — employer, employee and contribution compliance','NHIMA — employee registration, returns and premiums','WCFCB — employer registration, assessments and compliance','Council — business levy and local licences','Health — permits and inspections','Fire — certificates and renewals','ZDA — investment regulatory matters','ZEMA — environmental licences','ZABS — standards and certification','Tourism — tourism licences','ERB — energy licences','ZICTA — ICT regulatory licences','ZPPA — supplier compliance','Monthly / quarterly compliance status report','Annual compliance review'],ongoing:'managed',timeline:'Ongoing',popular:true,subscription:true},
+    c_ongoing:{code:'C3',desk:'compliance',title:'Ongoing Compliance Management',clientDesc:'We become your external administrative compliance department.',whatsCovered:['PACRA — annual returns and corporate changes','ZRA — tax registrations, returns and compliance','NAPSA — employer, employee and contribution compliance','NHIMA — employee registration, returns and premiums','WCFCB — employer registration, assessments and compliance','Council — business levy and local licences','Health — permits and inspections','Fire — certificates and renewals','ZDA — investment regulatory matters','ZEMA — environmental licences','ZABS — standards and certification','Tourism — tourism licences','ERB — energy licences','ZICTA — ICT regulatory licences','EIZ — engineering registration and renewals','NCC — construction contractor registration and renewals','ZPPA — supplier compliance','Monthly / quarterly compliance status report','Annual compliance review'],ongoing:'managed',timeline:'Ongoing',popular:true,subscription:true},
     pe_docs:{code:'PE1',desk:'personal',title:'Document Preparation',clientDesc:'Administrative preparation of CVs, application letters, supporting documents and personal paperwork.',whatsCovered:['CV and cover letter preparation','Application and motivation letters','Supporting document preparation','Document review for consistency','Formatting and finishing'],service:'basic',timeline:'2–5 working days'},
     pe_certs:{code:'PE2',desk:'personal',title:'Certificates & Statutory Documents',clientDesc:'Administrative support to obtain certificates, certified copies, affidavits and statutory statements.',whatsCovered:['Certificate application preparation','Certified copy coordination','Affidavit preparation support','Statutory statement preparation','Submission on your behalf','Collection and delivery'],service:'standard',timeline:'Varies',popular:true},
     pe_apps:{code:'PE3',desk:'personal',title:'Application Submissions',clientDesc:'Administrative submission of applications on government portals and with public offices.',whatsCovered:['Correct portal identified','Application prepared','Submitted on your behalf','Confirmation captured','Follow-up scheduled'],service:'basic',timeline:'1–5 working days'},
@@ -1950,7 +1964,7 @@ window.StartEasyAdminDesk = (function () {
       {icon:'fa-file-invoice-dollar',title:'Tax registration',desc:'TPIN, VAT, PAYE, tax clearance.',route:'desk',arg:'zra'},
       {icon:'fa-users',title:'Employ staff',desc:'NAPSA, NHIMA, WCFCB, PAYE.',route:'desk',arg:'napsa'},
       {icon:'fa-id-card',title:'Get a licence',desc:'Council trading, health, fire, sector.',route:'desk',arg:'licensing'},
-      {icon:'fa-sitemap',title:'Sector regulator',desc:'ZDA, ZEMA, Tourism, ZABS, ERB, ZICTA.',route:'desk',arg:'sector'},
+      {icon:'fa-sitemap',title:'Sector regulator',desc:'ZDA, ZEMA, Tourism, ZABS, ERB, ZICTA, EIZ, NCC.',route:'desk',arg:'sector'},
       {icon:'fa-wrench',title:"I'm behind on compliance",desc:'Check-up and regularisation.',route:'desk',arg:'compliance'}
     ];
     return <div className="fadein" style={{background:'#F5FAF6'}}>
@@ -2322,6 +2336,9 @@ async function ventureFindPaymentByRef(ref){
   }catch(e){ return null; }
 }
 
+/* ============================================================
+   VENTURE SERVICES — includes EIZ and NCC
+   ============================================================ */
 const VENTURE_SERVICES = {
   plan: {
     key:'plan', icon:'fa-file-lines', color:'#E8730F',
@@ -2422,6 +2439,28 @@ const VENTURE_SERVICES = {
     whatsCovered:['Sales audit — current channels and performance','Priority channel selection','Channel playbook per channel','Weekly content and campaign support','Lead generation execution','CRM setup (if needed)','Monthly performance report','Quarterly strategy review'],
     process:[{t:'Audit',d:'We examine what is working and what is not.'},{t:'Plan',d:'We agree priority channels and 90-day goals.'},{t:'Execute',d:'We run campaigns and coordinate outreach.'},{t:'Review',d:'Monthly report with adjustments.'}],
     faq:[{q:'Can I pause?',a:'Yes. Month-to-month — 30 days notice to stop.'},{q:'Is ad spend included?',a:'No. Ad spend is paid by you directly to the platforms. Our fee covers the work.'}]
+  },
+  /* ========== NEW: EIZ ========== */
+  eiz: {
+    key:'eiz', icon:'fa-drafting-compass', color:'#1B6CA8',
+    title:'EIZ Registration & Compliance',
+    tagline:'Engineering Institution of Zambia — practitioner and firm registration.',
+    lead:'Registration with the Engineering Institution of Zambia (EIZ) is required for practising engineers, engineering firms and consultancies in Zambia. We prepare, submit and follow up on your EIZ application so you can get on with the work.',
+    price:'From K750', priceUsd:'From $75', timeline:'Varies', audience:'Engineers · Engineering firms · Consultancies',
+    whatsCovered:['Correct EIZ registration category confirmed','Application form and documentation prepared','Identification, qualification and reference documents compiled','Submission to EIZ on your behalf','Reference tracking and EIZ correspondence follow-up','Annual practising certificate renewal support','CPD-related administrative coordination','Records kept for your compliance calendar'],
+    process:[{t:'Category review',d:'We confirm the correct EIZ registration category for your qualification and experience.'},{t:'Document pack',d:'We compile certificates, transcripts, references, ID and any supporting evidence.'},{t:'Submission',d:'We submit your application to EIZ on your behalf and retain the reference.'},{t:'Follow-up',d:'We chase EIZ, respond to queries, and coordinate any interview or verification.'},{t:'Certificate & renewals',d:'We deliver the certificate and diarise annual renewal.'}],
+    faq:[{q:'Do I need EIZ to practise engineering in Zambia?',a:'Yes — practising engineering in Zambia is governed by the Engineering Institution of Zambia Act. Registration with EIZ is required for most engineering practice, and firms also need to be registered.'},{q:'What categories exist?',a:'EIZ registers engineers at several grades (Graduate, Professional, Fellow, and others) and separately registers engineering firms and consultancies. We help you identify and apply for the right one.'},{q:'Can you renew my annual practising certificate?',a:'Yes. We track your expiry date and handle the renewal administration on your behalf.'},{q:'Do you give engineering advice?',a:'No. We are an administrative desk. Professional engineering work, opinions and designs are the responsibility of the registered practitioner.'}]
+  },
+  /* ========== NEW: NCC ========== */
+  ncc: {
+    key:'ncc', icon:'fa-helmet-safety', color:'#B8564F',
+    title:'NCC Contractor Registration',
+    tagline:'National Council for Construction — grading, registration and renewals.',
+    lead:'The National Council for Construction (NCC) regulates the Zambian construction industry. Contractors must be registered and graded with NCC to bid for most public and private construction work. We prepare and submit your application and manage the renewals.',
+    price:'From K900', priceUsd:'From $90', timeline:'Varies', audience:'Contractors · Construction firms · Consultants',
+    whatsCovered:['Correct NCC contractor grade and category confirmed','Application pack for NCC registration prepared','Company registration, tax and personnel documents compiled','Equipment and capability schedule prepared','Submission to NCC on your behalf','Reference tracking and inspection coordination','Annual contractor licence renewal support','Grade upgrade applications supported'],
+    process:[{t:'Grade review',d:'We review your track record, personnel and equipment against NCC grading criteria.'},{t:'Document pack',d:'We compile PACRA, ZRA, NAPSA and personnel files, plus equipment schedules.'},{t:'Submission',d:'We lodge your application with NCC and retain the reference.'},{t:'Inspection',d:'We coordinate any NCC verification, site visit or interview.'},{t:'Certificate & renewals',d:'We deliver your registration and manage the annual renewal cycle.'}],
+    faq:[{q:'Do I need NCC registration?',a:'For most public and private construction work in Zambia, yes. NCC registration and grading is required by law for contractors operating in the construction sector.'},{q:'What about consultants?',a:'NCC also registers construction consultants (engineers, architects, quantity surveyors). We can prepare the pack for consultant registration as well.'},{q:'Can you upgrade my grade?',a:'Yes. If your track record, personnel or equipment have grown, we can prepare and submit a grade upgrade application.'},{q:'How long does NCC registration take?',a:'Timelines vary depending on the grade and whether NCC requires an inspection. We give you a realistic estimate after the grade review.'}]
   }
 };
 
@@ -2532,10 +2571,6 @@ function Footer({go,onSwitchToAdmin}){
   </footer>;
 }
 
-/* ============================================================
-   VENTURE HOME — Support Services breakdown starting with the
-   exact intro paragraph requested.
-   ============================================================ */
 function VentureHome({go,onSwitchToAdmin}){
   const [myRefs] = useState(()=>readMyRefs());
   useEffect(()=>{trackEvent('page_view',{route:'venture-home'});},[]);
@@ -2549,6 +2584,7 @@ function VentureHome({go,onSwitchToAdmin}){
     {icon:'fa-shield-halved',value:'24/7',label:'WhatsApp support'}
   ];
 
+  /* Includes EIZ and NCC */
   const pillars=[
     {icon:'fa-file-lines', color:'#E8730F', key:'plan',      label:'Business plan',        price:'K750',       desc:'Funder-ready written plan.'},
     {icon:'fa-building',   color:'#2E9C4A', key:'register',  label:'Company registration', price:'K400 · K750',desc:'Business Name K400 · Company K750.'},
@@ -2556,6 +2592,8 @@ function VentureHome({go,onSwitchToAdmin}){
     {icon:'fa-palette',    color:'#7A4FA3', key:'brand',     label:'Brand & marketing',    price:'K1,000',     desc:'Identity, strategy, website.'},
     {icon:'fa-chart-line', color:'#B8564F', key:'financial', label:'Financial model',      price:'K800',       desc:'3-year projections.'},
     {icon:'fa-hand-holding-dollar', color:'#0E7C7B', key:'investors', label:'Investor readiness', price:'From K1,200', desc:'Pitch, funders, intros.'},
+    {icon:'fa-drafting-compass', color:'#1B6CA8', key:'eiz', label:'EIZ registration',    price:'From K750',  desc:'Engineering Institution of Zambia.'},
+    {icon:'fa-helmet-safety',    color:'#B8564F', key:'ncc', label:'NCC registration',    price:'From K900',  desc:'National Council for Construction.'},
     {icon:'fa-bullhorn',   color:'#5E7A67', key:'sales',     label:'Sales channels',       price:'K400/mo',    desc:'Ongoing revenue support.'}
   ];
 
@@ -2695,21 +2733,19 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
-    {/* ============ EXTENDED SECTION — starts with the exact intro paragraph ============ */}
     <section style={{background:'#0A1F12',padding:'clamp(64px,9vw,110px) 24px',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
       <div style={{position:'absolute',top:-140,left:'15%',width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
       <div style={{position:'absolute',bottom:-160,right:'-10%',width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.10), transparent 65%)',pointerEvents:'none'}}/>
 
       <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
-        <div style={{textAlign:'center',maxWidth:860,margin:'0 auto 56px'}}>
-          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.24em'}}>At StartEasy Zambia</span>
-          <p className="serif" style={{fontSize:'clamp(1.35rem,3.1vw,2rem)',lineHeight:1.45,marginBottom:24,color:'#fff',fontWeight:700,maxWidth:'52rem',marginLeft:'auto',marginRight:'auto'}}>
-            At StartEasy Zambia, we help <em style={{fontStyle:'italic',color:'#F5A623'}}>individuals</em>, <em style={{fontStyle:'italic',color:'#F5A623'}}>entrepreneurs</em>, <em style={{fontStyle:'italic',color:'#F5A623'}}>startups</em>, and <em style={{fontStyle:'italic',color:'#F5A623'}}>established businesses</em> grow by providing reliable support in four key areas: <strong style={{color:'#F5A623'}}>Finance, Technology, Marketing, and Administration.</strong>
-          </p>
-          <div style={{width:80,height:3,background:'linear-gradient(90deg,#E8730F,#F5A623)',borderRadius:99,margin:'0 auto 24px'}}/>
-          <h2 className="serif" style={{fontSize:'clamp(1.6rem,3.6vw,2.2rem)',lineHeight:1.15,color:'#fff',fontWeight:800,margin:0}}>
-            Breakdown of Our Support Services
+        <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 56px'}}>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Four Support Areas</span>
+          <h2 className="serif" style={{fontSize:'clamp(2rem,4.8vw,3.2rem)',lineHeight:1.1,marginBottom:18,color:'#fff'}}>
+            What we help you <em style={{fontStyle:'italic',color:'#F5A623'}}>actually</em> do.
           </h2>
+          <p style={{fontSize:15.5,lineHeight:1.75,color:'rgba(255,255,255,.65)',margin:0,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
+            Whether you are just starting out or running an established organisation, our support spans four areas — each with a practical, defined scope, and each delivered by a named officer.
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-5">
@@ -2759,7 +2795,6 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
-    {/* ============ WHO CAN BENEFIT ============ */}
     <section style={{background:'#fff',color:'#0A1F12',padding:'clamp(64px,9vw,110px) 24px',position:'relative',overflow:'hidden'}}>
       <div style={{position:'absolute',top:-100,right:'-5%',width:440,height:440,background:'radial-gradient(circle, rgba(232,115,15,.06), transparent 65%)',pointerEvents:'none'}}/>
       <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
@@ -2792,6 +2827,54 @@ function VentureHome({go,onSwitchToAdmin}){
              style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 30px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:11,fontSize:14.5,fontWeight:700,textDecoration:'none',boxShadow:'0 14px 38px -12px rgba(232,115,15,.5)'}}>
             <i className="fab fa-whatsapp"></i> Talk to an officer about your situation
           </a>
+        </div>
+      </div>
+    </section>
+
+    <section style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',padding:'clamp(72px,10vw,120px) 24px',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
+      <div style={{position:'absolute',top:-140,left:'20%',width:560,height:560,background:'radial-gradient(circle, rgba(245,166,35,.14), transparent 65%)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',bottom:-160,right:'-8%',width:520,height:520,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
+
+      <div style={{maxWidth:920,margin:'0 auto',textAlign:'center',position:'relative',zIndex:1}}>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>About StartEasy Zambia</span>
+
+        <h2 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.12,marginBottom:26,color:'#fff',maxWidth:'42rem',marginLeft:'auto',marginRight:'auto'}}>
+          A venture building &<br/>
+          <em style={{fontStyle:'italic',color:'#F5A623'}}>business support platform.</em>
+        </h2>
+
+        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.75)',marginBottom:22,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
+          StartEasy Zambia helps entrepreneurs, startups, small businesses and established organisations operate efficiently and grow sustainably.
+        </p>
+
+        <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.72)',marginBottom:40,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
+          Through financial organisation and planning, digital solutions, marketing strategies and administrative assistance, we help our clients simplify operations, improve productivity, strengthen their market presence, and make informed decisions.
+        </p>
+
+        <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginBottom:44}}>
+          {[
+            {icon:'fa-wallet',      label:'Finance',        color:'#2E9C4A'},
+            {icon:'fa-laptop-code', label:'Technology',     color:'#1B6CA8'},
+            {icon:'fa-bullhorn',    label:'Marketing',      color:'#E8730F'},
+            {icon:'fa-folder-open', label:'Administration', color:'#7A4FA3'}
+          ].map((x,i)=>
+            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'12px 22px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.92rem,1.35vw,1.05rem)',fontWeight:700,color:'#fff'}}>
+              <span style={{width:32,height:32,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
+                <i className={`fas ${x.icon}`}/>
+              </span>
+              {x.label}
+            </span>
+          )}
+        </div>
+
+        <div style={{display:'inline-flex',alignItems:'center',gap:16,padding:'18px 34px',background:'rgba(245,166,35,.1)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:'clamp(.98rem,1.5vw,1.12rem)',fontWeight:700,color:'#F5A623',fontFamily:"'Playfair Display',Georgia,serif",fontStyle:'italic',maxWidth:'100%',flexWrap:'wrap',justifyContent:'center',textAlign:'center'}}>
+          <i className="fas fa-quote-left" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
+          <span>Making Business Easier, One Step at a Time.</span>
+          <i className="fas fa-quote-right" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
+        </div>
+
+        <div style={{maxWidth:640,margin:'44px auto 0'}}>
+          <NotReg tone="dark"/>
         </div>
       </div>
     </section>
@@ -2877,6 +2960,20 @@ function VentureServiceDetail({serviceKey,go,onSwitchToAdmin}){
         timeline: option.adminTimeline,
         service: option.adminService,
         feeLabelOverride: option.adminFeeLabel
+      };
+    } else if(service.key==='eiz'){
+      serviceDef = {
+        code:'S7', desk:'sector', title:'EIZ Registration & Compliance',
+        clientDesc: service.lead, whatsCovered: service.whatsCovered, timeline: service.timeline,
+        amountOverride: 'From K750', feeLabelOverride: 'Venture Service Fee · EIZ Registration',
+        ongoing: 'filing'
+      };
+    } else if(service.key==='ncc'){
+      serviceDef = {
+        code:'S8', desk:'sector', title:'NCC Contractor Registration',
+        clientDesc: service.lead, whatsCovered: service.whatsCovered, timeline: service.timeline,
+        amountOverride: 'From K900', feeLabelOverride: 'Venture Service Fee · NCC Registration',
+        ongoing: 'filing'
       };
     } else {
       const isMonthly = service.price.indexOf('/mo') > -1;
@@ -3021,7 +3118,7 @@ function VentureServiceDetail({serviceKey,go,onSwitchToAdmin}){
               </div>
             </> : <>
               <h3 className="serif" style={{fontSize:20,fontWeight:800,color:'#0A1F12',lineHeight:1.2,marginBottom:8}}>{service.title}</h3>
-              <p style={{fontSize:12.5,color:'rgba(10,31,18,.6)',lineHeight:1.6,marginBottom:18}}>Ready to begin? Tell us about your business and we will confirm scope, timeline and payment.</p>
+              <p style={{fontSize:12.5,color:'rgba(10,31,18,.6)',lineHeight:1.6,marginBottom:18}}>Ready to begin? Tell us about your organisation and we will confirm scope, timeline and payment.</p>
 
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',padding:'14px 0',borderTop:'1px dashed rgba(10,31,18,.1)',borderBottom:'1px dashed rgba(10,31,18,.1)',marginBottom:18}}>
                 <span style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)'}}>Service fee</span>
@@ -3190,6 +3287,7 @@ function VentureTrack({go}){
 
 function VentureOrientation({go}){
   useEffect(()=>{trackEvent('page_view',{route:'orientation'});},[]);
+  /* Includes EIZ and NCC */
   const items=[
     {icon:'fa-rocket',color:'#2E9C4A',title:'I am starting a business',desc:'Registration, structure, tax and statutory setup.',target:'register'},
     {icon:'fa-file-lines',color:'#E8730F',title:'I need a business plan',desc:'Funder-ready plan and projections.',target:'plan'},
@@ -3197,6 +3295,8 @@ function VentureOrientation({go}){
     {icon:'fa-palette',color:'#7A4FA3',title:'I need a brand and website',desc:'Identity, strategy and website.',target:'brand'},
     {icon:'fa-chart-line',color:'#B8564F',title:'I need financial projections',desc:'3-year model and cash flow.',target:'financial'},
     {icon:'fa-hand-holding-dollar',color:'#0E7C7B',title:'I am ready for investors',desc:'Pitch, funders, introductions.',target:'investors'},
+    {icon:'fa-drafting-compass',color:'#1B6CA8',title:'I am an engineer or engineering firm',desc:'EIZ registration and annual renewals.',target:'eiz'},
+    {icon:'fa-helmet-safety',color:'#B8564F',title:'I am a contractor or construction firm',desc:'NCC grading, registration and renewals.',target:'ncc'},
     {icon:'fa-bullhorn',color:'#5E7A67',title:'I need to grow sales',desc:'Channels and campaigns.',target:'sales'}
   ];
   return <div className="fadein" style={{background:'#F5FAF6'}}>
@@ -3247,58 +3347,14 @@ function VenturePricing(){
   </div>;
 }
 
-/* ============================================================
-   ABOUT PAGE — full About StartEasy Zambia narrative
-   ============================================================ */
 function VentureAbout(){
   useEffect(()=>{trackEvent('page_view',{route:'about'});},[]);
-  return <div className="fadein" style={{background:'linear-gradient(180deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',minHeight:'100vh'}}>
-    <div style={{position:'absolute',top:-140,left:'15%',width:560,height:560,background:'radial-gradient(circle, rgba(245,166,35,.14), transparent 65%)',pointerEvents:'none'}}/>
-    <div style={{position:'absolute',bottom:-160,right:'-8%',width:520,height:520,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
-
-    <section style={{maxWidth:920,margin:'0 auto',padding:'clamp(72px,10vw,120px) 24px clamp(56px,7vw,80px)',position:'relative',zIndex:1,textAlign:'center'}}>
-      <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>About StartEasy Zambia</span>
-
-      <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.12,marginBottom:26,color:'#fff',maxWidth:'42rem',marginLeft:'auto',marginRight:'auto'}}>
-        A venture building &<br/>
-        <em style={{fontStyle:'italic',color:'#F5A623'}}>business support platform.</em>
-      </h1>
-
-      <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.75)',marginBottom:22,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
-        StartEasy Zambia is a venture building and business support service platform committed to helping entrepreneurs, startups, small businesses, and established organizations operate efficiently and grow sustainably.
-      </p>
-
-      <p style={{fontSize:'clamp(1rem,1.5vw,1.13rem)',lineHeight:1.85,color:'rgba(255,255,255,.72)',marginBottom:40,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
-        We provide support in four key areas: <strong style={{color:'#F5A623',fontWeight:700}}>Finance, Technology, Marketing, and Administration.</strong> Through financial organization and planning, digital solutions, marketing strategies, and administrative assistance, we help our clients simplify business operations, improve productivity, strengthen their market presence, and make informed decisions.
-      </p>
-
-      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginBottom:44}}>
-        {[
-          {icon:'fa-wallet',      label:'Finance',        color:'#2E9C4A'},
-          {icon:'fa-laptop-code', label:'Technology',     color:'#1B6CA8'},
-          {icon:'fa-bullhorn',    label:'Marketing',      color:'#E8730F'},
-          {icon:'fa-folder-open', label:'Administration', color:'#7A4FA3'}
-        ].map((x,i)=>
-          <span key={i} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'12px 22px',background:'rgba(255,255,255,.055)',border:'1px solid rgba(255,255,255,.16)',borderRadius:99,fontSize:'clamp(.92rem,1.35vw,1.05rem)',fontWeight:700,color:'#fff'}}>
-            <span style={{width:32,height:32,borderRadius:'50%',background:x.color+'2a',color:x.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
-              <i className={`fas ${x.icon}`}/>
-            </span>
-            {x.label}
-          </span>
-        )}
-      </div>
-
-      <div style={{display:'inline-flex',alignItems:'center',gap:16,padding:'18px 34px',background:'rgba(245,166,35,.1)',border:'1px solid rgba(245,166,35,.4)',borderRadius:99,fontSize:'clamp(.98rem,1.5vw,1.12rem)',fontWeight:700,color:'#F5A623',fontFamily:"'Playfair Display',Georgia,serif",fontStyle:'italic',maxWidth:'100%',flexWrap:'wrap',justifyContent:'center',textAlign:'center'}}>
-        <i className="fas fa-quote-left" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
-        <span>Making Business Easier, One Step at a Time.</span>
-        <i className="fas fa-quote-right" style={{fontSize:14,opacity:.6,flexShrink:0}}/>
-      </div>
-
-      <p style={{fontSize:'clamp(.95rem,1.4vw,1.05rem)',lineHeight:1.85,color:'rgba(255,255,255,.7)',marginTop:40,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
-        At StartEasy Zambia, our mission is to make business easier by providing practical, accessible, and reliable support that empowers our clients to focus on what matters most: building and growing their businesses.
-      </p>
-
-      <div style={{maxWidth:640,margin:'44px auto 0'}}>
+  return <div className="fadein" style={{background:'#F5FAF6'}}>
+    <section style={{background:'#0A1F12',color:'#fff',padding:'clamp(56px,8vw,80px) 24px'}}>
+      <div style={{maxWidth:1240,margin:'0 auto'}}>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>About</span>
+        <h1 className="serif" style={{fontSize:'clamp(2rem,4.6vw,3rem)',lineHeight:1.08,marginBottom:20,maxWidth:'48rem'}}>StartEasy Zambia</h1>
+        <p style={{fontSize:15.5,lineHeight:1.7,color:'rgba(255,255,255,.65)',maxWidth:'52rem',marginBottom:28}}>A venture building service platform — a central hub that provides the tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p>
         <NotReg tone="dark"/>
       </div>
     </section>
