@@ -178,84 +178,69 @@ input:focus,select:focus,textarea:focus{outline:none}
 .stat-icon{width:20px;height:20px;border-radius:50%;background:rgba(245,166,35,.18);color:#F5A623;display:inline-flex;align-items:center;justify-content:center;font-size:10px;margin-bottom:10px}
 
 /* ============================================================
-   HERO VIDEO SLIDES — square 1:1, no green, animated, refined type
+   HERO VIDEO SLIDES — SQUARE 1:1, WHITE, NO ANIMATION ON VIDEOS
    ============================================================ */
-.hero-slides{position:relative;overflow:hidden;background:#0A0A0A;isolation:isolate;width:100%;aspect-ratio:1/1;max-height:min(100vh,100svh)}
-.hero-slides__media{position:absolute;inset:0;z-index:0;overflow:hidden}
-.hero-slides__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1300ms cubic-bezier(.4,0,.2,1);will-change:opacity,transform;filter:saturate(1.05) contrast(1.05) brightness(.85);transform-origin:center center}
+.hero-slides{position:relative;overflow:hidden;background:#fff;isolation:isolate;width:100%;aspect-ratio:1/1;max-height:min(100vh,100svh)}
+.hero-slides__media{position:absolute;inset:0;z-index:0;overflow:hidden;background:#fff}
+.hero-slides__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 900ms cubic-bezier(.4,0,.2,1);will-change:opacity}
 .hero-slides__video.is-active{opacity:1}
 
-/* Animated motion per slide — subtle Ken Burns continuous zoom + drift */
-.hero-slide.is-active ~ .hero-slides__media .hero-slides__video.is-active,
-.hero-slides__video.is-active{animation:heroKenBurns 9000ms ease-in-out forwards}
-@keyframes heroKenBurns{
-  0%{transform:scale(1.02) translate(0,0)}
-  45%{transform:scale(1.10) translate(-1.2%,-0.8%)}
-  100%{transform:scale(1.14) translate(-2%,-1.4%)}
+/* Soft white veil so the copy stays readable, video remains visible */
+.hero-slides__tint{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.82) 36%, rgba(255,255,255,.38) 74%, rgba(255,255,255,.88) 100%);
 }
-.hero-slides__video.is-active.v0{animation-name:heroKenBurnsA}
-.hero-slides__video.is-active.v1{animation-name:heroKenBurnsB}
-.hero-slides__video.is-active.v2{animation-name:heroKenBurnsC}
-.hero-slides__video.is-active.v3{animation-name:heroKenBurnsD}
-@keyframes heroKenBurnsA{0%{transform:scale(1.02) translate(0,0)}50%{transform:scale(1.10) translate(-1.2%,-0.9%)}100%{transform:scale(1.14) translate(-2%,-1.6%)}}
-@keyframes heroKenBurnsB{0%{transform:scale(1.14) translate(2%,1.2%)}50%{transform:scale(1.08) translate(1%,0.6%)}100%{transform:scale(1.02) translate(0,0)}}
-@keyframes heroKenBurnsC{0%{transform:scale(1.05) translate(-1.5%,0.8%)}50%{transform:scale(1.11) translate(0.4%,-0.6%)}100%{transform:scale(1.16) translate(1.6%,-1.2%)}}
-@keyframes heroKenBurnsD{0%{transform:scale(1.12) translate(1.5%,-1%)}50%{transform:scale(1.06) translate(0.5%,0.4%)}100%{transform:scale(1.02) translate(0,0)}}
-
-/* Neutral dark overlay — no green tint */
-.hero-slides__tint{position:absolute;inset:0;z-index:1;background:
-  radial-gradient(ellipse at 30% 40%, rgba(0,0,0,.35) 0%, rgba(0,0,0,.72) 55%, rgba(0,0,0,.92) 100%),
-  linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.25) 30%, rgba(0,0,0,.7) 100%);
-  pointer-events:none}
-.hero-slides__bottomfade{position:absolute;left:0;right:0;bottom:0;height:38%;z-index:1;background:linear-gradient(to top,#0A0A0A 2%,rgba(10,10,10,.55) 45%,transparent 100%);pointer-events:none}
-.hero-slides__glow{position:absolute;top:-30%;right:-18%;width:65vw;height:65vw;max-width:820px;max-height:820px;z-index:1;background:radial-gradient(circle,rgba(232,115,15,.18),transparent 65%);pointer-events:none}
+.hero-slides__bottomfade{position:absolute;left:0;right:0;bottom:0;height:34%;z-index:1;pointer-events:none;
+  background:linear-gradient(to top,#fff 2%,rgba(255,255,255,.6) 45%,rgba(255,255,255,0) 100%);
+}
 
 .hero-slides__stack{position:absolute;inset:0;z-index:3}
 .hero-slide{position:absolute;inset:0;display:flex;align-items:center;opacity:0;visibility:hidden;transition:opacity .55s ease,visibility 0s .55s;pointer-events:none}
 .hero-slide.is-active{opacity:1;visibility:visible;transition:opacity .75s ease,visibility 0s;pointer-events:auto}
-.hero-slides__content{width:100%;max-width:1240px;margin:0 auto;padding:clamp(40px,5vw,80px) 24px clamp(80px,10vw,120px)}
-.hero-slides__inner{max-width:620px}
+.hero-slides__content{width:100%;max-width:1240px;margin:'0 auto';margin:0 auto;padding:clamp(40px,5vw,80px) 24px clamp(80px,10vw,120px)}
+.hero-slides__inner{max-width:600px}
 
-@keyframes heroUp{from{opacity:0;transform:translateY(22px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
-.hero-slide.is-active .hero-anim{animation:heroUp 900ms cubic-bezier(.22,.61,.36,1) both}
+@keyframes heroUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.hero-slide.is-active .hero-anim{animation:heroUp 800ms cubic-bezier(.22,.61,.36,1) both}
 .hero-slide.is-active .hero-anim--1{animation-delay:.1s}
-.hero-slide.is-active .hero-anim--2{animation-delay:.26s}
-.hero-slide.is-active .hero-anim--3{animation-delay:.44s}
-.hero-slide.is-active .hero-anim--4{animation-delay:.6s}
+.hero-slide.is-active .hero-anim--2{animation-delay:.24s}
+.hero-slide.is-active .hero-anim--3{animation-delay:.4s}
+.hero-slide.is-active .hero-anim--4{animation-delay:.55s}
 
-.hero-slides__eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:800;color:#F5A623;margin-bottom:16px;padding:7px 14px 7px 12px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.32);border-radius:99px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.hero-slides__accent{width:6px;height:6px;border-radius:99px;flex-shrink:0;box-shadow:0 0 10px currentColor}
-.hero-slides__title{font-size:clamp(1.45rem,3.1vw,2.35rem);line-height:1.12;font-weight:800;color:#fff;margin:0 0 clamp(12px,1.6vw,18px);letter-spacing:-.012em;text-shadow:0 6px 32px rgba(0,0,0,.65),0 2px 8px rgba(0,0,0,.5)}
-.hero-slides__title em{font-style:italic;color:#F5A623;font-weight:800}
-.hero-slides__sub{font-size:clamp(.88rem,1.05vw,.98rem);line-height:1.7;color:rgba(255,255,255,.82);margin:0 0 clamp(18px,2.2vw,24px);max-width:560px;font-weight:400;text-shadow:0 2px 14px rgba(0,0,0,.55)}
+.hero-slides__eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:800;color:#E8730F;margin-bottom:16px;padding:7px 14px 7px 12px;background:rgba(255,255,255,.72);border:1px solid rgba(232,115,15,.35);border-radius:99px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hero-slides__accent{width:6px;height:6px;border-radius:99px;flex-shrink:0}
+.hero-slides__title{font-size:clamp(1.4rem,2.9vw,2.2rem);line-height:1.14;font-weight:800;color:#0A1F12;margin:0 0 clamp(12px,1.6vw,18px);letter-spacing:-.012em}
+.hero-slides__title em{font-style:italic;color:#E8730F;font-weight:800}
+.hero-slides__sub{font-size:clamp(.85rem,1vw,.95rem);line-height:1.7;color:rgba(10,31,18,.72);margin:0 0 clamp(18px,2.2vw,24px);max-width:540px;font-weight:400}
 .hero-slides__ctas{display:flex;flex-wrap:wrap;gap:10px}
-.hero-cta{display:inline-flex;align-items:center;gap:9px;padding:12px 22px;border-radius:10px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;border:none;transition:all .28s cubic-bezier(.22,.61,.36,1);text-decoration:none;letter-spacing:.02em}
-.hero-cta--primary{background:linear-gradient(135deg,#E8730F,#F5A623);color:#fff;box-shadow:0 12px 32px rgba(232,115,15,.42),inset 0 1px 0 rgba(255,255,255,.15)}
-.hero-cta--primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(232,115,15,.55),inset 0 1px 0 rgba(255,255,255,.2)}
-.hero-cta--ghost{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.hero-cta--ghost:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.42);transform:translateY(-2px)}
-.hero-cta--brand{background:#25D366;color:#fff;box-shadow:0 12px 32px rgba(37,211,102,.4)}
-.hero-cta--brand:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(37,211,102,.55)}
+.hero-cta{display:inline-flex;align-items:center;gap:9px;padding:12px 22px;border-radius:10px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;border:none;transition:all .25s cubic-bezier(.22,.61,.36,1);text-decoration:none;letter-spacing:.02em}
+.hero-cta--primary{background:linear-gradient(135deg,#E8730F,#F5A623);color:#fff;box-shadow:0 10px 26px rgba(232,115,15,.32)}
+.hero-cta--primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(232,115,15,.45)}
+.hero-cta--ghost{background:#fff;color:#0A1F12;border:1px solid rgba(10,31,18,.18)}
+.hero-cta--ghost:hover{background:#0A1F12;color:#fff;border-color:#0A1F12;transform:translateY(-2px)}
+.hero-cta--brand{background:#25D366;color:#fff;box-shadow:0 10px 26px rgba(37,211,102,.32)}
+.hero-cta--brand:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(37,211,102,.45)}
 .hero-cta i{font-size:11px}
 
 .hero-slides__controls{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:0 24px clamp(18px,2.2vw,28px);pointer-events:none}
 .hero-slides__controls-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:18px;pointer-events:auto;flex-wrap:wrap}
 .hero-slides__nav{display:flex;gap:9px;align-items:center}
-.hero-slides__dot{position:relative;width:30px;height:5px;border-radius:99px;background:rgba(255,255,255,.22);border:none;padding:0;cursor:pointer;overflow:hidden;transition:width .5s cubic-bezier(.22,.61,.36,1),background .3s}
-.hero-slides__dot.is-active{width:64px;background:rgba(255,255,255,.18)}
-.hero-slides__dot:hover{background:rgba(255,255,255,.45)}
-.hero-slides__dot-fill{position:absolute;inset:0;background:linear-gradient(90deg,#E8730F,#F5A623);transform-origin:left center;transform:scaleX(0);box-shadow:0 0 14px rgba(232,115,15,.6)}
+.hero-slides__dot{position:relative;width:30px;height:5px;border-radius:99px;background:rgba(10,31,18,.18);border:none;padding:0;cursor:pointer;overflow:hidden;transition:width .5s cubic-bezier(.22,.61,.36,1),background .3s}
+.hero-slides__dot.is-active{width:64px;background:rgba(10,31,18,.12)}
+.hero-slides__dot:hover{background:rgba(10,31,18,.35)}
+.hero-slides__dot-fill{position:absolute;inset:0;background:linear-gradient(90deg,#E8730F,#F5A623);transform-origin:left center;transform:scaleX(0);box-shadow:0 0 12px rgba(232,115,15,.5)}
 .hero-slides__dot.is-active .hero-slides__dot-fill{animation:heroFill var(--slide-duration,7000ms) linear forwards}
 .hero-slides.is-paused .hero-slides__dot.is-active .hero-slides__dot-fill{animation-play-state:paused}
 @keyframes heroFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .hero-slides__meta{display:flex;align-items:center;gap:12px}
-.hero-slides__counter{font-family:'Playfair Display',Georgia,serif;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.06em;display:inline-flex;align-items:baseline;gap:5px}
-.hero-slides__counter strong{color:#fff;font-size:15px}
-.hero-slides__counter-sep{color:rgba(255,255,255,.25)}
-.hero-slides__theme{font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:#F5A623;padding:4px 12px;border:1px solid rgba(245,166,35,.35);border-radius:99px;background:rgba(245,166,35,.08);min-width:100px;text-align:center}
+.hero-slides__counter{font-family:'Playfair Display',Georgia,serif;font-size:12.5px;font-weight:700;color:rgba(10,31,18,.5);letter-spacing:.06em;display:inline-flex;align-items:baseline;gap:5px}
+.hero-slides__counter strong{color:#0A1F12;font-size:15px}
+.hero-slides__counter-sep{color:rgba(10,31,18,.28)}
+.hero-slides__theme{font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:#E8730F;padding:4px 12px;border:1px solid rgba(232,115,15,.35);border-radius:99px;background:rgba(232,115,15,.08);min-width:100px;text-align:center}
 .hero-slides__arrows{display:flex;gap:8px}
-.hero-slides__arrow{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .25s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.hero-slides__arrow:hover{background:#E8730F;border-color:#E8730F;transform:scale(1.05)}
+.hero-slides__arrow{width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid rgba(10,31,18,.15);color:#0A1F12;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .22s}
+.hero-slides__arrow:hover{background:#E8730F;border-color:#E8730F;color:#fff;transform:scale(1.05)}
+
 @media (max-width:768px){
   .hero-slides{max-height:none;aspect-ratio:1/1}
   .hero-slides__content{padding:36px 20px 120px}
@@ -270,13 +255,12 @@ input:focus,select:focus,textarea:focus{outline:none}
 @media (max-width:520px){
   .hero-slides__arrows{display:none}
   .hero-slides__controls-inner{justify-content:center}
-  .hero-slides__title{font-size:clamp(1.3rem,5.2vw,1.65rem)}
-  .hero-slides__sub{font-size:.88rem}
+  .hero-slides__title{font-size:clamp(1.25rem,5vw,1.6rem)}
+  .hero-slides__sub{font-size:.85rem}
 }
 @media (prefers-reduced-motion:reduce){
-  .hero-slides__video{transition:opacity 350ms ease;animation:none!important;transform:none!important}
+  .hero-slides__video{transition:opacity 350ms ease}
   .hero-slide.is-active .hero-anim{animation:heroFadeIn 400ms ease both}
-  .hero-slides__glow{animation:none!important}
 }
 @keyframes heroFadeIn{from{opacity:0}to{opacity:1}}
 </style>
@@ -499,8 +483,7 @@ function Nav({route,go,onSwitchToAdmin}){const [open,setOpen]=useState(false);co
 function Footer({go,onSwitchToAdmin}){return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}><div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}><div className="grid lg:grid-cols-[1.5fr_1fr_1fr] gap-10"><div><div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}><Mark size={38}/><div style={{lineHeight:1}}><span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Venture Building Platform</span><span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span></div></div><p style={{fontSize:11,letterSpacing:'.16em',textTransform:'uppercase',color:'#F5A623',fontWeight:700,marginBottom:14}}>A one-stop shop for building businesses.</p><p style={{fontSize:13,lineHeight:1.65,color:'rgba(255,255,255,.5)',maxWidth:340}}>Tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p></div><div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Explore</span><div style={{display:'flex',flexDirection:'column',gap:12}}>{[['venture','All Services'],['track','Track Submission'],['orientation','Orientation'],['pricing','Pricing'],['about','About Us'],['administrative','Administrative Desk']].map(([r,l])=><button key={l} onClick={()=>{if(r==='administrative'){onSwitchToAdmin&&onSwitchToAdmin();return;} go(r);}} style={{display:'block',fontSize:13,color:'rgba(255,255,255,.5)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left',padding:0}}>{l}</button>)}</div></div><div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Contact</span><div style={{display:'flex',flexDirection:'column',gap:12,fontSize:13,color:'rgba(255,255,255,.5)'}}><p style={{margin:0}}>{CONTACT_EMAIL}</p><p style={{margin:0}}>+260 762499581</p><p style={{margin:0,color:'rgba(255,255,255,.35)',fontSize:12}}>Lusaka, Zambia</p></div></div></div><div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}><p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia · Venture Building Service Platform.</p></div></div></footer>;}
 
 /* ============================================================
-   HERO VIDEO SLIDES — Square 1:1, no green tint, animated videos,
-   4 focused messages, refined smaller typography
+   HERO VIDEO SLIDES — Square 1:1, WHITE theme, no video animation
    ============================================================ */
 function HeroVideoSlides({go}){
   const SLIDE_MS = 7000;
@@ -544,9 +527,8 @@ function HeroVideoSlides({go}){
   const startRef = useRef(Date.now());
   const pauseAtRef = useRef(0);
   const touchStartX = useRef(0);
-  const [vKey,setVKey] = useState(0); // forces the animation restart on each slide switch
 
-  /* Play active video, pause others. vKey forces the Ken Burns animation to restart */
+  /* Play active video, pause others — no visual animation applied to video */
   useEffect(()=>{
     videoRefs.current.forEach((v,i)=>{
       if(!v) return;
@@ -558,7 +540,6 @@ function HeroVideoSlides({go}){
         try{ v.pause(); }catch(e){}
       }
     });
-    setVKey(k=>k+1);
   },[idx]);
 
   /* Auto-advance */
@@ -614,9 +595,9 @@ function HeroVideoSlides({go}){
     <div className="hero-slides__media" aria-hidden="true">
       {SLIDES.map((s,i)=>(
         <video
-          key={`${i}-${i===idx?vKey:0}`}
+          key={i}
           ref={el=>{ videoRefs.current[i] = el; }}
-          className={`hero-slides__video v${i}${i===idx?' is-active':''}`}
+          className={`hero-slides__video${i===idx?' is-active':''}`}
           src={s.video}
           muted loop playsInline
           preload={i===0 ? 'auto' : 'metadata'}
@@ -626,7 +607,6 @@ function HeroVideoSlides({go}){
     </div>
 
     <div className="hero-slides__tint" aria-hidden="true"/>
-    <div className="hero-slides__glow orb-pulse" aria-hidden="true"/>
     <div className="hero-slides__bottomfade" aria-hidden="true"/>
 
     <div className="hero-slides__stack">
@@ -640,7 +620,7 @@ function HeroVideoSlides({go}){
           <div className="hero-slides__content">
             <div className="hero-slides__inner">
               <span className="hero-slides__eyebrow hero-anim hero-anim--1">
-                <span className="hero-slides__accent" style={{background:s.accent,color:s.accent}}/>
+                <span className="hero-slides__accent" style={{background:s.accent}}/>
                 {s.eyebrow}
               </span>
               <h1 className="hero-slides__title hero-anim hero-anim--2 serif">{s.title}</h1>
@@ -757,7 +737,7 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>}
 
-    {/* ============ HERO VIDEO SLIDES (square, no green, animated) ============ */}
+    {/* ============ HERO VIDEO SLIDES (square, white, no video animation) ============ */}
     <HeroVideoSlides go={go}/>
 
     <section id="choose-situation" style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.18)',background:'linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.1))'}}>
