@@ -602,8 +602,7 @@ function Nav({user,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   },[menuOpen]);
   const logoClick=(e)=>{e.preventDefault();closeMenu();if(user)onDashboard();else if(onSignIn)onSignIn();};
   
-  // Changed position to fixed with high z-index to guarantee it stays on top
-  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',position:'fixed',top:0,left:0,right:0,height:72,zIndex:999}}>
+  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)', flexShrink:0, position:'relative', zIndex:50}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 16px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72,gap:10}}>
         <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0}}>
@@ -787,9 +786,7 @@ function Footer(){
 
 /* ═══════════════════ LANDING ═══════════════════ */
 function Landing({onSignup,onSignin}){
-  return <div className="fadein" style={{background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
-    <Nav user={null} onSignIn={onSignin} onSignUp={onSignup}/>
-    <div style={{ height: 72 }} /> {/* Spacer for fixed Nav */}
+  return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
     <main style={{flex:1}}>
       <Hero/>
       <LandingCTA onSignup={onSignup} onSignin={onSignin}/>
@@ -801,18 +798,14 @@ function Landing({onSignup,onSignin}){
 
 /* ═══════════════════ SIGN-IN PROMPT ═══════════════════ */
 function SignInPrompt({onSignIn,onSignUp,onHome}){
-  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
-    <Nav user={null} onSignIn={onSignIn} onSignUp={onSignUp}/>
-    <div style={{ height: 72 }} /> {/* Spacer for fixed Nav */}
-    <div style={{flex:1, display:'flex', alignItems:'center',justifyContent:'center', padding:'32px 20px'}}>
-      <div style={{maxWidth:440,textAlign:'center',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:16,padding:'36px 30px',boxShadow:'0 20px 50px -20px rgba(10,31,18,.15)'}}>
-        <i className="fas fa-lock" style={{fontSize:36,color:'#E8730F',marginBottom:16,display:'block'}}></i>
-        <h2 className="serif" style={{fontSize:24,color:'#0A1F12',marginBottom:10}}>Sign in to continue</h2>
-        <p style={{fontSize:14,color:'rgba(10,31,18,.65)',lineHeight:1.65,marginBottom:24}}>Create an account or sign in to access this page.</p>
-        <button onClick={onSignUp} style={{width:'100%',padding:'14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,marginBottom:10}}>Create account</button>
-        <button onClick={onSignIn} style={{width:'100%',padding:'13px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:10,fontSize:13.5,fontWeight:700,marginBottom:10}}>Sign in</button>
-        <button onClick={onHome} style={{width:'100%',padding:'12px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13,fontWeight:600,color:'#0A1F12'}}>← Back to home</button>
-      </div>
+  return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', alignItems:'center', justifyContent:'center', padding:'32px 20px'}}>
+    <div style={{maxWidth:440,textAlign:'center',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:16,padding:'36px 30px',boxShadow:'0 20px 50px -20px rgba(10,31,18,.15)'}}>
+      <i className="fas fa-lock" style={{fontSize:36,color:'#E8730F',marginBottom:16,display:'block'}}></i>
+      <h2 className="serif" style={{fontSize:24,color:'#0A1F12',marginBottom:10}}>Sign in to continue</h2>
+      <p style={{fontSize:14,color:'rgba(10,31,18,.65)',lineHeight:1.65,marginBottom:24}}>Create an account or sign in to access this page.</p>
+      <button onClick={onSignUp} style={{width:'100%',padding:'14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,marginBottom:10}}>Create account</button>
+      <button onClick={onSignIn} style={{width:'100%',padding:'13px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:10,fontSize:13.5,fontWeight:700,marginBottom:10}}>Sign in</button>
+      <button onClick={onHome} style={{width:'100%',padding:'12px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13,fontWeight:600,color:'#0A1F12'}}>← Back to home</button>
     </div>
   </div>;
 }
@@ -827,16 +820,14 @@ function Welcome({user,onDashboard,onBrowse,onSignedOut}){
     loadUserProfile(user.uid).then(p=>{setProfile(p);setLoading(false);});
   },[user]);
 
-  if(loading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+  if(loading) return <div style={{minHeight:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
 
   const isSupplier=profile?.role==='supplier';
   const cat=profile&&CAT_MAP[profile.category]?CAT_MAP[profile.category]:{title:profile?.category||'General'};
   const isVerified=profile?.status==='verified';
   const firstName=(profile?.name||user.email||'').split(' ')[0];
 
-  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
-    <Nav user={user} onDashboard={onDashboard} onBrowse={onBrowse} onSignOut={onSignedOut}/>
-    <div style={{ height: 72 }} /> {/* Spacer for fixed Nav */}
+  return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
     <main style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px 24px'}}>
       <div style={{maxWidth:560,width:'100%'}}>
         <div style={{textAlign:'center',marginBottom:28}}>
@@ -965,9 +956,9 @@ function Dashboard({user,onBrowse,onSignedOut}){
     finally{setSaving(false);}
   };
 
-  if(loading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+  if(loading) return <div style={{minHeight:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
 
-  if(!profile) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6',padding:'32px 20px',textAlign:'center'}}>
+  if(!profile) return <div style={{minHeight:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6',padding:'32px 20px',textAlign:'center'}}>
     <div style={{maxWidth:400}}>
       <h2 className="serif" style={{fontSize:22,color:'#0A1F12',marginBottom:10}}>Profile not found</h2>
       <p style={{fontSize:13.5,color:'rgba(10,31,18,.65)',lineHeight:1.6,marginBottom:20}}>Contact {CONTACT_EMAIL}.</p>
@@ -1010,288 +1001,282 @@ function Dashboard({user,onBrowse,onSignedOut}){
     ...(quotes.length>0?[{icon:'fa-file-invoice',color:'#E8730F',title:`${quotes.length} quote request${quotes.length===1?'':'s'} sent`,detail:'Track them in My Requests'}]:[{icon:'fa-magnifying-glass',color:'#1B6CA8',title:'Browse suppliers to request quotes',detail:'Your requests will appear here.'}])
   ];
 
-  return (
-    <>
-      <Nav user={user} onDashboard={()=>{}} onBrowse={onBrowse} onSignOut={onSignedOut} />
-      <div style={{ height: 72 }} />
-      <div className="fadein" style={{minHeight:'calc(100vh - 72px)',background:'#F5FAF6'}}>
-        <div className={'dash-backdrop '+(sidebarOpen?'open':'')} onClick={()=>setSidebarOpen(false)} style={{position:'fixed',top:72,left:0,right:0,bottom:0,background:'rgba(0,0,0,.45)',zIndex:35}}></div>
+  return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6'}}>
+    <div className={'dash-backdrop '+(sidebarOpen?'open':'')} onClick={()=>setSidebarOpen(false)} style={{position:'fixed',top:72,left:0,right:0,bottom:0,background:'rgba(0,0,0,.45)',zIndex:35}}></div>
 
-        <aside className={'dash-sidebar '+(sidebarOpen?'open':'')} style={{position:'fixed',left:0,top:72,bottom:0,width:260,background:'#0A1F12',color:'#fff',display:'flex',flexDirection:'column',zIndex:40,overflowY:'auto'}}>
-          <div style={{padding:'20px 20px 16px',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
-            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
-              <Mark size={36}/>
-              <div style={{lineHeight:1.15}}>
-                <div style={{fontSize:8.5,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)'}}>Dashboard</div>
-                <div style={{fontSize:14,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></div>
-              </div>
-            </div>
-            <div style={{background:'rgba(255,255,255,.05)',borderRadius:10,padding:'12px 14px',display:'flex',alignItems:'center',gap:10}}>
-              <span style={{width:38,height:38,borderRadius:'50%',background:cat.color,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0}}>{(profile.name||'U')[0].toUpperCase()}</span>
-              <div style={{minWidth:0,flex:1}}>
-                <div style={{fontSize:12.5,fontWeight:700,color:'#fff',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{profile.name}</div>
-                <div style={{fontSize:10.5,color:'rgba(255,255,255,.55)',marginTop:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{isSupplier?'Supplier':'Buyer'} · {profile.businessName}</div>
-              </div>
-            </div>
+    <aside className={'dash-sidebar '+(sidebarOpen?'open':'')} style={{position:'fixed',left:0,top:72,bottom:0,width:260,background:'#0A1F12',color:'#fff',display:'flex',flexDirection:'column',zIndex:40,overflowY:'auto'}}>
+      <div style={{padding:'20px 20px 16px',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
+          <Mark size={36}/>
+          <div style={{lineHeight:1.15}}>
+            <div style={{fontSize:8.5,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)'}}>Dashboard</div>
+            <div style={{fontSize:14,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></div>
           </div>
-          <nav style={{padding:'16px 12px',flex:1}}>
-            {tabs.map(([key,label,icon])=>
-              <button key={key} onClick={()=>{setTab(key);setSidebarOpen(false);}} className={'dash-nav-btn '+(tab===key?'active':'')}>
-                <i className={`fas ${icon}`} style={{fontSize:13,width:16}}></i>{label}
-                {key==='requests' && quotes.length>0 && <span style={{marginLeft:'auto',background:'#E8730F',color:'#fff',fontSize:9.5,fontWeight:800,borderRadius:99,padding:'1px 7px'}}>{quotes.length}</span>}
-              </button>
-            )}
-            <div style={{height:14}}></div>
-            <button onClick={onBrowse} className="dash-nav-btn"><i className="fas fa-magnifying-glass" style={{fontSize:12,width:16}}></i> Browse directory</button>
-            <a href={MAIN_PLATFORM_URL} className="dash-nav-btn" style={{textDecoration:'none',color:'#F5A623',background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.25)',marginTop:6}}>
-              <i className="fas fa-arrow-left" style={{fontSize:12,width:16}}></i> Back to StartEasy Platform
-            </a>
-          </nav>
-          <div style={{padding:'14px 16px',borderTop:'1px solid rgba(255,255,255,.08)'}}>
-            <a href={waUrl(`Hello StartEasy — I'm ${profile.name} (${profile.businessName}).`)} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px',marginBottom:8,background:'#25D366',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}>
-              <i className="fab fa-whatsapp"></i> Contact support
-            </a>
-            <button onClick={signOut} style={{width:'100%',padding:'10px',borderRadius:8,background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',fontSize:12,fontWeight:700}}>
-              <i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out
-            </button>
+        </div>
+        <div style={{background:'rgba(255,255,255,.05)',borderRadius:10,padding:'12px 14px',display:'flex',alignItems:'center',gap:10}}>
+          <span style={{width:38,height:38,borderRadius:'50%',background:cat.color,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0}}>{(profile.name||'U')[0].toUpperCase()}</span>
+          <div style={{minWidth:0,flex:1}}>
+            <div style={{fontSize:12.5,fontWeight:700,color:'#fff',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{profile.name}</div>
+            <div style={{fontSize:10.5,color:'rgba(255,255,255,.55)',marginTop:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{isSupplier?'Supplier':'Buyer'} · {profile.businessName}</div>
           </div>
-        </aside>
-
-        <div className="dash-main" style={{minHeight:'calc(100vh - 72px)'}}>
-          <header style={{background:'#fff',borderBottom:'1px solid rgba(10,31,18,.08)',padding:'10px 16px',display:'flex',alignItems:'center',gap:10,position:'sticky',top:72,zIndex:30,boxShadow:'0 2px 10px rgba(0,0,0,.03)'}}>
-            <button onClick={()=>setSidebarOpen(true)} className="dash-mobile-toggle" style={{width:36,height:36,borderRadius:8,background:'#0A1F12',color:'#fff',border:'none',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-              <i className="fas fa-bars" style={{fontSize:14}}></i>
-            </button>
-            
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:10,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>{isSupplier?'Supplier':'Buyer'} dashboard</div>
-              <div style={{fontSize:14,fontWeight:700,color:'#0A1F12',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{tabs.find(t=>t[0]===tab)?.[1]||'Overview'}</div>
-            </div>
-
-            <div style={{display:'flex', alignItems:'center', gap:8, flexShrink:0}}>
-              <span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'6px 10px',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase',background:isVerified?'rgba(30,123,60,.12)':'rgba(245,166,35,.15)',color:isVerified?'#0F5C2A':'#8A6828',border:'1px solid '+(isVerified?'rgba(30,123,60,.3)':'rgba(245,166,35,.35)')}}>
-                <i className={`fas ${isVerified?'fa-circle-check':'fa-clock'}`} style={{fontSize:8}}></i>
-                <span className="hide-sm">{isVerified?'Verified':'Pending'}</span>
-              </span>
-            </div>
-          </header>
-
-          <main style={{padding:'24px',maxWidth:1200,margin:'0 auto'}}>
-            {tab==='overview'&&<>
-              <div style={{marginBottom:22}}>
-                <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Welcome back, {profile.name.split(' ')[0]}</h1>
-                <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{profile.businessName} · {cat.title} · {locLabel(profile)}</p>
-              </div>
-
-              <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',marginBottom:22}}>
-                {kpis.map((k,i)=>(
-                  <div key={i} className="kpi-card">
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10}}>
-                      <span style={{fontSize:10.5,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',lineHeight:1.3}}>{k.label}</span>
-                      <span style={{width:32,height:32,borderRadius:8,background:k.color+'15',color:k.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${k.icon}`}></i></span>
-                    </div>
-                    <div className="serif" style={{fontSize:26,fontWeight:800,color:'#0A1F12',lineHeight:1}}>{k.value}</div>
-                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.5)'}}>{k.sub}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{display:'grid',gap:18,gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))'}}>
-                <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,overflow:'hidden'}}>
-                  <div style={{padding:'18px 20px',borderBottom:'1px solid rgba(10,31,18,.06)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
-                    <div>
-                      <h3 className="serif" style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 3px'}}>{isSupplier?'Businesses needing what you supply':'Suppliers in your category'}</h3>
-                      <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',margin:0}}>{matches.length} in {cat.title}</p>
-                    </div>
-                    <button onClick={()=>setTab('matches')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>See all</button>
-                  </div>
-                  {matches.length===0?<div style={{padding:'40px 20px',textAlign:'center'}}><p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No matches yet.</p></div>:
-                  matches.slice(0,5).map(m=>(
-                    <div key={m.id} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',borderBottom:'1px dashed rgba(10,31,18,.08)'}}>
-                      <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:13,fontWeight:700,color:'#0A1F12'}}>{m.name}</div>
-                        <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{locLabel(m)}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{display:'flex',flexDirection:'column',gap:18}}>
-                  <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px'}}>
-                    <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:12}}>
-                      <div className="profile-ring">
-                        <svg width="64" height="64" viewBox="0 0 64 64">
-                          <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(10,31,18,.08)" strokeWidth="6"/>
-                          <circle cx="32" cy="32" r="26" fill="none" stroke={pct===100?'#1E7B3C':'#E8730F'} strokeWidth="6" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={dash} style={{transition:'stroke-dashoffset .5s ease'}}/>
-                        </svg>
-                        <div className="inner" style={{color:pct===100?'#1E7B3C':'#E8730F'}}>{pct}%</div>
-                      </div>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:13,fontWeight:800,color:'#0A1F12',marginBottom:2}}>{pct===100?'Profile complete':'Profile '+pct+'%'}</div>
-                        <div style={{fontSize:11.5,color:'rgba(10,31,18,.6)',lineHeight:1.5}}>{pct===100?'Fully discoverable.':'Complete to unlock matches.'}</div>
-                      </div>
-                    </div>
-                    {pct<100&&<button onClick={()=>setTab('profile')} style={{width:'100%',padding:'10px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}>Complete profile</button>}
-                  </div>
-
-                  <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px'}}>
-                    <h3 className="serif" style={{fontSize:14,fontWeight:800,color:'#0A1F12',margin:'0 0 10px'}}>Recent activity</h3>
-                    {activity.map((a,i)=>(
-                      <div key={i} style={{display:'flex',gap:12,padding:'10px 0',borderBottom:i<activity.length-1?'1px dashed rgba(10,31,18,.06)':'none',alignItems:'flex-start'}}>
-                        <span style={{width:28,height:28,borderRadius:'50%',background:a.color+'15',color:a.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,flexShrink:0}}><i className={`fas ${a.icon}`}></i></span>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:2}}>{a.title}</div>
-                          <div style={{fontSize:11,color:'rgba(10,31,18,.55)',lineHeight:1.5}}>{a.detail}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </>}
-
-            {tab==='matches'&&<>
-              <div style={{marginBottom:20}}>
-                <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Your matches</h1>
-                <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{matches.length} in {cat.title}</p>
-              </div>
-              <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
-                {matches.map(m=>(
-                  <div key={m.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
-                    <div style={{display:'flex',alignItems:'center',gap:10}}>
-                      <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
-                      <div style={{minWidth:0,flex:1}}>
-                        <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{m.name}</div>
-                        <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}>{locLabel(m)}</div>
-                      </div>
-                    </div>
-                    <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{m.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </>}
-
-            {tab==='requests'&&!isSupplier&&<>
-              <div style={{marginBottom:20}}>
-                <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>My Requests</h1>
-                <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>Quotes you've requested — tracked here.</p>
-              </div>
-              {quotes.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:12,padding:'56px 24px',textAlign:'center'}}>
-                <i className="fas fa-file-invoice" style={{fontSize:32,color:'rgba(10,31,18,.15)',marginBottom:12,display:'block'}}></i>
-                <h3 className="serif" style={{fontSize:17,fontWeight:700,color:'#0A1F12',margin:'0 0 8px'}}>No requests yet</h3>
-                <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:'0 0 20px'}}>Request a quote from a supplier and it will appear here.</p>
-                <button onClick={onBrowse} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Browse suppliers</button>
-              </div>:
-              <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                {quotes.map(q=>(
-                  <div key={q.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px',borderLeft:'4px solid #E8730F'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginBottom:10}}>
-                      <div>
-                        <div style={{fontSize:14,fontWeight:800,color:'#0A1F12'}}>{q.supplierName||'Supplier'}</div>
-                        <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}>{CAT_MAP[q.category]?.title||q.category} · {q.at?new Date(q.at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
-                      </div>
-                      <span style={{padding:'3px 10px',background:'rgba(232,115,15,.12)',color:'#8A6828',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase'}}>{q.status||'sent'}</span>
-                    </div>
-                    <div style={{display:'grid',gap:6,gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',fontSize:12.5}}>
-                      <div><span style={{color:'rgba(10,31,18,.5)'}}>Product:</span> <strong style={{color:'#0A1F12'}}>{q.product}</strong></div>
-                      {q.quantity&&<div><span style={{color:'rgba(10,31,18,.5)'}}>Qty:</span> <strong style={{color:'#0A1F12'}}>{q.quantity}</strong></div>}
-                      {q.budget&&<div><span style={{color:'rgba(10,31,18,.5)'}}>Budget:</span> <strong style={{color:'#0A1F12'}}>{q.budget}</strong></div>}
-                    </div>
-                  </div>
-                ))}
-              </div>}
-            </>}
-
-            {tab==='profile'&&editForm&&<>
-              <div style={{marginBottom:20}}>
-                <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Your profile</h1>
-                <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>This is what buyers or suppliers will see.</p>
-              </div>
-              <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px'}}>
-                <div className="form-grid">
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Full name</label><TIn value={editForm.name} onChange={v=>setEditForm({...editForm,name:v})}/></div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name</label><TIn value={editForm.businessName} onChange={v=>setEditForm({...editForm,businessName:v})}/></div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone</label><TIn value={editForm.phone} onChange={v=>setEditForm({...editForm,phone:v})}/></div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category</label>
-                    <select value={editForm.category} onChange={e=>setEditForm({...editForm,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                      {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
-                    </select>
-                  </div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Country</label>
-                    <select value={editForm.country||'Zambia'} onChange={e=>setEditForm({...editForm,country:e.target.value,location:''})} style={{...INP_STYLE,cursor:'pointer'}}>
-                      {COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{(!editForm.country||editForm.country==='Zambia')?'City':'City / Region'}</label>
-                    {(!editForm.country||editForm.country==='Zambia')?(
-                      <select value={editForm.location} onChange={e=>setEditForm({...editForm,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                        {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
-                      </select>
-                    ):(
-                      <TIn value={editForm.location} onChange={v=>setEditForm({...editForm,location:v})}/>
-                    )}
-                  </div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isSupplier?'Delivery scope':'Sourcing scope'}</label>
-                    <select value={editForm.scope||'local'} onChange={e=>setEditForm({...editForm,scope:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                      {SCOPE_OPTIONS.map(o=><option key={o.key} value={o.key}>{o.label}</option>)}
-                    </select>
-                  </div>
-                </div>
-                {editForm.scope && editForm.scope!=='local' && <div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
-                  <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
-                  International sourcing: import duties, customs clearance and international freight are separate from supplier quotes.
-                </div>}
-                <div style={{marginTop:16}}>
-                  {isSupplier?<>
-                    <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products (comma-separated)</label><TIn value={editForm.products} onChange={v=>setEditForm({...editForm,products:v})}/>
-                    <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
-                      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>MOQ</label><TIn value={editForm.moq} onChange={v=>setEditForm({...editForm,moq:v})}/></div>
-                      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label><TIn value={editForm.leadTime} onChange={v=>setEditForm({...editForm,leadTime:v})}/></div>
-                      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery</label><TIn value={editForm.delivery} onChange={v=>setEditForm({...editForm,delivery:v})}/></div>
-                    </div>
-                  </>:<>
-                    <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>What you buy (comma-separated)</label><TIn value={editForm.sources} onChange={v=>setEditForm({...editForm,sources:v})}/>
-                    <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
-                      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Frequency</label>
-                        <select value={editForm.frequency} onChange={e=>setEditForm({...editForm,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                          {FREQUENCY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
-                        </select>
-                      </div>
-                      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={editForm.orderValue} onChange={v=>setEditForm({...editForm,orderValue:v})}/></div>
-                    </div>
-                  </>}
-                </div>
-                {saveMsg&&<div style={{background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',border:'1px solid '+(saveMsg.kind==='ok'?'rgba(30,123,60,.3)':'rgba(184,86,79,.3)'),borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318',marginTop:14}}>{saveMsg.msg}</div>}
-                <button onClick={saveProfile} disabled={saving} style={{marginTop:18,padding:'12px 22px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>{saving?'Saving…':'Save changes'}</button>
-              </div>
-            </>}
-
-            {tab==='settings'&&<>
-              <div style={{marginBottom:20}}>
-                <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Settings</h1>
-              </div>
-              <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px',marginBottom:16}}>
-                <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Account</div>
-                <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Email</span><span style={{fontWeight:700,color:'#0A1F12'}}>{profile.email}</span></div>
-                <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Role</span><span style={{fontWeight:700,color:'#0A1F12'}}>{isSupplier?'Supplier':'Buyer'}</span></div>
-                <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Status</span><span style={{fontWeight:700,color:isVerified?'#0F5C2A':'#8A6828'}}>{isVerified?'Verified':'Pending'}</span></div>
-              </div>
-              <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px',marginBottom:16}}>
-                <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Password</div>
-                <button onClick={async()=>{try{await auth.sendPasswordResetEmail(profile.email);setSaveMsg({kind:'ok',msg:'Reset email sent.'});setTimeout(()=>setSaveMsg(null),4000);}catch(e){setSaveMsg({kind:'err',msg:'Could not send.'});setTimeout(()=>setSaveMsg(null),4000);}}} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-key" style={{marginRight:6}}></i> Send reset email</button>
-                {saveMsg&&<div style={{marginTop:12,background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318'}}>{saveMsg.msg}</div>}
-              </div>
-              <div style={{background:'#fff',border:'1px solid rgba(184,86,79,.2)',borderRadius:12,padding:'22px'}}>
-                <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#7C2318',marginBottom:12}}>Danger zone</div>
-                <button onClick={signOut} style={{padding:'10px 18px',background:'#B8564F',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out</button>
-              </div>
-            </>}
-          </main>
         </div>
       </div>
-    </>
-  );
+      <nav style={{padding:'16px 12px',flex:1}}>
+        {tabs.map(([key,label,icon])=>
+          <button key={key} onClick={()=>{setTab(key);setSidebarOpen(false);}} className={'dash-nav-btn '+(tab===key?'active':'')}>
+            <i className={`fas ${icon}`} style={{fontSize:13,width:16}}></i>{label}
+            {key==='requests' && quotes.length>0 && <span style={{marginLeft:'auto',background:'#E8730F',color:'#fff',fontSize:9.5,fontWeight:800,borderRadius:99,padding:'1px 7px'}}>{quotes.length}</span>}
+          </button>
+        )}
+        <div style={{height:14}}></div>
+        <button onClick={onBrowse} className="dash-nav-btn"><i className="fas fa-magnifying-glass" style={{fontSize:12,width:16}}></i> Browse directory</button>
+        <a href={MAIN_PLATFORM_URL} className="dash-nav-btn" style={{textDecoration:'none',color:'#F5A623',background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.25)',marginTop:6}}>
+          <i className="fas fa-arrow-left" style={{fontSize:12,width:16}}></i> Back to StartEasy Platform
+        </a>
+      </nav>
+      <div style={{padding:'14px 16px',borderTop:'1px solid rgba(255,255,255,.08)'}}>
+        <a href={waUrl(`Hello StartEasy — I'm ${profile.name} (${profile.businessName}).`)} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px',marginBottom:8,background:'#25D366',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}>
+          <i className="fab fa-whatsapp"></i> Contact support
+        </a>
+        <button onClick={signOut} style={{width:'100%',padding:'10px',borderRadius:8,background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',fontSize:12,fontWeight:700}}>
+          <i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out
+        </button>
+      </div>
+    </aside>
+
+    <div className="dash-main" style={{minHeight:'100%'}}>
+      <header style={{background:'#fff',borderBottom:'1px solid rgba(10,31,18,.08)',padding:'10px 16px',display:'flex',alignItems:'center',gap:10,position:'sticky',top:0,zIndex:30,boxShadow:'0 2px 10px rgba(0,0,0,.03)'}}>
+        <button onClick={()=>setSidebarOpen(true)} className="dash-mobile-toggle" style={{width:36,height:36,borderRadius:8,background:'#0A1F12',color:'#fff',border:'none',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+          <i className="fas fa-bars" style={{fontSize:14}}></i>
+        </button>
+        
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:10,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>{isSupplier?'Supplier':'Buyer'} dashboard</div>
+          <div style={{fontSize:14,fontWeight:700,color:'#0A1F12',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{tabs.find(t=>t[0]===tab)?.[1]||'Overview'}</div>
+        </div>
+
+        <div style={{display:'flex', alignItems:'center', gap:8, flexShrink:0}}>
+          <span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'6px 10px',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase',background:isVerified?'rgba(30,123,60,.12)':'rgba(245,166,35,.15)',color:isVerified?'#0F5C2A':'#8A6828',border:'1px solid '+(isVerified?'rgba(30,123,60,.3)':'rgba(245,166,35,.35)')}}>
+            <i className={`fas ${isVerified?'fa-circle-check':'fa-clock'}`} style={{fontSize:8}}></i>
+            <span className="hide-sm">{isVerified?'Verified':'Pending'}</span>
+          </span>
+        </div>
+      </header>
+
+      <main style={{padding:'24px',maxWidth:1200,margin:'0 auto'}}>
+        {tab==='overview'&&<>
+          <div style={{marginBottom:22}}>
+            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Welcome back, {profile.name.split(' ')[0]}</h1>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{profile.businessName} · {cat.title} · {locLabel(profile)}</p>
+          </div>
+
+          <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',marginBottom:22}}>
+            {kpis.map((k,i)=>(
+              <div key={i} className="kpi-card">
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10}}>
+                  <span style={{fontSize:10.5,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',lineHeight:1.3}}>{k.label}</span>
+                  <span style={{width:32,height:32,borderRadius:8,background:k.color+'15',color:k.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${k.icon}`}></i></span>
+                </div>
+                <div className="serif" style={{fontSize:26,fontWeight:800,color:'#0A1F12',lineHeight:1}}>{k.value}</div>
+                <div style={{fontSize:11.5,color:'rgba(10,31,18,.5)'}}>{k.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{display:'grid',gap:18,gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))'}}>
+            <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,overflow:'hidden'}}>
+              <div style={{padding:'18px 20px',borderBottom:'1px solid rgba(10,31,18,.06)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
+                <div>
+                  <h3 className="serif" style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 3px'}}>{isSupplier?'Businesses needing what you supply':'Suppliers in your category'}</h3>
+                  <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',margin:0}}>{matches.length} in {cat.title}</p>
+                </div>
+                <button onClick={()=>setTab('matches')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>See all</button>
+              </div>
+              {matches.length===0?<div style={{padding:'40px 20px',textAlign:'center'}}><p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No matches yet.</p></div>:
+              matches.slice(0,5).map(m=>(
+                <div key={m.id} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',borderBottom:'1px dashed rgba(10,31,18,.08)'}}>
+                  <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:700,color:'#0A1F12'}}>{m.name}</div>
+                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{locLabel(m)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{display:'flex',flexDirection:'column',gap:18}}>
+              <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px'}}>
+                <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:12}}>
+                  <div className="profile-ring">
+                    <svg width="64" height="64" viewBox="0 0 64 64">
+                      <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(10,31,18,.08)" strokeWidth="6"/>
+                      <circle cx="32" cy="32" r="26" fill="none" stroke={pct===100?'#1E7B3C':'#E8730F'} strokeWidth="6" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={dash} style={{transition:'stroke-dashoffset .5s ease'}}/>
+                    </svg>
+                    <div className="inner" style={{color:pct===100?'#1E7B3C':'#E8730F'}}>{pct}%</div>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:800,color:'#0A1F12',marginBottom:2}}>{pct===100?'Profile complete':'Profile '+pct+'%'}</div>
+                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.6)',lineHeight:1.5}}>{pct===100?'Fully discoverable.':'Complete to unlock matches.'}</div>
+                  </div>
+                </div>
+                {pct<100&&<button onClick={()=>setTab('profile')} style={{width:'100%',padding:'10px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}>Complete profile</button>}
+              </div>
+
+              <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px'}}>
+                <h3 className="serif" style={{fontSize:14,fontWeight:800,color:'#0A1F12',margin:'0 0 10px'}}>Recent activity</h3>
+                {activity.map((a,i)=>(
+                  <div key={i} style={{display:'flex',gap:12,padding:'10px 0',borderBottom:i<activity.length-1?'1px dashed rgba(10,31,18,.06)':'none',alignItems:'flex-start'}}>
+                    <span style={{width:28,height:28,borderRadius:'50%',background:a.color+'15',color:a.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,flexShrink:0}}><i className={`fas ${a.icon}`}></i></span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:2}}>{a.title}</div>
+                      <div style={{fontSize:11,color:'rgba(10,31,18,.55)',lineHeight:1.5}}>{a.detail}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>}
+
+        {tab==='matches'&&<>
+          <div style={{marginBottom:20}}>
+            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Your matches</h1>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{matches.length} in {cat.title}</p>
+          </div>
+          <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
+            {matches.map(m=>(
+              <div key={m.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
+                  <div style={{minWidth:0,flex:1}}>
+                    <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{m.name}</div>
+                    <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}>{locLabel(m)}</div>
+                  </div>
+                </div>
+                <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{m.desc}</p>
+              </div>
+            ))}
+          </div>
+        </>}
+
+        {tab==='requests'&&!isSupplier&&<>
+          <div style={{marginBottom:20}}>
+            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>My Requests</h1>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>Quotes you've requested — tracked here.</p>
+          </div>
+          {quotes.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:12,padding:'56px 24px',textAlign:'center'}}>
+            <i className="fas fa-file-invoice" style={{fontSize:32,color:'rgba(10,31,18,.15)',marginBottom:12,display:'block'}}></i>
+            <h3 className="serif" style={{fontSize:17,fontWeight:700,color:'#0A1F12',margin:'0 0 8px'}}>No requests yet</h3>
+            <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:'0 0 20px'}}>Request a quote from a supplier and it will appear here.</p>
+            <button onClick={onBrowse} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Browse suppliers</button>
+          </div>:
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            {quotes.map(q=>(
+              <div key={q.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px',borderLeft:'4px solid #E8730F'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginBottom:10}}>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:800,color:'#0A1F12'}}>{q.supplierName||'Supplier'}</div>
+                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}>{CAT_MAP[q.category]?.title||q.category} · {q.at?new Date(q.at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
+                  </div>
+                  <span style={{padding:'3px 10px',background:'rgba(232,115,15,.12)',color:'#8A6828',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase'}}>{q.status||'sent'}</span>
+                </div>
+                <div style={{display:'grid',gap:6,gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',fontSize:12.5}}>
+                  <div><span style={{color:'rgba(10,31,18,.5)'}}>Product:</span> <strong style={{color:'#0A1F12'}}>{q.product}</strong></div>
+                  {q.quantity&&<div><span style={{color:'rgba(10,31,18,.5)'}}>Qty:</span> <strong style={{color:'#0A1F12'}}>{q.quantity}</strong></div>}
+                  {q.budget&&<div><span style={{color:'rgba(10,31,18,.5)'}}>Budget:</span> <strong style={{color:'#0A1F12'}}>{q.budget}</strong></div>}
+                </div>
+              </div>
+            ))}
+          </div>}
+        </>}
+
+        {tab==='profile'&&editForm&&<>
+          <div style={{marginBottom:20}}>
+            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Your profile</h1>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>This is what buyers or suppliers will see.</p>
+          </div>
+          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px'}}>
+            <div className="form-grid">
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Full name</label><TIn value={editForm.name} onChange={v=>setEditForm({...editForm,name:v})}/></div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name</label><TIn value={editForm.businessName} onChange={v=>setEditForm({...editForm,businessName:v})}/></div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone</label><TIn value={editForm.phone} onChange={v=>setEditForm({...editForm,phone:v})}/></div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category</label>
+                <select value={editForm.category} onChange={e=>setEditForm({...editForm,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                  {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
+                </select>
+              </div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Country</label>
+                <select value={editForm.country||'Zambia'} onChange={e=>setEditForm({...editForm,country:e.target.value,location:''})} style={{...INP_STYLE,cursor:'pointer'}}>
+                  {COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{(!editForm.country||editForm.country==='Zambia')?'City':'City / Region'}</label>
+                {(!editForm.country||editForm.country==='Zambia')?(
+                  <select value={editForm.location} onChange={e=>setEditForm({...editForm,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                    {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                ):(
+                  <TIn value={editForm.location} onChange={v=>setEditForm({...editForm,location:v})}/>
+                )}
+              </div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isSupplier?'Delivery scope':'Sourcing scope'}</label>
+                <select value={editForm.scope||'local'} onChange={e=>setEditForm({...editForm,scope:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                  {SCOPE_OPTIONS.map(o=><option key={o.key} value={o.key}>{o.label}</option>)}
+                </select>
+              </div>
+            </div>
+            {editForm.scope && editForm.scope!=='local' && <div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
+              <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
+              International sourcing: import duties, customs clearance and international freight are separate from supplier quotes.
+            </div>}
+            <div style={{marginTop:16}}>
+              {isSupplier?<>
+                <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products (comma-separated)</label><TIn value={editForm.products} onChange={v=>setEditForm({...editForm,products:v})}/>
+                <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>MOQ</label><TIn value={editForm.moq} onChange={v=>setEditForm({...editForm,moq:v})}/></div>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label><TIn value={editForm.leadTime} onChange={v=>setEditForm({...editForm,leadTime:v})}/></div>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery</label><TIn value={editForm.delivery} onChange={v=>setEditForm({...editForm,delivery:v})}/></div>
+                </div>
+              </>:<>
+                <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>What you buy (comma-separated)</label><TIn value={editForm.sources} onChange={v=>setEditForm({...editForm,sources:v})}/>
+                <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Frequency</label>
+                    <select value={editForm.frequency} onChange={e=>setEditForm({...editForm,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                      {FREQUENCY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
+                    </select>
+                  </div>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={editForm.orderValue} onChange={v=>setEditForm({...editForm,orderValue:v})}/></div>
+                </div>
+              </>}
+            </div>
+            {saveMsg&&<div style={{background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',border:'1px solid '+(saveMsg.kind==='ok'?'rgba(30,123,60,.3)':'rgba(184,86,79,.3)'),borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318',marginTop:14}}>{saveMsg.msg}</div>}
+            <button onClick={saveProfile} disabled={saving} style={{marginTop:18,padding:'12px 22px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>{saving?'Saving…':'Save changes'}</button>
+          </div>
+        </>}
+
+        {tab==='settings'&&<>
+          <div style={{marginBottom:20}}>
+            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Settings</h1>
+          </div>
+          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px',marginBottom:16}}>
+            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Account</div>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Email</span><span style={{fontWeight:700,color:'#0A1F12'}}>{profile.email}</span></div>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Role</span><span style={{fontWeight:700,color:'#0A1F12'}}>{isSupplier?'Supplier':'Buyer'}</span></div>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Status</span><span style={{fontWeight:700,color:isVerified?'#0F5C2A':'#8A6828'}}>{isVerified?'Verified':'Pending'}</span></div>
+          </div>
+          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px',marginBottom:16}}>
+            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Password</div>
+            <button onClick={async()=>{try{await auth.sendPasswordResetEmail(profile.email);setSaveMsg({kind:'ok',msg:'Reset email sent.'});setTimeout(()=>setSaveMsg(null),4000);}catch(e){setSaveMsg({kind:'err',msg:'Could not send.'});setTimeout(()=>setSaveMsg(null),4000);}}} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-key" style={{marginRight:6}}></i> Send reset email</button>
+            {saveMsg&&<div style={{marginTop:12,background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318'}}>{saveMsg.msg}</div>}
+          </div>
+          <div style={{background:'#fff',border:'1px solid rgba(184,86,79,.2)',borderRadius:12,padding:'22px'}}>
+            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#7C2318',marginBottom:12}}>Danger zone</div>
+            <button onClick={signOut} style={{padding:'10px 18px',background:'#B8564F',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out</button>
+          </div>
+        </>}
+      </main>
+    </div>
+  </div>;
 }
 
 /* ═══════════════════ BROWSE ═══════════════════ */
@@ -1344,9 +1329,7 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
   const list=tab==='suppliers'?filteredSuppliers:filteredBuyers;
   const signOut=async()=>{await authSignOutFn();onSignedOut&&onSignedOut();};
 
-  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
-    <Nav user={user} onDashboard={onDashboard} onSignOut={signOut}/>
-    <div style={{ height: 72 }} />
+  return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
     <main style={{flex:1,maxWidth:1240,margin:'0 auto',padding:'32px 24px 60px',width:'100%'}}>
       <div style={{marginBottom:24}}>
         <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:12}}>Browse directory</span>
@@ -1721,7 +1704,7 @@ function App(){
   let mainView;
 
   if(authLoading){
-    mainView = <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+    mainView = <div style={{minHeight:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
   } else if(justSignedUp && user){
     mainView = <Welcome user={user} onDashboard={()=>{setJustSignedUp(false);window.location.hash='#dashboard';}} onBrowse={()=>{setJustSignedUp(false);window.location.hash='#browse';}} onSignedOut={()=>{setJustSignedUp(false);setUser(null);window.location.hash='';}}/>;
   } else if(hash==='#dashboard' || hash==='#browse'){
@@ -1738,11 +1721,26 @@ function App(){
     mainView = <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
   }
 
+  // THIS IS THE CRITICAL FIX:
+  // Using a strict flexbox layout with height 100dvh to absolutely lock the header at the top,
+  // and let the inner container handle scrolling independently.
   return (
-    <>
-      {mainView}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
+      {!authLoading && (
+        <Nav 
+          user={user} 
+          onSignIn={()=>openAuth('signin','buyer')} 
+          onSignUp={(role)=>openAuth('signup',role||'buyer')} 
+          onDashboard={goDashboard} 
+          onBrowse={goBrowse} 
+          onSignOut={signedOut} 
+        />
+      )}
+      <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', position: 'relative' }}>
+        {mainView}
+      </div>
       {authModal}
-    </>
+    </div>
   );
 }
 
