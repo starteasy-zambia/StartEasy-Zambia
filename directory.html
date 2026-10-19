@@ -268,8 +268,10 @@ function lsGet(key, fallback=[]){ try{const v=localStorage.getItem(key);return v
 function lsSet(key, val){ try{localStorage.setItem(key, JSON.stringify(val));}catch(e){} }
 function getSavedSuppliers(uid){ return lsGet('se_saved_'+uid, []); }
 function setSavedSuppliers(uid, arr){ lsSet('se_saved_'+uid, arr); }
-function getAlerts(uid){ return lsGet('se_alerts_'+uid, []); }
-function setAlerts(uid, arr){ lsSet('se_alerts_'+uid, arr); }
+function getCampaigns(uid){ return lsGet('se_campaigns_'+uid, []); }
+function setCampaigns(uid, arr){ lsSet('se_campaigns_'+uid, arr); }
+function getListings(uid){ return lsGet('se_listings_'+uid, []); }
+function setListings(uid, arr){ lsSet('se_listings_'+uid, arr); }
 
 async function fsLoadDirectory(){
   if(!firebaseReady) return null;
@@ -560,7 +562,7 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
         </div>
         
         <div style={{display:'flex',alignItems:'center',gap:12, flexShrink:0}}>
-          {user ? (
+          {user && (
             <div className="acct" ref={acctRef}>
               <button className="acct-btn" onClick={()=>setAcctOpen(!acctOpen)} style={{background:'rgba(255,255,255,.08)',borderColor:'rgba(255,255,255,.2)',color:'#fff'}}>
                 <span className="avatar" style={{background:'#E8730F',color:'#fff'}}>{initials(profile?.name || user.email)}</span>
@@ -577,7 +579,7 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
                 
                 {profile?.role==='supplier' && <>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('profile');}}><i className="fas fa-building" style={{width:14}}></i> Organisation profile</a>
-                  <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('catalogue');}}><i className="fas fa-list" style={{width:14}}></i> My catalogue</a>
+                  <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('catalogue');}}><i className="fas fa-list" style={{width:14}}></i> My listings</a>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('campaigns');}}><i className="fas fa-bullhorn" style={{width:14}}></i> Campaigns</a>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('analytics');}}><i className="fas fa-chart-simple" style={{width:14}}></i> Analytics</a>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('billing');}}><i className="fas fa-credit-card" style={{width:14}}></i> Billing</a>
@@ -593,11 +595,6 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
                 <button onClick={()=>{setAcctOpen(false); onSignOut();}}><i className="fas fa-arrow-right-from-bracket" style={{width:14}}></i> Sign out</button>
               </div>
             </div>
-          ) : (
-            <>
-              <button onClick={onSignIn} style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Sign in</button>
-              <button onClick={()=>onSignUp(null)} style={{padding:'10px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}>Get started</button>
-            </>
           )}
 
           {/* Always visible Hamburger Menu Button */}
@@ -608,11 +605,25 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
       </div>
     </div>
     
-    {/* Mobile / General Menu Overlay */}
+    {/* Hamburger Menu Overlay - EarnUp Style Provisions */}
     {menuOpen && <div style={{position:'absolute', top:72, left:0, right:0, background:'#08170D', borderTop:'1px solid rgba(245,166,35,.15)', padding:'12px 16px 18px', display:'flex', flexDirection:'column', gap:'6px', boxShadow:'0 20px 30px -12px rgba(0,0,0,.5)'}}>
-      <a href="#dashboard" onClick={()=>setMenuOpen(false)} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,textDecoration:'none'}}><i className="fas fa-house" style={{width:18,color:'#F5A623'}}></i> Dashboard</a>
-      <button onClick={()=>{setMenuOpen(false); onBrowse();}} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,border:'none',textAlign:'left',width:'100%',fontFamily:'inherit'}}><i className="fas fa-magnifying-glass" style={{width:18,color:'#F5A623'}}></i> Browse Directory</button>
+      
+      {user ? (
+        <>
+          <a href="#dashboard" onClick={()=>setMenuOpen(false)} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,textDecoration:'none'}}><i className="fas fa-house" style={{width:18,color:'#F5A623'}}></i> Dashboard</a>
+          <button onClick={()=>{setMenuOpen(false); onBrowse();}} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,border:'none',textAlign:'left',width:'100%',fontFamily:'inherit'}}><i className="fas fa-magnifying-glass" style={{width:18,color:'#F5A623'}}></i> Browse Directory</button>
+        </>
+      ) : (
+        <>
+          <button onClick={()=>{setMenuOpen(false); onSignIn();}} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,border:'none',textAlign:'left',width:'100%',fontFamily:'inherit'}}><i className="fas fa-right-to-bracket" style={{width:18,color:'#F5A623'}}></i> Sign In</button>
+          <button onClick={()=>{setMenuOpen(false); onSignUp(null);}} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,border:'none',textAlign:'left',width:'100%',fontFamily:'inherit',justifyContent:'center'}}><i className="fas fa-user-plus" style={{width:18}}></i> Create Account</button>
+        </>
+      )}
+
+      <a href="#pricing" onClick={()=>setMenuOpen(false)} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,textDecoration:'none'}}><i className="fas fa-tags" style={{width:18,color:'#F5A623'}}></i> Pricing & Packages</a>
+      
       <a href={MAIN_PLATFORM_URL} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'linear-gradient(135deg,rgba(232,115,15,.18),rgba(245,166,35,.12))',border:'1px solid rgba(232,115,15,.4)',borderRadius:9,color:'#FFD9A6',fontSize:'13.5px',fontWeight:700,textDecoration:'none',justifyContent:'space-between'}}><span style={{display:'flex',alignItems:'center',gap:12}}><i className="fas fa-arrow-left" style={{color:'#F5A623'}}></i> Back to StartEasy Platform</span><i className="fas fa-chevron-right" style={{opacity:.5,fontSize:11}}></i></a>
+      
       {user && <button onClick={()=>{setMenuOpen(false); onSignOut();}} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(184,86,79,.12)',border:'1px solid rgba(184,86,79,.35)',borderRadius:9,color:'#FFB4A8',fontSize:'13.5px',fontWeight:700,border:'none',textAlign:'left',width:'100%',fontFamily:'inherit'}}><i className="fas fa-right-from-bracket" style={{width:18,color:'#FFB4A8'}}></i> Sign out</button>}
     </div>}
   </header>;
@@ -671,95 +682,6 @@ function LandingCTA({onSignup,onSignin}){
       </div>
       <div style={{textAlign:'center',marginTop:32,fontSize:13.5,color:'rgba(10,31,18,.6)'}}>
         Already have an account? <button onClick={onSignin} style={{background:'none',border:'none',color:'#E8730F',fontWeight:700,textDecoration:'underline',fontSize:'inherit',cursor:'pointer',fontFamily:'inherit',padding:0}}>Sign in</button>
-      </div>
-    </div>
-  </section>;
-}
-
-function PricingSection(){
-  const [activeTab, setActiveTab] = useState('suppliers');
-
-  return <section style={{ background:'#fff', padding:'clamp(60px, 8vw, 100px) 24px' }}>
-    <div style={{ maxWidth:1140, margin:'0 auto' }}>
-      <div style={{ textAlign:'center', marginBottom:40 }}>
-        <span className="micro" style={{ color:'#E8730F', display:'block', marginBottom:12 }}>Commercial Services</span>
-        <h2 className="serif" style={{ fontSize:'clamp(2rem, 4vw, 2.8rem)', color:'#0A1F12', margin:'0 0 16px' }}>Free to join. Pay only for growth.</h2>
-        <p style={{ fontSize:15, color:'rgba(10,31,18,.65)', maxWidth:600, margin:'0 auto 24px', lineHeight:1.6 }}>
-          Our directory is free to browse and list. We generate revenue through optional premium services, qualified leads, sourcing support, and supplier verification.
-        </p>
-        <div style={{ display:'inline-flex', background:'#F5FAF6', padding:6, borderRadius:12, border:'1px solid rgba(10,31,18,.08)' }}>
-          <button onClick={()=>setActiveTab('suppliers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='suppliers'?'#0A1F12':'transparent', color:activeTab==='suppliers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Suppliers</button>
-          <button onClick={()=>setActiveTab('buyers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='buyers'?'#0A1F12':'transparent', color:activeTab==='buyers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Buyers</button>
-        </div>
-      </div>
-
-      {activeTab === 'suppliers' ? (
-        <div className="grid lg:grid-cols-3 gap-6" style={{ alignItems:'stretch' }}>
-          {[
-            { title: 'Premium Profile', price: 'K100', period: '/mo', subtext: 'K140/mo intl | K1000/yr local | K1400/yr intl', desc: 'Get seen first. Enhance your profile with product catalogues, website links, additional photos and priority placement.', features: ['Enhanced profiles', 'Full product catalogues', 'Website links', 'Additional photos', 'Priority placement in category'], cta: 'Upgrade Profile', highlight: false },
-            { title: 'Qualified Buyer Enquiries', price: 'K50', period: '/lead', subtext: 'or K400/month access', desc: 'We send you buyers actively looking for your products. Pay per qualified lead or subscribe for full access.', features: ['Direct buyer enquiries', 'Verified buying intent', 'Pay only for relevant leads', 'Monthly package available'], cta: 'Get Leads', highlight: true },
-            { title: 'Supplier Verification', price: 'K75', period: 'one-off', subtext: 'or K600/year renewal', desc: 'Build trust instantly. We perform identity and business-registration checks, document reviews, and reference checks.', features: ['Identity & registration check', 'Document review', 'Reference checks', 'Verified badge on profile'], cta: 'Get Verified', highlight: false },
-            { title: 'Advertising & Sponsored', price: 'K455', period: '/campaign', subtext: 'Custom packages available', desc: 'Push your offers to the top of relevant searches. Feature selected products, sponsor categories, or promote special offers.', features: ['Promoted products', 'Category sponsorship', 'Featured in search results', 'Campaign report'], cta: 'Run Campaign', highlight: false }
-          ].map((plan, i) => (
-            <div key={i} className="mc" style={{ background:plan.highlight?'#0A1F12':'#fff', border:plan.highlight?'1px solid #0A1F12':'1px solid rgba(10,31,18,.1)', borderRadius:16, padding:'32px 28px', display:'flex', flexDirection:'column', position:'relative', boxShadow:plan.highlight?'0 20px 40px -15px rgba(10,31,18,.4)':'0 4px 20px -10px rgba(10,31,18,.05)' }}>
-              {plan.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', padding:'4px 12px', borderRadius:99 }}>Most Popular</div>}
-              <div style={{ marginBottom:24 }}>
-                <h3 style={{ fontSize:18, fontWeight:800, color:plan.highlight?'#fff':'#0A1F12', margin:'0 0 8px' }}>{plan.title}</h3>
-                <div style={{ display:'flex', alignItems:'flex-end', gap:4, marginBottom:8 }}>
-                  <span className="serif" style={{ fontSize:36, fontWeight:800, color:plan.highlight?'#F5A623':'#0A1F12', lineHeight:1 }}>{plan.price}</span>
-                  <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.6)':'rgba(10,31,18,.5)', fontWeight:600, paddingBottom:4 }}>{plan.period}</span>
-                </div>
-                {plan.subtext && <div style={{ fontSize:11.5, color:plan.highlight?'rgba(255,255,255,.5)':'rgba(10,31,18,.4)', marginBottom:12, lineHeight:1.4 }}>{plan.subtext}</div>}
-                <p style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.7)':'rgba(10,31,18,.6)', margin:0, lineHeight:1.5 }}>{plan.desc}</p>
-              </div>
-              <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, marginBottom:32 }}>
-                {plan.features.map((f, j) => (
-                  <div key={j} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
-                    <i className="fas fa-check-circle" style={{ color:plan.highlight?'#F5A623':'#1E7B3C', fontSize:14, marginTop:2 }}></i>
-                    <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.8)':'rgba(10,31,18,.7)', lineHeight:1.4 }}>{f}</span>
-                  </div>
-                ))}
-              </div>
-              <button style={{ width:'100%', padding:'14px', borderRadius:10, fontSize:14, fontWeight:700, border:'none', background:plan.highlight?'linear-gradient(135deg,#E8730F,#F5A623)':'#F5FAF6', color:plan.highlight?'#fff':'#0A1F12', transition:'all .2s' }} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';}} onMouseLeave={e=>{e.currentTarget.style.transform='none';}}>{plan.cta}</button>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid lg:grid-cols-2 gap-6" style={{ alignItems:'stretch', maxWidth: 800, margin: '0 auto' }}>
-          {[
-            { title: 'Sourcing & Procurement Support', price: 'K600', period: '/project', desc: 'We handle the sourcing so you don\'t have to. Tell us what you want to purchase, and we find suitable suppliers, request quotations, compare offers and present a shortlist.', features: ['We find the suppliers', 'We request and compare quotes', 'We negotiate terms', 'You get a shortlist to approve'], cta: 'Start Sourcing', highlight: true },
-            { title: 'International Sourcing', price: 'From K400', period: '/retainer', subtext: 'or agreed service fee', desc: 'Connect with international manufacturers and distributors. We assist with quotation requests, supplier communication, documentation coordination and introductions to freight/clearing partners.', features: ['Supplier identification abroad', 'Documentation coordination', 'Freight & clearing introductions', 'Quotation management'], cta: 'Source Internationally', highlight: false }
-          ].map((plan, i) => (
-            <div key={i} className="mc" style={{ background:plan.highlight?'#0A1F12':'#fff', border:plan.highlight?'1px solid #0A1F12':'1px solid rgba(10,31,18,.1)', borderRadius:16, padding:'32px 28px', display:'flex', flexDirection:'column', position:'relative', boxShadow:plan.highlight?'0 20px 40px -15px rgba(10,31,18,.4)':'0 4px 20px -10px rgba(10,31,18,.05)' }}>
-              {plan.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', padding:'4px 12px', borderRadius:99 }}>Most Popular</div>}
-              <div style={{ marginBottom:24 }}>
-                <h3 style={{ fontSize:18, fontWeight:800, color:plan.highlight?'#fff':'#0A1F12', margin:'0 0 8px' }}>{plan.title}</h3>
-                <div style={{ display:'flex', alignItems:'flex-end', gap:4, marginBottom:8 }}>
-                  <span className="serif" style={{ fontSize:36, fontWeight:800, color:plan.highlight?'#F5A623':'#0A1F12', lineHeight:1 }}>{plan.price}</span>
-                  <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.6)':'rgba(10,31,18,.5)', fontWeight:600, paddingBottom:4 }}>{plan.period}</span>
-                </div>
-                {plan.subtext && <div style={{ fontSize:11.5, color:plan.highlight?'rgba(255,255,255,.5)':'rgba(10,31,18,.4)', marginBottom:12, lineHeight:1.4 }}>{plan.subtext}</div>}
-                <p style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.7)':'rgba(10,31,18,.6)', margin:0, lineHeight:1.5 }}>{plan.desc}</p>
-              </div>
-              <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, marginBottom:32 }}>
-                {plan.features.map((f, j) => (
-                  <div key={j} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
-                    <i className="fas fa-check-circle" style={{ color:plan.highlight?'#F5A623':'#1E7B3C', fontSize:14, marginTop:2 }}></i>
-                    <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.8)':'rgba(10,31,18,.7)', lineHeight:1.4 }}>{f}</span>
-                  </div>
-                ))}
-              </div>
-              <button style={{ width:'100%', padding:'14px', borderRadius:10, fontSize:14, fontWeight:700, border:'none', background:plan.highlight?'linear-gradient(135deg,#E8730F,#F5A623)':'#F5FAF6', color:plan.highlight?'#fff':'#0A1F12', transition:'all .2s' }} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';}} onMouseLeave={e=>{e.currentTarget.style.transform='none';}}>{plan.cta}</button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div style={{ marginTop:32, textAlign:'center', background:'#F5FAF6', padding:'16px 24px', borderRadius:12, border:'1px dashed rgba(10,31,18,.15)', display:'inline-flex', alignItems:'center', gap:12, margin:'32px auto 0', maxWidth:800 }}>
-        <i className="fas fa-shield-halved" style={{ color:'#1E7B3C', fontSize:20 }}></i>
-        <p style={{ fontSize:13, color:'rgba(10,31,18,.7)', margin:0, textAlign:'left', lineHeight:1.5 }}>
-          <strong style={{ color:'#0A1F12' }}>Transact Directly:</strong> StartEasy does not process buyer payments or take on delivery/dispute responsibilities. Buyers and suppliers transact directly. We earn from the services above, keeping the process simple and transparent.
-        </p>
       </div>
     </div>
   </section>;
@@ -825,12 +747,102 @@ function Footer(){
   </footer>;
 }
 
+/* ═══════════════════ PRICING PAGE (COMMERCIAL MODEL) ═══════════════════ */
+function PricingPage({onSignup}){
+  const [activeTab, setActiveTab] = useState('suppliers');
+
+  return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6'}}>
+    <main style={{maxWidth:1140, margin:'0 auto', padding:'60px 24px 80px'}}>
+      <div style={{ textAlign:'center', marginBottom:40 }}>
+        <span className="micro" style={{ color:'#E8730F', display:'block', marginBottom:12 }}>Commercial Services</span>
+        <h2 className="serif" style={{ fontSize:'clamp(2rem, 4vw, 2.8rem)', color:'#0A1F12', margin:'0 0 16px' }}>Free to join. Pay only for growth.</h2>
+        <p style={{ fontSize:15, color:'rgba(10,31,18,.65)', maxWidth:600, margin:'0 auto 24px', lineHeight:1.6 }}>
+          Our directory is free to browse and list. We generate revenue through optional premium services, qualified leads, sourcing support, and supplier verification.
+        </p>
+        <div style={{ display:'inline-flex', background:'#fff', padding:6, borderRadius:12, border:'1px solid rgba(10,31,18,.08)' }}>
+          <button onClick={()=>setActiveTab('suppliers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='suppliers'?'#0A1F12':'transparent', color:activeTab==='suppliers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Suppliers</button>
+          <button onClick={()=>setActiveTab('buyers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='buyers'?'#0A1F12':'transparent', color:activeTab==='buyers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Buyers</button>
+        </div>
+      </div>
+
+      {activeTab === 'suppliers' ? (
+        <div className="grid lg:grid-cols-3 gap-6" style={{ alignItems:'stretch' }}>
+          {[
+            { title: 'Premium Profile', price: 'K100', period: '/mo', subtext: 'K140/mo intl | K1000/yr local | K1400/yr intl', desc: 'Get seen first. Enhance your profile with product catalogues, website links, additional photos and priority placement.', features: ['Enhanced profiles', 'Full product catalogues', 'Website links', 'Additional photos', 'Priority placement in category'], cta: 'Upgrade Profile', highlight: false },
+            { title: 'Qualified Buyer Enquiries', price: 'K50', period: '/lead', subtext: 'or K400/month access', desc: 'We send you buyers actively looking for your products. Pay per qualified lead or subscribe for full access.', features: ['Direct buyer enquiries', 'Verified buying intent', 'Pay only for relevant leads', 'Monthly package available'], cta: 'Get Leads', highlight: true },
+            { title: 'Supplier Verification', price: 'K75', period: 'one-off', subtext: 'or K600/year renewal', desc: 'Build trust instantly. We perform identity and business-registration checks, document reviews, and reference checks.', features: ['Identity & registration check', 'Document review', 'Reference checks', 'Verified badge on profile'], cta: 'Get Verified', highlight: false },
+            { title: 'Advertising & Sponsored', price: 'K455', period: '/campaign', subtext: 'Custom packages available', desc: 'Push your offers to the top of relevant searches. Feature selected products, sponsor categories, or promote special offers.', features: ['Promoted products', 'Category sponsorship', 'Featured in search results', 'Campaign report'], cta: 'Run Campaign', highlight: false }
+          ].map((plan, i) => (
+            <div key={i} className="mc" style={{ background:plan.highlight?'#0A1F12':'#fff', border:plan.highlight?'1px solid #0A1F12':'1px solid rgba(10,31,18,.1)', borderRadius:16, padding:'32px 28px', display:'flex', flexDirection:'column', position:'relative', boxShadow:plan.highlight?'0 20px 40px -15px rgba(10,31,18,.4)':'0 4px 20px -10px rgba(10,31,18,.05)' }}>
+              {plan.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', padding:'4px 12px', borderRadius:99 }}>Most Popular</div>}
+              <div style={{ marginBottom:24 }}>
+                <h3 style={{ fontSize:18, fontWeight:800, color:plan.highlight?'#fff':'#0A1F12', margin:'0 0 8px' }}>{plan.title}</h3>
+                <div style={{ display:'flex', alignItems:'flex-end', gap:4, marginBottom:8 }}>
+                  <span className="serif" style={{ fontSize:36, fontWeight:800, color:plan.highlight?'#F5A623':'#0A1F12', lineHeight:1 }}>{plan.price}</span>
+                  <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.6)':'rgba(10,31,18,.5)', fontWeight:600, paddingBottom:4 }}>{plan.period}</span>
+                </div>
+                {plan.subtext && <div style={{ fontSize:11.5, color:plan.highlight?'rgba(255,255,255,.5)':'rgba(10,31,18,.4)', marginBottom:12, lineHeight:1.4 }}>{plan.subtext}</div>}
+                <p style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.7)':'rgba(10,31,18,.6)', margin:0, lineHeight:1.5 }}>{plan.desc}</p>
+              </div>
+              <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, marginBottom:32 }}>
+                {plan.features.map((f, j) => (
+                  <div key={j} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                    <i className="fas fa-check-circle" style={{ color:plan.highlight?'#F5A623':'#1E7B3C', fontSize:14, marginTop:2 }}></i>
+                    <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.8)':'rgba(10,31,18,.7)', lineHeight:1.4 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={()=>onSignup && onSignup('supplier')} style={{ width:'100%', padding:'14px', borderRadius:10, fontSize:14, fontWeight:700, border:'none', background:plan.highlight?'linear-gradient(135deg,#E8730F,#F5A623)':'#F5FAF6', color:plan.highlight?'#fff':'#0A1F12', transition:'all .2s' }}>{plan.cta}</button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid lg:grid-cols-2 gap-6" style={{ alignItems:'stretch', maxWidth: 800, margin: '0 auto' }}>
+          {[
+            { title: 'Sourcing & Procurement Support', price: 'K600', period: '/project', desc: 'We handle the sourcing so you don\'t have to. Tell us what you want to purchase, and we find suitable suppliers, request quotations, compare offers and present a shortlist.', features: ['We find the suppliers', 'We request and compare quotes', 'We negotiate terms', 'You get a shortlist to approve'], cta: 'Start Sourcing', highlight: true },
+            { title: 'International Sourcing', price: 'From K400', period: '/retainer', subtext: 'or agreed service fee', desc: 'Connect with international manufacturers and distributors. We assist with quotation requests, supplier communication, documentation coordination and introductions to freight/clearing partners.', features: ['Supplier identification abroad', 'Documentation coordination', 'Freight & clearing introductions', 'Quotation management'], cta: 'Source Internationally', highlight: false }
+          ].map((plan, i) => (
+            <div key={i} className="mc" style={{ background:plan.highlight?'#0A1F12':'#fff', border:plan.highlight?'1px solid #0A1F12':'1px solid rgba(10,31,18,.1)', borderRadius:16, padding:'32px 28px', display:'flex', flexDirection:'column', position:'relative', boxShadow:plan.highlight?'0 20px 40px -15px rgba(10,31,18,.4)':'0 4px 20px -10px rgba(10,31,18,.05)' }}>
+              {plan.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', padding:'4px 12px', borderRadius:99 }}>Most Popular</div>}
+              <div style={{ marginBottom:24 }}>
+                <h3 style={{ fontSize:18, fontWeight:800, color:plan.highlight?'#fff':'#0A1F12', margin:'0 0 8px' }}>{plan.title}</h3>
+                <div style={{ display:'flex', alignItems:'flex-end', gap:4, marginBottom:8 }}>
+                  <span className="serif" style={{ fontSize:36, fontWeight:800, color:plan.highlight?'#F5A623':'#0A1F12', lineHeight:1 }}>{plan.price}</span>
+                  <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.6)':'rgba(10,31,18,.5)', fontWeight:600, paddingBottom:4 }}>{plan.period}</span>
+                </div>
+                {plan.subtext && <div style={{ fontSize:11.5, color:plan.highlight?'rgba(255,255,255,.5)':'rgba(10,31,18,.4)', marginBottom:12, lineHeight:1.4 }}>{plan.subtext}</div>}
+                <p style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.7)':'rgba(10,31,18,.6)', margin:0, lineHeight:1.5 }}>{plan.desc}</p>
+              </div>
+              <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, marginBottom:32 }}>
+                {plan.features.map((f, j) => (
+                  <div key={j} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                    <i className="fas fa-check-circle" style={{ color:plan.highlight?'#F5A623':'#1E7B3C', fontSize:14, marginTop:2 }}></i>
+                    <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.8)':'rgba(10,31,18,.7)', lineHeight:1.4 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={()=>onSignup && onSignup('buyer')} style={{ width:'100%', padding:'14px', borderRadius:10, fontSize:14, fontWeight:700, border:'none', background:plan.highlight?'linear-gradient(135deg,#E8730F,#F5A623)':'#F5FAF6', color:plan.highlight?'#fff':'#0A1F12', transition:'all .2s' }}>{plan.cta}</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ marginTop:32, textAlign:'center', background:'#fff', padding:'16px 24px', borderRadius:12, border:'1px dashed rgba(10,31,18,.15)', display:'inline-flex', alignItems:'center', gap:12, margin:'32px auto 0', maxWidth:800 }}>
+        <i className="fas fa-shield-halved" style={{ color:'#1E7B3C', fontSize:20 }}></i>
+        <p style={{ fontSize:13, color:'rgba(10,31,18,.7)', margin:0, textAlign:'left', lineHeight:1.5 }}>
+          <strong style={{ color:'#0A1F12' }}>Transact Directly:</strong> StartEasy does not process buyer payments or take on delivery/dispute responsibilities. Buyers and suppliers transact directly. We earn from the services above, keeping the process simple and transparent.
+        </p>
+      </div>
+    </main>
+    <Footer/>
+  </div>;
+}
+
 function Landing({onSignup,onSignin}){
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
     <main style={{flex:1}}>
       <Hero/>
       <LandingCTA onSignup={onSignup} onSignin={onSignin}/>
-      <PricingSection/>
       <TrustSection/>
     </main>
     <Footer/>
@@ -849,6 +861,12 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const [saving,setSaving]=useState(false);
   const [saveMsg,setSaveMsg]=useState(null);
   const [allSuppliers,setAllSuppliers]=useState([]);
+  
+  // New State for Campaigns and Listings
+  const [campaigns,setCampaigns]=useState([]);
+  const [listings,setListings]=useState([]);
+  const [campaignModalOpen,setCampaignModalOpen]=useState(false);
+  const [listingModalOpen,setListingModalOpen]=useState(false);
 
   useEffect(()=>{
     if(!user){setLoading(false);return;}
@@ -863,6 +881,8 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
         frequency:p.frequency||'Monthly',orderValue:p.orderValue||''
       });
       setSavedSuppliersState(getSavedSuppliers(user.uid));
+      setCampaigns(getCampaigns(user.uid));
+      setListings(getListings(user.uid));
       setLoading(false);
     });
   },[user]);
@@ -909,6 +929,22 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     toast('Removed from saved suppliers.', 'success');
   };
 
+  const handleAddCampaign = (newCamp) => {
+    const next = [...campaigns, newCamp];
+    setCampaigns(next);
+    setCampaigns(user.uid, next);
+    setCampaignModalOpen(false);
+    toast('Campaign created successfully.', 'success');
+  };
+
+  const handleAddListing = (newList) => {
+    const next = [...listings, newList];
+    setListings(next);
+    setListings(user.uid, next);
+    setListingModalOpen(false);
+    toast('Listing published live.', 'success');
+  };
+
   if(loading) return <div style={{minHeight:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
 
   if(!profile) return <div style={{minHeight:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6',padding:'32px 20px',textAlign:'center'}}>
@@ -926,7 +962,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const navItems = isSupplier ? [
     {key:'overview', label:'Overview', icon:'fa-border-all'},
     {key:'profile', label:'Organisation profile', icon:'fa-building'},
-    {key:'catalogue', label:'My catalogue', icon:'fa-list'},
+    {key:'catalogue', label:'My Listings', icon:'fa-list'},
     {key:'campaigns', label:'Campaigns', icon:'fa-bullhorn'},
     {key:'analytics', label:'Analytics', icon:'fa-chart-simple'},
     {key:'billing', label:'Billing', icon:'fa-credit-card'},
@@ -961,7 +997,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
             <p>{isSupplier ? 'Supplier dashboard' : 'Buyer dashboard'} · <span className={`chip ${isVerified?'':'chip-neutral'}`}>{isVerified?'Verified':'Not verified'}</span></p>
           </div>
           {isSupplier ? (
-            <button onClick={()=>setTab('catalogue')} style={{padding:'10px 18px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-plus"></i> New listing</button>
+            <button onClick={()=>setListingModalOpen(true)} style={{padding:'10px 18px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-plus"></i> New listing</button>
           ) : (
             <button onClick={onBrowse} style={{padding:'10px 18px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-magnifying-glass"></i> Find suppliers</button>
           )}
@@ -973,9 +1009,9 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
             <div className="stat-grid">
               {isSupplier ? (
                 <>
-                  <StatCard label="Live products" value={profile.products?.length||0} hint="0 awaiting review" />
+                  <StatCard label="Live listings" value={listings.length} hint="0 awaiting review" />
                   <StatCard label="Total views" value="0" hint="across all listings" />
-                  <StatCard label="Quote requests" value={quotes.length} hint="0% click rate" />
+                  <StatCard label="Outbound clicks" value="0" hint="0% click rate" />
                   <StatCard label="Total spend" value="K0" hint="0 transactions" />
                 </>
               ) : (
@@ -1073,27 +1109,26 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
           </div>
         )}
 
-        {/* MY CATALOGUE (Supplier) */}
+        {/* MY LISTINGS (Supplier) */}
         {tab==='catalogue' && isSupplier && (
           <div className="card">
             <div className="card-h">
-              <h3>My catalogue</h3>
-              <button style={{padding:'6px 12px',background:'#F5FAF6',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,fontSize:12,fontWeight:700}}>Add product</button>
+              <h3>My Listings</h3>
+              <button onClick={()=>setListingModalOpen(true)} style={{padding:'6px 12px',background:'#F5FAF6',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,fontSize:12,fontWeight:700}}>Add listing</button>
             </div>
             <div className="table-wrap" style={{border:0,borderRadius:0}}>
               <table className="dt">
-                <thead><tr><th>Product Name</th><th>MOQ</th><th>Lead Time</th><th>Delivery</th><th>Status</th></tr></thead>
+                <thead><tr><th>Listing Name</th><th>MOQ</th><th>Lead Time</th><th>Status</th></tr></thead>
                 <tbody>
-                  {Array.isArray(profile.products) && profile.products.length > 0 ? profile.products.map((p,i)=>(
+                  {listings.length > 0 ? listings.map((p,i)=>(
                     <tr key={i}>
-                      <td style={{fontWeight:700}}>{p}</td>
-                      <td className="muted">{profile.moq||'—'}</td>
-                      <td className="muted">{profile.leadTime||'—'}</td>
-                      <td className="muted">{profile.delivery||'—'}</td>
-                      <td><span className="chip">Active</span></td>
+                      <td style={{fontWeight:700}}>{p.title}</td>
+                      <td className="muted">{p.moq||'—'}</td>
+                      <td className="muted">{p.leadTime||'—'}</td>
+                      <td><span className="chip">Live</span></td>
                     </tr>
                   )) : (
-                    <tr><td colSpan="5" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No products listed yet.</td></tr>
+                    <tr><td colSpan="4" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No listings found. Click "Add listing" to publish one live.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -1154,7 +1189,29 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
 
         {/* CAMPAIGNS (Supplier) */}
         {tab==='campaigns' && isSupplier && (
-          <EmptyState icon="fa-bullhorn" title="No campaigns yet" text="Sponsored placements and campaigns let you promote your business at the top of search results." cta={<button style={{padding:'10px 18px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>View packages</button>} />
+          <div className="card">
+             <div className="card-h">
+               <h3>Campaigns</h3>
+               <button onClick={()=>setCampaignModalOpen(true)} style={{padding:'6px 12px',background:'#F5FAF6',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,fontSize:12,fontWeight:700}}>New campaign</button>
+             </div>
+             <div className="table-wrap" style={{border:0,borderRadius:0}}>
+              <table className="dt">
+                <thead><tr><th>Campaign Name</th><th>Package</th><th>Budget</th><th>Status</th></tr></thead>
+                <tbody>
+                  {campaigns.length > 0 ? campaigns.map((c,i)=>(
+                    <tr key={i}>
+                      <td style={{fontWeight:700}}>{c.name}</td>
+                      <td className="muted">{c.package}</td>
+                      <td className="muted">{c.budget}</td>
+                      <td><span className="chip">Active</span></td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan="4" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No campaigns yet. Create one to promote your business.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
         {/* ANALYTICS (Both) */}
@@ -1189,7 +1246,58 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
 
       </div>
     </div>
+
+    {/* MODALS */}
+    {campaignModalOpen && <CreateCampaignModal onClose={()=>setCampaignModalOpen(false)} onSave={handleAddCampaign} />}
+    {listingModalOpen && <CreateListingModal onClose={()=>setListingModalOpen(false)} onSave={handleAddListing} />}
   </div>;
+}
+
+/* ═══════════════════ DASHBOARD MODALS ═══════════════════ */
+function CreateCampaignModal({onClose, onSave}) {
+  const [form, setForm] = useState({ name:'', package:'Sponsored', budget:'K455' });
+  const submit = () => {
+    if(!form.name.trim()) return toast('Enter a campaign name.', 'error');
+    onSave(form);
+  };
+  return <Modal open={true} onClose={onClose} eyebrow="Campaigns" maxWidth="32rem">
+    <h2 className="serif" style={{fontSize:24, marginBottom:20}}>Create a Campaign</h2>
+    <div className="form-grid" style={{gap:16}}>
+      <div><label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Campaign Name</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})} placeholder="e.g. Q4 Sponsored Promo"/></div>
+      <div><label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Package</label>
+        <select value={form.package} onChange={e=>setForm({...form,package:e.target.value, budget: e.target.value==='Sponsored'?'K455':e.target.value==='Featured'?'K120':'K1000'})} style={{...INP_STYLE, cursor:'pointer'}}>
+          <option value="Sponsored">Sponsored Placement</option>
+          <option value="Featured">Featured Listing</option>
+          <option value="Premium">Premium Profile</option>
+        </select>
+      </div>
+      <div><label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget</label><TIn value={form.budget} onChange={v=>setForm({...form,budget:v})}/></div>
+    </div>
+    <div style={{display:'flex', gap:10, marginTop:24}}>
+      <button onClick={submit} style={{flex:1, padding:14, background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700}}>Create Campaign</button>
+      <button onClick={onClose} style={{padding:14, background:'#fff', border:'1px solid rgba(10,31,18,.15)', borderRadius:8, fontSize:14, fontWeight:600, color:'#0A1F12'}}>Cancel</button>
+    </div>
+  </Modal>;
+}
+
+function CreateListingModal({onClose, onSave}) {
+  const [form, setForm] = useState({ title:'', moq:'', leadTime:'' });
+  const submit = () => {
+    if(!form.title.trim()) return toast('Enter a listing name.', 'error');
+    onSave(form);
+  };
+  return <Modal open={true} onClose={onClose} eyebrow="My Listings" maxWidth="32rem">
+    <h2 className="serif" style={{fontSize:24, marginBottom:20}}>Add a Live Listing</h2>
+    <div className="form-grid" style={{gap:16}}>
+      <div><label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Listing / Product Name</label><TIn value={form.title} onChange={v=>setForm({...form,title:v})} placeholder="e.g. Premium Cotton Fabric"/></div>
+      <div><label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>MOQ</label><TIn value={form.moq} onChange={v=>setForm({...form,moq:v})} placeholder="e.g. 50 metres"/></div>
+      <div><label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead Time</label><TIn value={form.leadTime} onChange={v=>setForm({...form,leadTime:v})} placeholder="e.g. 3-5 days"/></div>
+    </div>
+    <div style={{display:'flex', gap:10, marginTop:24}}>
+      <button onClick={submit} style={{flex:1, padding:14, background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700}}>Publish Live</button>
+      <button onClick={onClose} style={{padding:14, background:'#fff', border:'1px solid rgba(10,31,18,.15)', borderRadius:8, fontSize:14, fontWeight:600, color:'#0A1F12'}}>Cancel</button>
+    </div>
+  </Modal>;
 }
 
 /* ═══════════════════ SIGN-IN PROMPT ═══════════════════ */
@@ -2176,6 +2284,8 @@ function App(){
     } else {
       mainView = <><Browse user={user} onRequestQuote={openRFQ} onRequestIntro={openIntro} onDashboard={goDashboard} onSignedOut={signedOut}/><RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} type={rfqType} user={user} onSaved={()=>{}}/></>;
     }
+  } else if(hash==='#pricing'){
+    mainView = <PricingPage onSignup={(role)=>openAuth('signup',role||'buyer')}/>;
   } else if(!user){
     mainView = <Landing onSignup={(role)=>openAuth('signup',role||'buyer')} onSignin={()=>openAuth('signin','buyer')}/>;
   } else {
