@@ -14,9 +14,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 :root{--forest:#0A1F12;--forest-2:#123A1F;--green:#1E7B3C;--orange:#E8730F;--orange-2:#F5A623;--light:#F5FAF6;--red:#B8564F;--purple:#7A4FA3;--blue:#1B6CA8;--teal:#0E7C7B}
-html{overflow-x:hidden;-webkit-text-size-adjust:100%}
-body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--light);overflow-x:hidden;margin:0}
-#root{overflow-x:hidden;width:100%}
+/* Fix sticky header issues by using overflow-x: clip instead of hidden */
+html{overflow-x:clip;-webkit-text-size-adjust:100%}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--light);overflow-x:clip;margin:0}
+#root{overflow-x:clip;width:100%}
 *,*::before,*::after{box-sizing:border-box;min-width:0}
 h1,h2,h3,h4,h5,h6,p,span,a,li,div,button{overflow-wrap:break-word}
 button,a{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
@@ -43,6 +44,7 @@ input:focus,select:focus,textarea:focus{outline:none}
   .dash-main{margin-left:260px}
   .dash-backdrop{display:none!important}
   .dash-mobile-toggle{display:none!important}
+  .dash-mobile-logo{display:none!important}
 }
 .kpi-card{background:#fff;border:1px solid rgba(10,31,18,.08);border-radius:12px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px;transition:all .2s}
 .kpi-card:hover{box-shadow:0 10px 26px -12px rgba(10,31,18,.12);transform:translateY(-2px)}
@@ -718,7 +720,7 @@ function LandingCTA({onSignup,onSignin}){
   </section>;
 }
 
-/* ═══════════════════ TRUST SECTION (moved near footer) ═══════════════════ */
+/* ═══════════════════ TRUST SECTION ═══════════════════ */
 function TrustSection(){
   const steps=[
     {icon:'fa-magnifying-glass-location',color:'#1B6CA8',title:'We identify suppliers',body:'Local and international suppliers matched to your exact category, quantities and terms.'},
@@ -788,11 +790,8 @@ function Landing({onSignup,onSignin}){
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
     <Nav user={null} onSignIn={onSignin} onSignUp={onSignup}/>
     <main style={{flex:1}}>
-      {/* 1. Original hero — unchanged, no trust content here */}
       <Hero/>
-      {/* 2. Two-card signup CTA (as in original design) */}
       <LandingCTA onSignup={onSignup} onSignin={onSignin}/>
-      {/* 3. Trust / verify section — moved down here, just above the footer */}
       <TrustSection/>
     </main>
     <Footer/>
@@ -1076,18 +1075,31 @@ function Dashboard({user,onBrowse,onSignedOut}){
     </aside>
 
     <div className="dash-main" style={{minHeight:'100vh'}}>
-      <header style={{background:'#fff',borderBottom:'1px solid rgba(10,31,18,.08)',padding:'14px 24px',display:'flex',alignItems:'center',gap:14,position:'sticky',top:0,zIndex:30}}>
+      {/* UPGRADED STICKY DASHBOARD HEADER */}
+      <header style={{background:'#fff',borderBottom:'1px solid rgba(10,31,18,.08)',padding:'10px 16px',display:'flex',alignItems:'center',gap:10,position:'sticky',top:0,zIndex:40,boxShadow:'0 2px 10px rgba(0,0,0,.03)'}}>
         <button onClick={()=>setSidebarOpen(true)} className="dash-mobile-toggle" style={{width:36,height:36,borderRadius:8,background:'#0A1F12',color:'#fff',border:'none',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
           <i className="fas fa-bars" style={{fontSize:14}}></i>
         </button>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>{isSupplier?'Supplier':'Buyer'} dashboard</div>
-          <div style={{fontSize:14.5,fontWeight:700,color:'#0A1F12'}}>{tabs.find(t=>t[0]===tab)?.[1]||'Overview'}</div>
+        
+        <div style={{display:'flex', alignItems:'center', gap:10, flex:1, minWidth:0}}>
+          <div className="dash-mobile-logo" style={{display:'flex', alignItems:'center', flexShrink:0}}>
+            <Mark size={32}/>
+          </div>
+          <div style={{minWidth:0, flex:1}}>
+            <div style={{fontSize:10,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>{isSupplier?'Supplier':'Buyer'} dashboard</div>
+            <div style={{fontSize:14,fontWeight:700,color:'#0A1F12',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{tabs.find(t=>t[0]===tab)?.[1]||'Overview'}</div>
+          </div>
         </div>
-        <span style={{display:'inline-flex',alignItems:'center',gap:6,padding:'5px 12px',borderRadius:99,fontSize:10.5,fontWeight:800,textTransform:'uppercase',background:isVerified?'rgba(30,123,60,.12)':'rgba(245,166,35,.15)',color:isVerified?'#0F5C2A':'#8A6828',border:'1px solid '+(isVerified?'rgba(30,123,60,.3)':'rgba(245,166,35,.35)')}}>
-          <i className={`fas ${isVerified?'fa-circle-check':'fa-clock'}`} style={{fontSize:9}}></i>
-          <span className="hide-sm">{isVerified?'Verified':'Pending'}</span>
-        </span>
+
+        <div style={{display:'flex', alignItems:'center', gap:8, flexShrink:0}}>
+          <a href={MAIN_PLATFORM_URL} style={{padding:'8px 10px', background:'rgba(232,115,15,.1)', color:'#E8730F', border:'1px solid rgba(232,115,15,.25)', borderRadius:8, fontSize:11, fontWeight:800, textDecoration:'none', display:'flex', alignItems:'center', gap:5, whiteSpace:'nowrap'}}>
+            <i className="fas fa-arrow-left" style={{fontSize:9}}></i> <span className="hide-sm">Platform</span>
+          </a>
+          <span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'6px 10px',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase',background:isVerified?'rgba(30,123,60,.12)':'rgba(245,166,35,.15)',color:isVerified?'#0F5C2A':'#8A6828',border:'1px solid '+(isVerified?'rgba(30,123,60,.3)':'rgba(245,166,35,.35)')}}>
+            <i className={`fas ${isVerified?'fa-circle-check':'fa-clock'}`} style={{fontSize:8}}></i>
+            <span className="hide-sm">{isVerified?'Verified':'Pending'}</span>
+          </span>
+        </div>
       </header>
 
       <main style={{padding:'24px',maxWidth:1200,margin:'0 auto'}}>
