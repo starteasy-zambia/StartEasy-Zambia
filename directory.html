@@ -1032,27 +1032,79 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
               )}
             </div>
 
-            <div className="card" style={{marginBottom:18}}>
-              <div className="card-h">
-                <h3>Recent activity</h3>
-              </div>
-              <div style={{padding:'20px', display:'flex', flexDirection:'column', gap:16}}>
-                <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
-                  <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(232,115,15,.1)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-check" style={{fontSize:12}}></i></div>
-                  <div>
-                    <div style={{fontSize:13.5,fontWeight:700,color:'#0A1F12'}}>Account created</div>
-                    <div style={{fontSize:12,color:'rgba(10,31,18,.55)'}}>{fmtDate(profile.createdAt||Date.now())}</div>
+            {isSupplier ? (
+              <>
+                <div className="card" style={{marginBottom:18}}>
+                  <div className="card-h">
+                    <h3>Your listings</h3>
+                    <button onClick={()=>setTab('catalogue')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>Manage all</button>
+                  </div>
+                  <div className="table-wrap" style={{border:0,borderRadius:0}}>
+                    <table className="dt">
+                      <thead><tr><th>Listing Name</th><th>MOQ</th><th>Lead Time</th><th>Status</th></tr></thead>
+                      <tbody>
+                        {listings.length > 0 ? listings.slice(0, 5).map((p,i)=>(
+                          <tr key={i}>
+                            <td style={{fontWeight:700}}>{p.title}</td>
+                            <td className="muted">{p.moq||'—'}</td>
+                            <td className="muted">{p.leadTime||'—'}</td>
+                            <td><span className="chip">Live</span></td>
+                          </tr>
+                        )) : (
+                          <tr><td colSpan="4" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>You haven't published any listings yet. Click "New listing" to publish one live.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-                {isVerified && <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
-                  <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(30,123,60,.1)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-shield" style={{fontSize:12}}></i></div>
-                  <div>
-                    <div style={{fontSize:13.5,fontWeight:700,color:'#0A1F12'}}>Profile verified</div>
-                    <div style={{fontSize:12,color:'rgba(10,31,18,.55)'}}>{isSupplier?'Buyers can now find you':'Suppliers can now find you'}</div>
+
+                <div className="card" style={{marginBottom:18}}>
+                  <div className="card-h">
+                    <h3>Active Campaigns</h3>
+                    <button onClick={()=>setTab('campaigns')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>Manage all</button>
                   </div>
-                </div>}
+                  <div className="table-wrap" style={{border:0,borderRadius:0}}>
+                    <table className="dt">
+                      <thead><tr><th>Campaign Name</th><th>Package</th><th>Budget</th><th>Status</th></tr></thead>
+                      <tbody>
+                        {campaigns.length > 0 ? campaigns.slice(0, 5).map((c,i)=>(
+                          <tr key={i}>
+                            <td style={{fontWeight:700}}>{c.name}</td>
+                            <td className="muted">{c.package}</td>
+                            <td className="muted">{c.budget}</td>
+                            <td><span className="chip">Active</span></td>
+                          </tr>
+                        )) : (
+                          <tr><td colSpan="4" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No active campaigns. Click "New campaign" to create one.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="card" style={{marginBottom:18}}>
+                <div className="card-h">
+                  <h3>Recent activity</h3>
+                </div>
+                <div style={{padding:'20px', display:'flex', flexDirection:'column', gap:16}}>
+                  <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                    <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(232,115,15,.1)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-check" style={{fontSize:12}}></i></div>
+                    <div>
+                      <div style={{fontSize:13.5,fontWeight:700,color:'#0A1F12'}}>Account created</div>
+                      <div style={{fontSize:12,color:'rgba(10,31,18,.55)'}}>{fmtDate(profile.createdAt||Date.now())}</div>
+                    </div>
+                  </div>
+                  {isVerified && <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                    <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(30,123,60,.1)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-shield" style={{fontSize:12}}></i></div>
+                    <div>
+                      <div style={{fontSize:13.5,fontWeight:700,color:'#0A1F12'}}>Profile verified</div>
+                      <div style={{fontSize:12,color:'rgba(10,31,18,.55)'}}>Suppliers can now find you</div>
+                    </div>
+                  </div>}
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
 
