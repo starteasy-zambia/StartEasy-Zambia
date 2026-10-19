@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 :root{--forest:#0A1F12;--forest-2:#123A1F;--green:#1E7B3C;--orange:#E8730F;--orange-2:#F5A623;--light:#F5FAF6;--red:#B8564F;--purple:#7A4FA3;--blue:#1B6CA8;--teal:#0E7C7B}
 html{overflow-x:hidden;-webkit-text-size-adjust:100%}
@@ -40,17 +43,52 @@ input:focus,select:focus,textarea:focus{outline:none}
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useMemo } = React;
 
+/* ═══════════════════════════════════════════════════════════
+   CONFIG + FIREBASE INIT
+   ═══════════════════════════════════════════════════════════ */
 const ADMIN_WHATSAPP = '260762499581';
 const CONTACT_EMAIL = 'directory@starteasyzambia.com';
 const MAIN_PLATFORM_URL = 'https://starteasyzambia.com';
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDdEyxvsd2RjgKVYTGYJfYUB_637lV3n5I",
+  authDomain: "starteasy-zambia.firebaseapp.com",
+  projectId: "starteasy-zambia",
+  storageBucket: "starteasy-zambia.firebasestorage.app",
+  messagingSenderId: "54136399237",
+  appId: "1:54136399237:web:2f9f2d7f86bfdfb4be50ec",
+  measurementId: "G-R622H7H5LJ"
+};
+let db = null, auth = null, firebaseReady = false;
+try {
+  if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+  auth = firebase.auth();
+  firebaseReady = true;
+  auth.signInAnonymously().catch(e => console.warn('[SE] anon auth:', e && e.message));
+  console.log('[SE] Firebase ready — project:', FIREBASE_CONFIG.projectId);
+} catch (e) { console.error('[SE] Firebase init failed:', e); }
 
 function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
 function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
 function readLS(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
 function writeLS(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
 
+async function fsLoadDirectory() {
+  if (!firebaseReady) return null;
+  try {
+    const [s, b] = await Promise.all([db.collection('se_suppliers').get(), db.collection('se_buyers').get()]);
+    return { suppliers: s.docs.map(d=>({id:d.id,...d.data()})), buyers: b.docs.map(d=>({id:d.id,...d.data()})) };
+  } catch (e) { console.warn('[SE] directory load failed:', e && e.message); return null; }
+}
+async function fsSubmitLead(lead) {
+  if (!firebaseReady) return false;
+  try { await db.collection('se_leads').add({...lead, at: Date.now()}); return true; }
+  catch (e) { console.warn('[SE] lead submit failed:', e && e.message); return false; }
+}
+
 /* ═══════════════════════════════════════════════════════════
-   CATEGORIES
+   CATEGORIES + SEED DATA
    ═══════════════════════════════════════════════════════════ */
 const CATEGORIES = [
   { key:'clothing', icon:'fa-shirt', color:'#E8730F', title:'Clothing, Fashion & Accessories', short:'Boutiques, shoe shops, handbag shops.', sources:'Clothes, shoes, handbags, belts, jewellery and fabrics.', suppliers:'Clothing wholesalers, importers, local designers and textile manufacturers.' },
@@ -67,18 +105,14 @@ const CATEGORIES = [
   { key:'packaging', icon:'fa-box-open', color:'#B8564F', title:'Packaging & Distribution', short:'Packaging shops, distributors, self-packaging businesses.', sources:'Boxes, labels, bottles, jars, bags, wrapping, takeaway containers.', suppliers:'Packaging manufacturers, printing companies, packaging wholesalers.' }
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.key,c]));
-
 const SIZE_OPTIONS = ['Micro','Small','Medium','Large'];
 const SIZE_COLORS = {Micro:'#0E7C7B',Small:'#1B6CA8',Medium:'#7A4FA3',Large:'#B8564F'};
 const FREQUENCY_OPTIONS = ['Weekly','Monthly','Quarterly','One-off'];
 
-/* ═══════════════════════════════════════════════════════════
-   SUPPLIERS — with size + established fields (per your brief)
-   ═══════════════════════════════════════════════════════════ */
 const SEED_SUPPLIERS = [
   { id:'sup-001', name:'Copperbelt Textiles Wholesale', category:'clothing', location:'Kitwe', verified:true, since:2018, size:'Medium', products:['Fabric rolls','School uniform fabric','Workwear fabric','Dress materials'], moq:'50 metres', delivery:'Kitwe · Ndola · Lusaka', leadTime:'3–5 days', phone:'+260971000101', email:'sales@copperbelttextiles.zm', desc:'Bulk fabric and textile supplier serving boutique, uniform and tailoring businesses across the Copperbelt.' },
   { id:'sup-002', name:'Lusaka Fashion Importers', category:'clothing', location:'Lusaka', verified:true, since:2015, size:'Small', products:['Ladies dresses','Handbags','Shoes','Accessories'], moq:'20 pieces per style', delivery:'Nationwide courier', leadTime:'5–7 days', phone:'+260971000102', email:'orders@lusakafashion.zm', desc:'Importer of ready-to-wear fashion and accessories, focused on small boutique buyers.' },
-  { id:'sup-003', name:'Zambezi Foods Distribution', category:'grocery', location:'Lusaka', verified:true, since:2016, size:'Large', products:['Mealie meal','Rice','Cooking oil','Sugar','Canned foods'], moq:'K3,000 order value', delivery:'Lusaka · Central · Copperbelt', leadTime:'2–3 days', phone:'+260971000103', email:'trade@zambezifoods.zm', desc:'Fast-moving consumer goods distributor serving mini-markets, grocery shops and convenience stores.' },
+  { id:'sup-003', name:'Zambezi Foods Distribution', category:'grocery', location:'Lusaka', verified:true, since:2016, size:'Large', products:['Mealie meal','Rice','Cooking oil','Sugar','Canned foods'], moq:'K3,000 order value', delivery:'Lusaka · Central · Copperbelt', leadTime:'2–3 days', phone:'+260971000103', email:'trade@zambezifoods.zm', desc:'FMCG distributor serving mini-markets, grocery shops and convenience stores.' },
   { id:'sup-004', name:'Chongwe Grain Millers', category:'grocery', location:'Chongwe', verified:true, since:2019, size:'Small', products:['Mealie meal (25kg)','Breakfast meal','Roller meal'], moq:'10 x 25kg bags', delivery:'Lusaka & surrounds', leadTime:'2 days', phone:'+260971000104', email:'info@chongwegrain.zm', desc:'Local grain miller supplying bulk mealie meal directly to grocery retailers and institutions.' },
   { id:'sup-005', name:'Fresh Valley Produce', category:'food', location:'Lusaka', verified:true, since:2017, size:'Small', products:['Tomatoes','Onions','Leafy greens','Carrots','Seasonal vegetables'], moq:'20 crates per order', delivery:'Lusaka metro · daily', leadTime:'1 day', phone:'+260971000105', email:'orders@freshvalley.zm', desc:'Farm-to-restaurant fresh produce supplier, delivering early-morning to restaurants, hotels and caterers.' },
   { id:'sup-006', name:'Prime Meat Butchery & Wholesale', category:'food', location:'Lusaka', verified:true, since:2014, size:'Medium', products:['Beef','Chicken','Goat','Fish','Offal'], moq:'K1,500 order value', delivery:'Lusaka · cold chain', leadTime:'1–2 days', phone:'+260971000106', email:'sales@primemeat.zm', desc:'Cold-chain wholesale meat supplier for restaurants, hotels and catering operators.' },
@@ -102,22 +136,19 @@ const SEED_SUPPLIERS = [
   { id:'sup-024', name:'ZamPack Manufacturers', category:'packaging', location:'Ndola', verified:true, since:2018, size:'Medium', products:['Cartons','Kraft bags','Custom prints','Corrugated boxes'], moq:'500 units per size', delivery:'Nationwide', leadTime:'7–10 days', phone:'+260971000124', email:'sales@zampack.zm', desc:'Packaging manufacturer offering custom-printed cartons and boxes for producers and distributors.' }
 ];
 
-/* ═══════════════════════════════════════════════════════════
-   BUYERS — the demand side (businesses with persistent sourcing needs)
-   ═══════════════════════════════════════════════════════════ */
 const SEED_BUYERS = [
-  { id:'buy-001', name:'Mama Chanda\u2019s Kitchen', category:'food', location:'Lusaka', size:'Small', established:true, since:2019, verified:true, sources:['Fresh vegetables','Chicken','Cooking oil','Packaging containers'], frequency:'Weekly', orderValue:'K1,500–K3,000 per week', desc:'Popular lunch restaurant near Cairo Road sourcing fresh vegetables and chicken weekly for its daily menu.', phone:'+260971200101' },
-  { id:'buy-002', name:'Fashion Forward Boutique', category:'clothing', location:'Kitwe', size:'Micro', established:false, since:2024, verified:true, sources:['Ladies dresses','Handbags','Shoes','Accessories'], frequency:'Monthly', orderValue:'K2,000–K4,000 per month', desc:'New boutique in Kitwe CBD stocking contemporary fashion for young professionals. Looking for reliable monthly suppliers.', phone:'+260971200102' },
-  { id:'buy-003', name:'BuildCo Contractors', category:'construction', location:'Lusaka', size:'Medium', established:true, since:2016, verified:true, sources:['Cement','Roofing sheets','Steel bars','Pipes','Paint'], frequency:'Weekly', orderValue:'K15,000–K40,000 per project', desc:'Small-to-medium construction firm building residential homes across Lusaka. Sources materials per active site.', phone:'+260971200103' },
-  { id:'buy-004', name:'Glow Salon & Spa', category:'beauty', location:'Lusaka', size:'Small', established:true, since:2020, verified:true, sources:['Hair extensions','Shampoo','Relaxers','Nail polish','Skincare'], frequency:'Monthly', orderValue:'K1,200–K2,500 per month', desc:'Full-service beauty salon in Kabulonga needing consistent monthly stock of hair and skin products.', phone:'+260971200104' },
-  { id:'buy-005', name:'Copperbelt Grocers', category:'grocery', location:'Ndola', size:'Medium', established:true, since:2014, verified:true, sources:['Mealie meal','Rice','Cooking oil','Sugar','Canned foods'], frequency:'Weekly', orderValue:'K8,000–K15,000 per week', desc:'Two-branch grocery retailer in Ndola sourcing bulk staples from distributors and millers.', phone:'+260971200105' },
-  { id:'buy-006', name:'Golden Crust Bakery', category:'food', location:'Lusaka', size:'Small', established:true, since:2018, verified:true, sources:['Flour','Sugar','Butter','Yeast','Packaging'], frequency:'Weekly', orderValue:'K3,000–K6,000 per week', desc:'Artisan bakery supplying bread and pastries to local supermarkets and cafés. Needs reliable flour and packaging supply.', phone:'+260971200106' },
-  { id:'buy-007', name:'Kitwe Auto Repairs', category:'auto', location:'Kitwe', size:'Small', established:true, since:2017, verified:true, sources:['Spare parts','Brake pads','Filters','Lubricants'], frequency:'Monthly', orderValue:'K1,000–K2,500 per month', desc:'Independent garage serving Copperbelt fleets. Needs a steady supply of common replacement parts.', phone:'+260971200107' },
-  { id:'buy-008', name:'PrintPoint Stationers', category:'stationery', location:'Lusaka', size:'Micro', established:false, since:2024, verified:true, sources:['Printing paper','Ink','Vinyl','Binding supplies'], frequency:'Monthly', orderValue:'K800–K1,500 per month', desc:'New printing and copy shop near UNZA sourcing paper and consumables on a monthly cycle.', phone:'+260971200108' },
-  { id:'buy-009', name:'ZamBuild Projects', category:'construction', location:'Ndola', size:'Medium', established:true, since:2015, verified:true, sources:['Cement','Aggregate','Steel','Roofing'], frequency:'Weekly', orderValue:'K20,000–K50,000 per project', desc:'Commercial contractor specialising in warehouses and small industrial builds on the Copperbelt.', phone:'+260971200109' },
-  { id:'buy-010', name:'Sparkle Clean Services', category:'cleaning', location:'Lusaka', size:'Small', established:true, since:2019, verified:true, sources:['Detergents','Disinfectants','Gloves','Mops','Tissue'], frequency:'Monthly', orderValue:'K1,500–K3,000 per month', desc:'Office and corporate cleaning company supplying a roster of clients across Lusaka CBD. Needs bulk consumables.', phone:'+260971200110' },
-  { id:'buy-011', name:'Fresh Bites Catering', category:'food', location:'Lusaka', size:'Small', established:true, since:2020, verified:true, sources:['Fresh produce','Meat','Flour','Packaging','Beverages'], frequency:'Weekly', orderValue:'K4,000–K8,000 per event', desc:'Event caterer covering weddings and corporate functions. Buys per event — needs flexible quantities.', phone:'+260971200111' },
-  { id:'buy-012', name:'Lusaka Tech Hub', category:'electronics', location:'Lusaka', size:'Micro', established:false, since:2023, verified:true, sources:['Laptops','Routers','Cabling','Accessories'], frequency:'Quarterly', orderValue:'K3,000–K8,000 per quarter', desc:'Co-working and startup hub setting up offices for member startups. Sources IT equipment quarterly.', phone:'+260971200112' }
+  { id:'buy-001', name:"Mama Chanda's Kitchen", category:'food', location:'Lusaka', size:'Small', established:true, since:2019, verified:true, sources:['Fresh vegetables','Chicken','Cooking oil','Packaging containers'], frequency:'Weekly', orderValue:'K1,500–K3,000 per week', desc:'Popular lunch restaurant near Cairo Road sourcing fresh vegetables and chicken weekly.', phone:'+260971200101' },
+  { id:'buy-002', name:'Fashion Forward Boutique', category:'clothing', location:'Kitwe', size:'Micro', established:false, since:2024, verified:true, sources:['Ladies dresses','Handbags','Shoes','Accessories'], frequency:'Monthly', orderValue:'K2,000–K4,000 per month', desc:'New boutique in Kitwe CBD stocking contemporary fashion for young professionals.', phone:'+260971200102' },
+  { id:'buy-003', name:'BuildCo Contractors', category:'construction', location:'Lusaka', size:'Medium', established:true, since:2016, verified:true, sources:['Cement','Roofing sheets','Steel bars','Pipes','Paint'], frequency:'Weekly', orderValue:'K15,000–K40,000 per project', desc:'Small-to-medium construction firm building residential homes across Lusaka.', phone:'+260971200103' },
+  { id:'buy-004', name:'Glow Salon & Spa', category:'beauty', location:'Lusaka', size:'Small', established:true, since:2020, verified:true, sources:['Hair extensions','Shampoo','Relaxers','Nail polish','Skincare'], frequency:'Monthly', orderValue:'K1,200–K2,500 per month', desc:'Full-service beauty salon in Kabulonga needing consistent monthly stock.', phone:'+260971200104' },
+  { id:'buy-005', name:'Copperbelt Grocers', category:'grocery', location:'Ndola', size:'Medium', established:true, since:2014, verified:true, sources:['Mealie meal','Rice','Cooking oil','Sugar','Canned foods'], frequency:'Weekly', orderValue:'K8,000–K15,000 per week', desc:'Two-branch grocery retailer in Ndola sourcing bulk staples.', phone:'+260971200105' },
+  { id:'buy-006', name:'Golden Crust Bakery', category:'food', location:'Lusaka', size:'Small', established:true, since:2018, verified:true, sources:['Flour','Sugar','Butter','Yeast','Packaging'], frequency:'Weekly', orderValue:'K3,000–K6,000 per week', desc:'Artisan bakery supplying bread and pastries to local supermarkets and cafés.', phone:'+260971200106' },
+  { id:'buy-007', name:'Kitwe Auto Repairs', category:'auto', location:'Kitwe', size:'Small', established:true, since:2017, verified:true, sources:['Spare parts','Brake pads','Filters','Lubricants'], frequency:'Monthly', orderValue:'K1,000–K2,500 per month', desc:'Independent garage serving Copperbelt fleets.', phone:'+260971200107' },
+  { id:'buy-008', name:'PrintPoint Stationers', category:'stationery', location:'Lusaka', size:'Micro', established:false, since:2024, verified:true, sources:['Printing paper','Ink','Vinyl','Binding supplies'], frequency:'Monthly', orderValue:'K800–K1,500 per month', desc:'New printing and copy shop near UNZA sourcing paper and consumables monthly.', phone:'+260971200108' },
+  { id:'buy-009', name:'ZamBuild Projects', category:'construction', location:'Ndola', size:'Medium', established:true, since:2015, verified:true, sources:['Cement','Aggregate','Steel','Roofing'], frequency:'Weekly', orderValue:'K20,000–K50,000 per project', desc:'Commercial contractor specialising in warehouses and small industrial builds.', phone:'+260971200109' },
+  { id:'buy-010', name:'Sparkle Clean Services', category:'cleaning', location:'Lusaka', size:'Small', established:true, since:2019, verified:true, sources:['Detergents','Disinfectants','Gloves','Mops','Tissue'], frequency:'Monthly', orderValue:'K1,500–K3,000 per month', desc:'Office and corporate cleaning company serving clients across Lusaka CBD.', phone:'+260971200110' },
+  { id:'buy-011', name:'Fresh Bites Catering', category:'food', location:'Lusaka', size:'Small', established:true, since:2020, verified:true, sources:['Fresh produce','Meat','Flour','Packaging','Beverages'], frequency:'Weekly', orderValue:'K4,000–K8,000 per event', desc:'Event caterer covering weddings and corporate functions.', phone:'+260971200111' },
+  { id:'buy-012', name:'Lusaka Tech Hub', category:'electronics', location:'Lusaka', size:'Micro', established:false, since:2023, verified:true, sources:['Laptops','Routers','Cabling','Accessories'], frequency:'Quarterly', orderValue:'K3,000–K8,000 per quarter', desc:'Co-working and startup hub setting up offices for member startups.', phone:'+260971200112' }
 ];
 
 const SERVICE_BUSINESSES = [
@@ -186,7 +217,6 @@ const INP_STYLE = {width:'100%',background:'#fff',border:'1.5px solid rgba(10,31
 function TIn({value,onChange,placeholder,type='text'}){
   return <input type={type} value={value||''} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={INP_STYLE}/>;
 }
-
 function SizeBadge({size}){
   if(!size) return null;
   const c = SIZE_COLORS[size]||'#0A1F12';
@@ -194,7 +224,6 @@ function SizeBadge({size}){
     <i className="fas fa-building" style={{fontSize:8}}></i>{size}
   </span>;
 }
-
 function StatusBadge({established,since}){
   if(established===undefined) return null;
   return established
@@ -203,9 +232,9 @@ function StatusBadge({established,since}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   NAV — with both buyer + supplier registration
+   NAV
    ═══════════════════════════════════════════════════════════ */
-function Nav({onOpenBuyerRegister,onOpenSupplierRegister,onOpenRFQ}){
+function Nav({onOpenBuyerRegister,onOpenSupplierRegister}){
   const [open,setOpen]=useState(false);
   return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',position:'sticky',top:0,zIndex:50}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
@@ -242,7 +271,7 @@ function Nav({onOpenBuyerRegister,onOpenSupplierRegister,onOpenRFQ}){
     </div>
     {open&&<div className="lg:hidden" style={{borderTop:'1px solid rgba(255,255,255,.1)',background:'#0A1F12'}}>
       <div style={{padding:'16px 24px'}}>
-        {[['#directory','Browse'],['#two-sides','Buyers & suppliers'],['#services','Service businesses'],['#roles','Supply chain']].map(([h,l])=>
+        {[['#directory','Browse'],['#two-sides','Buyers & suppliers'],['#services','Services'],['#roles','Supply chain']].map(([h,l])=>
           <a key={h} href={h} onClick={()=>setOpen(false)} style={{display:'block',padding:'14px 0',borderBottom:'1px solid rgba(255,255,255,.05)',color:'rgba(255,255,255,.7)',fontSize:14,textDecoration:'none'}}>{l}</a>
         )}
         <div style={{display:'flex',flexDirection:'column',gap:10,marginTop:16}}>
@@ -294,23 +323,19 @@ function Hero({onOpenBuyerRegister,onOpenSupplierRegister,stats}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   TWO SIDES — Demand vs Supply (from the original brief)
+   TWO SIDES
    ═══════════════════════════════════════════════════════════ */
 function TwoSides({onOpenBuyerRegister,onOpenSupplierRegister}){
   return <section id="two-sides" style={{background:'#F5FAF6',scrollMarginTop:80}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
       <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 44px'}}>
         <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Two sides, one market</span>
-        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>
-          Every transaction has a buyer and a seller.
-        </h2>
+        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>Every transaction has a buyer and a seller.</h2>
         <p style={{fontSize:15,lineHeight:1.75,color:'rgba(10,31,18,.65)',margin:0,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
           StartEasy is built for both sides of the table — because a supply relationship only works when the buyer finds the right supplier <em>and</em> the supplier finds the right buyer.
         </p>
       </div>
-
       <div className="grid lg:grid-cols-2 gap-5">
-        {/* DEMAND SIDE */}
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:18,padding:'32px 30px',borderLeft:'4px solid #E8730F',display:'flex',flexDirection:'column',gap:18}}>
           <div style={{display:'flex',alignItems:'center',gap:14}}>
             <span style={{width:56,height:56,borderRadius:14,background:'rgba(232,115,15,.14)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
@@ -321,27 +346,15 @@ function TwoSides({onOpenBuyerRegister,onOpenSupplierRegister}){
               <h3 className="serif" style={{fontSize:'clamp(1.15rem,2.1vw,1.4rem)',fontWeight:800,color:'#0A1F12',lineHeight:1.2,margin:0}}>Businesses looking for suppliers</h3>
             </div>
           </div>
-          <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>
-            They need products at affordable prices, reliable quality, consistent stock and trustworthy suppliers.
-          </p>
+          <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>They need products at affordable prices, reliable quality, consistent stock and trustworthy suppliers.</p>
           <div style={{background:'#F5FAF6',border:'1px dashed rgba(232,115,15,.3)',borderRadius:10,padding:'16px 18px'}}>
             <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:6}}>Their main challenge</div>
-            <p style={{fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.8)',margin:0}}>
-              Finding the right supplier at the right price — especially when they lack established contacts or cannot buy in large quantities.
-            </p>
-          </div>
-          <div style={{background:'#FFF9E6',border:'1px solid #F0E0A0',borderRadius:10,padding:'14px 16px'}}>
-            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:6}}>Register your buyer profile</div>
-            <p style={{fontSize:12.5,lineHeight:1.6,color:'rgba(10,31,18,.7)',margin:0}}>
-              List what you buy regularly. Suppliers can find you, and StartEasy routes matching enquiries to you.
-            </p>
+            <p style={{fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.8)',margin:0}}>Finding the right supplier at the right price — especially when they lack established contacts or cannot buy in large quantities.</p>
           </div>
           <button onClick={onOpenBuyerRegister} style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9,padding:'13px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:13.5,fontWeight:700,marginTop:'auto'}}>
             <i className="fas fa-plus"></i> Register as a buyer
           </button>
         </div>
-
-        {/* SUPPLY SIDE */}
         <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:18,padding:'32px 30px',borderLeft:'4px solid #1B6CA8',display:'flex',flexDirection:'column',gap:18}}>
           <div style={{display:'flex',alignItems:'center',gap:14}}>
             <span style={{width:56,height:56,borderRadius:14,background:'rgba(27,108,168,.14)',color:'#1B6CA8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
@@ -352,27 +365,16 @@ function TwoSides({onOpenBuyerRegister,onOpenSupplierRegister}){
               <h3 className="serif" style={{fontSize:'clamp(1.15rem,2.1vw,1.4rem)',fontWeight:800,color:'#0A1F12',lineHeight:1.2,margin:0}}>Suppliers looking for businesses</h3>
             </div>
           </div>
-          <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>
-            They need customers who buy regularly, order sufficient quantities and pay on time.
-          </p>
+          <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>They need customers who buy regularly, order sufficient quantities and pay on time.</p>
           <div style={{background:'#F5FAF6',border:'1px dashed rgba(27,108,168,.3)',borderRadius:10,padding:'16px 18px'}}>
             <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#1B6CA8',marginBottom:6}}>Their main challenge</div>
-            <p style={{fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.8)',margin:0}}>
-              Finding enough genuine, profitable customers — and turning one-off enquiries into repeat orders.
-            </p>
-          </div>
-          <div style={{background:'#EBF4FB',border:'1px solid rgba(27,108,168,.2)',borderRadius:10,padding:'14px 16px'}}>
-            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#1B6CA8',marginBottom:6}}>Register your supplier profile</div>
-            <p style={{fontSize:12.5,lineHeight:1.6,color:'rgba(10,31,18,.7)',margin:0}}>
-              List what you supply, your MOQ and delivery coverage. Buyers find you and request quotes directly.
-            </p>
+            <p style={{fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.8)',margin:0}}>Finding enough genuine, profitable customers — and turning one-off enquiries into repeat orders.</p>
           </div>
           <button onClick={onOpenSupplierRegister} style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9,padding:'13px 22px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:10,fontSize:13.5,fontWeight:700,marginTop:'auto'}}>
             <i className="fas fa-plus"></i> Register as a supplier
           </button>
         </div>
       </div>
-
       <p className="serif" style={{textAlign:'center',fontSize:'clamp(1.05rem,2vw,1.3rem)',lineHeight:1.5,color:'#0A1F12',fontStyle:'italic',maxWidth:760,margin:'40px auto 0'}}>
         At StartEasy, we're helping small businesses and suppliers access markets and customers in Zambia.
       </p>
@@ -381,7 +383,7 @@ function TwoSides({onOpenBuyerRegister,onOpenSupplierRegister}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DIRECTORY — Suppliers + Buyers tabs
+   DIRECTORY
    ═══════════════════════════════════════════════════════════ */
 function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote,onRegisterBuyer,onRegisterSupplier}){
   const [tab,setTab]=useState('suppliers');
@@ -389,23 +391,19 @@ function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote,o
   const [category,setCategory]=useState('all');
   const [city,setCity]=useState('all');
   const [size,setSize]=useState('all');
-
   const cities = useMemo(()=>{
     const src = tab==='suppliers' ? suppliers : buyers;
     return ['all',...Array.from(new Set(src.map(x=>x.location))).sort()];
   },[tab,suppliers,buyers]);
-
   const filteredSuppliers = useMemo(()=>{
     const q=query.trim().toLowerCase();
     return suppliers.filter(s=>{
       if(category!=='all' && s.category!==category) return false;
       if(city!=='all' && s.location!==city) return false;
       if(!q) return true;
-      const hay=(s.name+' '+s.location+' '+s.desc+' '+s.products.join(' ')+' '+s.moq).toLowerCase();
-      return hay.includes(q);
+      return (s.name+' '+s.location+' '+s.desc+' '+s.products.join(' ')+' '+s.moq).toLowerCase().includes(q);
     });
   },[suppliers,query,category,city]);
-
   const filteredBuyers = useMemo(()=>{
     const q=query.trim().toLowerCase();
     return buyers.filter(b=>{
@@ -413,15 +411,12 @@ function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote,o
       if(city!=='all' && b.location!==city) return false;
       if(size!=='all' && b.size!==size) return false;
       if(!q) return true;
-      const hay=(b.name+' '+b.location+' '+b.desc+' '+b.sources.join(' ')).toLowerCase();
-      return hay.includes(q);
+      return (b.name+' '+b.location+' '+b.desc+' '+b.sources.join(' ')).toLowerCase().includes(q);
     });
   },[buyers,query,category,city,size]);
-
   const reset=()=>{setQuery('');setCategory('all');setCity('all');setSize('all');};
   const list = tab==='suppliers' ? filteredSuppliers : filteredBuyers;
   const activeCount = (category!=='all'?1:0)+(city!=='all'?1:0)+(tab==='buyers'&&size!=='all'?1:0);
-
   return <section id="directory" style={{background:'#F5FAF6',scrollMarginTop:80}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(48px,6vw,72px) 24px'}}>
       <div style={{marginBottom:24}}>
@@ -429,14 +424,7 @@ function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote,o
         <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 12px'}}>
           {list.length} {tab==='suppliers'?'supplier':'buyer'}{list.length===1?'':'s'} ready to {tab==='suppliers'?'quote':'connect'}
         </h2>
-        <p style={{fontSize:14,lineHeight:1.65,color:'rgba(10,31,18,.6)',margin:0,maxWidth:640}}>
-          {tab==='suppliers'
-            ? 'Search by what you need, then open a supplier profile to see products, MOQ, delivery coverage and lead time.'
-            : 'Browse registered buyers by what they source, their order frequency and business size — then connect directly.'}
-        </p>
       </div>
-
-      {/* TABS */}
       <div style={{display:'flex',gap:6,marginBottom:16,background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:6}}>
         <button onClick={()=>{setTab('suppliers');setCategory('all');setSize('all');}}
           style={{flex:1,padding:'12px 16px',background:tab==='suppliers'?'#0A1F12':'transparent',color:tab==='suppliers'?'#fff':'rgba(10,31,18,.7)',border:'none',borderRadius:8,fontSize:13.5,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}>
@@ -447,8 +435,6 @@ function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote,o
           <i className="fas fa-cart-shopping"></i> Buyers ({buyers.length})
         </button>
       </div>
-
-      {/* SEARCH + FILTERS */}
       <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'16px 18px',marginBottom:16}}>
         <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
           <div style={{position:'relative',flex:'1 1 260px',minWidth:0}}>
@@ -459,7 +445,6 @@ function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote,o
           </div>
           {(activeCount>0||query) && <button onClick={reset} style={{padding:'12px 16px',background:'none',border:'none',color:'#B8564F',fontSize:12.5,fontWeight:700,textDecoration:'underline'}}>Clear</button>}
         </div>
-
         <div style={{display:'grid',gap:12,marginTop:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
           <div>
             <label style={{display:'block',fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:6}}>Category</label>
@@ -483,12 +468,9 @@ function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote,o
           </div>}
         </div>
       </div>
-
-      {/* RESULTS */}
       {list.length===0 ? <div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:14,padding:'64px 24px',textAlign:'center'}}>
         <i className="fas fa-magnifying-glass" style={{fontSize:32,color:'rgba(10,31,18,.2)',marginBottom:14,display:'block'}}></i>
         <h4 className="serif" style={{fontSize:19,fontWeight:700,color:'#0A1F12',margin:'0 0 8px'}}>No {tab==='suppliers'?'suppliers':'buyers'} match your search</h4>
-        <p style={{fontSize:13.5,color:'rgba(10,31,18,.55)',margin:'0 0 20px'}}>Try a different keyword, or register your own profile.</p>
         <button onClick={tab==='suppliers'?onRegisterSupplier:onRegisterBuyer} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700}}>
           <i className="fas fa-plus"></i> Register as a {tab==='suppliers'?'supplier':'buyer'}
         </button>
@@ -501,9 +483,6 @@ function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote,o
   </section>;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SUPPLIER CARD — with size + status badges
-   ═══════════════════════════════════════════════════════════ */
 function SupplierCard({supplier,onOpen,onQuote}){
   const cat=CAT_MAP[supplier.category]||{color:'#E8730F',icon:'fa-building',title:'Supplier'};
   const established = supplier.since && (new Date().getFullYear() - supplier.since) >= 2;
@@ -512,9 +491,7 @@ function SupplierCard({supplier,onOpen,onQuote}){
     onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';}}>
     <div style={{padding:'20px 20px 18px',display:'flex',flexDirection:'column',gap:12,flex:1}}>
       <div style={{display:'flex',alignItems:'flex-start',gap:12}}>
-        <span style={{width:44,height:44,borderRadius:11,background:cat.color+'16',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>
-          <i className={`fas ${cat.icon}`}></i>
-        </span>
+        <span style={{width:44,height:44,borderRadius:11,background:cat.color+'16',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:3,flexWrap:'wrap'}}>
             <h3 style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15.5,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{supplier.name}</h3>
@@ -525,41 +502,27 @@ function SupplierCard({supplier,onOpen,onQuote}){
           </div>
         </div>
       </div>
-
       <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
         <SizeBadge size={supplier.size}/>
         <StatusBadge established={established} since={supplier.since}/>
       </div>
-
-      <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',lineHeight:1.55,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-        {supplier.desc}
-      </p>
-
+      <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',lineHeight:1.55,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{supplier.desc}</p>
       <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-        {supplier.products.slice(0,3).map((p,i)=>(
-          <span key={i} style={{fontSize:11,color:'rgba(10,31,18,.7)',background:'rgba(10,31,18,.05)',border:'1px solid rgba(10,31,18,.08)',padding:'3px 9px',borderRadius:99,fontWeight:600}}>{p}</span>
-        ))}
+        {supplier.products.slice(0,3).map((p,i)=><span key={i} style={{fontSize:11,color:'rgba(10,31,18,.7)',background:'rgba(10,31,18,.05)',border:'1px solid rgba(10,31,18,.08)',padding:'3px 9px',borderRadius:99,fontWeight:600}}>{p}</span>)}
         {supplier.products.length>3 && <span style={{fontSize:11,color:'rgba(10,31,18,.5)',padding:'3px 4px'}}>+{supplier.products.length-3}</span>}
       </div>
-
       <div style={{display:'flex',gap:14,paddingTop:10,borderTop:'1px dashed rgba(10,31,18,.08)',fontSize:11,color:'rgba(10,31,18,.55)'}}>
         <span><i className="fas fa-box" style={{marginRight:4,color:cat.color}}></i><strong>MOQ:</strong> {supplier.moq}</span>
         <span><i className="fas fa-clock" style={{marginRight:4,color:cat.color}}></i>{supplier.leadTime}</span>
       </div>
     </div>
-
     <div style={{display:'flex',gap:8,padding:'0 20px 18px'}}>
       <button onClick={onOpen} style={{flex:1,padding:'10px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#0A1F12'}}>View profile</button>
-      <button onClick={onQuote} style={{flex:1,padding:'10px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#fff'}}>
-        <i className="fas fa-file-invoice" style={{marginRight:5}}></i>Request quote
-      </button>
+      <button onClick={onQuote} style={{flex:1,padding:'10px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#fff'}}><i className="fas fa-file-invoice" style={{marginRight:5}}></i>Request quote</button>
     </div>
   </div>;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BUYER CARD — the demand side
-   ═══════════════════════════════════════════════════════════ */
 function BuyerCard({buyer,onOpen}){
   const cat=CAT_MAP[buyer.category]||{color:'#E8730F',icon:'fa-cart-shopping',title:'Buyer'};
   return <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:0,overflow:'hidden',display:'flex',flexDirection:'column',borderTop:`3px solid #E8730F`,transition:'all .2s'}}
@@ -567,44 +530,32 @@ function BuyerCard({buyer,onOpen}){
     onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';}}>
     <div style={{padding:'20px 20px 18px',display:'flex',flexDirection:'column',gap:12,flex:1}}>
       <div style={{display:'flex',alignItems:'flex-start',gap:12}}>
-        <span style={{width:44,height:44,borderRadius:11,background:'rgba(232,115,15,.14)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>
-          <i className="fas fa-cart-shopping"></i>
-        </span>
+        <span style={{width:44,height:44,borderRadius:11,background:'rgba(232,115,15,.14)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className="fas fa-cart-shopping"></i></span>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:3,flexWrap:'wrap'}}>
             <h3 style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15.5,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{buyer.name}</h3>
-            {buyer.verified && <i className="fas fa-circle-check" style={{color:'#1E7B3C',fontSize:12}} title="Verified buyer"></i>}
+            {buyer.verified && <i className="fas fa-circle-check" style={{color:'#1E7B3C',fontSize:12}}></i>}
           </div>
           <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)',display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
             <i className="fas fa-location-dot" style={{fontSize:10}}></i> {buyer.location}
-            <span style={{opacity:.4}}>·</span>
-            <span>{cat.title}</span>
+            <span style={{opacity:.4}}>·</span><span>{cat.title}</span>
           </div>
         </div>
       </div>
-
       <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
         <SizeBadge size={buyer.size}/>
         <StatusBadge established={buyer.established} since={buyer.since}/>
       </div>
-
-      <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',lineHeight:1.55,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-        {buyer.desc}
-      </p>
-
+      <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',lineHeight:1.55,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{buyer.desc}</p>
       <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-        {buyer.sources.slice(0,3).map((p,i)=>(
-          <span key={i} style={{fontSize:11,color:'rgba(138,104,40,.9)',background:'rgba(232,115,15,.08)',border:'1px solid rgba(232,115,15,.2)',padding:'3px 9px',borderRadius:99,fontWeight:600}}>{p}</span>
-        ))}
+        {buyer.sources.slice(0,3).map((p,i)=><span key={i} style={{fontSize:11,color:'rgba(138,104,40,.9)',background:'rgba(232,115,15,.08)',border:'1px solid rgba(232,115,15,.2)',padding:'3px 9px',borderRadius:99,fontWeight:600}}>{p}</span>)}
         {buyer.sources.length>3 && <span style={{fontSize:11,color:'rgba(10,31,18,.5)',padding:'3px 4px'}}>+{buyer.sources.length-3}</span>}
       </div>
-
       <div style={{display:'flex',gap:14,paddingTop:10,borderTop:'1px dashed rgba(10,31,18,.08)',fontSize:11,color:'rgba(10,31,18,.55)',flexWrap:'wrap'}}>
         <span><i className="fas fa-repeat" style={{marginRight:4,color:'#E8730F'}}></i>{buyer.frequency}</span>
         <span><i className="fas fa-coins" style={{marginRight:4,color:'#E8730F'}}></i>{buyer.orderValue}</span>
       </div>
     </div>
-
     <div style={{padding:'0 20px 18px'}}>
       <button onClick={onOpen} style={{width:'100%',padding:'10px',background:'linear-gradient(135deg,#E8730F,#F5A623)',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#fff'}}>
         <i className="fas fa-eye" style={{marginRight:5}}></i>View buyer profile
@@ -614,7 +565,7 @@ function BuyerCard({buyer,onOpen}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SUPPLIER PROFILE
+   PROFILES
    ═══════════════════════════════════════════════════════════ */
 function SupplierProfile({supplier,onClose,onQuote}){
   if(!supplier) return null;
@@ -622,9 +573,7 @@ function SupplierProfile({supplier,onClose,onQuote}){
   const established = supplier.since && (new Date().getFullYear() - supplier.since) >= 2;
   return <Modal open={!!supplier} onClose={onClose} eyebrow={`${cat.title} · ${supplier.location}`} maxWidth="48rem">
     <div style={{display:'flex',alignItems:'flex-start',gap:14,marginBottom:16}}>
-      <span style={{width:64,height:64,borderRadius:15,background:cat.color+'16',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}>
-        <i className={`fas ${cat.icon}`}></i>
-      </span>
+      <span style={{width:64,height:64,borderRadius:15,background:cat.color+'16',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
       <div style={{flex:1,minWidth:0}}>
         <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',marginBottom:4}}>
           <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:0}}>{supplier.name}</h2>
@@ -640,68 +589,45 @@ function SupplierProfile({supplier,onClose,onQuote}){
         </div>
       </div>
     </div>
-
     <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',marginBottom:20}}>{supplier.desc}</p>
-
     <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',marginBottom:20}}>
       <InfoBox label="Minimum order" value={supplier.moq} icon="fa-box" color={cat.color}/>
       <InfoBox label="Lead time" value={supplier.leadTime} icon="fa-clock" color={cat.color}/>
       <InfoBox label="Delivery coverage" value={supplier.delivery} icon="fa-truck" color={cat.color}/>
     </div>
-
     <div style={{marginBottom:20}}>
       <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Products & services</div>
       <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-        {supplier.products.map((p,i)=>(
-          <span key={i} style={{fontSize:12.5,color:'rgba(10,31,18,.75)',background:'#fff',border:'1px solid rgba(10,31,18,.1)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>
-        ))}
+        {supplier.products.map((p,i)=><span key={i} style={{fontSize:12.5,color:'rgba(10,31,18,.75)',background:'#fff',border:'1px solid rgba(10,31,18,.1)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>)}
       </div>
     </div>
-
     <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',marginBottom:20}}>
       <a href={`tel:${supplier.phone}`} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 14px',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:9,textDecoration:'none',color:'#0A1F12',fontSize:13,fontWeight:600}}>
         <span style={{width:32,height:32,borderRadius:8,background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className="fas fa-phone"></i></span>
-        <div style={{minWidth:0}}>
-          <div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>Phone</div>
-          <div style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{supplier.phone}</div>
-        </div>
+        <div style={{minWidth:0}}><div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>Phone</div><div style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{supplier.phone}</div></div>
       </a>
       <a href={`mailto:${supplier.email}`} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 14px',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:9,textDecoration:'none',color:'#0A1F12',fontSize:13,fontWeight:600}}>
         <span style={{width:32,height:32,borderRadius:8,background:'rgba(27,108,168,.12)',color:'#1B6CA8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className="fas fa-envelope"></i></span>
-        <div style={{minWidth:0}}>
-          <div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>Email</div>
-          <div style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{supplier.email}</div>
-        </div>
+        <div style={{minWidth:0}}><div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>Email</div><div style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{supplier.email}</div></div>
       </a>
     </div>
-
     <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
-      <button onClick={()=>onQuote(supplier)} style={{flex:'1 1 200px',padding:'14px 22px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}>
-        <i className="fas fa-file-invoice"></i> Request a quote from {supplier.name.split(' ')[0]}
-      </button>
-      <a href={waUrl(`Hello StartEasy — I saw ${supplier.name} on the directory and would like to enquire.`)} target="_blank" rel="noopener noreferrer"
-        style={{flex:'1 1 180px',padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}>
-        <i className="fab fa-whatsapp"></i> Chat on WhatsApp
-      </a>
+      <button onClick={()=>onQuote(supplier)} style={{flex:'1 1 200px',padding:'14px 22px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}><i className="fas fa-file-invoice"></i> Request a quote</button>
+      <a href={waUrl(`Hello StartEasy — I saw ${supplier.name} on the directory and would like to enquire.`)} target="_blank" rel="noopener noreferrer" style={{flex:'1 1 180px',padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}><i className="fab fa-whatsapp"></i> Chat on WhatsApp</a>
     </div>
   </Modal>;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BUYER PROFILE
-   ═══════════════════════════════════════════════════════════ */
 function BuyerProfile({buyer,onClose}){
   if(!buyer) return null;
   const cat=CAT_MAP[buyer.category]||{color:'#E8730F',icon:'fa-cart-shopping',title:'Buyer'};
   return <Modal open={!!buyer} onClose={onClose} eyebrow={`Buyer · ${buyer.location}`} maxWidth="46rem">
     <div style={{display:'flex',alignItems:'flex-start',gap:14,marginBottom:16}}>
-      <span style={{width:64,height:64,borderRadius:15,background:'rgba(232,115,15,.14)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}>
-        <i className="fas fa-cart-shopping"></i>
-      </span>
+      <span style={{width:64,height:64,borderRadius:15,background:'rgba(232,115,15,.14)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}><i className="fas fa-cart-shopping"></i></span>
       <div style={{flex:1,minWidth:0}}>
         <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',marginBottom:4}}>
           <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:0}}>{buyer.name}</h2>
-          {buyer.verified && <span style={{display:'inline-flex',alignItems:'center',gap:5,background:'rgba(30,123,60,.12)',color:'#0F5C2A',padding:'3px 9px',borderRadius:99,fontSize:10.5,fontWeight:800,letterSpacing:'.06em',textTransform:'uppercase'}}><i className="fas fa-circle-check" style={{fontSize:9}}></i>Verified buyer</span>}
+          {buyer.verified && <span style={{display:'inline-flex',alignItems:'center',gap:5,background:'rgba(30,123,60,.12)',color:'#0F5C2A',padding:'3px 9px',borderRadius:99,fontSize:10.5,fontWeight:800,letterSpacing:'.06em',textTransform:'uppercase'}}><i className="fas fa-circle-check" style={{fontSize:9}}></i>Verified</span>}
         </div>
         <div style={{fontSize:13,color:'rgba(10,31,18,.6)',display:'flex',flexWrap:'wrap',gap:14,marginBottom:8}}>
           <span><i className="fas fa-location-dot" style={{marginRight:5}}></i>{buyer.location}</span>
@@ -713,42 +639,29 @@ function BuyerProfile({buyer,onClose}){
         </div>
       </div>
     </div>
-
     <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',marginBottom:20}}>{buyer.desc}</p>
-
     <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',marginBottom:20}}>
       <InfoBox label="Purchase frequency" value={buyer.frequency} icon="fa-repeat" color="#E8730F"/>
       <InfoBox label="Typical order value" value={buyer.orderValue} icon="fa-coins" color="#E8730F"/>
       <InfoBox label="Business size" value={buyer.size} icon="fa-building" color="#E8730F"/>
     </div>
-
     <div style={{marginBottom:20}}>
       <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>What they source regularly</div>
       <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-        {buyer.sources.map((p,i)=>(
-          <span key={i} style={{fontSize:12.5,color:'rgba(138,104,40,.9)',background:'#fff',border:'1px solid rgba(232,115,15,.25)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>
-        ))}
+        {buyer.sources.map((p,i)=><span key={i} style={{fontSize:12.5,color:'rgba(138,104,40,.9)',background:'#fff',border:'1px solid rgba(232,115,15,.25)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>)}
       </div>
     </div>
-
     <div style={{background:'#FFF9E6',border:'1px solid #F0E0A0',borderRadius:10,padding:'14px 16px',marginBottom:20}}>
       <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
         <i className="fas fa-info-circle" style={{color:'#E8730F',fontSize:15,marginTop:2,flexShrink:0}}></i>
         <p style={{fontSize:12.5,lineHeight:1.65,color:'rgba(10,31,18,.75)',margin:0}}>
-          <strong>Suppliers:</strong> Contact this buyer via StartEasy. We verify both sides before connecting and coordinate the introduction.
+          <strong>Suppliers:</strong> Contact this buyer via StartEasy. We verify both sides before connecting.
         </p>
       </div>
     </div>
-
     <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
-      <a href={waUrl(`Hello StartEasy — I'm a supplier and I'd like to be introduced to ${buyer.name} on the directory.`)} target="_blank" rel="noopener noreferrer"
-        style={{flex:'1 1 240px',padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}>
-        <i className="fab fa-whatsapp"></i> Request an introduction
-      </a>
-      <a href={'mailto:'+CONTACT_EMAIL+'?subject='+encodeURIComponent('Introduction request — '+buyer.name)}
-        style={{flex:'1 1 180px',padding:'14px 22px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:14,fontWeight:600,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}>
-        <i className="fas fa-envelope"></i> Email StartEasy
-      </a>
+      <a href={waUrl(`Hello StartEasy — I'm a supplier and I'd like to be introduced to ${buyer.name} on the directory.`)} target="_blank" rel="noopener noreferrer" style={{flex:'1 1 240px',padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}><i className="fab fa-whatsapp"></i> Request an introduction</a>
+      <a href={'mailto:'+CONTACT_EMAIL+'?subject='+encodeURIComponent('Introduction request — '+buyer.name)} style={{flex:'1 1 180px',padding:'14px 22px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:14,fontWeight:600,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}><i className="fas fa-envelope"></i> Email StartEasy</a>
     </div>
   </Modal>;
 }
@@ -764,7 +677,7 @@ function InfoBox({label,value,icon,color}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RFQ MODAL
+   MODALS — RFQ, Register Supplier, Register Buyer
    ═══════════════════════════════════════════════════════════ */
 function RFQModal({open,onClose,preselected}){
   const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deadline:'',budget:'',notes:''});
@@ -826,7 +739,7 @@ function RFQModal({open,onClose,preselected}){
     </div>
     <div style={{marginTop:14}}>
       <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Product / service needed *</label>
-      <TIn value={form.product} onChange={v=>setForm({...form,product:v})} placeholder="e.g. 50 bags of cement, fabric rolls, hair extensions…"/>
+      <TIn value={form.product} onChange={v=>setForm({...form,product:v})} placeholder="e.g. 50 bags of cement, fabric rolls…"/>
     </div>
     <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Quantity</label><TIn value={form.quantity} onChange={v=>setForm({...form,quantity:v})} placeholder="e.g. 100 units"/></div>
@@ -839,17 +752,12 @@ function RFQModal({open,onClose,preselected}){
     </div>
     {err && <div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5,display:'flex',gap:8,alignItems:'center'}}><i className="fas fa-circle-exclamation"></i> {err}</div>}
     <div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:20}}>
-      <button onClick={submit} style={{flex:'1 1 240px',padding:'14px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}>
-        <i className="fab fa-whatsapp"></i> Send to StartEasy
-      </button>
+      <button onClick={submit} style={{flex:'1 1 240px',padding:'14px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}><i className="fab fa-whatsapp"></i> Send to StartEasy</button>
       <button onClick={onClose} style={{padding:'14px 22px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13.5,fontWeight:600,color:'#0A1F12'}}>Cancel</button>
     </div>
   </Modal>;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SUPPLIER REGISTER MODAL — with size + status fields
-   ═══════════════════════════════════════════════════════════ */
 function RegisterSupplierModal({open,onClose,onRegistered}){
   const [form,setForm]=useState({name:'',owner:'',category:'',location:'',size:'Small',since:'',products:'',moq:'',delivery:'',leadTime:'',phone:'',email:'',desc:''});
   const [err,setErr]=useState('');
@@ -890,7 +798,7 @@ function RegisterSupplierModal({open,onClose,onRegistered}){
     {sent ? <div style={{textAlign:'center',padding:'20px 0'}}>
       <div style={{width:64,height:64,borderRadius:'50%',background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,margin:'0 auto 16px'}}><i className="fas fa-check"></i></div>
       <h3 className="serif" style={{fontSize:'clamp(1.3rem,3vw,1.6rem)',color:'#0A1F12',margin:'0 0 10px'}}>Application received</h3>
-      <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(10,31,18,.7)',maxWidth:440,margin:'0 auto 20px'}}>Your listing has been added as <strong style={{color:'#8A6828'}}>pending verification</strong>. A StartEasy officer will review within 48 hours.</p>
+      <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(10,31,18,.7)',maxWidth:440,margin:'0 auto 20px'}}>Your listing has been submitted as <strong style={{color:'#8A6828'}}>pending verification</strong>. A StartEasy officer will review within 48 hours.</p>
       <button onClick={onClose} style={{padding:'12px 24px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700}}>Done</button>
     </div> : <>
       <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Become a listed supplier</h2>
@@ -943,9 +851,6 @@ function RegisterSupplierModal({open,onClose,onRegistered}){
   </Modal>;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BUYER REGISTER MODAL — the demand side profile
-   ═══════════════════════════════════════════════════════════ */
 function RegisterBuyerModal({open,onClose,onRegistered}){
   const [form,setForm]=useState({name:'',owner:'',category:'',location:'',size:'Small',since:'',sources:'',frequency:'Monthly',orderValue:'',phone:'',email:'',desc:''});
   const [err,setErr]=useState('');
@@ -956,7 +861,7 @@ function RegisterBuyerModal({open,onClose,onRegistered}){
     if(!form.name.trim()) return setErr('Business name is required.');
     if(!form.category) return setErr('Please choose a category.');
     if(!form.location.trim()) return setErr('Location is required.');
-    if(!form.sources.trim()) return setErr('Please list the products you buy regularly.');
+    if(!form.sources.trim()) return setErr('Please list what you buy regularly.');
     if(!form.phone.trim()) return setErr('Phone number is required.');
     const sinceYear = form.since ? parseInt(form.since) : new Date().getFullYear();
     const established = (new Date().getFullYear() - sinceYear) >= 2;
@@ -986,17 +891,15 @@ function RegisterBuyerModal({open,onClose,onRegistered}){
     {sent ? <div style={{textAlign:'center',padding:'20px 0'}}>
       <div style={{width:64,height:64,borderRadius:'50%',background:'rgba(232,115,15,.12)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,margin:'0 auto 16px'}}><i className="fas fa-check"></i></div>
       <h3 className="serif" style={{fontSize:'clamp(1.3rem,3vw,1.6rem)',color:'#0A1F12',margin:'0 0 10px'}}>Buyer profile added</h3>
-      <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(10,31,18,.7)',maxWidth:440,margin:'0 auto 20px'}}>Your profile is now visible as <strong style={{color:'#8A6828'}}>pending verification</strong>. Suppliers whose products match what you source will reach out through StartEasy within 48 hours.</p>
+      <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(10,31,18,.7)',maxWidth:440,margin:'0 auto 20px'}}>Your profile is now <strong style={{color:'#8A6828'}}>pending verification</strong>. Matching suppliers will reach out through StartEasy within 48 hours.</p>
       <button onClick={onClose} style={{padding:'12px 24px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700}}>Done</button>
     </div> : <>
-      <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Register as a business looking for suppliers</h2>
-      <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 20px'}}>
-        Tell us what you buy regularly. Suppliers can find you, and StartEasy routes matching supplier enquiries to your WhatsApp.
-      </p>
+      <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Register as a buyer</h2>
+      <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 20px'}}>Tell us what you buy regularly. Suppliers can find you, and StartEasy routes matching enquiries to your WhatsApp.</p>
       <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))'}}>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name *</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})} placeholder="e.g. Mama Chanda's Kitchen"/></div>
-        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Owner / contact person</label><TIn value={form.owner} onChange={v=>setForm({...form,owner:v})} placeholder="Your full name"/></div>
-        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category you buy from *</label>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Contact person</label><TIn value={form.owner} onChange={v=>setForm({...form,owner:v})} placeholder="Your full name"/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category *</label>
           <select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
             <option value="">Choose a category</option>
             {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
@@ -1020,7 +923,7 @@ function RegisterBuyerModal({open,onClose,onRegistered}){
         <TIn value={form.sources} onChange={v=>setForm({...form,sources:v})} placeholder="e.g. Fresh vegetables, chicken, cooking oil, packaging"/>
       </div>
       <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
-        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>How often do you buy?</label>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>How often?</label>
           <select value={form.frequency} onChange={e=>setForm({...form,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
             {FREQUENCY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
           </select>
@@ -1033,16 +936,13 @@ function RegisterBuyerModal({open,onClose,onRegistered}){
       </div>
       <div style={{marginTop:14}}>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>About your business</label>
-        <textarea value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} rows={3} placeholder="What your business does, who you serve, any speciality…" style={{...INP_STYLE,resize:'vertical',lineHeight:1.55,minHeight:80}}/>
+        <textarea value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} rows={3} placeholder="What your business does, who you serve…" style={{...INP_STYLE,resize:'vertical',lineHeight:1.55,minHeight:80}}/>
       </div>
       {err && <div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5,display:'flex',gap:8,alignItems:'center'}}><i className="fas fa-circle-exclamation"></i> {err}</div>}
       <div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:20}}>
         <button onClick={submit} style={{flex:'1 1 240px',padding:'14px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}><i className="fas fa-paper-plane"></i> Submit buyer profile</button>
         <button onClick={onClose} style={{padding:'14px 22px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13.5,fontWeight:600,color:'#0A1F12'}}>Cancel</button>
       </div>
-      <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',lineHeight:1.6,marginTop:14,fontStyle:'italic'}}>
-        We verify buyers before sharing their contact. Suppliers reach you through StartEasy first, protecting your privacy.
-      </p>
     </>}
   </Modal>;
 }
@@ -1055,19 +955,13 @@ function ServiceBusinesses(){
     <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
       <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 44px'}}>
         <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Service businesses count too</span>
-        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#fff'}}>
-          Businesses that sell <em style={{fontStyle:'italic',color:'#F5A623'}}>services</em> need suppliers too.
-        </h2>
+        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#fff'}}>Businesses that sell <em style={{fontStyle:'italic',color:'#F5A623'}}>services</em> need suppliers too.</h2>
       </div>
       <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:16,overflow:'hidden'}}>
         {SERVICE_BUSINESSES.map((s,i)=>(
           <div key={i} style={{borderBottom:i<SERVICE_BUSINESSES.length-1?'1px solid rgba(255,255,255,.06)':'none',padding:'14px 22px',display:'flex',alignItems:'center',gap:14}}>
-            <span style={{width:34,height:34,borderRadius:9,background:'rgba(245,166,35,.16)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
-              <i className={`fas ${s.icon}`}></i>
-            </span>
-            <div style={{flex:'1 1 200px',minWidth:0}}>
-              <div style={{fontSize:13.5,fontWeight:700,color:'#fff',lineHeight:1.4}}>{s.category}</div>
-            </div>
+            <span style={{width:34,height:34,borderRadius:9,background:'rgba(245,166,35,.16)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${s.icon}`}></i></span>
+            <div style={{flex:'1 1 200px',minWidth:0}}><div style={{fontSize:13.5,fontWeight:700,color:'#fff',lineHeight:1.4}}>{s.category}</div></div>
             <div style={{flex:'2 1 300px',fontSize:12.5,color:'rgba(255,255,255,.65)',lineHeight:1.55}}>{s.need}</div>
           </div>
         ))}
@@ -1081,19 +975,13 @@ function Roles(){
     <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
       <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 44px'}}>
         <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14,letterSpacing:'.24em'}}>The three roles</span>
-        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>
-          Three different roles in the supply chain.
-        </h2>
-        <p style={{fontSize:15,lineHeight:1.75,color:'rgba(10,31,18,.65)',margin:0,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
-          Understanding these roles lets StartEasy make the right match — whether a business needs a manufacturer, a bulk wholesaler, or a shop down the road.
-        </p>
+        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>Three different roles in the supply chain.</h2>
+        <p style={{fontSize:15,lineHeight:1.75,color:'rgba(10,31,18,.65)',margin:0,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>Understanding these roles lets StartEasy make the right match — whether a business needs a manufacturer, a bulk wholesaler, or a shop down the road.</p>
       </div>
       <div className="grid sm:grid-cols-3 gap-4">
         {ROLES.map(r=>(
           <div key={r.key} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'28px 24px',borderTop:`4px solid ${r.color}`,display:'flex',flexDirection:'column',gap:14}}>
-            <span style={{width:52,height:52,borderRadius:13,background:r.color+'16',color:r.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21,flexShrink:0}}>
-              <i className={`fas ${r.icon}`}></i>
-            </span>
+            <span style={{width:52,height:52,borderRadius:13,background:r.color+'16',color:r.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21,flexShrink:0}}><i className={`fas ${r.icon}`}></i></span>
             <h3 className="serif" style={{fontSize:18,fontWeight:800,color:'#0A1F12',lineHeight:1.25,margin:0}}>{r.title}</h3>
             <p style={{fontSize:13.5,color:'rgba(10,31,18,.72)',lineHeight:1.65,margin:0}}>{r.desc}</p>
             <div style={{background:'#F5FAF6',border:'1px dashed rgba(10,31,18,.12)',borderRadius:9,padding:'12px 14px',marginTop:'auto'}}>
@@ -1112,16 +1000,10 @@ function ClosingCTA({onOpenBuyer,onOpenSupplier}){
     <div style={{maxWidth:920,margin:'0 auto',padding:'clamp(56px,8vw,90px) 24px',textAlign:'center',position:'relative',zIndex:1}}>
       <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>Every connection starts with one message</span>
       <h2 className="serif" style={{fontSize:'clamp(1.9rem,4.4vw,2.9rem)',lineHeight:1.15,marginBottom:22,color:'#fff',maxWidth:'36rem',marginLeft:'auto',marginRight:'auto'}}>Buy better. Sell more.</h2>
-      <p style={{fontSize:15.5,lineHeight:1.75,color:'rgba(255,255,255,.7)',maxWidth:'40rem',marginLeft:'auto',marginRight:'auto',marginBottom:32}}>
-        Tell us what you need to buy, or what you're able to supply. We take it from there — matching, introduction, and follow-up.
-      </p>
+      <p style={{fontSize:15.5,lineHeight:1.75,color:'rgba(255,255,255,.7)',maxWidth:'40rem',marginLeft:'auto',marginRight:'auto',marginBottom:32}}>Tell us what you need to buy, or what you're able to supply. We take it from there — matching, introduction, and follow-up.</p>
       <div style={{display:'flex',flexWrap:'wrap',gap:14,justifyContent:'center'}}>
-        <button onClick={onOpenBuyer} style={{padding:'15px 30px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:14.5,fontWeight:700,display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 14px 38px -12px rgba(232,115,15,.55)'}}>
-          <i className="fas fa-cart-shopping"></i> I need a supplier
-        </button>
-        <button onClick={onOpenSupplier} style={{padding:'15px 30px',background:'rgba(255,255,255,.08)',color:'#fff',border:'1px solid rgba(255,255,255,.25)',borderRadius:11,fontSize:14.5,fontWeight:700,display:'inline-flex',alignItems:'center',gap:10}}>
-          <i className="fas fa-truck-fast"></i> I'm a supplier
-        </button>
+        <button onClick={onOpenBuyer} style={{padding:'15px 30px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:11,fontSize:14.5,fontWeight:700,display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 14px 38px -12px rgba(232,115,15,.55)'}}><i className="fas fa-cart-shopping"></i> I need a supplier</button>
+        <button onClick={onOpenSupplier} style={{padding:'15px 30px',background:'rgba(255,255,255,.08)',color:'#fff',border:'1px solid rgba(255,255,255,.25)',borderRadius:11,fontSize:14.5,fontWeight:700,display:'inline-flex',alignItems:'center',gap:10}}><i className="fas fa-truck-fast"></i> I'm a supplier</button>
       </div>
       <div style={{marginTop:32,display:'flex',flexWrap:'wrap',justifyContent:'center',gap:20,fontSize:12,color:'rgba(255,255,255,.5)'}}>
         <span style={{display:'inline-flex',alignItems:'center',gap:8}}><i className="fab fa-whatsapp" style={{color:'#25D366',fontSize:14}}></i> +260 762499581</span>
@@ -1166,9 +1048,12 @@ function Footer(){
       </div>
       <div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
         <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.75,maxWidth:900}}>
-          <strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is a directory and matchmaking service. We help businesses discover suitable suppliers, compare offers and request quotations — but any transaction, contract, delivery or payment is between the buyer and the supplier. We are not a party to that transaction, and we do not guarantee supplier performance. Categories and matches are based on information provided and verified where possible; requirements and supplier availability change.
+          <strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is a directory and matchmaking service. We help businesses discover suitable suppliers, compare offers and request quotations — but any transaction, contract, delivery or payment is between the buyer and the supplier. We are not a party to that transaction, and we do not guarantee supplier performance.
         </p>
-        <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:'20px 0 0'}}>© {new Date().getFullYear()} StartEasy Zambia · Businesses &amp; Suppliers Directory.</p>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap',marginTop:20}}>
+          <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia · Businesses &amp; Suppliers Directory.</p>
+          <a href="#seed" style={{fontSize:10.5,color:'rgba(255,255,255,.2)',textDecoration:'none',letterSpacing:'.14em',textTransform:'uppercase',fontWeight:700}}><i className="fas fa-lock" style={{marginRight:6}}></i>Admin</a>
+        </div>
       </div>
     </div>
   </footer>;
@@ -1183,11 +1068,13 @@ function FloatingWA(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   APP
+   PUBLIC DIRECTORY VIEW
    ═══════════════════════════════════════════════════════════ */
-function App(){
+function DirectoryView(){
   const [localSuppliers,setLocalSuppliers]=useState(()=>readLS('se_directory_suppliers',[]));
   const [localBuyers,setLocalBuyers]=useState(()=>readLS('se_directory_buyers',[]));
+  const [remoteSuppliers,setRemoteSuppliers]=useState(null);
+  const [remoteBuyers,setRemoteBuyers]=useState(null);
   const [supplierProfile,setSupplierProfile]=useState(null);
   const [buyerProfile,setBuyerProfile]=useState(null);
   const [rfqOpen,setRfqOpen]=useState(false);
@@ -1197,49 +1084,241 @@ function App(){
 
   useEffect(()=>{window.scrollTo(0,0);},[]);
 
-  const allSuppliers=useMemo(()=>[...SEED_SUPPLIERS,...localSuppliers],[localSuppliers]);
-  const allBuyers=useMemo(()=>[...SEED_BUYERS,...localBuyers],[localBuyers]);
-  const stats=useMemo(()=>({
-    suppliers:allSuppliers.length,
-    buyers:allBuyers.length,
-    categories:CATEGORIES.length
-  }),[allSuppliers,allBuyers]);
+  useEffect(()=>{
+    let cancelled = false;
+    const attempt = () => {
+      if (!firebaseReady) { setTimeout(attempt, 400); return; }
+      fsLoadDirectory().then(res => {
+        if (cancelled) return;
+        if (res && (res.suppliers.length || res.buyers.length)) {
+          setRemoteSuppliers(res.suppliers);
+          setRemoteBuyers(res.buyers);
+        }
+      });
+    };
+    attempt();
+    return () => { cancelled = true; };
+  },[]);
+
+  const baseSuppliers = remoteSuppliers !== null ? remoteSuppliers : SEED_SUPPLIERS;
+  const baseBuyers = remoteBuyers !== null ? remoteBuyers : SEED_BUYERS;
+  const allSuppliers=useMemo(()=>[...baseSuppliers,...localSuppliers],[baseSuppliers,localSuppliers]);
+  const allBuyers=useMemo(()=>[...baseBuyers,...localBuyers],[baseBuyers,localBuyers]);
+  const stats=useMemo(()=>({suppliers:allSuppliers.length,buyers:allBuyers.length,categories:CATEGORIES.length}),[allSuppliers,allBuyers]);
 
   const openRFQ=(supplier)=>{setRfqPreselected(supplier||null);setRfqOpen(true);};
   const closeRFQ=()=>{setRfqOpen(false);setRfqPreselected(null);};
 
-  const handleSupplierRegistered=(s)=>{const next=[...localSuppliers,s];setLocalSuppliers(next);writeLS('se_directory_suppliers',next);};
-  const handleBuyerRegistered=(b)=>{const next=[...localBuyers,b];setLocalBuyers(next);writeLS('se_directory_buyers',next);};
+  const handleSupplierRegistered=(s)=>{
+    const next=[...localSuppliers,s];setLocalSuppliers(next);writeLS('se_directory_suppliers',next);
+    fsSubmitLead({kind:'supplier',name:s.name,category:s.category,location:s.location,phone:s.phone,email:s.email,size:s.size,since:s.since,products:s.products,moq:s.moq,delivery:s.delivery,leadTime:s.leadTime,desc:s.desc});
+  };
+  const handleBuyerRegistered=(b)=>{
+    const next=[...localBuyers,b];setLocalBuyers(next);writeLS('se_directory_buyers',next);
+    fsSubmitLead({kind:'buyer',name:b.name,category:b.category,location:b.location,phone:b.phone,email:b.email,size:b.size,since:b.since,sources:b.sources,frequency:b.frequency,orderValue:b.orderValue,desc:b.desc});
+  };
 
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
-    <Nav
-      onOpenBuyerRegister={()=>setBuyerRegOpen(true)}
-      onOpenSupplierRegister={()=>setSupplierRegOpen(true)}
-      onOpenRFQ={()=>openRFQ(null)}/>
+    <Nav onOpenBuyerRegister={()=>setBuyerRegOpen(true)} onOpenSupplierRegister={()=>setSupplierRegOpen(true)}/>
     <main style={{flex:1}}>
       <Hero onOpenBuyerRegister={()=>setBuyerRegOpen(true)} onOpenSupplierRegister={()=>setSupplierRegOpen(true)} stats={stats}/>
       <TwoSides onOpenBuyerRegister={()=>setBuyerRegOpen(true)} onOpenSupplierRegister={()=>setSupplierRegOpen(true)}/>
-      <Directory
-        suppliers={allSuppliers}
-        buyers={allBuyers}
-        onOpenSupplier={setSupplierProfile}
-        onOpenBuyer={setBuyerProfile}
-        onRequestQuote={openRFQ}
-        onRegisterBuyer={()=>setBuyerRegOpen(true)}
-        onRegisterSupplier={()=>setSupplierRegOpen(true)}/>
+      <Directory suppliers={allSuppliers} buyers={allBuyers} onOpenSupplier={setSupplierProfile} onOpenBuyer={setBuyerProfile} onRequestQuote={openRFQ} onRegisterBuyer={()=>setBuyerRegOpen(true)} onRegisterSupplier={()=>setSupplierRegOpen(true)}/>
       <ServiceBusinesses/>
       <Roles/>
       <ClosingCTA onOpenBuyer={()=>setBuyerRegOpen(true)} onOpenSupplier={()=>setSupplierRegOpen(true)}/>
     </main>
     <Footer/>
     <FloatingWA/>
-
     <SupplierProfile supplier={supplierProfile} onClose={()=>setSupplierProfile(null)} onQuote={(s)=>{setSupplierProfile(null);openRFQ(s);}}/>
     <BuyerProfile buyer={buyerProfile} onClose={()=>setBuyerProfile(null)}/>
     <RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected}/>
     <RegisterSupplierModal open={supplierRegOpen} onClose={()=>setSupplierRegOpen(false)} onRegistered={handleSupplierRegistered}/>
     <RegisterBuyerModal open={buyerRegOpen} onClose={()=>setBuyerRegOpen(false)} onRegistered={handleBuyerRegistered}/>
   </div>;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EMBEDDED SEED VIEW (access at #seed)
+   ═══════════════════════════════════════════════════════════ */
+function SeedView(){
+  const [user,setUser]=useState(null);
+  const [isAdmin,setIsAdmin]=useState(false);
+  const [checking,setChecking]=useState(true);
+  const [email,setEmail]=useState('');
+  const [pw,setPw]=useState('');
+  const [signingIn,setSigningIn]=useState(false);
+  const [err,setErr]=useState('');
+  const [status,setStatus]=useState(null); // {kind:'ok'|'err'|'info', msg}
+  const [seeding,setSeeding]=useState(false);
+  const [counts,setCounts]=useState({sup:null,buy:null});
+
+  const loadCounts=async()=>{
+    if(!firebaseReady) return;
+    try{
+      const [s,b]=await Promise.all([db.collection('se_suppliers').get(),db.collection('se_buyers').get()]);
+      setCounts({sup:s.size,buy:b.size});
+    }catch(e){ setCounts({sup:'?',buy:'?'}); }
+  };
+
+  useEffect(()=>{
+    if(!firebaseReady) return;
+    const unsub=auth.onAuthStateChanged(async u=>{
+      setUser(u); setIsAdmin(false);
+      if(u && u.email && u.providerData && u.providerData.length){
+        try{
+          const snap=await db.collection('se_admins').doc(u.uid).get();
+          setIsAdmin(snap.exists);
+          if(snap.exists) loadCounts();
+        }catch(e){ console.warn('[SE] admin check:',e.message); }
+      }
+      setChecking(false);
+    });
+    return unsub;
+  },[]);
+
+  const handleSignIn=async()=>{
+    setErr('');
+    if(!email.trim()||!pw){setErr('Enter email and password.');return;}
+    setSigningIn(true);
+    try{ await auth.signInWithEmailAndPassword(email.trim(),pw); }
+    catch(e){
+      const code=e.code||'';
+      if(code==='auth/wrong-password'||code==='auth/invalid-credential') setErr('Incorrect email or password.');
+      else if(code==='auth/user-not-found') setErr('No account with that email.');
+      else if(code==='auth/invalid-email') setErr('That email address is not valid.');
+      else if(code==='auth/operation-not-allowed') setErr('Email/password sign-in is not enabled in Firebase Console.');
+      else if(code==='auth/unauthorized-domain') setErr('This domain is not authorized in Firebase Console.');
+      else setErr('Sign-in failed: '+(e.message||code));
+    } finally{ setSigningIn(false); }
+  };
+
+  const handleSignOut=async()=>{ await auth.signOut(); setEmail('');setPw('');setStatus(null); };
+
+  const handleSeed=async()=>{
+    if(!isAdmin){setStatus({kind:'err',msg:'Only admins can seed.'});return;}
+    setSeeding(true);
+    setStatus({kind:'info',msg:'Seeding '+(SEED_SUPPLIERS.length+SEED_BUYERS.length)+' documents…'});
+    try{
+      const batch=db.batch();
+      SEED_SUPPLIERS.forEach(s=>batch.set(db.collection('se_suppliers').doc(s.id),s));
+      SEED_BUYERS.forEach(b=>batch.set(db.collection('se_buyers').doc(b.id),b));
+      await batch.commit();
+      setStatus({kind:'ok',msg:'✅ Done. '+SEED_SUPPLIERS.length+' suppliers and '+SEED_BUYERS.length+' buyers written to Firestore.'});
+      loadCounts();
+    }catch(e){
+      setStatus({kind:'err',msg:'Seeding failed: '+(e.code||e.message)});
+    } finally{ setSeeding(false); }
+  };
+
+  const statusBg = status
+    ? status.kind==='ok' ? {bg:'rgba(30,123,60,.1)',border:'1px solid rgba(30,123,60,.3)',color:'#0F5C2A'}
+      : status.kind==='err' ? {bg:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',color:'#7C2318'}
+      : {bg:'rgba(27,108,168,.08)',border:'1px solid rgba(27,108,168,.25)',color:'#1B4C7A'}
+    : null;
+
+  return <div style={{minHeight:'100vh',background:'#F5FAF6',padding:'32px 20px'}}>
+    <div style={{maxWidth:560,margin:'0 auto',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:14,padding:'28px',boxShadow:'0 20px 50px rgba(0,0,0,.06)'}}>
+      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:18}}>
+        <Mark size={42}/>
+        <div>
+          <div style={{fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(10,31,18,.4)'}}>StartEasy Directory</div>
+          <div className="serif" style={{fontSize:20,fontWeight:800,color:'#0A1F12'}}>Seed panel</div>
+        </div>
+      </div>
+
+      {!firebaseReady && <div style={{background:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',borderRadius:9,padding:'12px 14px',fontSize:13,color:'#7C2318',marginBottom:16}}>
+        Firebase did not initialize. Check the console for errors.
+      </div>}
+
+      {checking ? <div style={{textAlign:'center',padding:'24px 0',color:'rgba(10,31,18,.5)',fontSize:13}}>
+        <i className="fas fa-spinner fa-spin" style={{marginRight:8}}></i> Checking auth…
+      </div> : !user || !user.email ? <>
+        <p style={{fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 18px'}}>
+          Sign in with your Firebase admin account (the same one used for the StartEasy admin portal).
+        </p>
+        <label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Admin email</label>
+        <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="admin@starteasyzambia.com"
+          style={{...INP_STYLE,marginBottom:12}} autoComplete="username"/>
+        <label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password</label>
+        <input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="••••••••"
+          style={{...INP_STYLE,marginBottom:14}} autoComplete="current-password" onKeyDown={e=>{if(e.key==='Enter')handleSignIn();}}/>
+        <button onClick={handleSignIn} disabled={signingIn}
+          style={{width:'100%',padding:'13px',background:signingIn?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:signingIn?'wait':'pointer',marginBottom:10}}>
+          {signingIn ? <><i className="fas fa-spinner fa-spin" style={{marginRight:8}}></i>Signing in…</> : 'Sign in'}
+        </button>
+        <a href="#" onClick={e=>{e.preventDefault();window.location.hash='';window.location.reload();}}
+          style={{display:'block',textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.5)',textDecoration:'none',padding:'8px'}}>← Back to directory</a>
+        {err && <div style={{background:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',borderRadius:9,padding:'10px 14px',fontSize:12.5,color:'#7C2318',marginTop:12}}>{err}</div>}
+      </> : !isAdmin ? <>
+        <div style={{background:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',borderRadius:9,padding:'12px 14px',fontSize:13,color:'#7C2318',marginBottom:16}}>
+          Signed in as <strong>{user.email}</strong> but this account is not in <code>se_admins</code>.
+        </div>
+        <p style={{fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>
+          Add a document to Firestore → <code>se_admins</code> with document ID = <code style={{background:'rgba(10,31,18,.06)',padding:'2px 6px',borderRadius:4}}>{user.uid}</code>, then sign out and back in.
+        </p>
+        <button onClick={handleSignOut} style={{width:'100%',padding:'12px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700,marginBottom:10}}>Sign out</button>
+        <a href="#" onClick={e=>{e.preventDefault();window.location.hash='';window.location.reload();}}
+          style={{display:'block',textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.5)',textDecoration:'none',padding:'8px'}}>← Back to directory</a>
+      </> : <>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
+          <i className="fas fa-circle-check" style={{color:'#1E7B3C'}}></i>
+          <span style={{fontSize:13,color:'rgba(10,31,18,.7)'}}>Signed in as <strong>{user.email}</strong></span>
+        </div>
+
+        <div style={{background:'#F5FAF6',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:'14px 16px',marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}>
+            <span style={{color:'rgba(10,31,18,.6)'}}>Suppliers in seed payload</span>
+            <strong>{SEED_SUPPLIERS.length}</strong>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}>
+            <span style={{color:'rgba(10,31,18,.6)'}}>Buyers in seed payload</span>
+            <strong>{SEED_BUYERS.length}</strong>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}>
+            <span style={{color:'rgba(10,31,18,.6)'}}>Currently in se_suppliers</span>
+            <strong>{counts.sup===null?'—':counts.sup}</strong>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0'}}>
+            <span style={{color:'rgba(10,31,18,.6)'}}>Currently in se_buyers</span>
+            <strong>{counts.buy===null?'—':counts.buy}</strong>
+          </div>
+        </div>
+
+        <p style={{fontSize:12.5,lineHeight:1.6,color:'rgba(10,31,18,.65)',margin:'0 0 14px'}}>
+          Clicking <strong>Seed directory</strong> writes all {SEED_SUPPLIERS.length} suppliers and {SEED_BUYERS.length} buyers to Firestore. Safe to run again — uses <code>set()</code> by ID, so no duplicates.
+        </p>
+
+        <button onClick={handleSeed} disabled={seeding}
+          style={{width:'100%',padding:'13px',background:seeding?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:seeding?'wait':'pointer',marginBottom:10}}>
+          {seeding ? <><i className="fas fa-spinner fa-spin" style={{marginRight:8}}></i>Seeding…</> : <><i className="fas fa-database" style={{marginRight:8}}></i>Seed directory</>}
+        </button>
+        <button onClick={handleSignOut} style={{width:'100%',padding:'11px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700,marginBottom:10}}>Sign out</button>
+        <a href="#" onClick={e=>{e.preventDefault();window.location.hash='';window.location.reload();}}
+          style={{display:'block',textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.5)',textDecoration:'none',padding:'8px'}}>← Back to directory</a>
+
+        {status && <div style={{background:statusBg.bg,border:statusBg.border,color:statusBg.color,borderRadius:9,padding:'12px 14px',fontSize:12.5,lineHeight:1.6,marginTop:16}}>{status.msg}</div>}
+      </>}
+    </div>
+
+    <p style={{textAlign:'center',fontSize:11,color:'rgba(10,31,18,.35)',margin:'20px auto 0',maxWidth:400,lineHeight:1.6}}>
+      This page is only reachable at <code>#seed</code>. Non-admins who land here will be turned away.
+    </p>
+  </div>;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   APP — hash router between directory and seed
+   ═══════════════════════════════════════════════════════════ */
+function App(){
+  const [hash,setHash]=useState(()=>window.location.hash);
+  useEffect(()=>{
+    const onHash=()=>setHash(window.location.hash);
+    window.addEventListener('hashchange',onHash);
+    return ()=>window.removeEventListener('hashchange',onHash);
+  },[]);
+  if(hash==='#seed') return <SeedView/>;
+  return <DirectoryView/>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
