@@ -130,26 +130,32 @@ async function saveQuote(quote){
   try{await db.collection('se_quotes').add(quote);return true;}
   catch(e){console.warn('[SE] save quote:',e&&e.message);return false;}
 }
+
 async function authSignUp(form){
   if(!firebaseReady) throw new Error('Firebase not ready');
-  const cred=await auth.createUserWithEmailAndPassword(form.email,form.password);
-  const profile={
-    name:form.name,businessName:form.businessName,phone:form.phone,email:form.email,
-    role:form.role,category:form.category,location:form.location,status:'pending',createdAt:Date.now()
-  };
-  if(form.role==='supplier'){
-    profile.products=splitCSV(form.products);
-    profile.moq=form.moq||'Contact supplier';
-    profile.delivery=form.delivery||'Contact supplier';
-    profile.leadTime=form.leadTime||'Contact supplier';
+  let cred=null;
+  try{
+    cred=await auth.createUserWithEmailAndPassword(form.email,form.password);
+    const profile={
+      name:form.name,businessName:form.businessName,phone:form.phone,email:form.email,
+      role:form.role,category:form.category,location:form.location,status:'pending',createdAt:Date.now()
+    };
+    if(form.role==='supplier'){
+      profile.products=splitCSV(form.products);
+      profile.moq=form.moq||'Contact supplier';
+      profile.delivery=form.delivery||'Contact supplier';
+      profile.leadTime=form.leadTime||'Contact supplier';
+    }
+    if(form.role==='buyer'){
+      profile.sources=splitCSV(form.sources);
+      profile.frequency=form.frequency||'Monthly';
+      profile.orderValue=form.orderValue||'Contact buyer';
+    }
+    await db.collection('se_users').doc(cred.user.uid).set(profile);
+    return { email: form.email };
+  } finally {
+    try { await auth.signOut(); } catch(_){}
   }
-  if(form.role==='buyer'){
-    profile.sources=splitCSV(form.sources);
-    profile.frequency=form.frequency||'Monthly';
-    profile.orderValue=form.orderValue||'Contact buyer';
-  }
-  await db.collection('se_users').doc(cred.user.uid).set(profile);
-  return cred.user;
 }
 async function authSignIn(email,password){
   if(!firebaseReady) throw new Error('Firebase not ready');
@@ -290,7 +296,7 @@ function PasswordInput({value,onChange,placeholder='••••••••',au
   </div>;
 }
 
-/* ═══════════════════ AUTH MODAL (with forgot-password) ═══════════════════ */
+/* ═══════════════════ AUTH MODAL ═══════════════════ */
 function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuthSuccess}){
   const [mode,setMode]=useState(initialMode);
   const [role,setRole]=useState(initialRole);
@@ -298,6 +304,8 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
   const [submitting,setSubmitting]=useState(false);
   const [resetSent,setResetSent]=useState(false);
   const [resetEmail,setResetEmail]=useState('');
+  const [signupSuccess,setSignupSuccess]=useState(false);
+  const [registeredEmail,setRegisteredEmail]=useState('');
   const [form,setForm]=useState({name:'',businessName:'',email:'',phone:'',password:'',category:'',location:'',products:'',moq:'',delivery:'',leadTime:'',sources:'',frequency:'Monthly',orderValue:''});
 
   useEffect(()=>{
@@ -307,6 +315,8 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
       setErr('');
       setResetSent(false);
       setResetEmail('');
+      setSignupSuccess(false);
+      setRegisteredEmail('');
     }
   },[open,initialMode,initialRole]);
 
@@ -341,7 +351,7 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
       setSubmitting(true);
       try{
         await authSignIn(form.email.trim(),form.password);
-        onAuthSuccess && onAuthSuccess('dashboard');
+        onAuthSuccess && onAuthSuccess('dashboard', signupSuccess);
       }catch(e){
         setErr(authErrorMessage(e));
       }finally{setSubmitting(false);}
@@ -359,14 +369,17 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     if(role==='buyer' && !form.sources.trim()) return setErr('List what you buy regularly.');
     setSubmitting(true);
     try{
-      await authSignUp({...form,role});
-      onAuthSuccess && onAuthSuccess('signup');
+      const result = await authSignUp({...form,role});
+      setRegisteredEmail(result.email);
+      setSignupSuccess(true);
+      setMode('signin');
+      setForm(f=>({...f,email:result.email,password:''}));
+      setRole(role);
     }catch(e){
       setErr(authErrorMessage(e));
     }finally{setSubmitting(false);}
   };
 
-  // Reset-sent confirmation view
   if(mode==='forgot' && resetSent){
     return <Modal open={open} onClose={onClose} eyebrow="Reset link sent" maxWidth="40rem">
       <div style={{textAlign:'center',padding:'12px 0'}}>
@@ -390,7 +403,6 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     </Modal>;
   }
 
-  // Forgot-password email entry view
   if(mode==='forgot'){
     return <Modal open={open} onClose={onClose} eyebrow="Reset password" maxWidth="40rem">
       <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Forgot your password?</h2>
@@ -411,12 +423,21 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     </Modal>;
   }
 
-  // Signup / Signin
-  return <Modal open={open} onClose={onClose} eyebrow={mode==='signin'?'Welcome back':'Create your account'} maxWidth="40rem">
-    <div style={{display:'flex',gap:6,marginBottom:18,background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:5}}>
+  const eyebrowText = signupSuccess ? 'Sign in to continue' : (mode==='signin' ? 'Welcome back' : 'Create your account');
+
+  return <Modal open={open} onClose={onClose} eyebrow={eyebrowText} maxWidth="40rem">
+    {!signupSuccess && <div style={{display:'flex',gap:6,marginBottom:18,background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:5}}>
       <button onClick={()=>{setMode('signup');setErr('');}} style={{flex:1,padding:'10px',border:'none',borderRadius:8,fontSize:13,fontWeight:700,background:mode==='signup'?'#0A1F12':'transparent',color:mode==='signup'?'#fff':'rgba(10,31,18,.65)'}}>Create account</button>
       <button onClick={()=>{setMode('signin');setErr('');}} style={{flex:1,padding:'10px',border:'none',borderRadius:8,fontSize:13,fontWeight:700,background:mode==='signin'?'#0A1F12':'transparent',color:mode==='signin'?'#fff':'rgba(10,31,18,.65)'}}>Sign in</button>
-    </div>
+    </div>}
+
+    {signupSuccess && <div style={{background:'rgba(30,123,60,.06)',border:'1px solid rgba(30,123,60,.3)',borderRadius:10,padding:'14px 16px',marginBottom:16,display:'flex',gap:12,alignItems:'flex-start'}}>
+      <i className="fas fa-circle-check" style={{color:'#1E7B3C',fontSize:18,marginTop:1,flexShrink:0}}></i>
+      <div>
+        <div style={{fontSize:13.5,fontWeight:800,color:'#0F5C2A',marginBottom:4}}>Account created successfully</div>
+        <div style={{fontSize:12.5,lineHeight:1.55,color:'rgba(10,31,18,.75)'}}>For security, sign in with your email and password to continue to your dashboard.</div>
+      </div>
+    </div>}
 
     {mode==='signup'&&<>
       <div style={{marginBottom:16}}>
@@ -475,17 +496,20 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     </>}
 
     {mode==='signin'&&<>
-      <p style={{fontSize:13.5,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>Sign in to reach your dashboard.</p>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>{signupSuccess?'Enter your password to sign in.':'Sign in to reach your dashboard.'}</p>
       <div style={{marginBottom:14}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label><TIn type="email" value={form.email} onChange={v=>setForm({...form,email:v})}/></div>
       <div>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
           <label style={{fontSize:11.5,fontWeight:700,color:'#0A1F12'}}>Password</label>
-          <button onClick={()=>{setMode('forgot');setErr('');}} style={{background:'none',border:'none',color:'#E8730F',fontSize:11.5,fontWeight:700,cursor:'pointer',textDecoration:'underline',padding:0,fontFamily:'inherit'}}>
+          {!signupSuccess && <button onClick={()=>{setMode('forgot');setErr('');}} style={{background:'none',border:'none',color:'#E8730F',fontSize:11.5,fontWeight:700,cursor:'pointer',textDecoration:'underline',padding:0,fontFamily:'inherit'}}>
             Forgot password?
-          </button>
+          </button>}
         </div>
         <PasswordInput value={form.password} onChange={v=>setForm({...form,password:v})} autoComplete="current-password"/>
       </div>
+      {signupSuccess && <button onClick={()=>{setSignupSuccess(false);setMode('signup');setErr('');}} style={{width:'100%',marginTop:14,padding:'10px',background:'transparent',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:12.5,fontWeight:600,color:'#0A1F12',cursor:'pointer',fontFamily:'inherit'}}>
+        ← Use a different email
+      </button>}
     </>}
 
     {err&&<div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5}}><i className="fas fa-circle-exclamation" style={{marginRight:6}}></i>{err}</div>}
@@ -493,10 +517,11 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     <button onClick={submit} disabled={submitting} style={{width:'100%',marginTop:18,padding:'14px',background:submitting?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>
       {submitting?<><i className="fas fa-spinner fa-spin" style={{marginRight:8}}></i>Please wait…</>:(mode==='signin'?'Sign in':'Create my account')}
     </button>
-    <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',marginTop:12,textAlign:'center',fontStyle:'italic'}}>
+
+    {!signupSuccess && <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',marginTop:12,textAlign:'center',fontStyle:'italic'}}>
       {mode==='signin'?'New here?':'Have an account?'}{' '}
       <button onClick={()=>{setMode(mode==='signin'?'signup':'signin');setErr('');}} style={{background:'none',border:'none',color:'#E8730F',fontWeight:700,cursor:'pointer',textDecoration:'underline',fontSize:'inherit',padding:0,fontFamily:'inherit'}}>{mode==='signin'?'Create account':'Sign in'}</button>
-    </p>
+    </p>}
   </Modal>;
 }
 
@@ -610,7 +635,7 @@ function Footer(){
   </footer>;
 }
 
-/* ═══════════════════ LANDING (hero + CTA only) ═══════════════════ */
+/* ═══════════════════ LANDING ═══════════════════ */
 function Landing({onSignup,onSignin}){
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
     <Nav user={null} onSignIn={onSignin} onSignUp={onSignup}/>
@@ -636,7 +661,7 @@ function SignInPrompt({onSignIn,onSignUp,onHome}){
   </div>;
 }
 
-/* ═══════════════════ WELCOME (post-signup) ═══════════════════ */
+/* ═══════════════════ WELCOME ═══════════════════ */
 function Welcome({user,onDashboard,onBrowse,onSignedOut}){
   const [profile,setProfile]=useState(null);
   const [loading,setLoading]=useState(true);
@@ -1406,9 +1431,14 @@ function App(){
 
   useEffect(()=>{
     if(!firebaseReady){setAuthLoading(false);return;}
-    const unsub=auth.onAuthStateChanged(u=>{setUser(u&&u.email?u:null);setAuthLoading(false);});
+    const unsub=auth.onAuthStateChanged(u=>{
+      setAuthLoading(false);
+      if(authOpen) return;
+      setUser(u&&u.email?u:null);
+    });
     return unsub;
-  },[]);
+  },[authOpen]);
+
   useEffect(()=>{
     const onHash=()=>setHash(window.location.hash);
     window.addEventListener('hashchange',onHash);
@@ -1417,11 +1447,11 @@ function App(){
 
   const openAuth=(mode,role)=>{setAuthMode(mode||'signup');setAuthRole(role||'buyer');setAuthOpen(true);};
   const closeAuth=()=>setAuthOpen(false);
-  const handleAuthSuccess=(target='dashboard')=>{
+  const handleAuthSuccess=(target='dashboard', fromSignup=false)=>{
     closeAuth();
-    if(target==='signup'){setJustSignedUp(true);return;}
-    if(target==='browse'){window.location.hash='#browse';return;}
-    window.location.hash='#dashboard';
+    if(auth.currentUser && auth.currentUser.email) setUser(auth.currentUser);
+    if(fromSignup){ setJustSignedUp(true); return; }
+    window.location.hash = target==='browse' ? '#browse' : '#dashboard';
   };
   const goHome=()=>{window.location.hash='';};
   const goDashboard=()=>{window.location.hash='#dashboard';};
@@ -1430,30 +1460,31 @@ function App(){
   const closeRFQ=()=>{setRfqOpen(false);setRfqPreselected(null);};
   const signedOut=()=>{setUser(null);setJustSignedUp(false);goHome();};
 
-  if(justSignedUp && user) return <Welcome user={user} onDashboard={()=>{setJustSignedUp(false);window.location.hash='#dashboard';}} onBrowse={()=>{setJustSignedUp(false);window.location.hash='#browse';}} onSignedOut={()=>{setJustSignedUp(false);setUser(null);window.location.hash='';}}/>;
-
   if(hash==='#seed') return <SeedView/>;
 
-  if(authLoading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+  const authModal = <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={handleAuthSuccess}/>;
 
-  if(hash==='#dashboard' || hash==='#browse'){
-    if(!user) return <>
-      <SignInPrompt onSignIn={()=>openAuth('signin','buyer')} onSignUp={()=>openAuth('signup','buyer')} onHome={goHome}/>
-      <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={handleAuthSuccess}/>
-    </>;
-    if(hash==='#dashboard') return <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
-    return <>
-      <Browse user={user} onRequestQuote={openRFQ} onDashboard={goDashboard} onSignedOut={signedOut}/>
-      <RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} user={user} onSaved={()=>{}}/>
-    </>;
+  let mainView;
+
+  if(authLoading){
+    mainView = <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+  } else if(justSignedUp && user){
+    mainView = <Welcome user={user} onDashboard={()=>{setJustSignedUp(false);window.location.hash='#dashboard';}} onBrowse={()=>{setJustSignedUp(false);window.location.hash='#browse';}} onSignedOut={()=>{setJustSignedUp(false);setUser(null);window.location.hash='';}}/>;
+  } else if(hash==='#dashboard' || hash==='#browse'){
+    if(!user){
+      mainView = <SignInPrompt onSignIn={()=>openAuth('signin','buyer')} onSignUp={()=>openAuth('signup','buyer')} onHome={goHome}/>;
+    } else if(hash==='#dashboard'){
+      mainView = <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
+    } else {
+      mainView = <><Browse user={user} onRequestQuote={openRFQ} onDashboard={goDashboard} onSignedOut={signedOut}/><RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} user={user} onSaved={()=>{}}/></>;
+    }
+  } else if(!user){
+    mainView = <Landing onSignup={(role)=>openAuth('signup',role||'buyer')} onSignin={()=>openAuth('signin','buyer')}/>;
+  } else {
+    mainView = <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
   }
 
-  if(!user) return <>
-    <Landing onSignup={(role)=>openAuth('signup',role||'buyer')} onSignin={()=>openAuth('signin','buyer')}/>
-    <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={handleAuthSuccess}/>
-  </>;
-
-  return <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
+  return <>{mainView}{authModal}</>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
