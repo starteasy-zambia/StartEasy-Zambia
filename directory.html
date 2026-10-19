@@ -55,6 +55,32 @@ input:focus,select:focus,textarea:focus{outline:none}
 .profile-ring svg{transform:rotate(-90deg)}
 .profile-ring .inner{position:absolute;inset:6px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#0A1F12}
 .form-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+
+/* ── Navigation platform button & mobile menu ── */
+.nav-platform-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;background:linear-gradient(135deg,#E8730F,#F5A623);color:#fff;border-radius:9px;font-size:12px;font-weight:800;text-decoration:none;box-shadow:0 8px 18px -8px rgba(232,115,15,.6);border:1px solid rgba(255,255,255,.18);white-space:nowrap;transition:transform .15s,box-shadow .15s;flex-shrink:0}
+.nav-platform-btn:hover{transform:translateY(-1px);box-shadow:0 12px 24px -8px rgba(232,115,15,.8);color:#fff}
+.nav-platform-short{display:none}
+.nav-desktop-actions{display:flex;align-items:center;gap:8px}
+.nav-hamburger{display:none;width:40px;height:40px;border-radius:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;align-items:center;justify-content:center;font-size:15px;cursor:pointer;flex-shrink:0}
+.nav-mobile-menu{background:#08170D;border-top:1px solid rgba(245,166,35,.15);padding:12px 16px 18px;display:flex;flex-direction:column;gap:6px;box-shadow:0 20px 30px -12px rgba(0,0,0,.5)}
+.nav-mobile-link{display:flex;align-items:center;gap:12px;padding:13px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:#fff;font-size:13.5px;font-weight:700;text-decoration:none;font-family:inherit;cursor:pointer;text-align:left;width:100%}
+.nav-mobile-link i{width:18px;text-align:center;color:#F5A623;font-size:13px}
+.nav-mobile-platform{background:linear-gradient(135deg,rgba(232,115,15,.18),rgba(245,166,35,.12));border-color:rgba(232,115,15,.4);color:#FFD9A6;justify-content:space-between}
+.nav-mobile-platform i{color:#F5A623}
+.nav-mobile-cta{background:linear-gradient(135deg,#E8730F,#F5A623);border-color:transparent;color:#fff;justify-content:center}
+.nav-mobile-cta i{color:#fff}
+.nav-mobile-signout{color:#FFB4A8;border-color:rgba(184,86,79,.35);background:rgba(184,86,79,.12)}
+.nav-mobile-signout i{color:#FFB4A8}
+.footer-platform-btn{transition:transform .15s,box-shadow .15s}
+.footer-platform-btn:hover{transform:translateY(-2px);box-shadow:0 18px 38px -10px rgba(232,115,15,.85)!important}
+@media(max-width:900px){
+  .nav-desktop-actions{display:none!important}
+  .nav-hamburger{display:inline-flex}
+}
+@media(max-width:560px){
+  .nav-platform-full{display:none}
+  .nav-platform-short{display:inline}
+}
 @media (max-width:640px){.hide-sm{display:none!important}}
 </style>
 </head>
@@ -143,7 +169,9 @@ async function authSignUp(form){
     cred=await auth.createUserWithEmailAndPassword(form.email,form.password);
     const profile={
       name:form.name,businessName:form.businessName,phone:form.phone,email:form.email,
-      role:form.role,category:form.category,location:form.location,status:'pending',createdAt:Date.now()
+      role:form.role,category:form.category,location:form.location,
+      country:form.country||'Zambia',scope:form.scope||'local',
+      status:'pending',createdAt:Date.now()
     };
     if(form.role==='supplier'){
       profile.products=splitCSV(form.products);
@@ -185,6 +213,12 @@ const CATEGORIES = [
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.key,c]));
 const FREQUENCY_OPTIONS = ['Weekly','Monthly','Quarterly','One-off'];
+const COUNTRIES = ['Zambia','South Africa','Zimbabwe','DRC','Tanzania','Kenya','Malawi','Mozambique','Botswana','Namibia','China','India','UAE','Turkey','United Kingdom','United States','Other'];
+const SCOPE_OPTIONS = [
+  {key:'local',label:'Within Zambia'},
+  {key:'international',label:'International'},
+  {key:'both',label:'Both local & international'}
+];
 
 const SEED_SUPPLIERS = [
   {id:'sup-001',name:'Copperbelt Textiles Wholesale',category:'clothing',location:'Kitwe',verified:true,products:['Fabric rolls','School uniform fabric','Dress materials'],moq:'50 metres',delivery:'Kitwe · Ndola · Lusaka',leadTime:'3–5 days',phone:'+260971000101',desc:'Bulk fabric and textile supplier.'},
@@ -210,7 +244,10 @@ const SEED_SUPPLIERS = [
   {id:'sup-021',name:'Fabric House Zambia',category:'furniture',location:'Lusaka',verified:true,products:['Upholstery fabric','Foam'],moq:'20 metres',delivery:'Nationwide',leadTime:'3–5 days',phone:'+260971000121',desc:'Textile specialist.'},
   {id:'sup-022',name:'CleanPro Chemicals',category:'cleaning',location:'Lusaka',verified:true,products:['Detergents','Disinfectants','Gloves'],moq:'K800 order',delivery:'Lusaka',leadTime:'2–4 days',phone:'+260971000122',desc:'Cleaning chemicals.'},
   {id:'sup-023',name:'PackRight Solutions',category:'packaging',location:'Lusaka',verified:true,products:['Boxes','Labels','Bottles'],moq:'K1,000 order',delivery:'Lusaka',leadTime:'3–5 days',phone:'+260971000123',desc:'Packaging supplier.'},
-  {id:'sup-024',name:'ZamPack Manufacturers',category:'packaging',location:'Ndola',verified:true,products:['Cartons','Kraft bags'],moq:'500 units',delivery:'Nationwide',leadTime:'7–10 days',phone:'+260971000124',desc:'Custom packaging.'}
+  {id:'sup-024',name:'ZamPack Manufacturers',category:'packaging',location:'Ndola',verified:true,products:['Cartons','Kraft bags'],moq:'500 units',delivery:'Nationwide',leadTime:'7–10 days',phone:'+260971000124',desc:'Custom packaging.'},
+  {id:'sup-025',name:'Shenzhen Global Electronics',category:'electronics',location:'Shenzhen',country:'China',scope:'international',verified:true,products:['Consumer electronics','Charging accessories','Components'],moq:'USD 500 order',delivery:'International freight · DDP available',leadTime:'14–21 days',phone:'+86 755 000 0000',desc:'Verified China-based exporter. Import duties, clearance and freight quoted separately.'},
+  {id:'sup-026',name:'Durban Textile Exporters',category:'clothing',location:'Durban',country:'South Africa',scope:'international',verified:true,products:['Fabric rolls','Denim','Trims'],moq:'100 metres',delivery:'SADC · international courier',leadTime:'7–12 days',phone:'+27 31 000 0000',desc:'South African textile exporter. Duties and clearance are separate.'},
+  {id:'sup-027',name:'Dubai Packaging Trading',category:'packaging',location:'Dubai',country:'UAE',scope:'international',verified:true,products:['Custom boxes','Bottles','Labels'],moq:'1,000 units',delivery:'Worldwide freight',leadTime:'10–18 days',phone:'+971 4 000 0000',desc:'UAE packaging exporter serving African businesses. Duties and clearance separate.'}
 ];
 const SEED_BUYERS = [
   {id:'buy-001',name:"Mama Chanda's Kitchen",category:'food',location:'Lusaka',size:'Small',verified:true,sources:['Fresh vegetables','Chicken','Cooking oil'],frequency:'Weekly',orderValue:'K1,500–K3,000/wk',desc:'Lunch restaurant sourcing fresh produce.'},
@@ -224,9 +261,23 @@ const SEED_BUYERS = [
   {id:'buy-009',name:'ZamBuild Projects',category:'construction',location:'Ndola',size:'Medium',verified:true,sources:['Cement','Aggregate','Steel'],frequency:'Weekly',orderValue:'K20,000–K50,000',desc:'Commercial contractor.'},
   {id:'buy-010',name:'Sparkle Clean Services',category:'cleaning',location:'Lusaka',size:'Small',verified:true,sources:['Detergents','Gloves','Mops'],frequency:'Monthly',orderValue:'K1,500–K3,000',desc:'Office cleaning company.'},
   {id:'buy-011',name:'Fresh Bites Catering',category:'food',location:'Lusaka',size:'Small',verified:true,sources:['Fresh produce','Meat','Packaging'],frequency:'Weekly',orderValue:'K4,000–K8,000',desc:'Event caterer.'},
-  {id:'buy-012',name:'Lusaka Tech Hub',category:'electronics',location:'Lusaka',size:'Micro',verified:true,sources:['Laptops','Routers'],frequency:'Quarterly',orderValue:'K3,000–K8,000',desc:'Co-working hub.'}
+  {id:'buy-012',name:'Lusaka Tech Hub',category:'electronics',location:'Lusaka',size:'Micro',verified:true,sources:['Laptops','Routers'],frequency:'Quarterly',orderValue:'K3,000–K8,000',desc:'Co-working hub.'},
+  {id:'buy-013',name:'Lusaka Import Partners',category:'electronics',location:'Lusaka',country:'Zambia',scope:'international',size:'Small',verified:true,sources:['Consumer electronics','Phone accessories'],frequency:'Monthly',orderValue:'USD 2,000–5,000/mo',desc:'Importer sourcing electronics internationally for local resale. Duties and clearance separate.'}
 ];
 const ZAMBIAN_CITIES = ['Lusaka','Kitwe','Ndola','Livingstone','Kabwe','Chingola','Mufulira','Solwezi','Chipata','Choma','Mazabuka','Kasama','Mongu','Chongwe','Kafue'];
+
+function isInternationalEntity(e){
+  if(!e) return false;
+  if(e.scope==='international'||e.scope==='both') return true;
+  if(e.country && e.country!=='Zambia') return true;
+  return false;
+}
+function locLabel(e){
+  if(!e) return '';
+  const parts=[e.location];
+  if(e.country && e.country!=='Zambia' && e.country!==e.location) parts.push(e.country);
+  return parts.filter(Boolean).join(', ');
+}
 
 /* ═══════════════════ SHARED UI ═══════════════════ */
 function Mark({size=38}){
@@ -307,7 +358,7 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
   const [resetSent,setResetSent]=useState(false);
   const [resetEmail,setResetEmail]=useState('');
   const [signupSuccess,setSignupSuccess]=useState(false);
-  const [form,setForm]=useState({name:'',businessName:'',email:'',phone:'',password:'',category:'',location:'',products:'',moq:'',delivery:'',leadTime:'',sources:'',frequency:'Monthly',orderValue:''});
+  const [form,setForm]=useState({name:'',businessName:'',email:'',phone:'',password:'',category:'',location:'',country:'Zambia',scope:'local',products:'',moq:'',delivery:'',leadTime:'',sources:'',frequency:'Monthly',orderValue:''});
 
   useEffect(()=>{
     if(open){
@@ -363,7 +414,7 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     if(!form.email.trim()) return setErr('Enter your email.');
     if(!form.phone.trim()) return setErr('Enter your phone.');
     if(!form.category) return setErr('Choose a category.');
-    if(!form.location) return setErr('Choose a city.');
+    if(!form.location||!form.location.trim()) return setErr('Enter your city / region.');
     if(form.password.length<6) return setErr('Password must be at least 6 characters.');
     if(role==='supplier' && !form.products.trim()) return setErr('List the products you supply.');
     if(role==='buyer' && !form.sources.trim()) return setErr('List what you buy regularly.');
@@ -463,13 +514,31 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
             {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
           </select>
         </div>
-        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>City *</label>
-          <select value={form.location} onChange={e=>setForm({...form,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-            <option value="">Choose</option>
-            {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Country *</label>
+          <select value={form.country||'Zambia'} onChange={e=>setForm({...form,country:e.target.value,location:''})} style={{...INP_STYLE,cursor:'pointer'}}>
+            {COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{(!form.country||form.country==='Zambia')?'City *':'City / Region *'}</label>
+          {(!form.country||form.country==='Zambia')?(
+            <select value={form.location} onChange={e=>setForm({...form,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+              <option value="">Choose</option>
+              {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
+            </select>
+          ):(
+            <TIn value={form.location} onChange={v=>setForm({...form,location:v})} placeholder="e.g. Guangzhou"/>
+          )}
+        </div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{role==='buyer'?'Sourcing scope *':'Delivery scope *'}</label>
+          <select value={form.scope||'local'} onChange={e=>setForm({...form,scope:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+            {SCOPE_OPTIONS.map(o=><option key={o.key} value={o.key}>{o.label}</option>)}
           </select>
         </div>
       </div>
+      {form.scope && form.scope!=='local' && <div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginBottom:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
+        <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
+        International sourcing: import duties, customs clearance and international freight are separate and are not included in supplier quotes.
+      </div>}
       {role==='supplier'&&<div style={{background:'rgba(27,108,168,.04)',border:'1px dashed rgba(27,108,168,.25)',borderRadius:10,padding:'14px 16px',marginBottom:14}}>
         <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#1B6CA8',marginBottom:10}}>What you supply</div>
         <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
@@ -526,33 +595,68 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
 
 /* ═══════════════════ NAV ═══════════════════ */
 function Nav({user,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
+  const [menuOpen,setMenuOpen]=useState(false);
+  const closeMenu=()=>setMenuOpen(false);
+  useEffect(()=>{
+    if(menuOpen){document.body.style.overflow='hidden';}else{document.body.style.overflow='';}
+    return ()=>{document.body.style.overflow='';};
+  },[menuOpen]);
+  const logoClick=(e)=>{e.preventDefault();closeMenu();if(user)onDashboard();else if(onSignIn)onSignIn();};
   return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',position:'sticky',top:0,zIndex:50}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
-        <a href="#" onClick={e=>{e.preventDefault();if(user)onDashboard();else if(onSignIn)onSignIn();}} style={{display:'flex',alignItems:'center',gap:12,textDecoration:'none'}}>
-          <Mark size={38}/>
-          <span className="hide-sm" style={{textAlign:'left',lineHeight:1}}>
-            <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
-            <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
-          </span>
-        </a>
-        <div style={{display:'flex',alignItems:'center',gap:8}}>
-          <a href={MAIN_PLATFORM_URL} className="hide-sm" style={{padding:'10px 14px',background:'transparent',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none',marginRight:6}}>
-            <i className="fas fa-arrow-left" style={{marginRight:6}}></i> Main Platform
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 16px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72,gap:10}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0}}>
+          <a href="#" onClick={logoClick} style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none',flexShrink:0}} aria-label="StartEasy Directory home">
+            <Mark size={38}/>
+            <span className="hide-sm" style={{textAlign:'left',lineHeight:1}}>
+              <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
+              <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+            </span>
           </a>
-          {user?(
-            <>
-              <button onClick={onDashboard} className="hide-sm" style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Dashboard</button>
-              {onBrowse&&<button onClick={onBrowse} className="hide-sm" style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Browse</button>}
-              <button onClick={onSignOut} style={{padding:'10px 14px',background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',borderRadius:8,fontSize:12,fontWeight:700}}>Sign out</button>
-            </>
-          ):(<>
-            <button onClick={onSignIn} style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Sign in</button>
-            <button onClick={()=>onSignUp(null)} style={{padding:'10px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}>Get started</button>
-          </>)}
+          <a href={MAIN_PLATFORM_URL} className="nav-platform-btn" aria-label="Back to StartEasy main platform" title="Back to StartEasy Platform">
+            <i className="fas fa-arrow-left" style={{fontSize:11}}></i>
+            <span className="nav-platform-full">StartEasy Platform</span>
+            <span className="nav-platform-short">Platform</span>
+          </a>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <div className="nav-desktop-actions">
+            {user?(
+              <>
+                <button onClick={onDashboard} style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Dashboard</button>
+                {onBrowse&&<button onClick={onBrowse} style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Browse</button>}
+                <button onClick={onSignOut} style={{padding:'10px 14px',background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',borderRadius:8,fontSize:12,fontWeight:700}}>Sign out</button>
+              </>
+            ):(<>
+              <button onClick={onSignIn} style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Sign in</button>
+              <button onClick={()=>onSignUp(null)} style={{padding:'10px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}>Get started</button>
+            </>)}
+          </div>
+          <button className="nav-hamburger" onClick={()=>setMenuOpen(o=>!o)} aria-label={menuOpen?'Close menu':'Open menu'} aria-expanded={menuOpen}>
+            <i className={`fas ${menuOpen?'fa-times':'fa-bars'}`}></i>
+          </button>
         </div>
       </div>
     </div>
+    {menuOpen&&<div className="nav-mobile-menu">
+      <a href={MAIN_PLATFORM_URL} className="nav-mobile-link nav-mobile-platform" onClick={closeMenu}>
+        <span style={{display:'flex',alignItems:'center',gap:12}}><i className="fas fa-arrow-left"></i> Back to StartEasy Platform</span>
+        <i className="fas fa-chevron-right" style={{opacity:.5,fontSize:11}}></i>
+      </a>
+      <div style={{height:1,background:'rgba(255,255,255,.08)',margin:'4px 0'}}></div>
+      {user?(
+        <>
+          <button className="nav-mobile-link" onClick={()=>{closeMenu();onDashboard();}}><i className="fas fa-house"></i> Dashboard</button>
+          {onBrowse&&<button className="nav-mobile-link" onClick={()=>{closeMenu();onBrowse();}}><i className="fas fa-magnifying-glass"></i> Browse directory</button>}
+          <button className="nav-mobile-link nav-mobile-signout" onClick={()=>{closeMenu();onSignOut();}}><i className="fas fa-right-from-bracket"></i> Sign out</button>
+        </>
+      ):(
+        <>
+          <button className="nav-mobile-link" onClick={()=>{closeMenu();onSignIn();}}><i className="fas fa-right-to-bracket"></i> Sign in</button>
+          <button className="nav-mobile-link nav-mobile-cta" onClick={()=>{closeMenu();onSignUp(null);}}><i className="fas fa-user-plus"></i> Get started</button>
+        </>
+      )}
+    </div>}
   </header>;
 }
 
@@ -568,13 +672,45 @@ function Hero({stats}){
         Helping suppliers <em style={{fontStyle:'italic',color:'#F5A623'}}>sell more.</em>
       </h1>
       <p style={{fontSize:'clamp(1rem,1.5vw,1.2rem)',lineHeight:1.7,color:'rgba(255,255,255,.7)',maxWidth:'46rem',margin:'0 auto 40px'}}>
-        A two-sided marketplace connecting Zambian businesses with verified suppliers — and suppliers with the businesses that will actually buy from them.
+        A two-sided marketplace connecting Zambian businesses with verified suppliers — locally and internationally — and suppliers with the businesses that will actually buy from them.
       </p>
       {stats && <div style={{display:'flex',flexWrap:'wrap',gap:24,fontSize:12,color:'rgba(255,255,255,.6)',justifyContent:'center'}}>
         <span><i className="fas fa-check-circle" style={{color:'#2E9C4A',marginRight:6}}></i>{stats.suppliers} suppliers</span>
         <span><i className="fas fa-cart-shopping" style={{color:'#F5A623',marginRight:6}}></i>{stats.buyers} active buyers</span>
         <span><i className="fas fa-layer-group" style={{color:'#F5A623',marginRight:6}}></i>{stats.categories} categories</span>
       </div>}
+    </div>
+  </section>;
+}
+
+/* ═══════════════════ TRUST / VERIFY SECTION ═══════════════════ */
+function TrustSection(){
+  const steps=[
+    {icon:'fa-magnifying-glass-location',color:'#1B6CA8',title:'We identify suppliers',body:'Local and international suppliers matched to your exact category, quantities and terms.'},
+    {icon:'fa-shield-halved',color:'#1E7B3C',title:'We verify legitimacy',body:'We check registration, track record and references before shortlisting — so you are not buying blind.'},
+    {icon:'fa-file-signature',color:'#E8730F',title:'We obtain quotes & negotiate',body:'We gather quotes and help you negotiate terms, so you are not overpaying.'},
+    {icon:'fa-handshake-angle',color:'#7A4FA3',title:'We coordinate',body:'Final engagement and performance rest with the supplier — but we help coordinate disputes.'}
+  ];
+  return <section style={{background:'#fff',padding:'clamp(48px,7vw,80px) 24px'}}>
+    <div style={{maxWidth:1140,margin:'0 auto'}}>
+      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 36px'}}>
+        <span className="micro" style={{color:'#1E7B3C',display:'block',marginBottom:12}}>Verified · shortlisted · negotiated</span>
+        <h2 className="serif" style={{fontSize:'clamp(1.7rem,4vw,2.5rem)',lineHeight:1.15,margin:'0 0 12px',color:'#0A1F12'}}>We verify and shortlist — so you don't buy blind.</h2>
+        <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:0}}>We identify suppliers, verify their legitimacy, obtain quotes and help you negotiate terms. Final engagement and performance are the supplier's responsibility — but we help coordinate disputes.</p>
+      </div>
+      <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(230px,1fr))'}}>
+        {steps.map((s,i)=>(
+          <div key={i} style={{background:'#F5FAF6',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'22px 20px',borderTop:`3px solid ${s.color}`}}>
+            <span style={{width:44,height:44,borderRadius:11,background:s.color+'15',color:s.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,marginBottom:14}}><i className={`fas ${s.icon}`}></i></span>
+            <h3 style={{fontSize:14,fontWeight:800,color:'#0A1F12',margin:'0 0 6px'}}>{s.title}</h3>
+            <p style={{fontSize:12.5,lineHeight:1.6,color:'rgba(10,31,18,.65)',margin:0}}>{s.body}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{marginTop:24,background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:12,padding:'14px 18px',display:'flex',gap:12,alignItems:'flex-start',maxWidth:820,margin:'24px auto 0'}}>
+        <i className="fas fa-circle-info" style={{color:'#1B6CA8',fontSize:16,marginTop:1}}></i>
+        <p style={{fontSize:12.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:0}}><strong style={{color:'#0A1F12'}}>International sourcing:</strong> We source locally and internationally. Import duties, customs clearance and international freight are separate from supplier quotes and are the buyer's responsibility.</p>
+      </div>
     </div>
   </section>;
 }
@@ -618,8 +754,19 @@ function LandingCTA({onSignup,onSignin}){
 /* ═══════════════════ FOOTER ═══════════════════ */
 function Footer(){
   return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'48px 24px'}}>
-      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'44px 24px 32px'}}>
+      <div style={{background:'linear-gradient(135deg,rgba(232,115,15,.14),rgba(245,166,35,.08))',border:'1px solid rgba(245,166,35,.3)',borderRadius:14,padding:'22px 24px',marginBottom:32,display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:18}}>
+        <div style={{minWidth:220,flex:'1 1 320px'}}>
+          <div style={{fontSize:10.5,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:800,color:'#F5A623',marginBottom:6}}>Explore more</div>
+          <h3 className="serif" style={{fontSize:'clamp(1.15rem,2.4vw,1.5rem)',fontWeight:800,color:'#fff',margin:'0 0 6px',lineHeight:1.2}}>Looking for the full StartEasy experience?</h3>
+          <p style={{fontSize:12.5,lineHeight:1.6,color:'rgba(255,255,255,.7)',margin:0}}>Business registration, compliance, growth tools and more — back on the main platform.</p>
+        </div>
+        <a href={MAIN_PLATFORM_URL} className="footer-platform-btn" style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:11,fontSize:14,fontWeight:800,textDecoration:'none',boxShadow:'0 14px 30px -10px rgba(232,115,15,.7)',whiteSpace:'nowrap'}}>
+          <i className="fas fa-arrow-left"></i> Back to StartEasy Platform
+        </a>
+      </div>
+
+      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
         <Mark size={36}/>
         <span style={{fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
       </div>
@@ -628,7 +775,6 @@ function Footer(){
         <a href={'mailto:'+CONTACT_EMAIL} style={{color:'inherit',textDecoration:'none'}}>{CONTACT_EMAIL}</a>
         <span>+260 762499581</span>
         <span>Lusaka, Zambia</span>
-        <a href={MAIN_PLATFORM_URL} style={{color:'#F5A623',textDecoration:'underline',fontWeight:700}}>Return to Main Platform</a>
       </div>
       <div style={{paddingTop:18,borderTop:'1px solid rgba(255,255,255,.1)',display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
         <p style={{fontSize:11,color:'rgba(255,255,255,.35)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia</p>
@@ -644,6 +790,7 @@ function Landing({onSignup,onSignin}){
     <Nav user={null} onSignIn={onSignin} onSignUp={onSignup}/>
     <main style={{flex:1}}>
       <Hero/>
+      <TrustSection/>
       <LandingCTA onSignup={onSignup} onSignin={onSignin}/>
     </main>
     <Footer/>
@@ -690,18 +837,23 @@ function Welcome({user,onDashboard,onBrowse,onSignedOut}){
   const firstName=(profile?.name||user.email||'').split(' ')[0];
 
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
-    <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',padding:'0 24px'}}>
-      <div style={{maxWidth:1240,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
-        <div style={{display:'flex',alignItems:'center',gap:12}}>
+    <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',padding:'0 16px'}}>
+      <div style={{maxWidth:1240,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',height:72,gap:10}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
           <Mark size={38}/>
           <span className="hide-sm" style={{lineHeight:1}}>
             <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
             <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
           </span>
         </div>
-        <button onClick={handleSignOut} disabled={signingOut} style={{padding:'10px 14px',background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',borderRadius:8,fontSize:12,fontWeight:700}}>
-          <i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> {signingOut?'Signing out…':'Sign out'}
-        </button>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <a href={MAIN_PLATFORM_URL} style={{padding:'10px 14px',background:'rgba(232,115,15,.15)',color:'#FFD9A6',border:'1px solid rgba(232,115,15,.35)',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none',whiteSpace:'nowrap'}}>
+            <i className="fas fa-arrow-left" style={{marginRight:6}}></i> <span className="hide-sm">StartEasy Platform</span>
+          </a>
+          <button onClick={handleSignOut} disabled={signingOut} style={{padding:'10px 14px',background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',borderRadius:8,fontSize:12,fontWeight:700}}>
+            <i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> <span className="hide-sm">{signingOut?'Signing out…':'Sign out'}</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -724,7 +876,7 @@ function Welcome({user,onDashboard,onBrowse,onSignedOut}){
           <WelcomeRow k="Business" v={profile.businessName}/>
           <WelcomeRow k="Role" v={isSupplier?'Supplier':'Buyer'}/>
           <WelcomeRow k="Category" v={cat.title}/>
-          <WelcomeRow k="City" v={profile.location}/>
+          <WelcomeRow k="Location" v={locLabel(profile)}/>
           <WelcomeRow k="Status" v={isVerified?'Verified':'Pending verification'}/>
         </div>}
 
@@ -790,6 +942,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
       if(p) setEditForm({
         name:p.name||'',businessName:p.businessName||'',phone:p.phone||'',
         category:p.category||'',location:p.location||'',
+        country:p.country||'Zambia',scope:p.scope||'local',
         products:Array.isArray(p.products)?p.products.join(', '):(p.products||''),
         moq:p.moq||'',delivery:p.delivery||'',leadTime:p.leadTime||'',
         sources:Array.isArray(p.sources)?p.sources.join(', '):(p.sources||''),
@@ -821,7 +974,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
     setSaving(true);setSaveMsg(null);
     try{
       const isSupplier=profile.role==='supplier';
-      const updates={name:editForm.name.trim(),businessName:editForm.businessName.trim(),phone:editForm.phone.trim(),category:editForm.category,location:editForm.location};
+      const updates={name:editForm.name.trim(),businessName:editForm.businessName.trim(),phone:editForm.phone.trim(),category:editForm.category,location:editForm.location,country:editForm.country||'Zambia',scope:editForm.scope||'local'};
       if(isSupplier){updates.products=splitCSV(editForm.products);updates.moq=editForm.moq;updates.delivery=editForm.delivery;updates.leadTime=editForm.leadTime;}
       else{updates.sources=splitCSV(editForm.sources);updates.frequency=editForm.frequency;updates.orderValue=editForm.orderValue;}
       if(firebaseReady) await db.collection('se_users').doc(user.uid).update(updates);
@@ -906,6 +1059,9 @@ function Dashboard({user,onBrowse,onSignedOut}){
         )}
         <div style={{height:14}}></div>
         <button onClick={onBrowse} className="dash-nav-btn"><i className="fas fa-magnifying-glass" style={{fontSize:12,width:16}}></i> Browse directory</button>
+        <a href={MAIN_PLATFORM_URL} className="dash-nav-btn" style={{textDecoration:'none',color:'#F5A623',background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.25)',marginTop:6}}>
+          <i className="fas fa-arrow-left" style={{fontSize:12,width:16}}></i> Back to StartEasy Platform
+        </a>
       </nav>
       <div style={{padding:'14px 16px',borderTop:'1px solid rgba(255,255,255,.08)'}}>
         <a href={waUrl(`Hello StartEasy — I'm ${profile.name} (${profile.businessName}).`)} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px',marginBottom:8,background:'#25D366',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}>
@@ -936,7 +1092,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
         {tab==='overview'&&<>
           <div style={{marginBottom:22}}>
             <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Welcome back, {profile.name.split(' ')[0]}</h1>
-            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{profile.businessName} · {cat.title} · {profile.location}</p>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{profile.businessName} · {cat.title} · {locLabel(profile)}</p>
           </div>
 
           <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',marginBottom:22}}>
@@ -967,7 +1123,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
                   <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:13,fontWeight:700,color:'#0A1F12'}}>{m.name}</div>
-                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{m.location}</div>
+                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{locLabel(m)}</div>
                   </div>
                 </div>
               ))}
@@ -1019,7 +1175,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
                   <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
                   <div style={{minWidth:0,flex:1}}>
                     <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{m.name}</div>
-                    <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}>{m.location}</div>
+                    <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}>{locLabel(m)}</div>
                   </div>
                 </div>
                 <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{m.desc}</p>
@@ -1074,12 +1230,30 @@ function Dashboard({user,onBrowse,onSignedOut}){
                   {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
                 </select>
               </div>
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>City</label>
-                <select value={editForm.location} onChange={e=>setEditForm({...editForm,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                  {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Country</label>
+                <select value={editForm.country||'Zambia'} onChange={e=>setEditForm({...editForm,country:e.target.value,location:''})} style={{...INP_STYLE,cursor:'pointer'}}>
+                  {COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{(!editForm.country||editForm.country==='Zambia')?'City':'City / Region'}</label>
+                {(!editForm.country||editForm.country==='Zambia')?(
+                  <select value={editForm.location} onChange={e=>setEditForm({...editForm,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                    {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                ):(
+                  <TIn value={editForm.location} onChange={v=>setEditForm({...editForm,location:v})}/>
+                )}
+              </div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isSupplier?'Delivery scope':'Sourcing scope'}</label>
+                <select value={editForm.scope||'local'} onChange={e=>setEditForm({...editForm,scope:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                  {SCOPE_OPTIONS.map(o=><option key={o.key} value={o.key}>{o.label}</option>)}
                 </select>
               </div>
             </div>
+            {editForm.scope && editForm.scope!=='local' && <div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
+              <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
+              International sourcing: import duties, customs clearance and international freight are separate from supplier quotes.
+            </div>}
             <div style={{marginTop:16}}>
               {isSupplier?<>
                 <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products (comma-separated)</label><TIn value={editForm.products} onChange={v=>setEditForm({...editForm,products:v})}/>
@@ -1159,9 +1333,10 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
     const q=query.trim().toLowerCase();
     return suppliers.filter(s=>{
       if(category!=='all'&&s.category!==category) return false;
-      if(city!=='all'&&s.location!==city) return false;
+      if(city==='__intl'){ if(!isInternationalEntity(s)) return false; }
+      else if(city!=='all'&&s.location!==city) return false;
       if(!q) return true;
-      return (s.name+' '+s.location+' '+(s.desc||'')+' '+(s.products||[]).join(' ')).toLowerCase().includes(q);
+      return (s.name+' '+s.location+' '+(s.country||'')+' '+(s.desc||'')+' '+(s.products||[]).join(' ')).toLowerCase().includes(q);
     });
   },[suppliers,query,category,city]);
 
@@ -1169,9 +1344,10 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
     const q=query.trim().toLowerCase();
     return buyers.filter(b=>{
       if(category!=='all'&&b.category!==category) return false;
-      if(city!=='all'&&b.location!==city) return false;
+      if(city==='__intl'){ if(!isInternationalEntity(b)) return false; }
+      else if(city!=='all'&&b.location!==city) return false;
       if(!q) return true;
-      return (b.name+' '+b.location+' '+(b.desc||'')+' '+(b.sources||[]).join(' ')).toLowerCase().includes(q);
+      return (b.name+' '+b.location+' '+(b.country||'')+' '+(b.desc||'')+' '+(b.sources||[]).join(' ')).toLowerCase().includes(q);
     });
   },[buyers,query,category,city]);
 
@@ -1199,8 +1375,9 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
             <option value="all">All categories</option>
             {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
           </select>
-          <select value={city} onChange={e=>setCity(e.target.value)} style={{...INP_STYLE,minWidth:140,cursor:'pointer'}}>
-            <option value="all">All cities</option>
+          <select value={city} onChange={e=>setCity(e.target.value)} style={{...INP_STYLE,minWidth:150,cursor:'pointer'}}>
+            <option value="all">All locations</option>
+            <option value="__intl">🌍 International</option>
             {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
           </select>
         </div>
@@ -1216,9 +1393,10 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
               <span style={{width:40,height:40,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{s.name}</div>
-                <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{s.location}</div>
+                <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{locLabel(s)}</div>
               </div>
             </div>
+            {isInternationalEntity(s)&&<span style={{alignSelf:'flex-start',display:'inline-flex',alignItems:'center',gap:5,padding:'3px 9px',borderRadius:99,background:'rgba(27,108,168,.1)',color:'#1B6CA8',fontSize:10,fontWeight:800,textTransform:'uppercase',letterSpacing:'.04em'}}><i className="fas fa-globe" style={{fontSize:9}}></i> International</span>}
             <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{s.desc}</p>
             <button onClick={()=>{setProfile(s);setProfileType('supplier');}} style={{padding:'9px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700,marginTop:'auto'}}>View profile</button>
           </div>;
@@ -1228,9 +1406,10 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
               <span style={{width:40,height:40,borderRadius:10,background:'rgba(232,115,15,.15)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}><i className="fas fa-cart-shopping"></i></span>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{b.name}</div>
-                <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{b.location}</div>
+                <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{locLabel(b)}</div>
               </div>
             </div>
+            {isInternationalEntity(b)&&<span style={{alignSelf:'flex-start',display:'inline-flex',alignItems:'center',gap:5,padding:'3px 9px',borderRadius:99,background:'rgba(27,108,168,.1)',color:'#1B6CA8',fontSize:10,fontWeight:800,textTransform:'uppercase',letterSpacing:'.04em'}}><i className="fas fa-globe" style={{fontSize:9}}></i> International</span>}
             <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{b.desc}</p>
             <button onClick={()=>{setProfile(b);setProfileType('buyer');}} style={{padding:'9px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700,marginTop:'auto'}}>View buyer</button>
           </div>
@@ -1250,9 +1429,13 @@ function SupplierProfileModal({supplier,user,onClose,onRequestQuote}){
       <span style={{width:64,height:64,borderRadius:15,background:cat.color+'16',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
       <div style={{flex:1,minWidth:0}}>
         <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 4px'}}>{supplier.name}</h2>
-        <div style={{fontSize:13,color:'rgba(10,31,18,.6)'}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{supplier.location}</div>
+        <div style={{fontSize:13,color:'rgba(10,31,18,.6)'}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{locLabel(supplier)}</div>
       </div>
     </div>
+    {isInternationalEntity(supplier)&&<div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginBottom:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
+      <i className="fas fa-globe" style={{color:'#1B6CA8',marginRight:6}}></i>
+      International supplier — import duties, customs clearance and international freight are separate and not included in supplier quotes.
+    </div>}
     <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',marginBottom:16}}>{supplier.desc}</p>
     {supplier.products&&<div style={{marginBottom:16}}>
       <div style={{fontSize:11,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Products</div>
@@ -1270,7 +1453,11 @@ function SupplierProfileModal({supplier,user,onClose,onRequestQuote}){
 function BuyerProfileModal({buyer,onClose,onRequestIntro}){
   return <Modal open={true} onClose={onClose} eyebrow="Buyer profile" maxWidth="42rem">
     <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>{buyer.name}</h2>
-    <div style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:14}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{buyer.location}</div>
+    <div style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:14}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{locLabel(buyer)}</div>
+    {isInternationalEntity(buyer)&&<div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginBottom:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
+      <i className="fas fa-globe" style={{color:'#1B6CA8',marginRight:6}}></i>
+      This buyer sources internationally — duties and clearance are handled separately.
+    </div>}
     <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',marginBottom:16}}>{buyer.desc}</p>
     {buyer.sources&&<div style={{marginBottom:16}}>
       <div style={{fontSize:11,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Sources</div>
@@ -1282,7 +1469,7 @@ function BuyerProfileModal({buyer,onClose,onRequestIntro}){
 
 /* ═══════════════════ RFQ & INTRO MODAL ═══════════════════ */
 function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
-  const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deadline:'',budget:'',notes:''});
+  const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deliveryCountry:'Zambia',deadline:'',budget:'',notes:''});
   const [err,setErr]=useState('');
   const [saving,setSaving]=useState(false);
   const [agreeFee,setAgreeFee]=useState(false);
@@ -1291,7 +1478,7 @@ function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
 
   useEffect(()=>{
     if(open){
-      setForm(f=>({...f,name:user?.displayName||'',email:user?.email||'',category:preselected?preselected.category:'',product:preselected?(preselected.products||[])[0]||'':''}));
+      setForm(f=>({...f,name:user?.displayName||'',email:user?.email||'',category:preselected?preselected.category:'',product:preselected?(preselected.products||[])[0]||'':'',deliveryCity:'',deliveryCountry:'Zambia'}));
       setErr('');
       setAgreeFee(false);
     }
@@ -1326,10 +1513,12 @@ function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
         const msg=['*INTRODUCTION REQUEST*','','*Supplier:*',`Name: ${form.name}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Buyer:*',preselected?preselected.name:'Unknown Buyer','','*Pitch:*',form.product,form.notes&&`Notes: ${form.notes}`].filter(Boolean).join('\n');
         window.open(waUrl(msg),'_blank');
       } else {
-        const quote={userId:user.uid,userName:form.name,userEmail:form.email,supplierId:preselected?.id||null,supplierName:preselected?.name||null,supplierCategory:preselected?.category||form.category,category:form.category,product:form.product,quantity:form.quantity,deliveryCity:form.deliveryCity,deadline:form.deadline,budget:form.budget,notes:form.notes,phone:form.phone,status:'sent',at:Date.now()};
+        const quote={userId:user.uid,userName:form.name,userEmail:form.email,supplierId:preselected?.id||null,supplierName:preselected?.name||null,supplierCategory:preselected?.category||form.category,category:form.category,product:form.product,quantity:form.quantity,deliveryCity:form.deliveryCity,deliveryCountry:form.deliveryCountry,deadline:form.deadline,budget:form.budget,notes:form.notes,phone:form.phone,status:'sent',at:Date.now()};
         const ok=await saveQuote(quote);
         if(!ok) throw new Error('Could not save your request.');
-        const msg=['*QUOTATION REQUEST*','','*Buyer:*',`Name: ${form.name}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Requirement:*',form.category&&`Category: ${CAT_MAP[form.category]?.title||form.category}`,preselected&&`Supplier: ${preselected.name}`,`Product: ${form.product}`,form.quantity&&`Quantity: ${form.quantity}`,form.deliveryCity&&`Delivery to: ${form.deliveryCity}`,form.deadline&&`Needed by: ${form.deadline}`,form.budget&&`Budget: ${form.budget}`,form.notes&&`Notes: ${form.notes}`].filter(Boolean).join('\n');
+        const intl = form.deliveryCountry && form.deliveryCountry!=='Zambia';
+        const dest = form.deliveryCity ? `${form.deliveryCity}${intl?', '+form.deliveryCountry:''}` : '';
+        const msg=['*QUOTATION REQUEST*','','*Buyer:*',`Name: ${form.name}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Requirement:*',form.category&&`Category: ${CAT_MAP[form.category]?.title||form.category}`,preselected&&`Supplier: ${preselected.name}`,`Product: ${form.product}`,form.quantity&&`Quantity: ${form.quantity}`,dest&&`Delivery to: ${dest}`,form.deadline&&`Needed by: ${form.deadline}`,form.budget&&`Budget: ${form.budget}`,form.notes&&`Notes: ${form.notes}`,intl&&'Note: Import duties, clearance & international freight are separate.'].filter(Boolean).join('\n');
         window.open(waUrl(msg),'_blank');
       }
       onSaved && onSaved();
@@ -1354,11 +1543,33 @@ function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
     
     <div style={{marginTop:14}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isIntro?'Your pitch / offering *':'Product *'}</label><TIn value={form.product} onChange={v=>setForm({...form,product:v})} placeholder={isIntro?'e.g. We supply high quality imported fabric...':'e.g. 50 bags of cement, fabric rolls...'}/></div>
     
-    {!isIntro && <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
-      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Quantity</label><TIn value={form.quantity} onChange={v=>setForm({...form,quantity:v})}/></div>
-      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Needed by</label><TIn type="date" value={form.deadline} onChange={v=>setForm({...form,deadline:v})}/></div>
-      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget</label><TIn value={form.budget} onChange={v=>setForm({...form,budget:v})}/></div>
-    </div>}
+    {!isIntro && <>
+      <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Quantity</label><TIn value={form.quantity} onChange={v=>setForm({...form,quantity:v})}/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Needed by</label><TIn type="date" value={form.deadline} onChange={v=>setForm({...form,deadline:v})}/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget</label><TIn value={form.budget} onChange={v=>setForm({...form,budget:v})}/></div>
+      </div>
+      <div style={{marginTop:14}}>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery destination</label>
+        <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
+          <select value={form.deliveryCountry||'Zambia'} onChange={e=>setForm({...form,deliveryCountry:e.target.value,deliveryCity:''})} style={{...INP_STYLE,cursor:'pointer'}}>
+            {COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+          {(!form.deliveryCountry||form.deliveryCountry==='Zambia')?(
+            <select value={form.deliveryCity} onChange={e=>setForm({...form,deliveryCity:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+              <option value="">City</option>
+              {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
+            </select>
+          ):(
+            <TIn value={form.deliveryCity} onChange={v=>setForm({...form,deliveryCity:v})} placeholder="City / port"/>
+          )}
+        </div>
+        <div style={{marginTop:10,background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
+          <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
+          Import duties, customs clearance and international freight are separate and not included in supplier quotes.
+        </div>
+      </div>
+    </>}
 
     <label style={{display:'flex',gap:12,alignItems:'flex-start',marginTop:18,cursor:'pointer',background:'rgba(232,115,15,.04)',padding:'12px 14px',borderRadius:8,border:'1px solid rgba(232,115,15,.2)'}}>
       <input type="checkbox" checked={agreeFee} onChange={e=>setAgreeFee(e.target.checked)} style={{marginTop:3,width:16,height:16,accentColor:'#E8730F',flexShrink:0}}/>
