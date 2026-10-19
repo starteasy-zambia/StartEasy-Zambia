@@ -22,18 +22,15 @@ button,a{touch-action:manipulation;-webkit-tap-highlight-color:transparent;curso
 ::selection{background:var(--orange-2);color:var(--forest)}
 input,select,textarea{font-family:'Inter',system-ui,sans-serif}
 input:focus,select:focus,textarea:focus{outline:none}
-/* Opacity-only fade — no transform, so no ancestor-positioning bugs */
+/* FIX: opacity-only fade — no transform, so no ancestor-positioning bug */
 .fadein{animation:fi .35s ease both}
 @keyframes fi{from{opacity:0}to{opacity:1}}
-/* Modal card pop — safe because portal is at body */
-.pop{animation:pop .22s cubic-bezier(.22,.61,.36,1) both}
-@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
-/* Toast slide-down */
-.tin{animation:tin .25s cubic-bezier(.22,.61,.36,1) both}
-@keyframes tin{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
-@media (prefers-reduced-motion:reduce){.fadein,.pop,.tin{animation:none!important}}
+.mc{animation:mc .3s cubic-bezier(.22,.61,.36,1) both}
+@keyframes mc{from{opacity:0;transform:translateY(20px) scale(.98)}to{opacity:1;transform:none}}
+.mf{animation:mf .2s ease both}
+@keyframes mf{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.fadein,.mc,.mf{animation:none!important}}
 @media (min-width:1024px){html{scroll-behavior:smooth}}
-@media (max-width:640px){.hide-sm{display:none!important}}
 </style>
 </head>
 <body>
@@ -42,7 +39,7 @@ input:focus,select:focus,textarea:focus{outline:none}
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 <script type="text/babel" data-presets="react">
-const { useState, useEffect, useMemo, useRef } = React;
+const { useState, useEffect, useMemo, useCallback } = React;
 
 /* ═══════════════════════════════════════════════════════════
    CONFIG
@@ -60,51 +57,187 @@ function writeLS(key,val){try{localStorage.setItem(key,JSON.stringify(val));}cat
    CATEGORIES
    ═══════════════════════════════════════════════════════════ */
 const CATEGORIES = [
-  { key:'clothing', icon:'fa-shirt', color:'#E8730F', title:'Clothing, Fashion & Accessories', short:'Boutiques, shoe shops, handbag shops.', sources:'Clothes, shoes, handbags, belts, jewellery and fabrics.', suppliers:'Clothing wholesalers, importers, local designers and textile manufacturers.' },
-  { key:'grocery', icon:'fa-basket-shopping', color:'#2E9C4A', title:'Grocery & Supermarkets', short:'Mini-markets, grocery shops, supermarkets.', sources:'Mealie meal, rice, cooking oil, sugar, drinks, canned foods, household essentials.', suppliers:'Food manufacturers, wholesalers, distributors and farmers.' },
-  { key:'food', icon:'fa-utensils', color:'#B8564F', title:'Food, Catering & Hospitality', short:'Restaurants, takeaways, bakeries, caterers, hotels.', sources:'Vegetables, meat, fish, flour, spices, oil, packaging and drinks.', suppliers:'Farmers, butcheries, distributors, bakeries and packaging companies.' },
-  { key:'construction', icon:'fa-trowel-bricks', color:'#1B6CA8', title:'Construction & Hardware', short:'Hardware shops, contractors, plumbers.', sources:'Cement, bricks, roofing sheets, paint, cables, pipes, tiles, tools.', suppliers:'Building-material manufacturers, hardware wholesalers, steel distributors.' },
-  { key:'beauty', icon:'fa-scissors', color:'#7A4FA3', title:'Beauty, Cosmetics & Personal Care', short:'Hair salons, barbers, nail salons, spas.', sources:'Hair extensions, shampoo, relaxers, polish, makeup, skincare, salon equipment.', suppliers:'Beauty wholesalers, cosmetics distributors, salon equipment suppliers.' },
-  { key:'auto', icon:'fa-car', color:'#0E7C7B', title:'Automotive & Transport', short:'Spare-parts shops, garages, car washes.', sources:'Spare parts, tyres, batteries, lubricants, cleaning products, accessories.', suppliers:'Auto-parts wholesalers, importers, tyre distributors, lubricant suppliers.' },
-  { key:'agriculture', icon:'fa-seedling', color:'#2E9C4A', title:'Agriculture & Livestock', short:'Crop farms, poultry, fish farms, livestock.', sources:'Seeds, fertiliser, animal feed, chicks, veterinary supplies, irrigation, tools.', suppliers:'Agri-input dealers, hatcheries, feed manufacturers, equipment dealers.' },
-  { key:'stationery', icon:'fa-pen-ruler', color:'#E8730F', title:'Stationery, Printing & Office', short:'Stationery shops, printers, schools, office suppliers.', sources:'Paper, pens, notebooks, printer ink, toner, packaging, printing materials.', suppliers:'Stationery wholesalers, paper distributors, printing-equipment dealers.' },
-  { key:'electronics', icon:'fa-mobile-screen', color:'#1B6CA8', title:'Electronics & Technology', short:'Phone shops, computer shops, electronics retailers.', sources:'Phones, chargers, cables, laptops, screens, batteries, networking equipment.', suppliers:'Electronics distributors, importers, authorised wholesalers.' },
-  { key:'furniture', icon:'fa-couch', color:'#7A4FA3', title:'Furniture & Manufacturing', short:'Furniture shops, carpenters, tailors, small manufacturers.', sources:'Timber, foam, fabric, nails, screws, glue, metal, packaging, tools.', suppliers:'Timber yards, textile wholesalers, hardware distributors, raw-material suppliers.' },
-  { key:'cleaning', icon:'fa-spray-can-sparkles', color:'#0E7C7B', title:'Cleaning & Sanitation', short:'Cleaning companies, laundries, janitorial shops.', sources:'Detergents, bleach, disinfectants, gloves, mops, buckets, tissue, machines.', suppliers:'Chemical manufacturers, cleaning-product wholesalers, equipment dealers.' },
-  { key:'packaging', icon:'fa-box-open', color:'#B8564F', title:'Packaging & Distribution', short:'Packaging shops, distributors, self-packaging businesses.', sources:'Boxes, labels, bottles, jars, bags, wrapping, takeaway containers.', suppliers:'Packaging manufacturers, printing companies, packaging wholesalers.' }
+  { key:'clothing', icon:'fa-shirt', color:'#E8730F', title:'Clothing, Fashion & Accessories',
+    short:'Boutiques, shoe shops, handbag shops.',
+    sources:'Clothes, shoes, handbags, belts, jewellery and fabrics.',
+    suppliers:'Clothing wholesalers, importers, local designers and textile manufacturers.' },
+  { key:'grocery', icon:'fa-basket-shopping', color:'#2E9C4A', title:'Grocery & Supermarkets',
+    short:'Mini-markets, grocery shops, supermarkets.',
+    sources:'Mealie meal, rice, cooking oil, sugar, drinks, canned foods, household essentials.',
+    suppliers:'Food manufacturers, wholesalers, distributors and farmers.' },
+  { key:'food', icon:'fa-utensils', color:'#B8564F', title:'Food, Catering & Hospitality',
+    short:'Restaurants, takeaways, bakeries, caterers, hotels.',
+    sources:'Vegetables, meat, fish, flour, spices, oil, packaging and drinks.',
+    suppliers:'Farmers, butcheries, distributors, bakeries and packaging companies.' },
+  { key:'construction', icon:'fa-trowel-bricks', color:'#1B6CA8', title:'Construction & Hardware',
+    short:'Hardware shops, contractors, plumbers.',
+    sources:'Cement, bricks, roofing sheets, paint, cables, pipes, tiles, tools.',
+    suppliers:'Building-material manufacturers, hardware wholesalers, steel distributors.' },
+  { key:'beauty', icon:'fa-scissors', color:'#7A4FA3', title:'Beauty, Cosmetics & Personal Care',
+    short:'Hair salons, barbers, nail salons, spas.',
+    sources:'Hair extensions, shampoo, relaxers, polish, makeup, skincare, salon equipment.',
+    suppliers:'Beauty wholesalers, cosmetics distributors, salon equipment suppliers.' },
+  { key:'auto', icon:'fa-car', color:'#0E7C7B', title:'Automotive & Transport',
+    short:'Spare-parts shops, garages, car washes.',
+    sources:'Spare parts, tyres, batteries, lubricants, cleaning products, accessories.',
+    suppliers:'Auto-parts wholesalers, importers, tyre distributors, lubricant suppliers.' },
+  { key:'agriculture', icon:'fa-seedling', color:'#2E9C4A', title:'Agriculture & Livestock',
+    short:'Crop farms, poultry, fish farms, livestock.',
+    sources:'Seeds, fertiliser, animal feed, chicks, veterinary supplies, irrigation, tools.',
+    suppliers:'Agri-input dealers, hatcheries, feed manufacturers, equipment dealers.' },
+  { key:'stationery', icon:'fa-pen-ruler', color:'#E8730F', title:'Stationery, Printing & Office',
+    short:'Stationery shops, printers, schools, office suppliers.',
+    sources:'Paper, pens, notebooks, printer ink, toner, packaging, printing materials.',
+    suppliers:'Stationery wholesalers, paper distributors, printing-equipment dealers.' },
+  { key:'electronics', icon:'fa-mobile-screen', color:'#1B6CA8', title:'Electronics & Technology',
+    short:'Phone shops, computer shops, electronics retailers.',
+    sources:'Phones, chargers, cables, laptops, screens, batteries, networking equipment.',
+    suppliers:'Electronics distributors, importers, authorised wholesalers.' },
+  { key:'furniture', icon:'fa-couch', color:'#7A4FA3', title:'Furniture & Manufacturing',
+    short:'Furniture shops, carpenters, tailors, small manufacturers.',
+    sources:'Timber, foam, fabric, nails, screws, glue, metal, packaging, tools.',
+    suppliers:'Timber yards, textile wholesalers, hardware distributors, raw-material suppliers.' },
+  { key:'cleaning', icon:'fa-spray-can-sparkles', color:'#0E7C7B', title:'Cleaning & Sanitation',
+    short:'Cleaning companies, laundries, janitorial shops.',
+    sources:'Detergents, bleach, disinfectants, gloves, mops, buckets, tissue, machines.',
+    suppliers:'Chemical manufacturers, cleaning-product wholesalers, equipment dealers.' },
+  { key:'packaging', icon:'fa-box-open', color:'#B8564F', title:'Packaging & Distribution',
+    short:'Packaging shops, distributors, self-packaging businesses.',
+    sources:'Boxes, labels, bottles, jars, bags, wrapping, takeaway containers.',
+    suppliers:'Packaging manufacturers, printing companies, packaging wholesalers.' }
 ];
+
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.key,c]));
 
 /* ═══════════════════════════════════════════════════════════
    SEED SUPPLIERS — realistic Zambian data
    ═══════════════════════════════════════════════════════════ */
 const SEED_SUPPLIERS = [
-  { id:'sup-001', name:'Copperbelt Textiles Wholesale', category:'clothing', location:'Kitwe', verified:true, since:2018, products:['Fabric rolls','School uniform fabric','Workwear fabric','Dress materials'], moq:'50 metres', delivery:'Kitwe · Ndola · Lusaka', leadTime:'3–5 days', phone:'+260971000101', email:'sales@copperbelttextiles.zm', desc:'Bulk fabric and textile supplier serving boutique, uniform and tailoring businesses across the Copperbelt.' },
-  { id:'sup-002', name:'Lusaka Fashion Importers', category:'clothing', location:'Lusaka', verified:true, since:2015, products:['Ladies dresses','Handbags','Shoes','Accessories'], moq:'20 pieces per style', delivery:'Nationwide courier', leadTime:'5–7 days', phone:'+260971000102', email:'orders@lusakafashion.zm', desc:'Importer of ready-to-wear fashion and accessories, focused on small boutique buyers.' },
-  { id:'sup-003', name:'Zambezi Foods Distribution', category:'grocery', location:'Lusaka', verified:true, since:2016, products:['Mealie meal','Rice','Cooking oil','Sugar','Canned foods'], moq:'K3,000 order value', delivery:'Lusaka · Central · Copperbelt', leadTime:'2–3 days', phone:'+260971000103', email:'trade@zambezifoods.zm', desc:'Fast-moving consumer goods distributor serving mini-markets, grocery shops and convenience stores.' },
-  { id:'sup-004', name:'Chongwe Grain Millers', category:'grocery', location:'Chongwe', verified:true, since:2019, products:['Mealie meal (25kg)','Breakfast meal','Roller meal'], moq:'10 x 25kg bags', delivery:'Lusaka & surrounds', leadTime:'2 days', phone:'+260971000104', email:'info@chongwegrain.zm', desc:'Local grain miller supplying bulk mealie meal directly to grocery retailers and institutions.' },
-  { id:'sup-005', name:'Fresh Valley Produce', category:'food', location:'Lusaka', verified:true, since:2017, products:['Tomatoes','Onions','Leafy greens','Carrots','Seasonal vegetables'], moq:'20 crates per order', delivery:'Lusaka metro · daily', leadTime:'1 day', phone:'+260971000105', email:'orders@freshvalley.zm', desc:'Farm-to-restaurant fresh produce supplier, delivering early-morning to restaurants, hotels and caterers.' },
-  { id:'sup-006', name:'Prime Meat Butchery & Wholesale', category:'food', location:'Lusaka', verified:true, since:2014, products:['Beef','Chicken','Goat','Fish','Offal'], moq:'K1,500 order value', delivery:'Lusaka · cold chain', leadTime:'1–2 days', phone:'+260971000106', email:'sales@primemeat.zm', desc:'Cold-chain wholesale meat supplier for restaurants, hotels and catering operators.' },
-  { id:'sup-007', name:'BuildRight Hardware Wholesale', category:'construction', location:'Lusaka', verified:true, since:2013, products:['Cement','Roofing sheets','Paint','Electrical cables','Pipes','Tiles'], moq:'K5,000 order value', delivery:'Lusaka & Copperbelt', leadTime:'3–5 days', phone:'+260971000107', email:'trade@buildright.zm', desc:'Wholesale hardware distributor serving hardware shops, contractors and construction firms.' },
-  { id:'sup-008', name:'Kitwe Steel & Roofing', category:'construction', location:'Kitwe', verified:true, since:2016, products:['Roofing sheets','Steel bars','Mesh wire','Nails','Tools'], moq:'K2,500 order value', delivery:'Copperbelt · Lusaka', leadTime:'3–5 days', phone:'+260971000108', email:'orders@kitwesteel.zm', desc:'Steel and roofing supplier focused on Copperbelt hardware shops and contractors.' },
-  { id:'sup-009', name:'Ndola Cement Distributors', category:'construction', location:'Ndola', verified:true, since:2015, products:['Cement (50kg bags)','Lime','Aggregate','Sand'], moq:'50 bags', delivery:'Copperbelt · Lusaka', leadTime:'2–3 days', phone:'+260971000109', email:'sales@ndolacement.zm', desc:'Bulk cement and aggregate distributor working directly with hardware stores and small builders.' },
-  { id:'sup-010', name:'Glamour Beauty Supplies', category:'beauty', location:'Lusaka', verified:true, since:2018, products:['Hair extensions','Shampoo','Relaxers','Nail polish','Makeup'], moq:'K1,000 order value', delivery:'Lusaka · nationwide courier', leadTime:'2–4 days', phone:'+260971000110', email:'orders@glamourbeauty.zm', desc:'Beauty and cosmetics wholesaler serving salons, barbershops and beauty retailers.' },
-  { id:'sup-011', name:'SalonPro Equipment', category:'beauty', location:'Lusaka', verified:true, since:2019, products:['Salon chairs','Dryers','Clippers','Sterilizers','Mirrors'], moq:'1 unit', delivery:'Nationwide', leadTime:'5–10 days', phone:'+260971000111', email:'info@salonpro.zm', desc:'Salon equipment supplier offering single-unit purchases for new and growing salons.' },
-  { id:'sup-012', name:'AutoCare Parts Zambia', category:'auto', location:'Lusaka', verified:true, since:2014, products:['Spare parts','Brake pads','Filters','Belts','Lubricants'], moq:'K1,000 order value', delivery:'Lusaka · Copperbelt', leadTime:'3–5 days', phone:'+260971000112', email:'sales@autocare.zm', desc:'Auto-parts wholesaler serving spare-parts shops, garages and fleet operators.' },
-  { id:'sup-013', name:'Copperbelt Tyre Centre', category:'auto', location:'Kitwe', verified:true, since:2017, products:['Tyres','Batteries','Wheel alignment','Tyre repair'], moq:'4 tyres', delivery:'Kitwe · Ndola', leadTime:'1–2 days', phone:'+260971000113', email:'orders@cptyre.zm', desc:'Tyre and battery distributor focused on transport operators and commercial fleets.' },
-  { id:'sup-014', name:'AgriGrow Inputs', category:'agriculture', location:'Lusaka', verified:true, since:2016, products:['Seeds','Fertiliser','Herbicides','Irrigation kits','Tools'], moq:'K800 order value', delivery:'Central · Lusaka · Eastern', leadTime:'3–5 days', phone:'+260971000114', email:'orders@agrigrow.zm', desc:'Agricultural input dealer serving smallholder farmers, cooperatives and commercial farms.' },
-  { id:'sup-015', name:'Zamhatch Poultry & Feed', category:'agriculture', location:'Kabwe', verified:true, since:2015, products:['Day-old chicks','Starter feed','Grower feed','Finisher feed'], moq:'100 chicks', delivery:'Central · Lusaka · Copperbelt', leadTime:'2–4 days', phone:'+260971000115', email:'sales@zamhatch.zm', desc:'Hatchery and feed supplier for poultry farmers at starter and commercial scale.' },
-  { id:'sup-016', name:'OfficeMart Stationery', category:'stationery', location:'Lusaka', verified:true, since:2018, products:['Paper','Pens','Notebooks','Files','Printer ink','Toner'], moq:'K500 order value', delivery:'Lusaka · nationwide courier', leadTime:'2–3 days', phone:'+260971000116', email:'orders@officemart.zm', desc:'Office and stationery wholesaler serving schools, offices and stationery retail shops.' },
-  { id:'sup-017', name:'PrintHub Zambia', category:'stationery', location:'Lusaka', verified:true, since:2019, products:['Printing paper','Vinyl','Ink','Binding supplies'], moq:'K1,000 order value', delivery:'Lusaka metro', leadTime:'2 days', phone:'+260971000117', email:'info@printhub.zm', desc:'Printing materials and consumables supplier for print shops and small presses.' },
-  { id:'sup-018', name:'TechSource Distributors', category:'electronics', location:'Lusaka', verified:true, since:2017, products:['Phones','Chargers','Cables','Laptops','Accessories'], moq:'K2,000 order value', delivery:'Nationwide courier', leadTime:'3–5 days', phone:'+260971000118', email:'trade@techsource.zm', desc:'Electronics distributor serving phone shops, computer retailers and repair businesses.' },
-  { id:'sup-019', name:'NetLink Equipment', category:'electronics', location:'Lusaka', verified:true, since:2020, products:['Routers','Switches','Cabling','Access points'], moq:'1 unit', delivery:'Lusaka · Copperbelt', leadTime:'5–7 days', phone:'+260971000119', email:'sales@netlink.zm', desc:'Networking equipment supplier for IT service providers and small business infrastructure.' },
-  { id:'sup-020', name:'WoodWorks Timber Yard', category:'furniture', location:'Lusaka', verified:true, since:2013, products:['Timber','Plywood','Foam','Upholstery fabric','Hardware'], moq:'K1,500 order value', delivery:'Lusaka · Central', leadTime:'3–5 days', phone:'+260971000120', email:'orders@woodworks.zm', desc:'Timber and upholstery supplier for furniture makers, carpenters and interior specialists.' },
-  { id:'sup-021', name:'Fabric House Zambia', category:'furniture', location:'Lusaka', verified:true, since:2016, products:['Upholstery fabric','Curtain fabric','Foam','Zip and trims'], moq:'20 metres', delivery:'Nationwide courier', leadTime:'3–5 days', phone:'+260971000121', email:'sales@fabrichouse.zm', desc:'Specialist textile supplier for upholsterers, interior decorators and furniture workshops.' },
-  { id:'sup-022', name:'CleanPro Chemicals', category:'cleaning', location:'Lusaka', verified:true, since:2017, products:['Detergents','Disinfectants','Bleach','Gloves','Mops & buckets'], moq:'K800 order value', delivery:'Lusaka · Copperbelt', leadTime:'2–4 days', phone:'+260971000122', email:'info@cleanpro.zm', desc:'Cleaning chemicals and consumables supplier for cleaning companies, laundries and janitorial shops.' },
-  { id:'sup-023', name:'PackRight Solutions', category:'packaging', location:'Lusaka', verified:true, since:2019, products:['Boxes','Labels','Bottles','Jars','Takeaway containers'], moq:'K1,000 order value', delivery:'Lusaka · Copperbelt', leadTime:'3–5 days', phone:'+260971000123', email:'orders@packright.zm', desc:'Packaging supplier serving restaurants, food producers, cosmetics brands and retailers.' },
-  { id:'sup-024', name:'ZamPack Manufacturers', category:'packaging', location:'Ndola', verified:true, since:2018, products:['Cartons','Kraft bags','Custom prints','Corrugated boxes'], moq:'500 units per size', delivery:'Nationwide', leadTime:'7–10 days', phone:'+260971000124', email:'sales@zampack.zm', desc:'Packaging manufacturer offering custom-printed cartons and boxes for producers and distributors.' }
+  { id:'sup-001', name:'Copperbelt Textiles Wholesale', category:'clothing', location:'Kitwe', verified:true, since:2018,
+    products:['Fabric rolls','School uniform fabric','Workwear fabric','Dress materials'],
+    moq:'50 metres', delivery:'Kitwe · Ndola · Lusaka', leadTime:'3–5 days',
+    phone:'+260971000101', email:'sales@copperbelttextiles.zm',
+    desc:'Bulk fabric and textile supplier serving boutique, uniform and tailoring businesses across the Copperbelt.' },
+  { id:'sup-002', name:'Lusaka Fashion Importers', category:'clothing', location:'Lusaka', verified:true, since:2015,
+    products:['Ladies dresses','Handbags','Shoes','Accessories'],
+    moq:'20 pieces per style', delivery:'Nationwide courier', leadTime:'5–7 days',
+    phone:'+260971000102', email:'orders@lusakafashion.zm',
+    desc:'Importer of ready-to-wear fashion and accessories, focused on small boutique buyers.' },
+  { id:'sup-003', name:'Zambezi Foods Distribution', category:'grocery', location:'Lusaka', verified:true, since:2016,
+    products:['Mealie meal','Rice','Cooking oil','Sugar','Canned foods'],
+    moq:'K3,000 order value', delivery:'Lusaka · Central · Copperbelt', leadTime:'2–3 days',
+    phone:'+260971000103', email:'trade@zambezifoods.zm',
+    desc:'Fast-moving consumer goods distributor serving mini-markets, grocery shops and convenience stores.' },
+  { id:'sup-004', name:'Chongwe Grain Millers', category:'grocery', location:'Chongwe', verified:true, since:2019,
+    products:['Mealie meal (25kg)','Breakfast meal','Roller meal'],
+    moq:'10 x 25kg bags', delivery:'Lusaka & surrounds', leadTime:'2 days',
+    phone:'+260971000104', email:'info@chongwegrain.zm',
+    desc:'Local grain miller supplying bulk mealie meal directly to grocery retailers and institutions.' },
+  { id:'sup-005', name:'Fresh Valley Produce', category:'food', location:'Lusaka', verified:true, since:2017,
+    products:['Tomatoes','Onions','Leafy greens','Carrots','Seasonal vegetables'],
+    moq:'20 crates per order', delivery:'Lusaka metro · daily', leadTime:'1 day',
+    phone:'+260971000105', email:'orders@freshvalley.zm',
+    desc:'Farm-to-restaurant fresh produce supplier, delivering early-morning to restaurants, hotels and caterers.' },
+  { id:'sup-006', name:'Prime Meat Butchery & Wholesale', category:'food', location:'Lusaka', verified:true, since:2014,
+    products:['Beef','Chicken','Goat','Fish','Offal'],
+    moq:'K1,500 order value', delivery:'Lusaka · cold chain', leadTime:'1–2 days',
+    phone:'+260971000106', email:'sales@primemeat.zm',
+    desc:'Cold-chain wholesale meat supplier for restaurants, hotels and catering operators.' },
+  { id:'sup-007', name:'BuildRight Hardware Wholesale', category:'construction', location:'Lusaka', verified:true, since:2013,
+    products:['Cement','Roofing sheets','Paint','Electrical cables','Pipes','Tiles'],
+    moq:'K5,000 order value', delivery:'Lusaka & Copperbelt', leadTime:'3–5 days',
+    phone:'+260971000107', email:'trade@buildright.zm',
+    desc:'Wholesale hardware distributor serving hardware shops, contractors and construction firms.' },
+  { id:'sup-008', name:'Kitwe Steel & Roofing', category:'construction', location:'Kitwe', verified:true, since:2016,
+    products:['Roofing sheets','Steel bars','Mesh wire','Nails','Tools'],
+    moq:'K2,500 order value', delivery:'Copperbelt · Lusaka', leadTime:'3–5 days',
+    phone:'+260971000108', email:'orders@kitwesteel.zm',
+    desc:'Steel and roofing supplier focused on Copperbelt hardware shops and contractors.' },
+  { id:'sup-009', name:'Ndola Cement Distributors', category:'construction', location:'Ndola', verified:true, since:2015,
+    products:['Cement (50kg bags)','Lime','Aggregate','Sand'],
+    moq:'50 bags', delivery:'Copperbelt · Lusaka', leadTime:'2–3 days',
+    phone:'+260971000109', email:'sales@ndolacement.zm',
+    desc:'Bulk cement and aggregate distributor working directly with hardware stores and small builders.' },
+  { id:'sup-010', name:'Glamour Beauty Supplies', category:'beauty', location:'Lusaka', verified:true, since:2018,
+    products:['Hair extensions','Shampoo','Relaxers','Nail polish','Makeup'],
+    moq:'K1,000 order value', delivery:'Lusaka · nationwide courier', leadTime:'2–4 days',
+    phone:'+260971000110', email:'orders@glamourbeauty.zm',
+    desc:'Beauty and cosmetics wholesaler serving salons, barbershops and beauty retailers.' },
+  { id:'sup-011', name:'SalonPro Equipment', category:'beauty', location:'Lusaka', verified:true, since:2019,
+    products:['Salon chairs','Dryers','Clippers','Sterilizers','Mirrors'],
+    moq:'1 unit', delivery:'Nationwide', leadTime:'5–10 days',
+    phone:'+260971000111', email:'info@salonpro.zm',
+    desc:'Salon equipment supplier offering single-unit purchases for new and growing salons.' },
+  { id:'sup-012', name:'AutoCare Parts Zambia', category:'auto', location:'Lusaka', verified:true, since:2014,
+    products:['Spare parts','Brake pads','Filters','Belts','Lubricants'],
+    moq:'K1,000 order value', delivery:'Lusaka · Copperbelt', leadTime:'3–5 days',
+    phone:'+260971000112', email:'sales@autocare.zm',
+    desc:'Auto-parts wholesaler serving spare-parts shops, garages and fleet operators.' },
+  { id:'sup-013', name:'Copperbelt Tyre Centre', category:'auto', location:'Kitwe', verified:true, since:2017,
+    products:['Tyres','Batteries','Wheel alignment','Tyre repair'],
+    moq:'4 tyres', delivery:'Kitwe · Ndola', leadTime:'1–2 days',
+    phone:'+260971000113', email:'orders@cptyre.zm',
+    desc:'Tyre and battery distributor focused on transport operators and commercial fleets.' },
+  { id:'sup-014', name:'AgriGrow Inputs', category:'agriculture', location:'Lusaka', verified:true, since:2016,
+    products:['Seeds','Fertiliser','Herbicides','Irrigation kits','Tools'],
+    moq:'K800 order value', delivery:'Central · Lusaka · Eastern', leadTime:'3–5 days',
+    phone:'+260971000114', email:'orders@agrigrow.zm',
+    desc:'Agricultural input dealer serving smallholder farmers, cooperatives and commercial farms.' },
+  { id:'sup-015', name:'Zamhatch Poultry & Feed', category:'agriculture', location:'Kabwe', verified:true, since:2015,
+    products:['Day-old chicks','Starter feed','Grower feed','Finisher feed'],
+    moq:'100 chicks', delivery:'Central · Lusaka · Copperbelt', leadTime:'2–4 days',
+    phone:'+260971000115', email:'sales@zamhatch.zm',
+    desc:'Hatchery and feed supplier for poultry farmers at starter and commercial scale.' },
+  { id:'sup-016', name:'OfficeMart Stationery', category:'stationery', location:'Lusaka', verified:true, since:2018,
+    products:['Paper','Pens','Notebooks','Files','Printer ink','Toner'],
+    moq:'K500 order value', delivery:'Lusaka · nationwide courier', leadTime:'2–3 days',
+    phone:'+260971000116', email:'orders@officemart.zm',
+    desc:'Office and stationery wholesaler serving schools, offices and stationery retail shops.' },
+  { id:'sup-017', name:'PrintHub Zambia', category:'stationery', location:'Lusaka', verified:true, since:2019,
+    products:['Printing paper','Vinyl','Ink','Binding supplies'],
+    moq:'K1,000 order value', delivery:'Lusaka metro', leadTime:'2 days',
+    phone:'+260971000117', email:'info@printhub.zm',
+    desc:'Printing materials and consumables supplier for print shops and small presses.' },
+  { id:'sup-018', name:'TechSource Distributors', category:'electronics', location:'Lusaka', verified:true, since:2017,
+    products:['Phones','Chargers','Cables','Laptops','Accessories'],
+    moq:'K2,000 order value', delivery:'Nationwide courier', leadTime:'3–5 days',
+    phone:'+260971000118', email:'trade@techsource.zm',
+    desc:'Electronics distributor serving phone shops, computer retailers and repair businesses.' },
+  { id:'sup-019', name:'NetLink Equipment', category:'electronics', location:'Lusaka', verified:true, since:2020,
+    products:['Routers','Switches','Cabling','Access points'],
+    moq:'1 unit', delivery:'Lusaka · Copperbelt', leadTime:'5–7 days',
+    phone:'+260971000119', email:'sales@netlink.zm',
+    desc:'Networking equipment supplier for IT service providers and small business infrastructure.' },
+  { id:'sup-020', name:'WoodWorks Timber Yard', category:'furniture', location:'Lusaka', verified:true, since:2013,
+    products:['Timber','Plywood','Foam','Upholstery fabric','Hardware'],
+    moq:'K1,500 order value', delivery:'Lusaka · Central', leadTime:'3–5 days',
+    phone:'+260971000120', email:'orders@woodworks.zm',
+    desc:'Timber and upholstery supplier for furniture makers, carpenters and interior specialists.' },
+  { id:'sup-021', name:'Fabric House Zambia', category:'furniture', location:'Lusaka', verified:true, since:2016,
+    products:['Upholstery fabric','Curtain fabric','Foam','Zip and trims'],
+    moq:'20 metres', delivery:'Nationwide courier', leadTime:'3–5 days',
+    phone:'+260971000121', email:'sales@fabrichouse.zm',
+    desc:'Specialist textile supplier for upholsterers, interior decorators and furniture workshops.' },
+  { id:'sup-022', name:'CleanPro Chemicals', category:'cleaning', location:'Lusaka', verified:true, since:2017,
+    products:['Detergents','Disinfectants','Bleach','Gloves','Mops & buckets'],
+    moq:'K800 order value', delivery:'Lusaka · Copperbelt', leadTime:'2–4 days',
+    phone:'+260971000122', email:'info@cleanpro.zm',
+    desc:'Cleaning chemicals and consumables supplier for cleaning companies, laundries and janitorial shops.' },
+  { id:'sup-023', name:'PackRight Solutions', category:'packaging', location:'Lusaka', verified:true, since:2019,
+    products:['Boxes','Labels','Bottles','Jars','Takeaway containers'],
+    moq:'K1,000 order value', delivery:'Lusaka · Copperbelt', leadTime:'3–5 days',
+    phone:'+260971000123', email:'orders@packright.zm',
+    desc:'Packaging supplier serving restaurants, food producers, cosmetics brands and retailers.' },
+  { id:'sup-024', name:'ZamPack Manufacturers', category:'packaging', location:'Ndola', verified:true, since:2018,
+    products:['Cartons','Kraft bags','Custom prints','Corrugated boxes'],
+    moq:'500 units per size', delivery:'Nationwide', leadTime:'7–10 days',
+    phone:'+260971000124', email:'sales@zampack.zm',
+    desc:'Packaging manufacturer offering custom-printed cartons and boxes for producers and distributors.' }
 ];
 
+/* ═══════════════════════════════════════════════════════════
+   OTHER DATA
+   ═══════════════════════════════════════════════════════════ */
 const SERVICE_BUSINESSES = [
   { icon:'fa-camera', category:'Photography & Videography', need:'Cameras, lighting, memory cards and printing services.' },
   { icon:'fa-champagne-glasses', category:'Events & Weddings', need:'Decorations, flowers, chairs, tents, sound equipment and catering.' },
@@ -124,7 +257,7 @@ const ROLES = [
 const ZAMBIAN_CITIES = ['Lusaka','Kitwe','Ndola','Livingstone','Kabwe','Chingola','Mufulira','Solwezi','Chipata','Choma','Mazabuka','Kasama','Mongu','Chongwe','Kafue'];
 
 /* ═══════════════════════════════════════════════════════════
-   SHARED: Mark, Modal (portaled), Toast (portaled), TIn
+   SHARED COMPONENTS
    ═══════════════════════════════════════════════════════════ */
 function Mark({size=38}){
   return <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:size,height:size,borderRadius:'50%',background:'#fff',boxShadow:'0 4px 12px -4px rgba(10,31,18,.5)',flexShrink:0}}>
@@ -132,85 +265,37 @@ function Mark({size=38}){
   </span>;
 }
 
-/* MODAL — portaled to document.body, viewport-centered, scroll-locked, escape-to-close */
+/* FIX — Modal now portaled to document.body so ancestor transforms can't break fixed positioning */
 function Modal({open,onClose,eyebrow,title,children,maxWidth='46rem'}){
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-
   useEffect(()=>{
-    if(!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return ()=>{ document.body.style.overflow = prev || ''; };
+    if(open){document.body.style.overflow='hidden';}
+    else{document.body.style.overflow='';}
+    return ()=>{document.body.style.overflow='';};
   },[open]);
-
   useEffect(()=>{
-    if(!open) return;
-    const onKey = (e)=>{ if(e.key==='Escape') onCloseRef.current(); };
-    window.addEventListener('keydown', onKey);
-    return ()=>window.removeEventListener('keydown', onKey);
-  },[open]);
-
+    const onKey=e=>{if(e.key==='Escape')onClose();};
+    if(open)window.addEventListener('keydown',onKey);
+    return ()=>window.removeEventListener('keydown',onKey);
+  },[open,onClose]);
   if(!open) return null;
-
   return ReactDOM.createPortal(
-    <div onClick={()=>onCloseRef.current()} role="dialog" aria-modal="true" style={{
-      position:'fixed', top:0, right:0, bottom:0, left:0, zIndex:9999,
-      background:'rgba(10,31,18,.85)',
-      display:'flex', alignItems:'center', justifyContent:'center',
-      padding:'16px', overflowY:'auto'
-    }}>
-      <div onClick={e=>e.stopPropagation()} className="pop" style={{
-        background:'#F5FAF6', borderRadius:14, width:'100%', maxWidth,
-        maxHeight:'92vh', overflowY:'auto',
-        boxShadow:'0 30px 80px rgba(0,0,0,.35)',
-        display:'flex', flexDirection:'column'
-      }}>
-        <div style={{
-          background:'#0A1F12', padding:'14px 22px',
-          display:'flex', alignItems:'center', justifyContent:'space-between',
-          position:'sticky', top:0, zIndex:10,
-          borderTopLeftRadius:14, borderTopRightRadius:14,
-          borderBottom:'1px solid rgba(245,166,35,.15)'
-        }}>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 mf"
+      style={{background:'rgba(10,31,18,0.85)',position:'fixed',inset:0,zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'12px'}}
+      onClick={onClose}>
+      <div className="mc" onClick={e=>e.stopPropagation()}
+        style={{background:'#F5FAF6',borderRadius:12,width:'100%',maxWidth:maxWidth,maxHeight:'92vh',overflowY:'auto',boxShadow:'0 30px 80px rgba(0,0,0,.35)'}}>
+        <div style={{background:'#0A1F12',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:10,borderBottom:'1px solid rgba(245,166,35,.15)'}}>
           <div style={{display:'flex',alignItems:'center',gap:12,minWidth:0}}>
-            <span style={{width:8,height:8,borderRadius:'50%',background:'#F5A623',flexShrink:0}}></span>
+            <span style={{width:8,height:8,borderRadius:'50%',background:'#F5A623'}}></span>
             <span style={{fontSize:10.5,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:700,color:'#F5A623',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{eyebrow||'StartEasy'}</span>
-            {title && <span className="hide-sm" style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,.7)',marginLeft:8,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'20rem'}}>{title}</span>}
+            {title&&<span className="hidden sm:inline" style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,.7)',marginLeft:8,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'20rem'}}>{title}</span>}
           </div>
-          <button onClick={()=>onCloseRef.current()} aria-label="Close" style={{
-            background:'rgba(255,255,255,.06)', border:'none', color:'rgba(255,255,255,.8)',
-            cursor:'pointer', width:32, height:32, borderRadius:8, fontSize:14, flexShrink:0
-          }}><i className="fas fa-times"></i></button>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'rgba(255,255,255,.6)',cursor:'pointer',padding:6,fontSize:16}} aria-label="Close">
+            <i className="fas fa-times"></i>
+          </button>
         </div>
-        <div style={{padding:'22px 26px'}}>{children}</div>
+        <div style={{padding:'24px 28px'}}>{children}</div>
       </div>
-    </div>,
-    document.body
-  );
-}
-
-/* TOAST — portaled to document.body, top-center, auto-dismissed by parent */
-function Toast({toast}){
-  if(!toast) return null;
-  const map = {
-    success:{bg:'#1E7B3C',icon:'fa-circle-check'},
-    info:{bg:'#1B6CA8',icon:'fa-circle-info'},
-    warn:{bg:'#8A6828',icon:'fa-triangle-exclamation'},
-    error:{bg:'#B8564F',icon:'fa-circle-exclamation'}
-  };
-  const c = map[toast.type] || map.info;
-  return ReactDOM.createPortal(
-    <div key={toast.id} className="tin" style={{
-      position:'fixed', top:20, left:'50%', transform:'translateX(-50%)',
-      zIndex:10000, maxWidth:'calc(100vw - 32px)',
-      display:'flex', alignItems:'center', gap:12,
-      padding:'13px 20px', background:c.bg, color:'#fff',
-      borderRadius:10, boxShadow:'0 14px 38px -8px rgba(0,0,0,.3)',
-      fontSize:13.5, fontWeight:600, lineHeight:1.5
-    }}>
-      <i className={`fas ${c.icon}`} style={{fontSize:16,flexShrink:0}}></i>
-      <span>{toast.message}</span>
     </div>,
     document.body
   );
@@ -231,31 +316,34 @@ function Nav({onOpenRegister,onOpenRFQ}){
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
         <a href={MAIN_PLATFORM_URL} style={{display:'flex',alignItems:'center',gap:12,textDecoration:'none'}}>
           <Mark size={38}/>
-          <span className="hide-sm" style={{textAlign:'left',lineHeight:1}}>
+          <span className="hidden sm:block" style={{textAlign:'left',lineHeight:1}}>
             <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
             <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
           </span>
         </a>
-        <nav className="hide-sm" style={{display:'flex',gap:22}}>
-          <a href="#directory" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Browse</a>
-          <a href="#services" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Services</a>
-          <a href="#roles" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Roles</a>
+        <nav className="hidden lg:flex" style={{gap:22}}>
+          <a href="#directory" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Browse suppliers</a>
+          <a href="#services" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Service businesses</a>
+          <a href="#roles" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Supply chain</a>
         </nav>
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <button onClick={onOpenRFQ} className="hide-sm" style={{padding:'10px 16px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+          <button onClick={onOpenRFQ} className="hidden sm:inline-flex"
+            style={{padding:'10px 16px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
             <i className="fas fa-file-invoice"></i> Request quote
           </button>
-          <button onClick={onOpenRegister} className="hide-sm" style={{padding:'10px 16px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+          <button onClick={onOpenRegister} className="hidden sm:inline-flex"
+            style={{padding:'10px 16px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
             <i className="fas fa-plus"></i> Become a supplier
           </button>
-          <button onClick={()=>setOpen(!open)} style={{width:36,height:36,display:'none',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'none',border:'none'}} className="mobile-menu-btn" aria-label="Menu">
+          <button onClick={()=>setOpen(!open)} className="lg:hidden"
+            style={{width:36,height:36,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'none',border:'none'}} aria-label="Menu">
             <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(45deg) translateY(3.5px)':'none',transition:'transform .2s'}}/>
             <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(-45deg) translateY(-3.5px)':'none',transition:'transform .2s'}}/>
           </button>
         </div>
       </div>
     </div>
-    {open && <div style={{borderTop:'1px solid rgba(255,255,255,.1)',background:'#0A1F12'}}>
+    {open&&<div className="lg:hidden" style={{borderTop:'1px solid rgba(255,255,255,.1)',background:'#0A1F12'}}>
       <div style={{padding:'16px 24px'}}>
         {[['#directory','Browse suppliers'],['#services','Service businesses'],['#roles','Supply chain']].map(([h,l])=>
           <a key={h} href={h} onClick={()=>setOpen(false)} style={{display:'block',padding:'14px 0',borderBottom:'1px solid rgba(255,255,255,.05)',color:'rgba(255,255,255,.7)',fontSize:14,textDecoration:'none'}}>{l}</a>
@@ -270,19 +358,19 @@ function Nav({onOpenRegister,onOpenRFQ}){
         </div>
       </div>
     </div>}
-    <style>{`@media (max-width:768px){.hide-sm{display:none!important}.mobile-menu-btn{display:flex!important}}`}</style>
   </header>;
 }
 
 /* ═══════════════════════════════════════════════════════════
    HERO
    ═══════════════════════════════════════════════════════════ */
-function Hero({onOpenRFQ,onOpenRegister,stats}){
+function Hero({onOpenRegister,onOpenRFQ,stats}){
   return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',padding:'clamp(60px,8vw,100px) 24px clamp(50px,7vw,80px)'}}>
     <div style={{position:'absolute',top:-160,right:-120,width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',bottom:-180,left:-100,width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
     <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
       <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:18,letterSpacing:'.22em'}}>Businesses &amp; Suppliers Directory</span>
-      <h1 className="serif" style={{fontSize:'clamp(2.1rem,5.2vw,3.6rem)',lineHeight:1.08,margin:'0 0 22px',maxWidth:'52rem'}}>
+      <h1 className="serif" style={{fontSize:'clamp(2.1rem,5.2vw,3.6rem)',lineHeight:1.08,marginBottom:22,maxWidth:'52rem',margin:'0 0 22px'}}>
         Helping businesses <em style={{fontStyle:'italic',color:'#F5A623'}}>buy better.</em><br/>
         Helping suppliers <em style={{fontStyle:'italic',color:'#F5A623'}}>sell more.</em>
       </h1>
@@ -290,10 +378,12 @@ function Hero({onOpenRFQ,onOpenRegister,stats}){
         Search verified suppliers across Zambia. Compare offers, request quotations, and turn a first enquiry into a working supply relationship — in one place.
       </p>
       <div style={{display:'flex',flexWrap:'wrap',gap:12,marginBottom:36}}>
-        <button onClick={onOpenRFQ} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,boxShadow:'0 14px 34px -12px rgba(232,115,15,.55)'}}>
+        <button onClick={onOpenRFQ}
+          style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,boxShadow:'0 14px 34px -12px rgba(232,115,15,.55)'}}>
           <i className="fas fa-file-invoice"></i> Request a quotation
         </button>
-        <a href="#directory" style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'rgba(255,255,255,.06)',color:'#fff',border:'1px solid rgba(255,255,255,.22)',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}>
+        <a href="#directory"
+          style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'rgba(255,255,255,.06)',color:'#fff',border:'1px solid rgba(255,255,255,.22)',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}>
           <i className="fas fa-magnifying-glass"></i> Browse suppliers
         </a>
       </div>
@@ -307,7 +397,7 @@ function Hero({onOpenRFQ,onOpenRegister,stats}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DIRECTORY
+   DIRECTORY — filters + supplier grid
    ═══════════════════════════════════════════════════════════ */
 function Directory({suppliers,onOpenProfile,onRequestQuote}){
   const [query,setQuery]=useState('');
@@ -316,7 +406,11 @@ function Directory({suppliers,onOpenProfile,onRequestQuote}){
   const [delivery,setDelivery]=useState('all');
   const [showFilters,setShowFilters]=useState(false);
 
-  const cities=useMemo(()=>['all',...Array.from(new Set(suppliers.map(x=>x.location))).sort()],[suppliers]);
+  const cities=useMemo(()=>{
+    const s=new Set(suppliers.map(x=>x.location));
+    return ['all',...Array.from(s).sort()];
+  },[suppliers]);
+
   const filtered=useMemo(()=>{
     const q=query.trim().toLowerCase();
     return suppliers.filter(s=>{
@@ -334,7 +428,7 @@ function Directory({suppliers,onOpenProfile,onRequestQuote}){
   },[suppliers,query,category,city,delivery]);
 
   const reset=()=>{setQuery('');setCategory('all');setCity('all');setDelivery('all');};
-  const activeFilters=(category!=='all'?1:0)+(city!=='all'?1:0)+(delivery!=='all'?1:0);
+  const activeFilters = (category!=='all'?1:0)+(city!=='all'?1:0)+(delivery!=='all'?1:0);
 
   return <section id="directory" style={{background:'#F5FAF6',scrollMarginTop:80}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(48px,6vw,72px) 24px'}}>
@@ -348,17 +442,22 @@ function Directory({suppliers,onOpenProfile,onRequestQuote}){
         </p>
       </div>
 
+      {/* SEARCH BAR */}
       <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'16px 18px',marginBottom:16}}>
         <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
           <div style={{position:'relative',flex:'1 1 260px',minWidth:0}}>
             <i className="fas fa-magnifying-glass" style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',color:'rgba(10,31,18,.4)',fontSize:13}}></i>
-            <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search by product, supplier or city — e.g. cement, fabric, Kitwe…" style={{...INP_STYLE,paddingLeft:40,fontSize:14}}/>
+            <input value={query} onChange={e=>setQuery(e.target.value)}
+              placeholder="Search by product, supplier name or city — e.g. cement, fabric, Kitwe…"
+              style={{...INP_STYLE,paddingLeft:40,fontSize:14}}/>
           </div>
-          <button onClick={()=>setShowFilters(!showFilters)} style={{padding:'12px 18px',background:activeFilters>0?'#0A1F12':'#fff',color:activeFilters>0?'#fff':'#0A1F12',border:'1.5px solid rgba(10,31,18,.15)',borderRadius:9,fontSize:13,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+          <button onClick={()=>setShowFilters(!showFilters)}
+            style={{padding:'12px 18px',background:activeFilters>0?'#0A1F12':'#fff',color:activeFilters>0?'#fff':'#0A1F12',border:'1.5px solid rgba(10,31,18,.15)',borderRadius:9,fontSize:13,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8,position:'relative'}}>
             <i className="fas fa-sliders"></i> Filters
             {activeFilters>0 && <span style={{background:'#F5A623',color:'#0A1F12',fontSize:10,fontWeight:800,borderRadius:99,padding:'1px 7px',marginLeft:2}}>{activeFilters}</span>}
           </button>
-          {(activeFilters>0||query) && <button onClick={reset} style={{padding:'12px 16px',background:'none',border:'none',color:'#B8564F',fontSize:12.5,fontWeight:700,textDecoration:'underline'}}>Clear</button>}
+          {(activeFilters>0 || query) && <button onClick={reset}
+            style={{padding:'12px 16px',background:'none',border:'none',color:'#B8564F',fontSize:12.5,fontWeight:700,textDecoration:'underline'}}>Clear</button>}
         </div>
 
         {showFilters && <div className="fadein" style={{display:'grid',gap:12,marginTop:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
@@ -386,20 +485,22 @@ function Directory({suppliers,onOpenProfile,onRequestQuote}){
         </div>}
       </div>
 
+      {/* ACTIVE FILTER PILLS */}
       {activeFilters>0 && <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:20}}>
         {category!=='all' && <FilterPill label={CAT_MAP[category]?.title||category} onClear={()=>setCategory('all')}/>}
         {city!=='all' && <FilterPill label={city} onClear={()=>setCity('all')}/>}
         {delivery!=='all' && <FilterPill label={delivery==='nationwide'?'Nationwide delivery':'Local delivery'} onClear={()=>setDelivery('all')}/>}
       </div>}
 
+      {/* RESULTS */}
       {filtered.length===0 ? <div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:14,padding:'64px 24px',textAlign:'center'}}>
         <i className="fas fa-magnifying-glass" style={{fontSize:32,color:'rgba(10,31,18,.2)',marginBottom:14,display:'block'}}></i>
         <h4 className="serif" style={{fontSize:19,fontWeight:700,color:'#0A1F12',margin:'0 0 8px'}}>No suppliers match your search</h4>
         <p style={{fontSize:13.5,color:'rgba(10,31,18,.55)',margin:'0 0 20px'}}>Try a different keyword, or request a quotation and we'll source on your behalf.</p>
-        <button onClick={()=>onRequestQuote()} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700}}>
+        <button onClick={onRequestQuote} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700}}>
           <i className="fas fa-file-invoice"></i> Request a quotation
         </button>
-      </div> : <div className="fadein" style={{display:'grid',gap:16,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
+      </div> : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map(s=><SupplierCard key={s.id} supplier={s} onOpen={()=>onOpenProfile(s)} onQuote={()=>onRequestQuote(s)}/>)}
       </div>}
     </div>
@@ -409,13 +510,13 @@ function Directory({suppliers,onOpenProfile,onRequestQuote}){
 function FilterPill({label,onClear}){
   return <span style={{display:'inline-flex',alignItems:'center',gap:8,padding:'6px 12px',background:'#0A1F12',color:'#fff',borderRadius:99,fontSize:11.5,fontWeight:700}}>
     {label}
-    <button onClick={onClear} aria-label="Remove filter" style={{background:'none',border:'none',color:'rgba(255,255,255,.7)',fontSize:12,padding:0,lineHeight:1}}><i className="fas fa-times"></i></button>
+    <button onClick={onClear} style={{background:'none',border:'none',color:'rgba(255,255,255,.7)',fontSize:12,padding:0,lineHeight:1,cursor:'pointer'}}><i className="fas fa-times"></i></button>
   </span>;
 }
 
 function SupplierCard({supplier,onOpen,onQuote}){
   const cat=CAT_MAP[supplier.category]||{color:'#E8730F',icon:'fa-building',title:'Supplier'};
-  return <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:0,overflow:'hidden',display:'flex',flexDirection:'column',borderTop:`3px solid ${cat.color}`,transition:'transform .18s,box-shadow .18s'}}
+  return <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:0,overflow:'hidden',display:'flex',flexDirection:'column',borderTop:`3px solid ${cat.color}`,transition:'all .2s'}}
     onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.boxShadow='0 14px 34px -14px rgba(10,31,18,.15)';}}
     onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';}}>
     <div style={{padding:'20px 20px 18px',display:'flex',flexDirection:'column',gap:12,flex:1}}>
@@ -428,24 +529,34 @@ function SupplierCard({supplier,onOpen,onQuote}){
             <h3 style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15.5,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{supplier.name}</h3>
             {supplier.verified && <i className="fas fa-circle-check" style={{color:'#1E7B3C',fontSize:12}} title="Verified supplier"></i>}
           </div>
-          <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)',display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+          <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)',display:'flex',alignItems:'center',gap:6}}>
             <i className="fas fa-location-dot" style={{fontSize:10}}></i> {supplier.location}
             {supplier.since && <><span style={{opacity:.4}}>·</span><span>Since {supplier.since}</span></>}
           </div>
         </div>
       </div>
-      <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',lineHeight:1.55,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{supplier.desc}</p>
+
+      <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',lineHeight:1.55,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+        {supplier.desc}
+      </p>
+
       <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-        {supplier.products.slice(0,3).map((p,i)=><span key={i} style={{fontSize:11,color:'rgba(10,31,18,.7)',background:'rgba(10,31,18,.05)',border:'1px solid rgba(10,31,18,.08)',padding:'3px 9px',borderRadius:99,fontWeight:600}}>{p}</span>)}
+        {supplier.products.slice(0,3).map((p,i)=>(
+          <span key={i} style={{fontSize:11,color:'rgba(10,31,18,.7)',background:'rgba(10,31,18,.05)',border:'1px solid rgba(10,31,18,.08)',padding:'3px 9px',borderRadius:99,fontWeight:600}}>{p}</span>
+        ))}
         {supplier.products.length>3 && <span style={{fontSize:11,color:'rgba(10,31,18,.5)',padding:'3px 4px'}}>+{supplier.products.length-3}</span>}
       </div>
-      <div style={{display:'flex',gap:14,paddingTop:10,borderTop:'1px dashed rgba(10,31,18,.08)',fontSize:11,color:'rgba(10,31,18,.55)',flexWrap:'wrap'}}>
+
+      <div style={{display:'flex',gap:14,paddingTop:10,borderTop:'1px dashed rgba(10,31,18,.08)',fontSize:11,color:'rgba(10,31,18,.55)'}}>
         <span><i className="fas fa-box" style={{marginRight:4,color:cat.color}}></i><strong>MOQ:</strong> {supplier.moq}</span>
         <span><i className="fas fa-clock" style={{marginRight:4,color:cat.color}}></i>{supplier.leadTime}</span>
       </div>
     </div>
+
     <div style={{display:'flex',gap:8,padding:'0 20px 18px'}}>
-      <button onClick={onOpen} style={{flex:1,padding:'10px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#0A1F12'}}>View profile</button>
+      <button onClick={onOpen} style={{flex:1,padding:'10px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#0A1F12'}}>
+        View profile
+      </button>
       <button onClick={onQuote} style={{flex:1,padding:'10px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#fff'}}>
         <i className="fas fa-file-invoice" style={{marginRight:5}}></i>Request quote
       </button>
@@ -454,7 +565,7 @@ function SupplierCard({supplier,onOpen,onQuote}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SUPPLIER PROFILE — portaled modal
+   SUPPLIER PROFILE MODAL
    ═══════════════════════════════════════════════════════════ */
 function SupplierProfile({supplier,onClose,onQuote}){
   if(!supplier) return null;
@@ -476,18 +587,24 @@ function SupplierProfile({supplier,onClose,onQuote}){
         </div>
       </div>
     </div>
+
     <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',marginBottom:20}}>{supplier.desc}</p>
+
     <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',marginBottom:20}}>
       <InfoBox label="Minimum order" value={supplier.moq} icon="fa-box" color={cat.color}/>
       <InfoBox label="Lead time" value={supplier.leadTime} icon="fa-clock" color={cat.color}/>
       <InfoBox label="Delivery coverage" value={supplier.delivery} icon="fa-truck" color={cat.color}/>
     </div>
+
     <div style={{marginBottom:20}}>
       <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Products & services</div>
       <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-        {supplier.products.map((p,i)=><span key={i} style={{fontSize:12.5,color:'rgba(10,31,18,.75)',background:'#fff',border:'1px solid rgba(10,31,18,.1)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>)}
+        {supplier.products.map((p,i)=>(
+          <span key={i} style={{fontSize:12.5,color:'rgba(10,31,18,.75)',background:'#fff',border:'1px solid rgba(10,31,18,.1)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>
+        ))}
       </div>
     </div>
+
     <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',marginBottom:20}}>
       <a href={`tel:${supplier.phone}`} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 14px',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:9,textDecoration:'none',color:'#0A1F12',fontSize:13,fontWeight:600}}>
         <span style={{width:32,height:32,borderRadius:8,background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className="fas fa-phone"></i></span>
@@ -504,11 +621,13 @@ function SupplierProfile({supplier,onClose,onQuote}){
         </div>
       </a>
     </div>
+
     <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
       <button onClick={()=>onQuote(supplier)} style={{flex:'1 1 200px',padding:'14px 22px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}>
-        <i className="fas fa-file-invoice"></i> Request a quote
+        <i className="fas fa-file-invoice"></i> Request a quote from {supplier.name.split(' ')[0]}
       </button>
-      <a href={waUrl(`Hello StartEasy — I saw ${supplier.name} on the directory and would like to enquire.`)} target="_blank" rel="noopener noreferrer" style={{flex:'1 1 180px',padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}>
+      <a href={waUrl(`Hello StartEasy — I saw ${supplier.name} on the directory and would like to enquire.`)} target="_blank" rel="noopener noreferrer"
+        style={{flex:'1 1 180px',padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}>
         <i className="fab fa-whatsapp"></i> Chat on WhatsApp
       </a>
     </div>
@@ -526,15 +645,15 @@ function InfoBox({label,value,icon,color}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RFQ MODAL — portaled
+   RFQ MODAL — Request Quotation
    ═══════════════════════════════════════════════════════════ */
-function RFQModal({open,onClose,preselected,onSuccess}){
+function RFQModal({open,onClose,preselected}){
   const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deadline:'',budget:'',notes:''});
   const [err,setErr]=useState('');
 
   useEffect(()=>{
     if(open){
-      setForm({name:'',business:'',phone:'',email:'',category:preselected?preselected.category:'',product:preselected?preselected.products[0]:'',quantity:'',deliveryCity:'',deadline:'',budget:'',notes:''});
+      setForm(f=>({...f,category:preselected?preselected.category:'',product:preselected?preselected.products[0]:'',business:''}));
       setErr('');
     }
   },[open,preselected]);
@@ -562,21 +681,24 @@ function RFQModal({open,onClose,preselected,onSuccess}){
     ].filter(Boolean).join('\n');
     window.open(waUrl(msg),'_blank');
     onClose();
-    if(onSuccess) onSuccess('Quote request ready — tap Send in WhatsApp.');
   };
 
   return <Modal open={open} onClose={onClose} eyebrow="Request for quotation" maxWidth="44rem">
-    <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Request a quotation</h2>
+    <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>
+      Request a quotation
+    </h2>
     <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 20px'}}>
       Tell us what you need. StartEasy matches your requirement with suitable suppliers and connects you directly.
       {preselected && <span style={{display:'block',marginTop:8,color:'#8A6828',fontWeight:600}}><i className="fas fa-info-circle"></i> Requesting from {preselected.name}</span>}
     </p>
+
     <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))'}}>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Your name *</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})} placeholder="Full name"/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name</label><TIn value={form.business} onChange={v=>setForm({...form,business:v})} placeholder="Business name"/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone / WhatsApp *</label><TIn value={form.phone} onChange={v=>setForm({...form,phone:v})} placeholder="+260 …"/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label><TIn value={form.email} onChange={v=>setForm({...form,email:v})} placeholder="you@business.zm"/></div>
     </div>
+
     <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))'}}>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category</label>
         <select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
@@ -591,22 +713,28 @@ function RFQModal({open,onClose,preselected,onSuccess}){
         </select>
       </div>
     </div>
+
     <div style={{marginTop:14}}>
       <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Product / service needed *</label>
       <TIn value={form.product} onChange={v=>setForm({...form,product:v})} placeholder="e.g. 50 bags of cement, fabric rolls, hair extensions…"/>
     </div>
+
     <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Quantity</label><TIn value={form.quantity} onChange={v=>setForm({...form,quantity:v})} placeholder="e.g. 100 units"/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Needed by</label><TIn type="date" value={form.deadline} onChange={v=>setForm({...form,deadline:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget range</label><TIn value={form.budget} onChange={v=>setForm({...form,budget:v})} placeholder="e.g. K5,000 – K10,000"/></div>
     </div>
+
     <div style={{marginTop:14}}>
       <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Anything else?</label>
-      <textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} rows={3} placeholder="Quality specs, packaging, delivery preferences…" style={{...INP_STYLE,resize:'vertical',lineHeight:1.55,minHeight:80}}/>
+      <textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} rows={3} placeholder="Quality specs, packaging, delivery preferences…"
+        style={{...INP_STYLE,resize:'vertical',lineHeight:1.55,minHeight:80}}/>
     </div>
+
     {err && <div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5,display:'flex',gap:8,alignItems:'center'}}>
       <i className="fas fa-circle-exclamation"></i> {err}
     </div>}
+
     <div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:20}}>
       <button onClick={submit} style={{flex:'1 1 240px',padding:'14px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}>
         <i className="fab fa-whatsapp"></i> Send to StartEasy
@@ -620,14 +748,14 @@ function RFQModal({open,onClose,preselected,onSuccess}){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   REGISTER MODAL — portaled
+   SUPPLIER REGISTRATION MODAL
    ═══════════════════════════════════════════════════════════ */
-function RegisterModal({open,onClose,onRegistered,onSuccess}){
+function RegisterModal({open,onClose,onRegistered}){
   const [form,setForm]=useState({name:'',owner:'',category:'',location:'',products:'',moq:'',delivery:'',leadTime:'',phone:'',email:'',desc:''});
   const [err,setErr]=useState('');
   const [sent,setSent]=useState(false);
 
-  useEffect(()=>{ if(open){ setErr(''); setSent(false); } },[open]);
+  useEffect(()=>{if(open){setErr('');setSent(false);}},[open]);
 
   const submit=()=>{
     setErr('');
@@ -653,10 +781,7 @@ function RegisterModal({open,onClose,onRegistered,onSuccess}){
       desc:form.desc.trim()||'New supplier awaiting verification.'
     };
     onRegistered(newSupplier);
-    setSent(true);
-  };
 
-  const sendWhatsApp = ()=>{
     const msg = [
       '*STARTEASY — SUPPLIER LISTING APPLICATION*','',
       '*Business:*', form.name,
@@ -672,35 +797,25 @@ function RegisterModal({open,onClose,onRegistered,onSuccess}){
       form.desc && `Description:\n${form.desc}`
     ].filter(Boolean).join('\n');
     window.open(waUrl(msg),'_blank');
-  };
-
-  const finish = ()=>{
-    onClose();
-    if(onSuccess) onSuccess('Your listing is added — pending verification.');
+    setSent(true);
   };
 
   return <Modal open={open} onClose={onClose} eyebrow="Supplier listing" maxWidth="44rem">
-    {sent ? <div style={{textAlign:'center',padding:'16px 0'}}>
+    {sent ? <div style={{textAlign:'center',padding:'20px 0'}}>
       <div style={{width:64,height:64,borderRadius:'50%',background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,margin:'0 auto 16px'}}>
         <i className="fas fa-check"></i>
       </div>
-      <h3 className="serif" style={{fontSize:'clamp(1.3rem,3vw,1.6rem)',color:'#0A1F12',margin:'0 0 10px'}}>Listing added to the directory</h3>
+      <h3 className="serif" style={{fontSize:'clamp(1.3rem,3vw,1.6rem)',color:'#0A1F12',margin:'0 0 10px'}}>Application received</h3>
       <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(10,31,18,.7)',maxWidth:440,margin:'0 auto 20px'}}>
-        Your listing is now visible as <strong style={{color:'#8A6828'}}>pending verification</strong>. A StartEasy officer will review and contact you within 48 hours.
+        Your listing has been added to the directory as <strong style={{color:'#8A6828'}}>pending verification</strong>. A StartEasy officer will review and contact you on WhatsApp within 48 hours.
       </p>
-      <div style={{display:'flex',flexWrap:'wrap',gap:10,justifyContent:'center'}}>
-        <button onClick={sendWhatsApp} style={{padding:'12px 22px',background:'#25D366',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-          <i className="fab fa-whatsapp"></i> Notify StartEasy
-        </button>
-        <button onClick={finish} style={{padding:'12px 22px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700}}>
-          Done
-        </button>
-      </div>
+      <button onClick={onClose} style={{padding:'12px 24px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700}}>Done</button>
     </div> : <>
       <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Become a listed supplier</h2>
       <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 20px'}}>
         Get your business in front of real buyers looking for what you sell. Verification protects buyers and keeps the directory credible.
       </p>
+
       <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))'}}>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name *</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})} placeholder="e.g. Copperbelt Textiles"/></div>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Owner name</label><TIn value={form.owner} onChange={v=>setForm({...form,owner:v})} placeholder="Your full name"/></div>
@@ -717,26 +832,34 @@ function RegisterModal({open,onClose,onRegistered,onSuccess}){
           </select>
         </div>
       </div>
+
       <div style={{marginTop:14}}>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products / services * <span style={{color:'rgba(10,31,18,.5)',fontWeight:500}}>(comma-separated)</span></label>
         <TIn value={form.products} onChange={v=>setForm({...form,products:v})} placeholder="e.g. Fabric rolls, uniform fabric, dress materials"/>
       </div>
+
       <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Minimum order</label><TIn value={form.moq} onChange={v=>setForm({...form,moq:v})} placeholder="e.g. 50 metres"/></div>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label><TIn value={form.leadTime} onChange={v=>setForm({...form,leadTime:v})} placeholder="e.g. 3–5 days"/></div>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery coverage</label><TIn value={form.delivery} onChange={v=>setForm({...form,delivery:v})} placeholder="e.g. Lusaka · Copperbelt"/></div>
       </div>
+
       <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))'}}>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone / WhatsApp *</label><TIn value={form.phone} onChange={v=>setForm({...form,phone:v})} placeholder="+260 …"/></div>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label><TIn value={form.email} onChange={v=>setForm({...form,email:v})} placeholder="sales@yourbusiness.zm"/></div>
       </div>
+
       <div style={{marginTop:14}}>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>About your business</label>
-        <textarea value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} rows={3} placeholder="Short description — what you supply, who you serve, any speciality…" style={{...INP_STYLE,resize:'vertical',lineHeight:1.55,minHeight:80}}/>
+        <textarea value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} rows={3}
+          placeholder="Short description — what you supply, who you serve, any speciality…"
+          style={{...INP_STYLE,resize:'vertical',lineHeight:1.55,minHeight:80}}/>
       </div>
+
       {err && <div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5,display:'flex',gap:8,alignItems:'center'}}>
         <i className="fas fa-circle-exclamation"></i> {err}
       </div>}
+
       <div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:20}}>
         <button onClick={submit} style={{flex:'1 1 240px',padding:'14px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}>
           <i className="fas fa-paper-plane"></i> Submit listing
@@ -744,7 +867,7 @@ function RegisterModal({open,onClose,onRegistered,onSuccess}){
         <button onClick={onClose} style={{padding:'14px 22px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13.5,fontWeight:600,color:'#0A1F12'}}>Cancel</button>
       </div>
       <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',lineHeight:1.6,marginTop:14,fontStyle:'italic'}}>
-        Your listing appears immediately as "pending verification." StartEasy verifies suppliers before marking them as verified.
+        Your listing shows immediately as "pending verification." StartEasy verifies suppliers before marking them as verified — this protects buyers and keeps the directory credible.
       </p>
     </>}
   </Modal>;
@@ -764,7 +887,7 @@ function ServiceBusinesses(){
       </div>
       <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:16,overflow:'hidden'}}>
         {SERVICE_BUSINESSES.map((s,i)=>(
-          <div key={i} style={{borderBottom:i<SERVICE_BUSINESSES.length-1?'1px solid rgba(255,255,255,.06)':'none',padding:'14px 22px',display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
+          <div key={i} style={{borderBottom:i<SERVICE_BUSINESSES.length-1?'1px solid rgba(255,255,255,.06)':'none',padding:'14px 22px',display:'flex',alignItems:'center',gap:14}}>
             <span style={{width:34,height:34,borderRadius:9,background:'rgba(245,166,35,.16)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
               <i className={`fas ${s.icon}`}></i>
             </span>
@@ -791,7 +914,7 @@ function Roles(){
           Understanding these roles lets StartEasy make the right match — whether a business needs a manufacturer, a bulk wholesaler, or a shop down the road.
         </p>
       </div>
-      <div style={{display:'grid',gap:16,gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))'}}>
+      <div className="grid sm:grid-cols-3 gap-4">
         {ROLES.map(r=>(
           <div key={r.key} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'28px 24px',borderTop:`4px solid ${r.color}`,display:'flex',flexDirection:'column',gap:14}}>
             <span style={{width:52,height:52,borderRadius:13,background:r.color+'16',color:r.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21,flexShrink:0}}>
@@ -828,14 +951,21 @@ function ClosingCTA({onOpenRFQ,onOpenRegister}){
           <i className="fas fa-truck-fast"></i> I'm a supplier
         </button>
       </div>
+      <div style={{marginTop:32,display:'flex',flexWrap:'wrap',justifyContent:'center',gap:20,fontSize:12,color:'rgba(255,255,255,.5)'}}>
+        <span style={{display:'inline-flex',alignItems:'center',gap:8}}><i className="fab fa-whatsapp" style={{color:'#25D366',fontSize:14}}></i> +260 762499581</span>
+        <span style={{display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-envelope" style={{color:'#F5A623',fontSize:12}}></i> {CONTACT_EMAIL}</span>
+      </div>
     </div>
   </section>;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
 function Footer(){
   return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
-      <div style={{display:'grid',gap:40,gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))'}}>
+      <div className="grid lg:grid-cols-[1.5fr_1fr_1fr] gap-10">
         <div>
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
             <Mark size={38}/>
@@ -867,7 +997,7 @@ function Footer(){
       </div>
       <div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
         <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.75,maxWidth:900}}>
-          <strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is a directory and matchmaking service. We help businesses discover suitable suppliers, compare offers and request quotations — but any transaction, contract, delivery or payment is between the buyer and the supplier. We are not a party to that transaction, and we do not guarantee supplier performance.
+          <strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is a directory and matchmaking service. We help businesses discover suitable suppliers, compare offers and request quotations — but any transaction, contract, delivery or payment is between the buyer and the supplier. We are not a party to that transaction, and we do not guarantee supplier performance. Categories and matches are based on information provided and verified where possible; requirements and supplier availability change.
         </p>
         <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:'20px 0 0'}}>© {new Date().getFullYear()} StartEasy Zambia · Businesses &amp; Suppliers Directory.</p>
       </div>
@@ -877,7 +1007,7 @@ function Footer(){
 
 function FloatingWA(){
   return <a href={waUrl('Hello StartEasy — I would like to talk about the Businesses & Suppliers Directory.')} target="_blank" rel="noopener noreferrer"
-    style={{position:'fixed',bottom:20,right:20,zIndex:100,width:52,height:52,borderRadius:'50%',background:'#25D366',boxShadow:'0 6px 22px rgba(37,211,102,.45)',display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none'}}
+    style={{position:'fixed',bottom:24,right:24,zIndex:100,width:52,height:52,borderRadius:'50%',background:'#25D366',boxShadow:'0 6px 22px rgba(37,211,102,.45)',display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none'}}
     aria-label="Chat on WhatsApp">
     <i className="fab fa-whatsapp" style={{color:'#fff',fontSize:24}}></i>
   </a>;
@@ -892,17 +1022,8 @@ function App(){
   const [rfqOpen,setRfqOpen]=useState(false);
   const [rfqPreselected,setRfqPreselected]=useState(null);
   const [registerOpen,setRegisterOpen]=useState(false);
-  const [toast,setToast]=useState(null);
 
   useEffect(()=>{window.scrollTo(0,0);},[]);
-
-  useEffect(()=>{
-    if(!toast) return;
-    const t=setTimeout(()=>setToast(null),4000);
-    return ()=>clearTimeout(t);
-  },[toast]);
-
-  const showToast=(message,type='success')=>setToast({message,type,id:Date.now()});
 
   const allSuppliers=useMemo(()=>[...SEED_SUPPLIERS,...localSuppliers],[localSuppliers]);
   const stats=useMemo(()=>({
@@ -912,7 +1033,6 @@ function App(){
   }),[allSuppliers]);
 
   const openRFQ=(supplier)=>{
-    setProfile(null);
     setRfqPreselected(supplier||null);
     setRfqOpen(true);
   };
@@ -924,7 +1044,7 @@ function App(){
     writeLS('se_directory_suppliers',next);
   };
 
-  return <div style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
     <Nav onOpenRegister={()=>setRegisterOpen(true)} onOpenRFQ={()=>openRFQ(null)}/>
     <main style={{flex:1}}>
       <Hero onOpenRFQ={()=>openRFQ(null)} onOpenRegister={()=>setRegisterOpen(true)} stats={stats}/>
@@ -936,10 +1056,9 @@ function App(){
     <Footer/>
     <FloatingWA/>
 
-    <SupplierProfile supplier={profile} onClose={()=>setProfile(null)} onQuote={openRFQ}/>
-    <RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} onSuccess={showToast}/>
-    <RegisterModal open={registerOpen} onClose={()=>setRegisterOpen(false)} onRegistered={handleRegistered} onSuccess={showToast}/>
-    <Toast toast={toast}/>
+    <SupplierProfile supplier={profile} onClose={()=>setProfile(null)} onQuote={(s)=>{setProfile(null);openRFQ(s);}}/>
+    <RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected}/>
+    <RegisterModal open={registerOpen} onClose={()=>setRegisterOpen(false)} onRegistered={handleRegistered}/>
   </div>;
 }
 
