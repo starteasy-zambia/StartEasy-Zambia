@@ -601,7 +601,9 @@ function Nav({user,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
     return ()=>{document.body.style.overflow='';};
   },[menuOpen]);
   const logoClick=(e)=>{e.preventDefault();closeMenu();if(user)onDashboard();else if(onSignIn)onSignIn();};
-  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',position:'sticky',top:0,zIndex:50}}>
+  
+  // Changed position to fixed to guarantee it stays on top
+  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',position:'fixed',top:0,left:0,right:0,height:72,zIndex:100}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 16px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72,gap:10}}>
         <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0}}>
@@ -785,7 +787,7 @@ function Footer(){
 
 /* ═══════════════════ LANDING ═══════════════════ */
 function Landing({onSignup,onSignin}){
-  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
+  return <div className="fadein" style={{background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
     <main style={{flex:1}}>
       <Hero/>
       <LandingCTA onSignup={onSignup} onSignin={onSignin}/>
@@ -797,7 +799,7 @@ function Landing({onSignup,onSignin}){
 
 /* ═══════════════════ SIGN-IN PROMPT ═══════════════════ */
 function SignInPrompt({onSignIn,onSignUp,onHome}){
-  return <div className="fadein" style={{minHeight:'calc(100vh - 72px)',background:'#F5FAF6',display:'flex',alignItems:'center',justifyContent:'center',padding:'32px 20px'}}>
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',alignItems:'center',justifyContent:'center',padding:'32px 20px'}}>
     <div style={{maxWidth:440,textAlign:'center',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:16,padding:'36px 30px',boxShadow:'0 20px 50px -20px rgba(10,31,18,.15)'}}>
       <i className="fas fa-lock" style={{fontSize:36,color:'#E8730F',marginBottom:16,display:'block'}}></i>
       <h2 className="serif" style={{fontSize:24,color:'#0A1F12',marginBottom:10}}>Sign in to continue</h2>
@@ -819,14 +821,14 @@ function Welcome({user,onDashboard,onBrowse,onSignedOut}){
     loadUserProfile(user.uid).then(p=>{setProfile(p);setLoading(false);});
   },[user]);
 
-  if(loading) return <div style={{minHeight:'calc(100vh - 72px)',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+  if(loading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
 
   const isSupplier=profile?.role==='supplier';
   const cat=profile&&CAT_MAP[profile.category]?CAT_MAP[profile.category]:{title:profile?.category||'General'};
   const isVerified=profile?.status==='verified';
   const firstName=(profile?.name||user.email||'').split(' ')[0];
 
-  return <div className="fadein" style={{minHeight:'calc(100vh - 72px)',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
     <main style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px 24px'}}>
       <div style={{maxWidth:560,width:'100%'}}>
         <div style={{textAlign:'center',marginBottom:28}}>
@@ -955,9 +957,9 @@ function Dashboard({user,onBrowse,onSignedOut}){
     finally{setSaving(false);}
   };
 
-  if(loading) return <div style={{minHeight:'calc(100vh - 72px)',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+  if(loading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
 
-  if(!profile) return <div style={{minHeight:'calc(100vh - 72px)',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6',padding:'32px 20px',textAlign:'center'}}>
+  if(!profile) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6',padding:'32px 20px',textAlign:'center'}}>
     <div style={{maxWidth:400}}>
       <h2 className="serif" style={{fontSize:22,color:'#0A1F12',marginBottom:10}}>Profile not found</h2>
       <p style={{fontSize:13.5,color:'rgba(10,31,18,.65)',lineHeight:1.6,marginBottom:20}}>Contact {CONTACT_EMAIL}.</p>
@@ -1000,7 +1002,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
     ...(quotes.length>0?[{icon:'fa-file-invoice',color:'#E8730F',title:`${quotes.length} quote request${quotes.length===1?'':'s'} sent`,detail:'Track them in My Requests'}]:[{icon:'fa-magnifying-glass',color:'#1B6CA8',title:'Browse suppliers to request quotes',detail:'Your requests will appear here.'}])
   ];
 
-  return <div className="fadein" style={{minHeight:'calc(100vh - 72px)',background:'#F5FAF6'}}>
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6'}}>
     <div className={'dash-backdrop '+(sidebarOpen?'open':'')} onClick={()=>setSidebarOpen(false)} style={{position:'fixed',top:72,left:0,right:0,bottom:0,background:'rgba(0,0,0,.45)',zIndex:35}}></div>
 
     <aside className={'dash-sidebar '+(sidebarOpen?'open':'')} style={{position:'fixed',left:0,top:72,bottom:0,width:260,background:'#0A1F12',color:'#fff',display:'flex',flexDirection:'column',zIndex:40,overflowY:'auto'}}>
@@ -1043,7 +1045,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
       </div>
     </aside>
 
-    <div className="dash-main" style={{minHeight:'calc(100vh - 72px)'}}>
+    <div className="dash-main" style={{minHeight:'100vh'}}>
       <header style={{background:'#fff',borderBottom:'1px solid rgba(10,31,18,.08)',padding:'10px 16px',display:'flex',alignItems:'center',gap:10,position:'sticky',top:72,zIndex:30,boxShadow:'0 2px 10px rgba(0,0,0,.03)'}}>
         <button onClick={()=>setSidebarOpen(true)} className="dash-mobile-toggle" style={{width:36,height:36,borderRadius:8,background:'#0A1F12',color:'#fff',border:'none',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
           <i className="fas fa-bars" style={{fontSize:14}}></i>
@@ -1703,7 +1705,7 @@ function App(){
   let mainView;
 
   if(authLoading){
-    mainView = <div style={{minHeight:'calc(100vh - 72px)',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+    mainView = <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
   } else if(justSignedUp && user){
     mainView = <Welcome user={user} onDashboard={()=>{setJustSignedUp(false);window.location.hash='#dashboard';}} onBrowse={()=>{setJustSignedUp(false);window.location.hash='#browse';}} onSignedOut={()=>{setJustSignedUp(false);setUser(null);window.location.hash='';}}/>;
   } else if(hash==='#dashboard' || hash==='#browse'){
@@ -1720,19 +1722,13 @@ function App(){
     mainView = <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
   }
 
+  // ADDED: paddingTop to account for the fixed header
   return (
     <>
-      {!authLoading && (
-        <Nav 
-          user={user} 
-          onSignIn={()=>openAuth('signin','buyer')} 
-          onSignUp={(role)=>openAuth('signup',role||'buyer')} 
-          onDashboard={goDashboard} 
-          onBrowse={goBrowse} 
-          onSignOut={signedOut} 
-        />
-      )}
-      {mainView}
+      {!authLoading && <Nav user={user} onSignIn={()=>openAuth('signin','buyer')} onSignUp={(role)=>openAuth('signup',role||'buyer')} onDashboard={goDashboard} onBrowse={goBrowse} onSignOut={signedOut} />}
+      <div style={{ paddingTop: authLoading ? 0 : 72, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {mainView}
+      </div>
       {authModal}
     </>
   );
