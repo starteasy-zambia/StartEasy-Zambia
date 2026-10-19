@@ -126,10 +126,62 @@ input:focus,select:focus,textarea:focus{outline:none}
 .tl .tt{font-size:14px;font-weight:700;color:#FFFFFF;margin-bottom:4px}
 .tl .td{font-size:12.5px;color:rgba(255,255,255,.78);line-height:1.6;margin-bottom:8px}
 .tl .tw{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#F5A623;background:rgba(245,166,35,.2);padding:4px 12px;border-radius:99px;border:1px solid rgba(245,166,35,.35)}
+
+/* ═══ NEW: EarnUp-inspired Dashboard UI primitives ═══ */
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:rgba(30,123,60,.1);color:#1E7B3C;font-size:11px;font-weight:700;border:1px solid rgba(30,123,60,.22);white-space:nowrap;line-height:1.4}
+.chip-neutral{background:rgba(10,31,18,.05);color:rgba(10,31,18,.65);border-color:rgba(10,31,18,.12)}
+.chip-accent{background:rgba(232,115,15,.1);color:#8A6828;border-color:rgba(232,115,15,.28)}
+.chip-danger{background:rgba(184,86,79,.1);color:#7C2318;border-color:rgba(184,86,79,.28)}
+.chip-info{background:rgba(27,108,168,.08);color:#1B6CA8;border-color:rgba(27,108,168,.25)}
+.chip i{font-size:9px}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:22px}
+.stat-card{background:#fff;border:1px solid rgba(10,31,18,.08);border-radius:14px;padding:16px 18px;transition:.2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px -12px rgba(10,31,18,.12)}
+.stat-card .sc-label{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(10,31,18,.5)}
+.stat-card .sc-value{font-family:'Playfair Display',Georgia,serif;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:6px;color:#0A1F12;line-height:1}
+.stat-card .sc-hint{font-size:11.5px;color:rgba(10,31,18,.55);margin-top:6px;font-weight:600}
+.stat-card .sc-hint.warn{color:#D97706}
+
+.table-wrap{overflow-x:auto;border-radius:14px;border:1px solid rgba(10,31,18,.08);background:#fff;-webkit-overflow-scrolling:touch}
+table.dt{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
+table.dt th{text-align:left;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(10,31,18,.5);padding:12px 16px;background:#F8FAF6;border-bottom:1px solid rgba(10,31,18,.08);white-space:nowrap}
+table.dt td{padding:13px 16px;border-bottom:1px solid rgba(10,31,18,.06);vertical-align:middle;color:rgba(10,31,18,.85)}
+table.dt tr:last-child td{border-bottom:0}
+table.dt tbody tr:hover{background:#FAFCF9}
+
+.empty{text-align:center;padding:48px 24px;background:#fff;border:1px dashed rgba(10,31,18,.15);border-radius:14px}
+.empty .e-icon{width:56px;height:56px;border-radius:16px;background:rgba(232,115,15,.1);color:#E8730F;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px}
+.empty h3{font-family:'Playfair Display',Georgia,serif;font-size:18px;color:#0A1F12;margin:0 0 8px}
+.empty p{font-size:13px;color:rgba(10,31,18,.55);max-width:44ch;margin:0 auto 18px;line-height:1.6}
+
+.toast-root{position:fixed;bottom:1.4rem;right:1.4rem;z-index:300;display:grid;gap:.6rem;max-width:min(380px,calc(100vw - 2rem))}
+.toast{display:flex;align-items:flex-start;gap:.65rem;background:#0A1F12;color:#fff;padding:.85rem 1rem;border-radius:13px;box-shadow:0 30px 70px -30px rgba(0,0,0,.45);font-size:13px;font-weight:600;animation:slidein .25s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes slidein{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+.toast.success{background:#1E7B3C}
+.toast.error{background:#B8564F}
+.toast .ic{flex-shrink:0;margin-top:2px}
+
+.bars{display:grid;gap:.75rem}
+.bar-row{display:grid;grid-template-columns:1fr 62px;gap:.75rem;align-items:center;font-size:12.5px;font-weight:600;color:rgba(10,31,18,.75)}
+.bar-track{grid-column:1/-1;height:8px;background:rgba(10,31,18,.06);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,#E8730F,#F5A623);border-radius:99px;transition:width .5s ease}
+
+.save-btn{margin-left:auto;background:#fff;border:1px solid rgba(10,31,18,.12);border-radius:9px;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:rgba(10,31,18,.4);transition:.15s;flex-shrink:0}
+.save-btn:hover{color:#E8730F;border-color:#E8730F;background:rgba(232,115,15,.06)}
+.save-btn.saved{color:#fff;background:#E8730F;border-color:#E8730F}
+
+.dash-side-section{font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:14px 14px 6px}
+.dash-nav-badge{margin-left:auto;background:#E8730F;color:#fff;font-size:9.5px;font-weight:800;border-radius:99px;padding:1px 7px;min-width:18px;text-align:center}
+@media(max-width:1023px){
+  .dash-sidebar{width:280px!important}
+  .dash-nav-btn{font-size:13.5px}
+}
 </style>
 </head>
 <body>
 <div id="root"></div>
+<div class="toast-root" id="toastRoot" aria-live="polite"></div>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
@@ -159,9 +211,27 @@ try {
   auth.signInAnonymously().catch(e => console.warn('[SE] anon auth:', e && e.message));
 } catch (e) { console.error('[SE] Firebase init failed:', e); }
 
+/* ═══ NEW: Global Toast Helper ═══ */
+function toast(msg, type='success'){
+  const root = document.getElementById('toastRoot');
+  if(!root) return;
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = `<i class="ic fas ${type==='error'?'fa-circle-exclamation':'fa-circle-check'}"></i><span>${String(msg).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</span>`;
+  root.appendChild(el);
+  setTimeout(() => {
+    el.style.transition='opacity .3s, transform .3s';
+    el.style.opacity='0';
+    el.style.transform='translateX(20px)';
+    setTimeout(()=>el.remove(),320);
+  }, 3600);
+}
+
 function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
 function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
 function splitCSV(str){return (str||'').split(',').map(s=>s.trim()).filter(Boolean);}
+function initials(name){return String(name||'').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase() || '·';}
+function fmtDate(d){ if(!d) return '—'; const x = new Date(d); return isNaN(x)?d:x.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
 function authErrorMessage(e){
   const code=(e&&e.code)||'';
   if(code==='auth/email-already-in-use') return 'This email is already registered. Try signing in.';
@@ -175,6 +245,14 @@ function authErrorMessage(e){
   if(code==='auth/missing-email') return 'Enter your email address.';
   return 'Sign-in failed: '+(code||(e&&e.message)||'unknown');
 }
+
+/* ═══ NEW: LocalStorage helpers for saved suppliers & alerts ═══ */
+function lsGet(key, fallback=[]){ try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;} }
+function lsSet(key, val){ try{localStorage.setItem(key, JSON.stringify(val));}catch(e){} }
+function getSavedSuppliers(uid){ return lsGet('se_saved_'+uid, []); }
+function setSavedSuppliers(uid, arr){ lsSet('se_saved_'+uid, arr); }
+function getAlerts(uid){ return lsGet('se_alerts_'+uid, []); }
+function setAlerts(uid, arr){ lsSet('se_alerts_'+uid, arr); }
 
 async function fsLoadDirectory(){
   if(!firebaseReady) return null;
@@ -339,6 +417,39 @@ function Mark({size=38}){
     <span className="serif" style={{fontSize:size*0.5,fontWeight:800,color:'#0A1F12',lineHeight:1}}>S<span style={{color:'#E8730F'}}>E</span></span>
   </span>;
 }
+
+/* NEW: reusable dashboard primitives */
+function Chip({kind='', children}){
+  return <span className={'chip '+kind}>{children}</span>;
+}
+function StatCard({label, value, hint, warn}){
+  return <div className="stat-card">
+    <div className="sc-label">{label}</div>
+    <div className="sc-value">{value}</div>
+    {hint && <div className={'sc-hint '+(warn?'warn':'')}>{hint}</div>}
+  </div>;
+}
+function EmptyState({icon, title, text, cta}){
+  return <div className="empty">
+    <div className="e-icon"><i className={'fas '+icon}></i></div>
+    <h3>{title}</h3>
+    <p>{text}</p>
+    {cta}
+  </div>;
+}
+function Bars({items, color}){
+  const max = Math.max(1, ...items.map(i=>i.value||0));
+  return <div className="bars">
+    {items.map((item,i)=>(
+      <div key={i} className="bar-row">
+        <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.label}</span>
+        <span style={{textAlign:'right',color:'rgba(10,31,18,.55)'}}>{item.value}</span>
+        <div className="bar-track"><div className="bar-fill" style={{width:((item.value||0)/max*100).toFixed(1)+'%', background: color||undefined}}/></div>
+      </div>
+    ))}
+  </div>;
+}
+
 function Modal({open,onClose,eyebrow,title,children,maxWidth='46rem'}){
   useEffect(()=>{
     if(open){document.body.style.overflow='hidden';}else{document.body.style.overflow='';}
@@ -407,11 +518,9 @@ function PasswordInput({value,onChange,placeholder='••••••••',au
 function EngagementLetterBody({service,clientName,clientBusiness,clientEmail,wizardData,readOnly}){
   const s=service;
   const sf=s.service?SF[s.service]:null;
-  const og=s.ongoing?ONGOING[s.ongoing]:null;
-  const feeLabel = s.feeLabelOverride || (sf ? sf.label : (og ? og.label : 'Service Fee'));
-  const feeAmount = s.amountOverride || (sf ? sf.zm : (og ? og.zm : ''));
+  const feeLabel = s.feeLabelOverride || (sf ? sf.label : 'Service Fee');
+  const feeAmount = s.amountOverride || (sf ? sf.zm : '');
   const wd=wizardData||s._wizardData;
-  
   return <div className="el printable" id="engagementLetter">
     <div className="eh">
       <div>
@@ -441,7 +550,7 @@ function EngagementLetterBody({service,clientName,clientBusiness,clientEmail,wiz
     <ul>{s.whatsCovered.map((d,i)=><li key={i}>{d}</li>)}</ul>
     <h4>{wd?'4':'3'}. Fees</h4>
     <div className="feebox">
-      {s.amountOverride?<div className="row"><span className="l">{feeLabel}</span><span className="v">{feeAmount}</span></div>:<>{sf&&<div className="row"><span className="l">{feeLabel}</span><span className="v">{sf.zm}</span></div>}</>}
+      {sf&&<div className="row"><span className="l">{feeLabel}</span><span className="v">{sf.zm}</span></div>}
       <div className="total"><span className="tl">Service fee due on acceptance</span><span className="tv">{feeAmount}</span></div>
     </div>
     <p style={{fontSize:11.5,color:'#666',fontStyle:'italic',marginTop:8}}>All amounts are StartEasy service fees for work only. They are separate from and do not include any government or regulator fee.</p>
@@ -516,9 +625,9 @@ function Payment({service,client,onClose,onDone}){
   const [copied,setCopied]=useState('');
 
   const copyTxt=(t,k)=>{const done=()=>{setCopied(k);setTimeout(()=>setCopied(''),1500)};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done).catch(done);else done()};
-  
+
   const buildMsg=(r,dt)=>['*STARTEASY — ENGAGEMENT FEE*','','*Ref:* '+r,'*Date:* '+dt,'','*Client:* '+client.name,'*Business:* '+(client.business||'—'),'*Email:* '+client.email,'','*Engagement:*',(s.code||'DIR')+' — '+s.title,'','*Fee:*',amountDue,'','*Payment*','Method: '+(PAYMENT_METHODS[method]?PAYMENT_METHODS[method].label:'—'),'Sender: '+senderName,'Contact: '+senderContact,'TxID: '+userRef].join('\n');
-  
+
   const confirm=async()=>{
     setErrorMsg('');
     if(!method){setErrorMsg('Select a payment method.');return}
@@ -532,8 +641,6 @@ function Payment({service,client,onClose,onDone}){
     const record = {ref:rcpt,clientName:client.name,clientEmail:client.email,clientPhone:client.phone||'',clientBusiness:client.business||'',serviceCode:s.code||'DIR',serviceTitle:s.title,serviceDesk:s.desk||'directory',serviceClientDesc:s.clientDesc,serviceTimeline:s.timeline,serviceFee:amountDue,serviceFeeLabel:'Service Fee',whatsCovered:s.whatsCovered||[],wizardData:s._wizardData||null,amount:amountDue,method:PAYMENT_METHODS[method]?.label||method,senderName,senderContact,txRef:userRef,receiptDate:dt};
     const saved = await addPayment(record);
     setCloudSaved(saved ? 'ok' : 'fail');
-    rememberMyRef(rcpt);
-    trackEvent('payment_submit',{ref:rcpt,serviceCode:s.code,amount:amountDue});
     setReceiptNo(rcpt);
     setWhatsappUrl(waUrl(buildMsg(rcpt,dt)));
     setConfirmed(true);
@@ -549,14 +656,10 @@ function Payment({service,client,onClose,onDone}){
         {cloudSaved==='ok'&&<p style={{fontSize:12,color:'#1E7B3C',marginBottom:6,fontWeight:600}}><i className="fas fa-cloud-upload-alt" style={{marginRight:6}}></i>Synced to StartEasy records — the officer sees this now.</p>}
         {cloudSaved==='fail'&&<p style={{fontSize:12,color:'#B8564F',marginBottom:6,fontWeight:600}}><i className="fas fa-triangle-exclamation" style={{marginRight:6}}></i>Cloud sync delayed — please send proof on WhatsApp below.</p>}
         <p style={{fontSize:13,color:'rgba(10,31,18,.7)',lineHeight:1.65,maxWidth:'54ch',margin:'0 auto 18px'}}>Your submission is now <strong style={{color:'#8A6828'}}>Under Review</strong>. A StartEasy officer will verify your payment — usually within 4 working hours.</p>
-        <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center',marginBottom:18}}>
-          <a href="#/track" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'12px 20px',background:'#0A1F12',color:'#fff',borderRadius:8,fontSize:13.5,fontWeight:700,textDecoration:'none',fontFamily:'inherit'}}><i className="fas fa-magnifying-glass"></i> Check my status anytime</a>
-        </div>
         <div style={{background:'#fff',border:'1px dashed #25D366',borderRadius:12,padding:18,marginTop:18,textAlign:'left'}}>
           <div style={{fontSize:12.5,fontWeight:800,letterSpacing:'.6px',color:'#075E54',marginBottom:10,display:'flex',alignItems:'center',gap:8,textTransform:'uppercase'}}><i className="fab fa-whatsapp" style={{color:'#25D366',fontSize:16}}></i> Send your reference to the officer</div>
           <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={()=>setWhatsappSent(true)} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#25D366',color:'#fff',padding:'13px 22px',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}><i className="fab fa-whatsapp"></i><span>Send to officer on WhatsApp</span></a>
           <button type="button" onClick={()=>copyTxt(buildMsg(receiptNo,''),'msg')} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,width:'100%',marginTop:10,padding:'11px 18px',background:'#fff',border:'1.5px solid #25D366',color:'#075E54',borderRadius:10,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><i className={`fas ${copied==='msg'?'fa-check':'fa-copy'}`}></i>{copied==='msg'?'Copied':'Copy message'}</button>
-          {whatsappSent&&<div style={{background:'#E7F7EC',border:'1px solid #25D366',color:'#075E54',fontSize:12.5,fontWeight:600,padding:'10px 14px',borderRadius:8,marginTop:12}}><i className="fas fa-check-circle"></i> Confirmation ready — tap <strong>Send</strong> in WhatsApp.</div>}
         </div>
         <div style={{background:'linear-gradient(135deg,#0A1F12,#123A1F)',borderRadius:12,padding:'20px 22px',marginTop:18,color:'#fff',textAlign:'left'}}>
           <div style={{fontSize:11,fontWeight:800,letterSpacing:'.14em',textTransform:'uppercase',color:'#F5A623',marginBottom:14,display:'flex',alignItems:'center',gap:8}}><i className="fas fa-route"></i> What happens next</div>
@@ -617,15 +720,11 @@ function Payment({service,client,onClose,onDone}){
             </div>
           ))}
         </div>
-        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:10,padding:'18px 20px 18px 44px',marginTop:14}}>
-          <div style={{fontSize:11,fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase',color:'#0A1F12',marginBottom:14,marginLeft:-22,display:'flex',alignItems:'center',gap:8}}><i className="fas fa-list-ol" style={{color:'#8A6828'}}></i> How to pay</div>
-          <ol style={{listStyle:'none',padding:0,margin:0,counterReset:'sc'}}>{m.steps.map((st,i)=><li key={i} dangerouslySetInnerHTML={{__html:st}} style={{position:'relative',paddingBottom:14,fontSize:13,color:'rgba(10,31,18,.8)',lineHeight:1.55,paddingLeft:0}}/>)}</ol>
-        </div>
         {m.note&&<div style={{background:'#FFF4E5',borderLeft:'3px solid #FFC107',borderRadius:8,padding:'14px 18px',fontSize:12.5,color:'#7A5C10',lineHeight:1.6,display:'flex',gap:12,alignItems:'flex-start',marginTop:12}}><i className="fas fa-info-circle" style={{color:'#D89400',fontSize:16,flexShrink:0,marginTop:2}}></i><div>{m.note}</div></div>}
       </div>
     </div>}
     {m&&<div style={{marginTop:20,paddingTop:20,borderTop:'1px dashed rgba(10,31,18,.15)'}}>
-      <h4 style={{fontSize:13,fontWeight:800,letterSpacing:'.8',textTransform:'uppercase',color:'#0A1F12',marginBottom:14,display:'flex',alignItems:'center',gap:10}}><i className="fas fa-clipboard-check" style={{color:'#8A6828'}}></i> Confirm you have paid</h4>
+      <h4 style={{fontSize:13,fontWeight:800,letterSpacing:'.8px',textTransform:'uppercase',color:'#0A1F12',marginBottom:14,display:'flex',alignItems:'center',gap:10}}><i className="fas fa-clipboard-check" style={{color:'#8A6828'}}></i> Confirm you have paid</h4>
       <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))'}}>
         <div><label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Your name *</label><TIn value={senderName} onChange={setSenderName}/></div>
         <div><label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Phone / email used *</label><TIn value={senderContact} onChange={setSenderContact}/></div>
@@ -692,7 +791,7 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
       setSubmitting(true);
       try{
         await authSignIn(form.email.trim(),form.password);
-        onAuthSuccess && onAuthSuccess('dashboard', signupSuccess);
+        onAuthSuccess && onAuthSuccess('dashboard', false);
       }catch(e){
         setErr(authErrorMessage(e));
       }finally{setSubmitting(false);}
@@ -892,7 +991,6 @@ function Nav({user,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
     return ()=>{document.body.style.overflow='';};
   },[menuOpen]);
   const logoClick=(e)=>{e.preventDefault();closeMenu();if(user)onDashboard();else if(onSignIn)onSignIn();};
-  
   return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)', flexShrink:0, position:'relative', zIndex:50}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 16px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72,gap:10}}>
@@ -974,7 +1072,6 @@ function Hero({stats}){
   </section>;
 }
 
-/* ═══════════════════ LANDING CTA ═══════════════════ */
 function LandingCTA({onSignup,onSignin}){
   return <section style={{background:'#F5FAF6',padding:'clamp(48px,7vw,80px) 24px'}}>
     <div style={{maxWidth:1100,margin:'0 auto'}}>
@@ -1010,192 +1107,67 @@ function LandingCTA({onSignup,onSignin}){
   </section>;
 }
 
-/* ═══════════════════ PRICING SECTION ═══════════════════ */
 function PricingSection(){
   const [activeTab, setActiveTab] = useState('suppliers');
-
   const plans = {
     suppliers: [
-      {
-        title: 'Basic Listing',
-        price: 'Free',
-        period: 'forever',
-        desc: 'Get listed in the directory. Build your presence.',
-        features: ['Standard directory profile', 'Basic contact details', 'Up to 3 product tags'],
-        cta: 'Create free account',
-        highlight: false
-      },
-      {
-        title: 'Premium Profile',
-        price: 'K100',
-        period: '/month',
-        subtext: 'or K1000/year',
-        desc: 'For local suppliers ready to win more buyers.',
-        features: ['Enhanced profile', 'Full product catalogue', 'Website links & photos', 'Priority placement in category'],
-        cta: 'Upgrade to Premium',
-        highlight: true
-      },
-      {
-        title: 'Qualified Leads',
-        price: 'K50',
-        period: '/lead',
-        subtext: 'or K400/month access',
-        desc: 'We send you buyers actively looking for your products.',
-        features: ['Direct buyer enquiries', 'Verified buying intent', 'Pay only for relevant leads', 'Monthly package available'],
-        cta: 'Get leads',
-        highlight: false
-      },
-      {
-        title: 'Verification Badge',
-        price: 'K75',
-        period: 'one-off',
-        subtext: 'or K600/year renewal',
-        desc: 'Build trust instantly with our verification check.',
-        features: ['Identity & registration check', 'Document review', 'Reference checks', 'Verified badge on profile'],
-        cta: 'Get verified',
-        highlight: false
-      },
-      {
-        title: 'Sponsored Campaign',
-        price: 'K455',
-        period: '/campaign',
-        desc: 'Push your offers to the top of relevant searches.',
-        features: ['Promoted products', 'Category sponsorship', 'Featured in search results', 'Campaign report'],
-        cta: 'Run campaign',
-        highlight: false
-      }
+      {title:'Basic Listing',price:'Free',period:'forever',desc:'Get listed in the directory. Build your presence.',features:['Standard directory profile','Basic contact details','Up to 3 product tags'],cta:'Create free account',highlight:false},
+      {title:'Premium Profile',price:'K100',period:'/month',subtext:'or K1000/year',desc:'For local suppliers ready to win more buyers.',features:['Enhanced profile','Full product catalogue','Website links & photos','Priority placement in category'],cta:'Upgrade to Premium',highlight:true},
+      {title:'Qualified Leads',price:'K50',period:'/lead',subtext:'or K400/month access',desc:'We send you buyers actively looking for your products.',features:['Direct buyer enquiries','Verified buying intent','Pay only for relevant leads','Monthly package available'],cta:'Get leads',highlight:false},
+      {title:'Verification Badge',price:'K75',period:'one-off',subtext:'or K600/year renewal',desc:'Build trust instantly with our verification check.',features:['Identity & registration check','Document review','Reference checks','Verified badge on profile'],cta:'Get verified',highlight:false},
+      {title:'Sponsored Campaign',price:'K455',period:'/campaign',desc:'Push your offers to the top of relevant searches.',features:['Promoted products','Category sponsorship','Featured in search results','Campaign report'],cta:'Run campaign',highlight:false}
     ],
     buyers: [
-      {
-        title: 'Directory Access',
-        price: 'Free',
-        period: 'forever',
-        desc: 'Browse our network of suppliers.',
-        features: ['Search the directory', 'View basic profiles', 'Contact suppliers directly', 'Request quotes'],
-        cta: 'Browse free',
-        highlight: false
-      },
-      {
-        title: 'Sourcing & Procurement',
-        price: 'K600',
-        period: '/project',
-        desc: 'We handle the sourcing so you don\'t have to.',
-        features: ['We find the suppliers', 'We request and compare quotes', 'We negotiate terms', 'You get a shortlist to approve'],
-        cta: 'Start sourcing',
-        highlight: true
-      },
-      {
-        title: 'International Sourcing',
-        price: 'From K400',
-        period: '/retainer',
-        subtext: 'or agreed service fee',
-        desc: 'Source from China, UAE, South Africa and beyond.',
-        features: ['Supplier identification abroad', 'Documentation coordination', 'Freight & clearing introductions', 'Quotation management'],
-        cta: 'Source internationally',
-        highlight: false
-      }
+      {title:'Directory Access',price:'Free',period:'forever',desc:'Browse our network of suppliers.',features:['Search the directory','View basic profiles','Contact suppliers directly','Request quotes'],cta:'Browse free',highlight:false},
+      {title:'Sourcing & Procurement',price:'K600',period:'/project',desc:'We handle the sourcing so you don\'t have to.',features:['We find the suppliers','We request and compare quotes','We negotiate terms','You get a shortlist to approve'],cta:'Start sourcing',highlight:true},
+      {title:'International Sourcing',price:'From K400',period:'/retainer',subtext:'or agreed service fee',desc:'Source from China, UAE, South Africa and beyond.',features:['Supplier identification abroad','Documentation coordination','Freight & clearing introductions','Quotation management'],cta:'Source internationally',highlight:false}
     ]
   };
 
-  return (
-    <section style={{ background: '#fff', padding: 'clamp(60px, 8vw, 100px) 24px' }}>
-      <div style={{ maxWidth: 1140, margin: '0 auto' }}>
-        
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <span className="micro" style={{ color: '#E8730F', display: 'block', marginBottom: 12 }}>Commercial Services</span>
-          <h2 className="serif" style={{ fontSize: 'clamp(2rem, 4vw, 2.8rem)', color: '#0A1F12', margin: '0 0 16px' }}>
-            Free directory. Paid growth.
-          </h2>
-          <p style={{ fontSize: 15, color: 'rgba(10,31,18,.65)', maxWidth: 600, margin: '0 auto 24px', lineHeight: 1.6 }}>
-            Join for free and get listed. When you're ready to scale, we offer procurement support, qualified leads, and premium visibility.
-          </p>
-          
-          <div style={{ display: 'inline-flex', background: '#F5FAF6', padding: 6, borderRadius: 12, border: '1px solid rgba(10,31,18,.08)' }}>
-            <button 
-              onClick={() => setActiveTab('suppliers')}
-              style={{ padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 700, border: 'none', background: activeTab === 'suppliers' ? '#0A1F12' : 'transparent', color: activeTab === 'suppliers' ? '#fff' : 'rgba(10,31,18,.6)', transition: 'all .2s' }}
-            >
-              For Suppliers
-            </button>
-            <button 
-              onClick={() => setActiveTab('buyers')}
-              style={{ padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 700, border: 'none', background: activeTab === 'buyers' ? '#0A1F12' : 'transparent', color: activeTab === 'buyers' ? '#fff' : 'rgba(10,31,18,.6)', transition: 'all .2s' }}
-            >
-              For Buyers
-            </button>
-          </div>
+  return <section style={{ background:'#fff', padding:'clamp(60px, 8vw, 100px) 24px' }}>
+    <div style={{ maxWidth:1140, margin:'0 auto' }}>
+      <div style={{ textAlign:'center', marginBottom:40 }}>
+        <span className="micro" style={{ color:'#E8730F', display:'block', marginBottom:12 }}>Commercial Services</span>
+        <h2 className="serif" style={{ fontSize:'clamp(2rem, 4vw, 2.8rem)', color:'#0A1F12', margin:'0 0 16px' }}>Free directory. Paid growth.</h2>
+        <p style={{ fontSize:15, color:'rgba(10,31,18,.65)', maxWidth:600, margin:'0 auto 24px', lineHeight:1.6 }}>Join for free and get listed. When you're ready to scale, we offer procurement support, qualified leads, and premium visibility.</p>
+        <div style={{ display:'inline-flex', background:'#F5FAF6', padding:6, borderRadius:12, border:'1px solid rgba(10,31,18,.08)' }}>
+          <button onClick={()=>setActiveTab('suppliers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='suppliers'?'#0A1F12':'transparent', color:activeTab==='suppliers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Suppliers</button>
+          <button onClick={()=>setActiveTab('buyers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='buyers'?'#0A1F12':'transparent', color:activeTab==='buyers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Buyers</button>
         </div>
-
-        <div className="grid lg:grid-cols-3 gap-6" style={{ alignItems: 'stretch' }}>
-          {plans[activeTab].map((plan, i) => (
-            <div key={i} className="mc" style={{ 
-              background: plan.highlight ? '#0A1F12' : '#fff', 
-              border: plan.highlight ? '1px solid #0A1F12' : '1px solid rgba(10,31,18,.1)', 
-              borderRadius: 16, 
-              padding: '32px 28px', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              position: 'relative',
-              boxShadow: plan.highlight ? '0 20px 40px -15px rgba(10,31,18,.4)' : '0 4px 20px -10px rgba(10,31,18,.05)'
-            }}>
-              {plan.highlight && (
-                <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#E8730F,#F5A623)', color: '#fff', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', padding: '4px 12px', borderRadius: 99 }}>
-                  Most Popular
-                </div>
-              )}
-              
-              <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontSize: 18, fontWeight: 800, color: plan.highlight ? '#fff' : '#0A1F12', margin: '0 0 8px' }}>{plan.title}</h3>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: 8 }}>
-                  <span className="serif" style={{ fontSize: 36, fontWeight: 800, color: plan.highlight ? '#F5A623' : '#0A1F12', lineHeight: 1 }}>{plan.price}</span>
-                  <span style={{ fontSize: 13, color: plan.highlight ? 'rgba(255,255,255,.6)' : 'rgba(10,31,18,.5)', fontWeight: 600, paddingBottom: 4 }}>{plan.period}</span>
-                </div>
-                {plan.subtext && <div style={{ fontSize: 12, color: plan.highlight ? 'rgba(255,255,255,.5)' : 'rgba(10,31,18,.4)', marginBottom: 8 }}>{plan.subtext}</div>}
-                <p style={{ fontSize: 13, color: plan.highlight ? 'rgba(255,255,255,.7)' : 'rgba(10,31,18,.6)', margin: 0, lineHeight: 1.5 }}>{plan.desc}</p>
-              </div>
-
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
-                {plan.features.map((f, j) => (
-                  <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <i className="fas fa-check-circle" style={{ color: plan.highlight ? '#F5A623' : '#1E7B3C', fontSize: 14, marginTop: 2 }}></i>
-                    <span style={{ fontSize: 13, color: plan.highlight ? 'rgba(255,255,255,.8)' : 'rgba(10,31,18,.7)', lineHeight: 1.4 }}>{f}</span>
-                  </div>
-                ))}
-              </div>
-
-              <button style={{ 
-                width: '100%', 
-                padding: '14px', 
-                borderRadius: 10, 
-                fontSize: 14, 
-                fontWeight: 700, 
-                border: 'none', 
-                background: plan.highlight ? 'linear-gradient(135deg,#E8730F,#F5A623)' : '#F5FAF6', 
-                color: plan.highlight ? '#fff' : '#0A1F12',
-                transition: 'all .2s'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
-              >
-                {plan.cta}
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ marginTop: 32, textAlign: 'center', background: '#F5FAF6', padding: '16px 24px', borderRadius: 12, border: '1px dashed rgba(10,31,18,.15)', display: 'inline-flex', alignItems: 'center', gap: 12, margin: '32px auto 0', maxWidth: 800 }}>
-          <i className="fas fa-shield-halved" style={{ color: '#1E7B3C', fontSize: 20 }}></i>
-          <p style={{ fontSize: 13, color: 'rgba(10,31,18,.7)', margin: 0, textAlign: 'left', lineHeight: 1.5 }}>
-            <strong style={{ color: '#0A1F12' }}>Transact Directly:</strong> StartEasy does not process buyer payments. Buyers and suppliers transact directly. We earn from the services above, keeping the process simple and transparent.
-          </p>
-        </div>
-
       </div>
-    </section>
-  );
+      <div className="grid lg:grid-cols-3 gap-6" style={{ alignItems:'stretch' }}>
+        {plans[activeTab].map((plan,i)=>(
+          <div key={i} className="mc" style={{ background:plan.highlight?'#0A1F12':'#fff', border:plan.highlight?'1px solid #0A1F12':'1px solid rgba(10,31,18,.1)', borderRadius:16, padding:'32px 28px', display:'flex', flexDirection:'column', position:'relative', boxShadow:plan.highlight?'0 20px 40px -15px rgba(10,31,18,.4)':'0 4px 20px -10px rgba(10,31,18,.05)' }}>
+            {plan.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', padding:'4px 12px', borderRadius:99 }}>Most Popular</div>}
+            <div style={{ marginBottom:24 }}>
+              <h3 style={{ fontSize:18, fontWeight:800, color:plan.highlight?'#fff':'#0A1F12', margin:'0 0 8px' }}>{plan.title}</h3>
+              <div style={{ display:'flex', alignItems:'flex-end', gap:4, marginBottom:8 }}>
+                <span className="serif" style={{ fontSize:36, fontWeight:800, color:plan.highlight?'#F5A623':'#0A1F12', lineHeight:1 }}>{plan.price}</span>
+                <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.6)':'rgba(10,31,18,.5)', fontWeight:600, paddingBottom:4 }}>{plan.period}</span>
+              </div>
+              {plan.subtext && <div style={{ fontSize:12, color:plan.highlight?'rgba(255,255,255,.5)':'rgba(10,31,18,.4)', marginBottom:8 }}>{plan.subtext}</div>}
+              <p style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.7)':'rgba(10,31,18,.6)', margin:0, lineHeight:1.5 }}>{plan.desc}</p>
+            </div>
+            <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, marginBottom:32 }}>
+              {plan.features.map((f,j)=>(
+                <div key={j} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                  <i className="fas fa-check-circle" style={{ color:plan.highlight?'#F5A623':'#1E7B3C', fontSize:14, marginTop:2 }}></i>
+                  <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.8)':'rgba(10,31,18,.7)', lineHeight:1.4 }}>{f}</span>
+                </div>
+              ))}
+            </div>
+            <button style={{ width:'100%', padding:'14px', borderRadius:10, fontSize:14, fontWeight:700, border:'none', background:plan.highlight?'linear-gradient(135deg,#E8730F,#F5A623)':'#F5FAF6', color:plan.highlight?'#fff':'#0A1F12', transition:'all .2s' }} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';}} onMouseLeave={e=>{e.currentTarget.style.transform='none';}}>{plan.cta}</button>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop:32, textAlign:'center', background:'#F5FAF6', padding:'16px 24px', borderRadius:12, border:'1px dashed rgba(10,31,18,.15)', display:'inline-flex', alignItems:'center', gap:12, margin:'32px auto 0', maxWidth:800 }}>
+        <i className="fas fa-shield-halved" style={{ color:'#1E7B3C', fontSize:20 }}></i>
+        <p style={{ fontSize:13, color:'rgba(10,31,18,.7)', margin:0, textAlign:'left', lineHeight:1.5 }}><strong style={{ color:'#0A1F12' }}>Transact Directly:</strong> StartEasy does not process buyer payments. Buyers and suppliers transact directly. We earn from the services above, keeping the process simple and transparent.</p>
+      </div>
+    </div>
+  </section>;
 }
 
-/* ═══════════════════ TRUST SECTION ═══════════════════ */
 function TrustSection(){
   const steps=[
     {icon:'fa-magnifying-glass-location',color:'#1B6CA8',title:'We identify suppliers',body:'Local and international suppliers matched to your exact category, quantities and terms.'},
@@ -1227,7 +1199,6 @@ function TrustSection(){
   </section>;
 }
 
-/* ═══════════════════ FOOTER ═══════════════════ */
 function Footer(){
   return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'44px 24px 32px'}}>
@@ -1237,11 +1208,8 @@ function Footer(){
           <h3 className="serif" style={{fontSize:'clamp(1.15rem,2.4vw,1.5rem)',fontWeight:800,color:'#fff',margin:'0 0 6px',lineHeight:1.2}}>Looking for the full StartEasy experience?</h3>
           <p style={{fontSize:12.5,lineHeight:1.6,color:'rgba(255,255,255,.7)',margin:0}}>Business registration, compliance, growth tools and more — back on the main platform.</p>
         </div>
-        <a href={MAIN_PLATFORM_URL} className="footer-platform-btn" style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:11,fontSize:14,fontWeight:800,textDecoration:'none',boxShadow:'0 14px 30px -10px rgba(232,115,15,.7)',whiteSpace:'nowrap'}}>
-          <i className="fas fa-arrow-left"></i> Back to StartEasy Platform
-        </a>
+        <a href={MAIN_PLATFORM_URL} className="footer-platform-btn" style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:11,fontSize:14,fontWeight:800,textDecoration:'none',boxShadow:'0 14px 30px -10px rgba(232,115,15,.7)',whiteSpace:'nowrap'}}><i className="fas fa-arrow-left"></i> Back to StartEasy Platform</a>
       </div>
-
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
         <Mark size={36}/>
         <span style={{fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
@@ -1260,7 +1228,6 @@ function Footer(){
   </footer>;
 }
 
-/* ═══════════════════ LANDING ═══════════════════ */
 function Landing({onSignup,onSignin}){
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
     <main style={{flex:1}}>
@@ -1273,7 +1240,6 @@ function Landing({onSignup,onSignin}){
   </div>;
 }
 
-/* ═══════════════════ SIGN-IN PROMPT ═══════════════════ */
 function SignInPrompt({onSignIn,onSignUp,onHome}){
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', alignItems:'center', justifyContent:'center', padding:'32px 20px'}}>
     <div style={{maxWidth:440,textAlign:'center',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:16,padding:'36px 30px',boxShadow:'0 20px 50px -20px rgba(10,31,18,.15)'}}>
@@ -1287,7 +1253,6 @@ function SignInPrompt({onSignIn,onSignUp,onHome}){
   </div>;
 }
 
-/* ═══════════════════ WELCOME ═══════════════════ */
 function Welcome({user,onDashboard,onBrowse,onSignedOut}){
   const [profile,setProfile]=useState(null);
   const [loading,setLoading]=useState(true);
@@ -1308,17 +1273,10 @@ function Welcome({user,onDashboard,onBrowse,onSignedOut}){
     <main style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px 24px'}}>
       <div style={{maxWidth:560,width:'100%'}}>
         <div style={{textAlign:'center',marginBottom:28}}>
-          <div style={{width:76,height:76,borderRadius:'50%',background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:34,margin:'0 auto 20px'}}>
-            <i className="fas fa-check"></i>
-          </div>
-          <h1 className="serif" style={{fontSize:'clamp(1.7rem,4vw,2.3rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 12px'}}>
-            Welcome to StartEasy, {firstName}!
-          </h1>
-          <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:'0 auto',maxWidth:420}}>
-            Your {isSupplier?'supplier':'buyer'} account is ready. {isVerified?'Your profile is verified and live in the directory.':'Our team will verify your profile — usually within 48 hours.'}
-          </p>
+          <div style={{width:76,height:76,borderRadius:'50%',background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:34,margin:'0 auto 20px'}}><i className="fas fa-check"></i></div>
+          <h1 className="serif" style={{fontSize:'clamp(1.7rem,4vw,2.3rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 12px'}}>Welcome to StartEasy, {firstName}!</h1>
+          <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:'0 auto',maxWidth:420}}>Your {isSupplier?'supplier':'buyer'} account is ready. {isVerified?'Your profile is verified and live in the directory.':'Our team will verify your profile — usually within 48 hours.'}</p>
         </div>
-
         {profile && <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px',marginBottom:20}}>
           <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Your account</div>
           <WelcomeRow k="Business" v={profile.businessName}/>
@@ -1327,39 +1285,21 @@ function Welcome({user,onDashboard,onBrowse,onSignedOut}){
           <WelcomeRow k="Location" v={locLabel(profile)}/>
           <WelcomeRow k="Status" v={isVerified?'Verified':'Pending verification'}/>
         </div>}
-
         <div style={{marginBottom:20}}>
           <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>What would you like to do first?</div>
           <div style={{display:'flex',flexDirection:'column',gap:10}}>
-            <button onClick={onBrowse} style={{padding:'16px 18px',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:10,textAlign:'left',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:14,transition:'all .2s'}}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor='#1B6CA8';e.currentTarget.style.transform='translateY(-2px)';}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(10,31,18,.12)';e.currentTarget.style.transform='none';}}>
-              <span style={{width:44,height:44,borderRadius:11,background:'rgba(27,108,168,.12)',color:'#1B6CA8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>
-                <i className="fas fa-magnifying-glass"></i>
-              </span>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:14,fontWeight:800,color:'#0A1F12'}}>Browse {isSupplier?'buyers':'suppliers'} first</div>
-                <div style={{fontSize:12,color:'rgba(10,31,18,.6)',marginTop:2}}>See who's in your category right now</div>
-              </div>
+            <button onClick={onBrowse} style={{padding:'16px 18px',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:10,textAlign:'left',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:14,transition:'all .2s'}} onMouseEnter={e=>{e.currentTarget.style.borderColor='#1B6CA8';e.currentTarget.style.transform='translateY(-2px)';}} onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(10,31,18,.12)';e.currentTarget.style.transform='none';}}>
+              <span style={{width:44,height:44,borderRadius:11,background:'rgba(27,108,168,.12)',color:'#1B6CA8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className="fas fa-magnifying-glass"></i></span>
+              <div style={{flex:1,minWidth:0}}><div style={{fontSize:14,fontWeight:800,color:'#0A1F12'}}>Browse {isSupplier?'buyers':'suppliers'} first</div><div style={{fontSize:12,color:'rgba(10,31,18,.6)',marginTop:2}}>See who's in your category right now</div></div>
               <i className="fas fa-arrow-right" style={{color:'rgba(10,31,18,.3)'}}></i>
             </button>
-
             <button onClick={onDashboard} style={{padding:'16px 18px',background:'linear-gradient(135deg,#E8730F,#F5A623)',border:'none',borderRadius:10,textAlign:'left',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:14,color:'#fff',boxShadow:'0 12px 28px -10px rgba(232,115,15,.5)'}}>
-              <span style={{width:44,height:44,borderRadius:11,background:'rgba(255,255,255,.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>
-                <i className="fas fa-house"></i>
-              </span>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:14,fontWeight:800}}>Open my dashboard</div>
-                <div style={{fontSize:12,color:'rgba(255,255,255,.85)',marginTop:2}}>Track matches, requests, and your profile</div>
-              </div>
+              <span style={{width:44,height:44,borderRadius:11,background:'rgba(255,255,255,.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className="fas fa-house"></i></span>
+              <div style={{flex:1,minWidth:0}}><div style={{fontSize:14,fontWeight:800}}>Open my dashboard</div><div style={{fontSize:12,color:'rgba(255,255,255,.85)',marginTop:2}}>Track matches, requests, and your profile</div></div>
               <i className="fas fa-arrow-right"></i>
             </button>
           </div>
         </div>
-
-        <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',textAlign:'center',lineHeight:1.6,margin:0,fontStyle:'italic'}}>
-          You can switch between Browse and Dashboard anytime from the top menu.
-        </p>
       </div>
     </main>
   </div>;
@@ -1371,7 +1311,7 @@ function WelcomeRow({k,v}){
   </div>;
 }
 
-/* ═══════════════════ DASHBOARD ═══════════════════ */
+/* ═══════════════════ DASHBOARD (EarnUp-inspired rewrite) ═══════════════════ */
 function Dashboard({user,onBrowse,onSignedOut}){
   const [profile,setProfile]=useState(null);
   const [loading,setLoading]=useState(true);
@@ -1379,10 +1319,15 @@ function Dashboard({user,onBrowse,onSignedOut}){
   const [sidebarOpen,setSidebarOpen]=useState(false);
   const [matches,setMatches]=useState([]);
   const [quotes,setQuotes]=useState([]);
+  const [savedSuppliers,setSavedSuppliersState]=useState([]);
+  const [alerts,setAlertsState]=useState([]);
   const [editForm,setEditForm]=useState(null);
   const [saving,setSaving]=useState(false);
   const [saveMsg,setSaveMsg]=useState(null);
+  const [allSuppliers,setAllSuppliers]=useState([]);
+  const [allBuyers,setAllBuyers]=useState([]);
 
+  // Load profile + saved + alerts
   useEffect(()=>{
     if(!user){setLoading(false);return;}
     loadUserProfile(user.uid).then(p=>{
@@ -1396,26 +1341,29 @@ function Dashboard({user,onBrowse,onSignedOut}){
         sources:Array.isArray(p.sources)?p.sources.join(', '):(p.sources||''),
         frequency:p.frequency||'Monthly',orderValue:p.orderValue||''
       });
+      setSavedSuppliersState(getSavedSuppliers(user.uid));
+      setAlertsState(getAlerts(user.uid));
       setLoading(false);
     });
   },[user]);
 
+  // Load directory data for matches + analytics
   useEffect(()=>{
     if(!profile) return;
-    const isSupplier=profile.role==='supplier';
-    const coll=isSupplier?'se_buyers':'se_suppliers';
-    const seeds=isSupplier?SEED_BUYERS:SEED_SUPPLIERS;
-    const filterSeed=()=>setMatches(seeds.filter(x=>x.category===profile.category).slice(0,12));
-    if(!firebaseReady){filterSeed();}
-    else{
-      db.collection(coll).where('category','==',profile.category).limit(12).get()
-        .then(snap=>{if(snap.empty) filterSeed();else setMatches(snap.docs.map(d=>({id:d.id,...d.data()})));})
-        .catch(()=>filterSeed());
-    }
-    if(!isSupplier){loadUserQuotes(user.uid).then(q=>setQuotes(q));}
+    fsLoadDirectory().then(res=>{
+      const sups = (res&&res.suppliers.length)?res.suppliers:SEED_SUPPLIERS;
+      const buys = (res&&res.buyers.length)?res.buyers:SEED_BUYERS;
+      setAllSuppliers(sups);
+      setAllBuyers(buys);
+      const pool = profile.role==='supplier'?buys:sups;
+      setMatches(pool.filter(x=>x.category===profile.category).slice(0,12));
+    });
+    if(profile.role!=='supplier'){ loadUserQuotes(user.uid).then(q=>setQuotes(q)); }
   },[profile,user]);
 
   const signOut=async()=>{await authSignOutFn();onSignedOut&&onSignedOut();};
+
+  const toggleSave=()=>{ /* not used at this level */ };
 
   const saveProfile=async()=>{
     if(!editForm) return;
@@ -1428,8 +1376,9 @@ function Dashboard({user,onBrowse,onSignedOut}){
       if(firebaseReady) await db.collection('se_users').doc(user.uid).update(updates);
       setProfile({...profile,...updates});
       setSaveMsg({kind:'ok',msg:'Profile saved.'});
+      toast('Profile saved successfully.', 'success');
       setTimeout(()=>setSaveMsg(null),3000);
-    }catch(e){setSaveMsg({kind:'err',msg:'Save failed: '+(e.code||e.message)});}
+    }catch(e){setSaveMsg({kind:'err',msg:'Save failed: '+(e.code||e.message)});toast('Save failed.', 'error');}
     finally{setSaving(false);}
   };
 
@@ -1447,71 +1396,76 @@ function Dashboard({user,onBrowse,onSignedOut}){
   const cat=CAT_MAP[profile.category]||{title:'General',color:'#E8730F',icon:'fa-building'};
   const isVerified=profile.status==='verified';
 
-  const fields=isSupplier
-    ? [profile.name,profile.businessName,profile.phone,profile.category,profile.location,(profile.products&&profile.products.length),profile.moq,profile.delivery,profile.leadTime]
-    : [profile.name,profile.businessName,profile.phone,profile.category,profile.location,(profile.sources&&profile.sources.length),profile.frequency,profile.orderValue];
-  const pct=Math.round((fields.filter(Boolean).length/fields.length)*100);
-  const circ=2*Math.PI*26;
-  const dash=circ*(1-pct/100);
-
-  const tabs=isSupplier
-    ? [['overview','Overview','fa-house'],['matches','Matches','fa-users'],['profile','Profile','fa-user'],['settings','Settings','fa-gear']]
-    : [['overview','Overview','fa-house'],['matches','Matches','fa-truck-fast'],['requests','My Requests','fa-file-invoice'],['profile','Profile','fa-user'],['settings','Settings','fa-gear']];
-
-  const kpis=isSupplier
-    ? [
-        {label:'Buyers matched',value:matches.length,icon:'fa-users',color:'#1B6CA8',sub:'in your category'},
-        {label:'Inquiries',value:0,icon:'fa-envelope',color:'#E8730F',sub:'Received from buyers'},
-        {label:'Profile views',value:'—',icon:'fa-eye',color:'#7A4FA3',sub:'Tracking'},
-        {label:'Status',value:isVerified?'Verified':'Pending',icon:isVerified?'fa-circle-check':'fa-clock',color:isVerified?'#1E7B3C':'#8A6828',sub:isVerified?'Live in directory':'Being reviewed'}
-      ]
-    : [
-        {label:'Suppliers matched',value:matches.length,icon:'fa-truck-fast',color:'#1B6CA8',sub:'in your category'},
-        {label:'Quotes requested',value:quotes.length,icon:'fa-file-invoice',color:'#E8730F',sub:quotes.length>0?'View My Requests':'None yet'},
-        {label:'Suppliers contacted',value:new Set(quotes.map(q=>q.supplierId).filter(Boolean)).size,icon:'fa-handshake',color:'#7A4FA3',sub:'Across your requests'},
-        {label:'Status',value:isVerified?'Verified':'Pending',icon:isVerified?'fa-circle-check':'fa-clock',color:isVerified?'#1E7B3C':'#8A6828',sub:isVerified?'Live in directory':'Being reviewed'}
-      ];
-
-  const activity=[
-    {icon:'fa-user-plus',color:'#2E9C4A',title:'Account created',detail:`${new Date(profile.createdAt||Date.now()).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`},
-    ...(isVerified?[{icon:'fa-circle-check',color:'#1E7B3C',title:'Profile verified',detail:isSupplier?'Buyers can now find you':'Suppliers can now find you'}]:[{icon:'fa-clock',color:'#8A6828',title:'Verification pending',detail:'Reviewed within 48 hours.'}]),
-    ...(quotes.length>0?[{icon:'fa-file-invoice',color:'#E8730F',title:`${quotes.length} quote request${quotes.length===1?'':'s'} sent`,detail:'Track them in My Requests'}]:[{icon:'fa-magnifying-glass',color:'#1B6CA8',title:'Browse suppliers to request quotes',detail:'Your requests will appear here.'}])
+  // Sidebar nav definition
+  const navItems = isSupplier ? [
+    {kind:'section',label:'Workspace'},
+    {key:'overview', label:'Overview', icon:'fa-house'},
+    {key:'profile', label:'Organisation Profile', icon:'fa-building'},
+    {key:'catalogue', label:'My Catalogue', icon:'fa-list'},
+    {key:'matches', label:'Buyer Matches', icon:'fa-users', badge: matches.length},
+    {key:'analytics', label:'Analytics', icon:'fa-chart-simple'},
+    {kind:'section',label:'Explore'},
+    {key:'browse', label:'Browse Buyers', icon:'fa-magnifying-glass'},
+    {kind:'section',label:'Account'},
+    {key:'settings', label:'Settings', icon:'fa-gear'},
+  ] : [
+    {kind:'section',label:'Workspace'},
+    {key:'overview', label:'Overview', icon:'fa-house'},
+    {key:'profile', label:'My Profile', icon:'fa-user'},
+    {key:'saved', label:'Saved Suppliers', icon:'fa-bookmark', badge: savedSuppliers.length},
+    {key:'requests', label:'My Requests', icon:'fa-file-invoice', badge: quotes.length},
+    {key:'alerts', label:'Opportunity Alerts', icon:'fa-bell', badge: alerts.length},
+    {kind:'section',label:'Explore'},
+    {key:'browse', label:'Browse Suppliers', icon:'fa-magnifying-glass'},
+    {kind:'section',label:'Account'},
+    {key:'settings', label:'Settings', icon:'fa-gear'},
   ];
+
+  const handleNav=(key)=>{
+    if(key==='browse'){ onBrowse && onBrowse(); setSidebarOpen(false); return; }
+    setTab(key); setSidebarOpen(false);
+  };
+
+  const pageTitle = navItems.find(x=>x.key===tab)?.label || 'Overview';
+  const pageEyebrow = isSupplier ? 'Supplier dashboard' : 'Buyer dashboard';
 
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6'}}>
     <div className={'dash-backdrop '+(sidebarOpen?'open':'')} onClick={()=>setSidebarOpen(false)} style={{position:'fixed',top:72,left:0,right:0,bottom:0,background:'rgba(0,0,0,.45)',zIndex:35}}></div>
 
     <aside className={'dash-sidebar '+(sidebarOpen?'open':'')} style={{position:'fixed',left:0,top:72,bottom:0,width:260,background:'#0A1F12',color:'#fff',display:'flex',flexDirection:'column',zIndex:40,overflowY:'auto'}}>
-      <div style={{padding:'20px 20px 16px',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
-        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
-          <Mark size={36}/>
+      <div style={{padding:'18px 16px 14px',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+          <Mark size={34}/>
           <div style={{lineHeight:1.15}}>
             <div style={{fontSize:8.5,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)'}}>Dashboard</div>
             <div style={{fontSize:14,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></div>
           </div>
         </div>
-        <div style={{background:'rgba(255,255,255,.05)',borderRadius:10,padding:'12px 14px',display:'flex',alignItems:'center',gap:10}}>
-          <span style={{width:38,height:38,borderRadius:'50%',background:cat.color,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0}}>{(profile.name||'U')[0].toUpperCase()}</span>
+        <div style={{background:'rgba(255,255,255,.05)',borderRadius:10,padding:'12px 12px',display:'flex',alignItems:'center',gap:10}}>
+          <span style={{width:38,height:38,borderRadius:'50%',background:cat.color,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:800,flexShrink:0}}>{initials(profile.name)}</span>
           <div style={{minWidth:0,flex:1}}>
             <div style={{fontSize:12.5,fontWeight:700,color:'#fff',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{profile.name}</div>
             <div style={{fontSize:10.5,color:'rgba(255,255,255,.55)',marginTop:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{isSupplier?'Supplier':'Buyer'} · {profile.businessName}</div>
           </div>
         </div>
       </div>
-      <nav style={{padding:'16px 12px',flex:1}}>
-        {tabs.map(([key,label,icon])=>
-          <button key={key} onClick={()=>{setTab(key);setSidebarOpen(false);}} className={'dash-nav-btn '+(tab===key?'active':'')}>
-            <i className={`fas ${icon}`} style={{fontSize:13,width:16}}></i>{label}
-            {key==='requests' && quotes.length>0 && <span style={{marginLeft:'auto',background:'#E8730F',color:'#fff',fontSize:9.5,fontWeight:800,borderRadius:99,padding:'1px 7px'}}>{quotes.length}</span>}
-          </button>
-        )}
+      <nav style={{padding:'6px 10px',flex:1}}>
+        {navItems.map((item, idx)=>{
+          if(item.kind==='section'){
+            return <div key={idx} className="dash-side-section">{item.label}</div>;
+          }
+          return <button key={item.key} onClick={()=>handleNav(item.key)} className={'dash-nav-btn '+(tab===item.key?'active':'')}>
+            <i className={'fas '+item.icon} style={{fontSize:13,width:16}}></i>
+            <span style={{flex:1,textAlign:'left'}}>{item.label}</span>
+            {item.badge>0 && <span className="dash-nav-badge">{item.badge}</span>}
+          </button>;
+        })}
         <div style={{height:14}}></div>
-        <button onClick={onBrowse} className="dash-nav-btn"><i className="fas fa-magnifying-glass" style={{fontSize:12,width:16}}></i> Browse directory</button>
-        <a href={MAIN_PLATFORM_URL} className="dash-nav-btn" style={{textDecoration:'none',color:'#F5A623',background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.25)',marginTop:6}}>
+        <a href={MAIN_PLATFORM_URL} className="dash-nav-btn" style={{textDecoration:'none',color:'#F5A623',background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.25)'}}>
           <i className="fas fa-arrow-left" style={{fontSize:12,width:16}}></i> Back to StartEasy Platform
         </a>
       </nav>
-      <div style={{padding:'14px 16px',borderTop:'1px solid rgba(255,255,255,.08)'}}>
+      <div style={{padding:'12px 14px',borderTop:'1px solid rgba(255,255,255,.08)'}}>
         <a href={waUrl(`Hello StartEasy — I'm ${profile.name} (${profile.businessName}).`)} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px',marginBottom:8,background:'#25D366',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}>
           <i className="fab fa-whatsapp"></i> Contact support
         </a>
@@ -1526,234 +1480,486 @@ function Dashboard({user,onBrowse,onSignedOut}){
         <button onClick={()=>setSidebarOpen(true)} className="dash-mobile-toggle" style={{width:36,height:36,borderRadius:8,background:'#0A1F12',color:'#fff',border:'none',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
           <i className="fas fa-bars" style={{fontSize:14}}></i>
         </button>
-        
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:10,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>{isSupplier?'Supplier':'Buyer'} dashboard</div>
-          <div style={{fontSize:14,fontWeight:700,color:'#0A1F12',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{tabs.find(t=>t[0]===tab)?.[1]||'Overview'}</div>
+          <div style={{fontSize:10,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>{pageEyebrow}</div>
+          <div style={{fontSize:14,fontWeight:700,color:'#0A1F12',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pageTitle}</div>
         </div>
-
-        <div style={{display:'flex', alignItems:'center', gap:8, flexShrink:0}}>
-          <span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'6px 10px',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase',background:isVerified?'rgba(30,123,60,.12)':'rgba(245,166,35,.15)',color:isVerified?'#0F5C2A':'#8A6828',border:'1px solid '+(isVerified?'rgba(30,123,60,.3)':'rgba(245,166,35,.35)')}}>
-            <i className={`fas ${isVerified?'fa-circle-check':'fa-clock'}`} style={{fontSize:8}}></i>
+        <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
+          <span className={'chip '+(isVerified?'':'chip-accent')}>
+            <i className={'fas '+(isVerified?'fa-circle-check':'fa-clock')}></i>
             <span className="hide-sm">{isVerified?'Verified':'Pending'}</span>
           </span>
         </div>
       </header>
 
-      <main style={{padding:'24px',maxWidth:1200,margin:'0 auto'}}>
-        {tab==='overview'&&<>
-          <div style={{marginBottom:22}}>
-            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Welcome back, {profile.name.split(' ')[0]}</h1>
-            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{profile.businessName} · {cat.title} · {locLabel(profile)}</p>
-          </div>
-
-          <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',marginBottom:22}}>
-            {kpis.map((k,i)=>(
-              <div key={i} className="kpi-card">
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10}}>
-                  <span style={{fontSize:10.5,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',lineHeight:1.3}}>{k.label}</span>
-                  <span style={{width:32,height:32,borderRadius:8,background:k.color+'15',color:k.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${k.icon}`}></i></span>
-                </div>
-                <div className="serif" style={{fontSize:26,fontWeight:800,color:'#0A1F12',lineHeight:1}}>{k.value}</div>
-                <div style={{fontSize:11.5,color:'rgba(10,31,18,.5)'}}>{k.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{display:'grid',gap:18,gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))'}}>
-            <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,overflow:'hidden'}}>
-              <div style={{padding:'18px 20px',borderBottom:'1px solid rgba(10,31,18,.06)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
-                <div>
-                  <h3 className="serif" style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 3px'}}>{isSupplier?'Businesses needing what you supply':'Suppliers in your category'}</h3>
-                  <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',margin:0}}>{matches.length} in {cat.title}</p>
-                </div>
-                <button onClick={()=>setTab('matches')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>See all</button>
-              </div>
-              {matches.length===0?<div style={{padding:'40px 20px',textAlign:'center'}}><p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No matches yet.</p></div>:
-              matches.slice(0,5).map(m=>(
-                <div key={m.id} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',borderBottom:'1px dashed rgba(10,31,18,.08)'}}>
-                  <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13,fontWeight:700,color:'#0A1F12'}}>{m.name}</div>
-                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{locLabel(m)}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{display:'flex',flexDirection:'column',gap:18}}>
-              <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px'}}>
-                <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:12}}>
-                  <div className="profile-ring">
-                    <svg width="64" height="64" viewBox="0 0 64 64">
-                      <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(10,31,18,.08)" strokeWidth="6"/>
-                      <circle cx="32" cy="32" r="26" fill="none" stroke={pct===100?'#1E7B3C':'#E8730F'} strokeWidth="6" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={dash} style={{transition:'stroke-dashoffset .5s ease'}}/>
-                    </svg>
-                    <div className="inner" style={{color:pct===100?'#1E7B3C':'#E8730F'}}>{pct}%</div>
-                  </div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13,fontWeight:800,color:'#0A1F12',marginBottom:2}}>{pct===100?'Profile complete':'Profile '+pct+'%'}</div>
-                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.6)',lineHeight:1.5}}>{pct===100?'Fully discoverable.':'Complete to unlock matches.'}</div>
-                  </div>
-                </div>
-                {pct<100&&<button onClick={()=>setTab('profile')} style={{width:'100%',padding:'10px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}>Complete profile</button>}
-              </div>
-
-              <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px'}}>
-                <h3 className="serif" style={{fontSize:14,fontWeight:800,color:'#0A1F12',margin:'0 0 10px'}}>Recent activity</h3>
-                {activity.map((a,i)=>(
-                  <div key={i} style={{display:'flex',gap:12,padding:'10px 0',borderBottom:i<activity.length-1?'1px dashed rgba(10,31,18,.06)':'none',alignItems:'flex-start'}}>
-                    <span style={{width:28,height:28,borderRadius:'50%',background:a.color+'15',color:a.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,flexShrink:0}}><i className={`fas ${a.icon}`}></i></span>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:2}}>{a.title}</div>
-                      <div style={{fontSize:11,color:'rgba(10,31,18,.55)',lineHeight:1.5}}>{a.detail}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </>}
-
-        {tab==='matches'&&<>
-          <div style={{marginBottom:20}}>
-            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Your matches</h1>
-            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{matches.length} in {cat.title}</p>
-          </div>
-          <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
-            {matches.map(m=>(
-              <div key={m.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
-                <div style={{display:'flex',alignItems:'center',gap:10}}>
-                  <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
-                  <div style={{minWidth:0,flex:1}}>
-                    <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{m.name}</div>
-                    <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}>{locLabel(m)}</div>
-                  </div>
-                </div>
-                <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{m.desc}</p>
-              </div>
-            ))}
-          </div>
-        </>}
-
-        {tab==='requests'&&!isSupplier&&<>
-          <div style={{marginBottom:20}}>
-            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>My Requests</h1>
-            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>Quotes you've requested — tracked here.</p>
-          </div>
-          {quotes.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:12,padding:'56px 24px',textAlign:'center'}}>
-            <i className="fas fa-file-invoice" style={{fontSize:32,color:'rgba(10,31,18,.15)',marginBottom:12,display:'block'}}></i>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700,color:'#0A1F12',margin:'0 0 8px'}}>No requests yet</h3>
-            <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:'0 0 20px'}}>Request a quote from a supplier and it will appear here.</p>
-            <button onClick={onBrowse} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Browse suppliers</button>
-          </div>:
-          <div style={{display:'flex',flexDirection:'column',gap:12}}>
-            {quotes.map(q=>(
-              <div key={q.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px',borderLeft:'4px solid #E8730F'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginBottom:10}}>
-                  <div>
-                    <div style={{fontSize:14,fontWeight:800,color:'#0A1F12'}}>{q.supplierName||'Supplier'}</div>
-                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}>{CAT_MAP[q.category]?.title||q.category} · {q.at?new Date(q.at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
-                  </div>
-                  <span style={{padding:'3px 10px',background:'rgba(232,115,15,.12)',color:'#8A6828',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase'}}>{q.status||'sent'}</span>
-                </div>
-                <div style={{display:'grid',gap:6,gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',fontSize:12.5}}>
-                  <div><span style={{color:'rgba(10,31,18,.5)'}}>Product:</span> <strong style={{color:'#0A1F12'}}>{q.product}</strong></div>
-                  {q.quantity&&<div><span style={{color:'rgba(10,31,18,.5)'}}>Qty:</span> <strong style={{color:'#0A1F12'}}>{q.quantity}</strong></div>}
-                  {q.budget&&<div><span style={{color:'rgba(10,31,18,.5)'}}>Budget:</span> <strong style={{color:'#0A1F12'}}>{q.budget}</strong></div>}
-                </div>
-              </div>
-            ))}
-          </div>}
-        </>}
-
-        {tab==='profile'&&editForm&&<>
-          <div style={{marginBottom:20}}>
-            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Your profile</h1>
-            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>This is what buyers or suppliers will see.</p>
-          </div>
-          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px'}}>
-            <div className="form-grid">
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Full name</label><TIn value={editForm.name} onChange={v=>setEditForm({...editForm,name:v})}/></div>
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name</label><TIn value={editForm.businessName} onChange={v=>setEditForm({...editForm,businessName:v})}/></div>
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone</label><TIn value={editForm.phone} onChange={v=>setEditForm({...editForm,phone:v})}/></div>
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category</label>
-                <select value={editForm.category} onChange={e=>setEditForm({...editForm,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                  {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
-                </select>
-              </div>
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Country</label>
-                <select value={editForm.country||'Zambia'} onChange={e=>setEditForm({...editForm,country:e.target.value,location:''})} style={{...INP_STYLE,cursor:'pointer'}}>
-                  {COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{(!editForm.country||editForm.country==='Zambia')?'City':'City / Region'}</label>
-                {(!editForm.country||editForm.country==='Zambia')?(
-                  <select value={editForm.location} onChange={e=>setEditForm({...editForm,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                    {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
-                  </select>
-                ):(
-                  <TIn value={editForm.location} onChange={v=>setEditForm({...editForm,location:v})}/>
-                )}
-              </div>
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isSupplier?'Delivery scope':'Sourcing scope'}</label>
-                <select value={editForm.scope||'local'} onChange={e=>setEditForm({...editForm,scope:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                  {SCOPE_OPTIONS.map(o=><option key={o.key} value={o.key}>{o.label}</option>)}
-                </select>
-              </div>
-            </div>
-            {editForm.scope && editForm.scope!=='local' && <div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
-              <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
-              International sourcing: import duties, customs clearance and international freight are separate from supplier quotes.
-            </div>}
-            <div style={{marginTop:16}}>
-              {isSupplier?<>
-                <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products (comma-separated)</label><TIn value={editForm.products} onChange={v=>setEditForm({...editForm,products:v})}/>
-                <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>MOQ</label><TIn value={editForm.moq} onChange={v=>setEditForm({...editForm,moq:v})}/></div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label><TIn value={editForm.leadTime} onChange={v=>setEditForm({...editForm,leadTime:v})}/></div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery</label><TIn value={editForm.delivery} onChange={v=>setEditForm({...editForm,delivery:v})}/></div>
-                </div>
-              </>:<>
-                <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>What you buy (comma-separated)</label><TIn value={editForm.sources} onChange={v=>setEditForm({...editForm,sources:v})}/>
-                <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Frequency</label>
-                    <select value={editForm.frequency} onChange={e=>setEditForm({...editForm,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                      {FREQUENCY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
-                    </select>
-                  </div>
-                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={editForm.orderValue} onChange={v=>setEditForm({...editForm,orderValue:v})}/></div>
-                </div>
-              </>}
-            </div>
-            {saveMsg&&<div style={{background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',border:'1px solid '+(saveMsg.kind==='ok'?'rgba(30,123,60,.3)':'rgba(184,86,79,.3)'),borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318',marginTop:14}}>{saveMsg.msg}</div>}
-            <button onClick={saveProfile} disabled={saving} style={{marginTop:18,padding:'12px 22px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>{saving?'Saving…':'Save changes'}</button>
-          </div>
-        </>}
-
-        {tab==='settings'&&<>
-          <div style={{marginBottom:20}}>
-            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Settings</h1>
-          </div>
-          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px',marginBottom:16}}>
-            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Account</div>
-            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Email</span><span style={{fontWeight:700,color:'#0A1F12'}}>{profile.email}</span></div>
-            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Role</span><span style={{fontWeight:700,color:'#0A1F12'}}>{isSupplier?'Supplier':'Buyer'}</span></div>
-            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Status</span><span style={{fontWeight:700,color:isVerified?'#0F5C2A':'#8A6828'}}>{isVerified?'Verified':'Pending'}</span></div>
-          </div>
-          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px',marginBottom:16}}>
-            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Password</div>
-            <button onClick={async()=>{try{await auth.sendPasswordResetEmail(profile.email);setSaveMsg({kind:'ok',msg:'Reset email sent.'});setTimeout(()=>setSaveMsg(null),4000);}catch(e){setSaveMsg({kind:'err',msg:'Could not send.'});setTimeout(()=>setSaveMsg(null),4000);}}} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-key" style={{marginRight:6}}></i> Send reset email</button>
-            {saveMsg&&<div style={{marginTop:12,background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318'}}>{saveMsg.msg}</div>}
-          </div>
-          <div style={{background:'#fff',border:'1px solid rgba(184,86,79,.2)',borderRadius:12,padding:'22px'}}>
-            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#7C2318',marginBottom:12}}>Danger zone</div>
-            <button onClick={signOut} style={{padding:'10px 18px',background:'#B8564F',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out</button>
-          </div>
-        </>}
+      <main style={{padding:'24px',maxWidth:1240,margin:'0 auto'}}>
+        {tab==='overview' && <DashOverview 
+          profile={profile} isSupplier={isSupplier} cat={cat} matches={matches} quotes={quotes} 
+          savedSuppliers={savedSuppliers} alerts={alerts} allSuppliers={allSuppliers} allBuyers={allBuyers}
+          onNav={handleNav} onBrowse={onBrowse}
+        />}
+        {tab==='profile' && editForm && <DashProfile 
+          profile={profile} editForm={editForm} setEditForm={setEditForm} isSupplier={isSupplier} 
+          saving={saving} saveMsg={saveMsg} onSave={saveProfile}
+        />}
+        {tab==='matches' && <DashMatches profile={profile} matches={matches} isSupplier={isSupplier} cat={cat} onBrowse={onBrowse}/>}
+        {tab==='saved' && !isSupplier && <DashSaved savedSuppliers={savedSuppliers} allSuppliers={allSuppliers} cat={cat} user={user} onBrowse={onBrowse}/>}
+        {tab==='requests' && !isSupplier && <DashRequests quotes={quotes} onBrowse={onBrowse}/>}
+        {tab==='alerts' && !isSupplier && <DashAlerts alerts={alerts} setAlerts={setAlertsState} user={user} cat={cat}/>}
+        {tab==='catalogue' && isSupplier && <DashCatalogue profile={profile} cat={cat}/>}
+        {tab==='analytics' && isSupplier && <DashAnalytics profile={profile} matches={matches} cat={cat}/>}
+        {tab==='settings' && <DashSettings profile={profile} isVerified={isVerified} isSupplier={isSupplier} onSignOut={signOut} user={user}/>}
       </main>
     </div>
   </div>;
+}
+
+/* --- Dashboard sub-pages --- */
+function DashOverview({profile, isSupplier, cat, matches, quotes, savedSuppliers, alerts, allSuppliers, allBuyers, onNav, onBrowse}){
+  const pct = computeProfilePct(profile, isSupplier);
+  const activity = [
+    {icon:'fa-user-plus', color:'#2E9C4A', title:'Account created', detail:fmtDate(profile.createdAt||Date.now())},
+    ...(profile.status==='verified' ? [{icon:'fa-circle-check', color:'#1E7B3C', title:'Profile verified', detail:isSupplier?'Buyers can now find you':'Suppliers can now find you'}] : [{icon:'fa-clock', color:'#8A6828', title:'Verification pending', detail:'Reviewed within 48 hours.'}]),
+    ...(quotes.length>0 ? [{icon:'fa-file-invoice', color:'#E8730F', title:`${quotes.length} quote request${quotes.length===1?'':'s'} sent`, detail:'Track them in My Requests'}] : [{icon:'fa-magnifying-glass', color:'#1B6CA8', title:isSupplier?'Browse buyers to introduce yourself':'Browse suppliers to request quotes', detail:'Your activity will appear here.'}])
+  ];
+
+  const supplierKPIs = [
+    {label:'Buyers matched', value:matches.length, hint:'in your category'},
+    {label:'Saved by buyers', value:savedSuppliers.length, hint:'bookmarked'},
+    {label:'Profile views', value:'—', hint:'Analytics tracking on'},
+    {label:'Status', value:profile.status==='verified'?'Verified':'Pending', hint:profile.status==='verified'?'Live in directory':'Being reviewed', warn:profile.status!=='verified'}
+  ];
+  const buyerKPIs = [
+    {label:'Suppliers matched', value:matches.length, hint:'in your category'},
+    {label:'Quote requests', value:quotes.length, hint:quotes.length?'View My Requests':'None yet'},
+    {label:'Saved suppliers', value:savedSuppliers.length, hint:'saved for later'},
+    {label:'Status', value:profile.status==='verified'?'Verified':'Pending', hint:profile.status==='verified'?'Live in directory':'Being reviewed', warn:profile.status!=='verified'}
+  ];
+  const kpis = isSupplier ? supplierKPIs : buyerKPIs;
+
+  const analyticsItems = isSupplier ? [
+    {label:'Profile completeness', value:pct},
+    {label:'Category matches', value:matches.length},
+    {label:'Directory exposure', value:Math.min(100, matches.length*8)},
+    {label:'Verification', value:profile.status==='verified'?100:40},
+  ] : [
+    {label:'Profile completeness', value:pct},
+    {label:'Suppliers matched', value:matches.length},
+    {label:'Requests made', value:quotes.length},
+    {label:'Saved suppliers', value:savedSuppliers.length},
+  ];
+
+  return <>
+    <div style={{marginBottom:22}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Welcome back, {profile.name.split(' ')[0]}</h1>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{profile.businessName} · {cat.title} · {locLabel(profile)}</p>
+    </div>
+
+    <div className="stat-grid">
+      {kpis.map((k,i)=><StatCard key={i} {...k}/>)}
+    </div>
+
+    <div style={{display:'grid',gap:18,gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',marginBottom:18}}>
+      <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,overflow:'hidden'}}>
+        <div style={{padding:'16px 20px',borderBottom:'1px solid rgba(10,31,18,.06)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
+          <div>
+            <h3 className="serif" style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 3px'}}>{isSupplier?'Businesses needing what you supply':'Suppliers in your category'}</h3>
+            <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',margin:0}}>{matches.length} in {cat.title}</p>
+          </div>
+          <button onClick={()=>onNav('matches')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>See all</button>
+        </div>
+        {matches.length===0 ? <div style={{padding:'40px 20px',textAlign:'center'}}><p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No matches yet.</p></div> :
+          matches.slice(0,5).map(m=>(
+            <div key={m.id} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',borderBottom:'1px dashed rgba(10,31,18,.08)'}}>
+              <span style={{width:36,height:36,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:700,color:'#0A1F12',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m.name}</div>
+                <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{locLabel(m)}</div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+
+      <div style={{display:'flex',flexDirection:'column',gap:18}}>
+        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'18px 20px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:12}}>
+            <div className="profile-ring">
+              <svg width="64" height="64" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(10,31,18,.08)" strokeWidth="6"/>
+                <circle cx="32" cy="32" r="26" fill="none" stroke={pct===100?'#1E7B3C':'#E8730F'} strokeWidth="6" strokeLinecap="round" strokeDasharray={2*Math.PI*26} strokeDashoffset={2*Math.PI*26*(1-pct/100)} style={{transition:'stroke-dashoffset .5s ease'}}/>
+              </svg>
+              <div className="inner" style={{color:pct===100?'#1E7B3C':'#E8730F'}}>{pct}%</div>
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:13,fontWeight:800,color:'#0A1F12',marginBottom:2}}>{pct===100?'Profile complete':'Profile '+pct+'%'}</div>
+              <div style={{fontSize:11.5,color:'rgba(10,31,18,.6)',lineHeight:1.5}}>{pct===100?'Fully discoverable.':'Complete to unlock matches.'}</div>
+            </div>
+          </div>
+          {pct<100 && <button onClick={()=>onNav('profile')} style={{width:'100%',padding:'10px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}>Complete profile</button>}
+        </div>
+
+        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'18px 20px'}}>
+          <h3 className="serif" style={{fontSize:14,fontWeight:800,color:'#0A1F12',margin:'0 0 10px'}}>Recent activity</h3>
+          {activity.map((a,i)=>(
+            <div key={i} style={{display:'flex',gap:12,padding:'10px 0',borderBottom:i<activity.length-1?'1px dashed rgba(10,31,18,.06)':'none',alignItems:'flex-start'}}>
+              <span style={{width:28,height:28,borderRadius:'50%',background:a.color+'15',color:a.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,flexShrink:0}}><i className={`fas ${a.icon}`}></i></span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:2}}>{a.title}</div>
+                <div style={{fontSize:11,color:'rgba(10,31,18,.55)',lineHeight:1.5}}>{a.detail}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'18px 20px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,marginBottom:14,flexWrap:'wrap'}}>
+        <div>
+          <h3 className="serif" style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 3px'}}>{isSupplier?'Profile snapshot':'Sourcing snapshot'}</h3>
+          <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',margin:0}}>Quick view of your {isSupplier?'supplier':'buyer'} activity</p>
+        </div>
+        <button onClick={()=>onNav(isSupplier?'analytics':'requests')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>
+          {isSupplier?'View analytics':'View requests'}
+        </button>
+      </div>
+      <Bars items={analyticsItems}/>
+    </div>
+  </>;
+}
+
+function computeProfilePct(profile, isSupplier){
+  const fields = isSupplier
+    ? [profile.name,profile.businessName,profile.phone,profile.category,profile.location,(profile.products&&profile.products.length),profile.moq,profile.delivery,profile.leadTime]
+    : [profile.name,profile.businessName,profile.phone,profile.category,profile.location,(profile.sources&&profile.sources.length),profile.frequency,profile.orderValue];
+  return Math.round((fields.filter(Boolean).length/fields.length)*100);
+}
+
+function DashProfile({profile, editForm, setEditForm, isSupplier, saving, saveMsg, onSave}){
+  return <>
+    <div style={{marginBottom:20}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>{isSupplier?'Organisation profile':'Your profile'}</h1>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{isSupplier?'This is what buyers see when they browse the directory.':'This is what suppliers see when you request quotes.'}</p>
+    </div>
+    <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'22px'}}>
+      <div className="form-grid">
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Full name</label><TIn value={editForm.name} onChange={v=>setEditForm({...editForm,name:v})}/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name</label><TIn value={editForm.businessName} onChange={v=>setEditForm({...editForm,businessName:v})}/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone</label><TIn value={editForm.phone} onChange={v=>setEditForm({...editForm,phone:v})}/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category</label>
+          <select value={editForm.category} onChange={e=>setEditForm({...editForm,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+            {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
+          </select>
+        </div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Country</label>
+          <select value={editForm.country||'Zambia'} onChange={e=>setEditForm({...editForm,country:e.target.value,location:''})} style={{...INP_STYLE,cursor:'pointer'}}>
+            {COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{(!editForm.country||editForm.country==='Zambia')?'City':'City / Region'}</label>
+          {(!editForm.country||editForm.country==='Zambia')?(
+            <select value={editForm.location} onChange={e=>setEditForm({...editForm,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+              {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
+            </select>
+          ):(
+            <TIn value={editForm.location} onChange={v=>setEditForm({...editForm,location:v})}/>
+          )}
+        </div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isSupplier?'Delivery scope':'Sourcing scope'}</label>
+          <select value={editForm.scope||'local'} onChange={e=>setEditForm({...editForm,scope:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+            {SCOPE_OPTIONS.map(o=><option key={o.key} value={o.key}>{o.label}</option>)}
+          </select>
+        </div>
+      </div>
+      {editForm.scope && editForm.scope!=='local' && <div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
+        <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
+        International sourcing: import duties, customs clearance and international freight are separate from supplier quotes.
+      </div>}
+      <div style={{marginTop:16}}>
+        {isSupplier?<>
+          <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products (comma-separated)</label><TIn value={editForm.products} onChange={v=>setEditForm({...editForm,products:v})}/>
+          <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
+            <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>MOQ</label><TIn value={editForm.moq} onChange={v=>setEditForm({...editForm,moq:v})}/></div>
+            <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label><TIn value={editForm.leadTime} onChange={v=>setEditForm({...editForm,leadTime:v})}/></div>
+            <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery</label><TIn value={editForm.delivery} onChange={v=>setEditForm({...editForm,delivery:v})}/></div>
+          </div>
+        </>:<>
+          <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>What you buy (comma-separated)</label><TIn value={editForm.sources} onChange={v=>setEditForm({...editForm,sources:v})}/>
+          <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
+            <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Frequency</label>
+              <select value={editForm.frequency} onChange={e=>setEditForm({...editForm,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                {FREQUENCY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
+              </select>
+            </div>
+            <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={editForm.orderValue} onChange={v=>setEditForm({...editForm,orderValue:v})}/></div>
+          </div>
+        </>}
+      </div>
+      {saveMsg&&<div style={{background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',border:'1px solid '+(saveMsg.kind==='ok'?'rgba(30,123,60,.3)':'rgba(184,86,79,.3)'),borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318',marginTop:14}}>{saveMsg.msg}</div>}
+      <button onClick={onSave} disabled={saving} style={{marginTop:18,padding:'12px 22px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>{saving?'Saving…':'Save changes'}</button>
+    </div>
+  </>;
+}
+
+function DashMatches({profile, matches, isSupplier, cat, onBrowse}){
+  return <>
+    <div style={{marginBottom:20}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>{isSupplier?'Buyer matches':'Supplier matches'}</h1>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{matches.length} in {cat.title}</p>
+    </div>
+    {matches.length===0 ? <EmptyState icon="fa-users" title="No matches yet" text="There are no counterparties in your category right now. Try browsing the full directory." cta={<button onClick={onBrowse} className="btn btn-primary" style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Browse directory</button>} /> :
+    <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
+      {matches.map(m=>(
+        <div key={m.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
+            <div style={{minWidth:0,flex:1}}>
+              <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.name}</div>
+              <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}>{locLabel(m)}</div>
+            </div>
+          </div>
+          <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0,flex:1}}>{m.desc}</p>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            <Chip kind="">{isSupplier?'Buyer':'Supplier'}</Chip>
+            {isInternationalEntity(m) && <Chip kind="chip-info"><i className="fas fa-globe"></i> International</Chip>}
+            {m.verified && <Chip kind=""><i className="fas fa-check"></i> Verified</Chip>}
+          </div>
+        </div>
+      ))}
+    </div>}
+  </>;
+}
+
+function DashSaved({savedSuppliers, allSuppliers, cat, user, onBrowse}){
+  const items = savedSuppliers.map(id=>allSuppliers.find(s=>s.id===id)).filter(Boolean);
+  const remove = (id)=>{
+    const next = savedSuppliers.filter(x=>x!==id);
+    setSavedSuppliers(user.uid, next);
+    toast('Removed from saved suppliers.', 'success');
+    window.dispatchEvent(new Event('resize'));
+    // Force rerender by reloading dashboard state through parent (simplest: hard refresh tab)
+    // Instead trigger a page-level reload — but keep simple by using window.location.hash trick is overkill.
+    // We'll rely on parent to re-read on next mount.
+    // For immediate feedback, we can do a soft reload:
+    setTimeout(()=>{ if(window.dispatchEvent) window.dispatchEvent(new CustomEvent('se-dashboard-refresh')); }, 50);
+  };
+  return <>
+    <div style={{marginBottom:20}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Saved suppliers</h1>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{items.length} saved — bookmark suppliers you're interested in.</p>
+    </div>
+    {items.length===0 ? <EmptyState icon="fa-bookmark" title="Nothing saved yet" text="When you find a supplier you like, use the save button in the directory to keep them here." cta={<button onClick={onBrowse} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Browse suppliers</button>}/> :
+    <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
+      {items.map(s=>{
+        const c = CAT_MAP[s.category] || cat;
+        return <div key={s.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${c.color}`}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <span style={{width:38,height:38,borderRadius:10,background:c.color+'15',color:c.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${c.icon}`}></i></span>
+            <div style={{minWidth:0,flex:1}}>
+              <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{s.name}</div>
+              <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}>{locLabel(s)}</div>
+            </div>
+            <button onClick={()=>remove(s.id)} className="save-btn saved" title="Remove from saved" aria-label="Remove from saved">
+              <i className="fas fa-bookmark" style={{fontSize:12}}></i>
+            </button>
+          </div>
+          <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0,flex:1}}>{s.desc}</p>
+          {s.products && <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+            {s.products.slice(0,3).map((p,i)=><span key={i} style={{fontSize:10.5,background:'#F5FAF6',color:'rgba(10,31,18,.7)',padding:'3px 8px',borderRadius:99,fontWeight:600}}>{p}</span>)}
+          </div>}
+        </div>;
+      })}
+    </div>}
+  </>;
+}
+
+function DashRequests({quotes, onBrowse}){
+  return <>
+    <div style={{marginBottom:20}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>My Requests</h1>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>Quotes you've requested — tracked here.</p>
+    </div>
+    {quotes.length===0 ? <EmptyState icon="fa-file-invoice" title="No requests yet" text="Request a quote from a supplier and it will appear here, with status tracking." cta={<button onClick={onBrowse} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Browse suppliers</button>}/> :
+    <div className="table-wrap">
+      <table className="dt">
+        <thead><tr><th>Supplier</th><th>Category</th><th>Product</th><th>Qty / Budget</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
+          {quotes.map(q=>(
+            <tr key={q.id}>
+              <td style={{fontWeight:700}}>{q.supplierName||'Supplier'}</td>
+              <td className="muted">{CAT_MAP[q.category]?.title||q.category}</td>
+              <td>{q.product||'—'}</td>
+              <td className="muted">{[q.quantity, q.budget].filter(Boolean).join(' · ') || '—'}</td>
+              <td className="muted">{q.at?fmtDate(q.at):''}</td>
+              <td><Chip kind={q.status==='approved'?'':q.status==='pending'?'chip-accent':'chip-info'}>{q.status||'Sent'}</Chip></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>}
+  </>;
+}
+
+function DashAlerts({alerts, setAlerts, user, cat}){
+  const [form, setForm] = useState({keywords:'', category:cat.key||'', location:'', frequency:'Weekly'});
+  const [err, setErr] = useState('');
+  const submit = ()=>{
+    setErr('');
+    if(!form.keywords.trim()){ setErr('Enter keywords to match.'); return; }
+    const next = [...alerts, {id:'al_'+Date.now(), keywords:form.keywords.trim(), category:form.category, location:form.location.trim(), frequency:form.frequency, active:true, createdAt:Date.now()}];
+    setAlerts(user.uid, next);
+    setForm({keywords:'', category:cat.key||'', location:'', frequency:'Weekly'});
+    toast('Alert created successfully.', 'success');
+    // Force rerender via parent — soft trigger
+    setTimeout(()=>window.dispatchEvent(new Event('se-dashboard-refresh')), 40);
+  };
+  const toggle = (id)=>{
+    const next = alerts.map(a=>a.id===id?{...a, active:!a.active}:a);
+    setAlerts(user.uid, next);
+    toast(next.find(a=>a.id===id).active?'Alert resumed':'Alert paused', 'success');
+    setTimeout(()=>window.dispatchEvent(new Event('se-dashboard-refresh')), 40);
+  };
+  const remove = (id)=>{
+    setAlerts(user.uid, alerts.filter(a=>a.id!==id));
+    toast('Alert deleted.', 'success');
+    setTimeout(()=>window.dispatchEvent(new Event('se-dashboard-refresh')), 40);
+  };
+
+  return <>
+    <div style={{marginBottom:20}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Opportunity alerts</h1>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>Get notified when new suppliers appear in a category or location you care about.</p>
+    </div>
+
+    <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'22px',marginBottom:16}}>
+      <h3 className="serif" style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 14px'}}>Create a new alert</h3>
+      <div className="form-grid">
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Keywords *</label><TIn value={form.keywords} onChange={v=>setForm({...form,keywords:v})} placeholder="e.g. fabric supplier"/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category</label>
+          <select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+            <option value="">Any category</option>
+            {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
+          </select>
+        </div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Location</label><TIn value={form.location} onChange={v=>setForm({...form,location:v})} placeholder="Any location"/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Frequency</label>
+          <select value={form.frequency} onChange={e=>setForm({...form,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+            <option>Instant</option><option>Daily</option><option>Weekly</option><option>Monthly</option>
+          </select>
+        </div>
+      </div>
+      {err && <div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:12,fontSize:12.5,color:'#7C2318'}}><i className="fas fa-circle-exclamation" style={{marginRight:6}}></i>{err}</div>}
+      <button onClick={submit} style={{marginTop:14,padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Create alert</button>
+    </div>
+
+    {alerts.length===0 ? <EmptyState icon="fa-bell" title="No alerts yet" text="Create your first alert above to be notified of new matches."/> :
+      <div className="table-wrap">
+        <table className="dt">
+          <thead><tr><th>Keywords</th><th>Category</th><th>Location</th><th>Frequency</th><th>Status</th><th style={{textAlign:'right'}}>Actions</th></tr></thead>
+          <tbody>
+            {alerts.map(a=>(
+              <tr key={a.id}>
+                <td style={{fontWeight:700}}>{a.keywords}</td>
+                <td className="muted">{CAT_MAP[a.category]?.title||'Any'}</td>
+                <td className="muted">{a.location||'Any'}</td>
+                <td className="muted">{a.frequency}</td>
+                <td><Chip kind={a.active?'':'chip-neutral'}>{a.active?'Active':'Paused'}</Chip></td>
+                <td style={{textAlign:'right'}}>
+                  <div style={{display:'inline-flex',gap:6}}>
+                    <button onClick={()=>toggle(a.id)} style={{padding:'6px 10px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,fontSize:11.5,fontWeight:700,color:'#0A1F12',cursor:'pointer'}}>{a.active?'Pause':'Resume'}</button>
+                    <button onClick={()=>remove(a.id)} style={{padding:'6px 10px',background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.25)',borderRadius:6,fontSize:11.5,fontWeight:700,color:'#7C2318',cursor:'pointer'}}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    }
+  </>;
+}
+
+function DashCatalogue({profile, cat}){
+  const products = Array.isArray(profile.products)?profile.products:[];
+  return <>
+    <div style={{marginBottom:20}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>My catalogue</h1>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>What buyers see when they browse your profile.</p>
+    </div>
+    <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'22px',marginBottom:16}}>
+      <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:16}}>
+        <span style={{width:56,height:56,borderRadius:14,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
+        <div>
+          <div style={{fontSize:16,fontWeight:800,color:'#0A1F12'}}>{profile.businessName}</div>
+          <div style={{fontSize:12.5,color:'rgba(10,31,18,.55)'}}>{cat.title} · {locLabel(profile)}</div>
+        </div>
+      </div>
+      {products.length===0 ? <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No products listed yet. Add them from your profile page.</p> :
+        <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+          {products.map((p,i)=><span key={i} style={{fontSize:13,background:'#F5FAF6',border:'1px solid rgba(10,31,18,.1)',padding:'8px 14px',borderRadius:99,fontWeight:600,color:'#0A1F12'}}>{p}</span>)}
+        </div>
+      }
+    </div>
+    <div className="stat-grid">
+      <StatCard label="MOQ" value={profile.moq||'—'} hint="minimum order"/>
+      <StatCard label="Lead time" value={profile.leadTime||'—'} hint="typical"/>
+      <StatCard label="Delivery" value={profile.delivery||'—'} hint="coverage"/>
+    </div>
+  </>;
+}
+
+function DashAnalytics({profile, matches, cat}){
+  const pct = computeProfilePct(profile, true);
+  const items = [
+    {label:'Profile completeness', value:pct},
+    {label:'Category matches', value:matches.length},
+    {label:'Directory exposure', value:Math.min(100, matches.length*8)},
+    {label:'Verification score', value:profile.status==='verified'?100:40}
+  ];
+  return <>
+    <div style={{marginBottom:20}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Analytics</h1>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>Snapshot of your supplier performance and discoverability.</p>
+    </div>
+    <div className="stat-grid">
+      <StatCard label="Profile completeness" value={pct+'%'} hint={pct===100?'Fully complete':'Complete to unlock more'} warn={pct<100}/>
+      <StatCard label="Category matches" value={matches.length} hint={cat.title}/>
+      <StatCard label="Verification" value={profile.status==='verified'?'Verified':'Pending'} hint={profile.status==='verified'?'Trusted badge active':'Submit documents'} warn={profile.status!=='verified'}/>
+      <StatCard label="Directory reach" value={matches.length*8+'%'} hint="estimated exposure"/>
+    </div>
+    <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'22px'}}>
+      <h3 className="serif" style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 16px'}}>Performance breakdown</h3>
+      <Bars items={items}/>
+      <p style={{fontSize:12,color:'rgba(10,31,18,.55)',margin:'16px 0 0',lineHeight:1.6}}><i className="fas fa-circle-info" style={{marginRight:6,color:'#1B6CA8'}}></i>Deeper analytics (actual profile views, contact clicks, response rates) will become available as your profile receives traffic. Complete your profile and get verified to maximise discoverability.</p>
+    </div>
+  </>;
+}
+
+function DashSettings({profile, isVerified, isSupplier, onSignOut, user}){
+  const sendReset = async ()=>{
+    try{ await auth.sendPasswordResetEmail(profile.email); toast('Password reset email sent.', 'success'); }
+    catch(e){ toast('Could not send reset email.', 'error'); }
+  };
+  return <>
+    <div style={{marginBottom:20}}>
+      <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Settings</h1>
+    </div>
+    <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'22px',marginBottom:16}}>
+      <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Account</div>
+      <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Email</span><span style={{fontWeight:700,color:'#0A1F12'}}>{profile.email}</span></div>
+      <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Role</span><span style={{fontWeight:700,color:'#0A1F12'}}>{isSupplier?'Supplier':'Buyer'}</span></div>
+      <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Status</span><Chip kind={isVerified?'':'chip-accent'}><i className={'fas '+(isVerified?'fa-circle-check':'fa-clock')}></i> {isVerified?'Verified':'Pending'}</Chip></div>
+    </div>
+    <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'22px',marginBottom:16}}>
+      <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Password</div>
+      <button onClick={sendReset} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-key" style={{marginRight:6}}></i> Send reset email</button>
+    </div>
+    <div style={{background:'#fff',border:'1px solid rgba(184,86,79,.2)',borderRadius:14,padding:'22px'}}>
+      <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#7C2318',marginBottom:12}}>Danger zone</div>
+      <button onClick={onSignOut} style={{padding:'10px 18px',background:'#B8564F',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out</button>
+    </div>
+  </>;
 }
 
 /* ═══════════════════ BROWSE ═══════════════════ */
@@ -1767,6 +1973,7 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
   const [city,setCity]=useState('all');
   const [profile,setProfile]=useState(null);
   const [profileType,setProfileType]=useState(null);
+  const [saved,setSaved]=useState(()=>user?getSavedSuppliers(user.uid):[]);
 
   useEffect(()=>{
     fsLoadDirectory().then(res=>{
@@ -1780,6 +1987,14 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
       setLoading(false);
     });
   },[]);
+
+  const toggleSave=(supplierId)=>{
+    if(!user){ toast('Sign in to save suppliers.', 'error'); return; }
+    const next = saved.includes(supplierId) ? saved.filter(x=>x!==supplierId) : [...saved, supplierId];
+    setSaved(next);
+    setSavedSuppliers(user.uid, next);
+    toast(saved.includes(supplierId)?'Removed from saved.':'Saved to your dashboard.', 'success');
+  };
 
   const filteredSuppliers=useMemo(()=>{
     const q=query.trim().toLowerCase();
@@ -1804,7 +2019,6 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
   },[buyers,query,category,city]);
 
   const list=tab==='suppliers'?filteredSuppliers:filteredBuyers;
-  const signOut=async()=>{await authSignOutFn();onSignedOut&&onSignedOut();};
 
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
     <main style={{flex:1,maxWidth:1240,margin:'0 auto',padding:'32px 24px 60px',width:'100%'}}>
@@ -1834,25 +2048,25 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
         </div>
       </div>
       {loading?<div style={{textAlign:'center',padding:'60px 0'}}><i className="fas fa-spinner fa-spin" style={{fontSize:24,color:'#E8730F'}}></i></div>:
-      list.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:14,padding:'48px',textAlign:'center'}}>
-        <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No results.</p>
-      </div>:<div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
+      list.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:14,padding:'48px',textAlign:'center'}}><p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No results.</p></div>:<div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
         {tab==='suppliers'?filteredSuppliers.map(s=>{
           const cat=CAT_MAP[s.category]||{color:'#E8730F',icon:'fa-building',title:'Supplier'};
-          return <div key={s.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
+          const isSaved=saved.includes(s.id);
+          return <div key={s.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
               <span style={{width:40,height:40,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{s.name}</div>
                 <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{locLabel(s)}</div>
               </div>
+              <button onClick={()=>toggleSave(s.id)} className={'save-btn '+(isSaved?'saved':'')} title={isSaved?'Saved':'Save'} aria-label="Save supplier"><i className={`fas ${isSaved?'fa-bookmark':'fa-bookmark'}`} style={{fontSize:12}}></i></button>
             </div>
             {isInternationalEntity(s)&&<span style={{alignSelf:'flex-start',display:'inline-flex',alignItems:'center',gap:5,padding:'3px 9px',borderRadius:99,background:'rgba(27,108,168,.1)',color:'#1B6CA8',fontSize:10,fontWeight:800,textTransform:'uppercase',letterSpacing:'.04em'}}><i className="fas fa-globe" style={{fontSize:9}}></i> International</span>}
-            <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{s.desc}</p>
-            <button onClick={()=>{setProfile(s);setProfileType('supplier');}} style={{padding:'9px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700,marginTop:'auto'}}>View profile</button>
+            <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0,flex:1}}>{s.desc}</p>
+            <button onClick={()=>{setProfile(s);setProfileType('supplier');}} style={{padding:'9px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700}}>View profile</button>
           </div>;
         }):filteredBuyers.map(b=>(
-          <div key={b.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:'3px solid #E8730F'}}>
+          <div key={b.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:'3px solid #E8730F'}}>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
               <span style={{width:40,height:40,borderRadius:10,background:'rgba(232,115,15,.15)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}><i className="fas fa-cart-shopping"></i></span>
               <div style={{flex:1,minWidth:0}}>
@@ -1861,8 +2075,8 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
               </div>
             </div>
             {isInternationalEntity(b)&&<span style={{alignSelf:'flex-start',display:'inline-flex',alignItems:'center',gap:5,padding:'3px 9px',borderRadius:99,background:'rgba(27,108,168,.1)',color:'#1B6CA8',fontSize:10,fontWeight:800,textTransform:'uppercase',letterSpacing:'.04em'}}><i className="fas fa-globe" style={{fontSize:9}}></i> International</span>}
-            <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{b.desc}</p>
-            <button onClick={()=>{setProfile(b);setProfileType('buyer');}} style={{padding:'9px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700,marginTop:'auto'}}>View buyer</button>
+            <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0,flex:1}}>{b.desc}</p>
+            <button onClick={()=>{setProfile(b);setProfileType('buyer');}} style={{padding:'9px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700}}>View buyer</button>
           </div>
         ))}
       </div>}
@@ -1875,6 +2089,18 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
 
 function SupplierProfileModal({supplier,user,onClose,onRequestQuote}){
   const cat=CAT_MAP[supplier.category]||{color:'#E8730F',icon:'fa-building',title:'Supplier'};
+  const [isSaved,setIsSaved]=useState(()=>{
+    if(!user) return false;
+    return getSavedSuppliers(user.uid).includes(supplier.id);
+  });
+  const toggleSave=()=>{
+    if(!user){ toast('Sign in to save suppliers.', 'error'); return; }
+    const cur = getSavedSuppliers(user.uid);
+    const next = cur.includes(supplier.id) ? cur.filter(x=>x!==supplier.id) : [...cur, supplier.id];
+    setSavedSuppliers(user.uid, next);
+    setIsSaved(next.includes(supplier.id));
+    toast(next.includes(supplier.id)?'Saved to your dashboard.':'Removed from saved.', 'success');
+  };
   return <Modal open={true} onClose={onClose} eyebrow={cat.title} maxWidth="44rem">
     <div style={{display:'flex',alignItems:'flex-start',gap:14,marginBottom:16}}>
       <span style={{width:64,height:64,borderRadius:15,background:cat.color+'16',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
@@ -1882,6 +2108,7 @@ function SupplierProfileModal({supplier,user,onClose,onRequestQuote}){
         <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 4px'}}>{supplier.name}</h2>
         <div style={{fontSize:13,color:'rgba(10,31,18,.6)'}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{locLabel(supplier)}</div>
       </div>
+      <button onClick={toggleSave} className={'save-btn '+(isSaved?'saved':'')} title={isSaved?'Remove from saved':'Save'} aria-label="Save supplier"><i className="fas fa-bookmark" style={{fontSize:13}}></i></button>
     </div>
     {isInternationalEntity(supplier)&&<div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginBottom:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
       <i className="fas fa-globe" style={{color:'#1B6CA8',marginRight:6}}></i>
@@ -1918,7 +2145,7 @@ function BuyerProfileModal({buyer,onClose,onRequestIntro}){
   </Modal>;
 }
 
-/* ═══════════════════ RFQ & INTRO MODAL (NOW DRIVES THE NEW FLOW) ═══════════════════ */
+/* ═══════════════════ RFQ & INTRO MODAL ═══════════════════ */
 function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
   const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deliveryCountry:'Zambia',deadline:'',budget:'',notes:''});
   const [err,setErr]=useState('');
@@ -1946,7 +2173,7 @@ function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
     if(!form.phone.trim()) return setErr('Enter your phone.');
     if(!form.product.trim()) return setErr('Describe what you need.');
     if(!user){setErr('You must be signed in.');return;}
-    
+
     const intl = form.deliveryCountry && form.deliveryCountry!=='Zambia';
     const dest = form.deliveryCity ? `${form.deliveryCity}${intl?', '+form.deliveryCountry:''}` : '';
 
@@ -1955,12 +2182,7 @@ function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
       desk: 'directory',
       title: isIntro ? 'Buyer Introduction Request' : 'Supplier Quotation Request',
       clientDesc: `We will review this request, verify the details, and ${isIntro?'introduce you to the buyer':'forward it to the relevant supplier'}.`,
-      whatsCovered: [
-        'Review and verification of request',
-        isIntro ? 'Direct introduction to buyer' : 'Direct introduction to supplier',
-        'Tracking of response',
-        'Administrative coordination'
-      ],
+      whatsCovered: ['Review and verification of request', isIntro ? 'Direct introduction to buyer' : 'Direct introduction to supplier', 'Tracking of response', 'Administrative coordination'],
       timeline: '3-5 working days',
       amountOverride: 'K50',
       feeLabelOverride: 'Directory Service Fee',
@@ -2002,64 +2224,29 @@ function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
             {isIntro?'Introduce your business and why you are a good match for their sourcing needs.':'Your request will be tracked in "My Requests" in your dashboard.'}
             {preselected&&<span style={{display:'block',marginTop:8,color:'#8A6828',fontWeight:600}}><i className="fas fa-info-circle"></i> Target: {preselected.name}</span>}
           </p>
-          
           <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))'}}>
             <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Your name *</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})}/></div>
             <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business</label><TIn value={form.business} onChange={v=>setForm({...form,business:v})}/></div>
             <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone *</label><TIn value={form.phone} onChange={v=>setForm({...form,phone:v})}/></div>
             <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label><TIn value={form.email} onChange={v=>setForm({...form,email:v})}/></div>
           </div>
-          
           <div style={{marginTop:14}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isIntro?'Your pitch / offering *':'Product *'}</label><TIn value={form.product} onChange={v=>setForm({...form,product:v})} placeholder={isIntro?'e.g. We supply high quality imported fabric...':'e.g. 50 bags of cement, fabric rolls...'}/></div>
-          
           {!isIntro && <>
             <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
               <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Quantity</label><TIn value={form.quantity} onChange={v=>setForm({...form,quantity:v})}/></div>
               <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Needed by</label><TIn type="date" value={form.deadline} onChange={v=>setForm({...form,deadline:v})}/></div>
               <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget</label><TIn value={form.budget} onChange={v=>setForm({...form,budget:v})}/></div>
             </div>
-            <div style={{marginTop:14}}>
-              <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery destination</label>
-              <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
-                <select value={form.deliveryCountry||'Zambia'} onChange={e=>setForm({...form,deliveryCountry:e.target.value,deliveryCity:''})} style={{...INP_STYLE,cursor:'pointer'}}>
-                  {COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
-                </select>
-                {(!form.deliveryCountry||form.deliveryCountry==='Zambia')?(
-                  <select value={form.deliveryCity} onChange={e=>setForm({...form,deliveryCity:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                    <option value="">City</option>
-                    {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
-                  </select>
-                ):(
-                  <TIn value={form.deliveryCity} onChange={v=>setForm({...form,deliveryCity:v})} placeholder="City / port"/>
-                )}
-              </div>
-              <div style={{marginTop:10,background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
-                <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
-                Import duties, customs clearance and international freight are separate and not included in supplier quotes.
-              </div>
-            </div>
           </>}
-
           {err&&<div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5}}>{err}</div>}
-          
           <div style={{display:'flex',gap:10,marginTop:20,flexWrap:'wrap'}}>
-            <button onClick={proceedToEngagement} style={{flex:'1 1 240px',padding:'14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>
-              Proceed to engagement proposal
-            </button>
+            <button onClick={proceedToEngagement} style={{flex:'1 1 240px',padding:'14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>Proceed to engagement proposal</button>
             <button onClick={onClose} style={{padding:'14px 22px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13.5,fontWeight:600,color:'#0A1F12'}}>Cancel</button>
           </div>
         </Modal>
       )}
-
-      {isEngaging && serviceData && (
-        <Engagement service={serviceData} onClose={()=>setIsEngaging(false)} onAgreed={handleEngaged} />
-      )}
-
-      {showPayment && agreedClient && (
-        <Modal open={showPayment} onClose={closePayment} eyebrow="Engagement payment" maxWidth="52rem">
-          <Payment service={agreedClient.service} client={agreedClient.client} onClose={closePayment} onDone={closePayment}/>
-        </Modal>
-      )}
+      {isEngaging && serviceData && <Engagement service={serviceData} onClose={()=>setIsEngaging(false)} onAgreed={handleEngaged}/>}
+      {showPayment && agreedClient && <Modal open={showPayment} onClose={closePayment} eyebrow="Engagement payment" maxWidth="52rem"><Payment service={agreedClient.service} client={agreedClient.client} onClose={closePayment} onDone={closePayment}/></Modal>}
     </>
   );
 }
@@ -2076,7 +2263,6 @@ function SeedView(){
   const [status,setStatus]=useState(null);
   const [seeding,setSeeding]=useState(false);
   const [counts,setCounts]=useState({sup:null,buy:null});
-
   const loadCounts=async()=>{
     if(!firebaseReady) return;
     try{const [s,b]=await Promise.all([db.collection('se_suppliers').get(),db.collection('se_buyers').get()]);setCounts({sup:s.size,buy:b.size});}
@@ -2165,6 +2351,7 @@ function App(){
   const [rfqPreselected,setRfqPreselected]=useState(null);
   const [rfqType,setRfqType]=useState('quote');
   const [justSignedUp,setJustSignedUp]=useState(false);
+  const [dashKey,setDashKey]=useState(0);
 
   useEffect(()=>{
     if(!firebaseReady){setAuthLoading(false);return;}
@@ -2180,6 +2367,13 @@ function App(){
     const onHash=()=>setHash(window.location.hash);
     window.addEventListener('hashchange',onHash);
     return ()=>window.removeEventListener('hashchange',onHash);
+  },[]);
+
+  // Soft refresh listener for saved/alerts updates
+  useEffect(()=>{
+    const handler = ()=> setDashKey(k=>k+1);
+    window.addEventListener('se-dashboard-refresh', handler);
+    return ()=> window.removeEventListener('se-dashboard-refresh', handler);
   },[]);
 
   const openAuth=(mode,role)=>{setAuthMode(mode||'signup');setAuthRole(role||'buyer');setAuthOpen(true);};
@@ -2212,27 +2406,20 @@ function App(){
     if(!user){
       mainView = <SignInPrompt onSignIn={()=>openAuth('signin','buyer')} onSignUp={()=>openAuth('signup','buyer')} onHome={goHome}/>;
     } else if(hash==='#dashboard'){
-      mainView = <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
+      mainView = <Dashboard key={dashKey} user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
     } else {
-      mainView = <><Browse user={user} onRequestQuote={openRFQ} onRequestIntro={openIntro} onDashboard={goDashboard} onSignedOut={signedOut}/><RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} type={rfqType} user={user} onSaved={()=>{}}/></>;
+      mainView = <><Browse user={user} onRequestQuote={openRFQ} onRequestIntro={openIntro} onDashboard={goDashboard} onSignedOut={signedOut}/><RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} type={rfqType} user={user} onSaved={()=>setDashKey(k=>k+1)}/></>;
     }
   } else if(!user){
     mainView = <Landing onSignup={(role)=>openAuth('signup',role||'buyer')} onSignin={()=>openAuth('signin','buyer')}/>;
   } else {
-    mainView = <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
+    mainView = <Dashboard key={dashKey} user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
       {!authLoading && (
-        <Nav 
-          user={user} 
-          onSignIn={()=>openAuth('signin','buyer')} 
-          onSignUp={(role)=>openAuth('signup',role||'buyer')} 
-          onDashboard={goDashboard} 
-          onBrowse={goBrowse} 
-          onSignOut={signedOut} 
-        />
+        <Nav user={user} onSignIn={()=>openAuth('signin','buyer')} onSignUp={(role)=>openAuth('signup',role||'buyer')} onDashboard={goDashboard} onBrowse={goBrowse} onSignOut={signedOut}/>
       )}
       <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', position: 'relative' }}>
         {mainView}
