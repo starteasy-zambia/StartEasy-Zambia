@@ -33,7 +33,7 @@ input:focus,select:focus,textarea:focus{outline:none}
 @keyframes mf{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.fadein,.mc,.mf{animation:none!important}}
 
-/* ═══ EARNUP DASHBOARD ARCHITECTURE (MAPPED TO STARTEASY) ═══ */
+/* ═══ STARTEASY DASHBOARD ARCHITECTURE (EARNUP STYLE) ═══ */
 .dash-layout{display:grid;grid-template-columns:238px 1fr;gap:1.6rem;align-items:start;padding:2rem 0 3.4rem;max-width:1240px;margin:0 auto;}
 .dash-side{position:sticky;top:86px;background:#fff;border:1px solid rgba(10,31,18,.08);border-radius:14px;padding:.7rem;display:grid;gap:.15rem}
 .dash-side a{display:flex;align-items:center;gap:.65rem;padding:.65rem .75rem;border-radius:10px;font-size:.87rem;font-weight:700;color:rgba(10,31,18,.65);transition:.15s;text-decoration:none}
@@ -139,7 +139,7 @@ td .row{gap:.4rem}
 .tl .td{font-size:12.5px;color:rgba(255,255,255,.78);line-height:1.6;margin-bottom:8px}
 .tl .tw{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#F5A623;background:rgba(245,166,35,.2);padding:4px 12px;border-radius:99px;border:1px solid rgba(245,166,35,.35)}
 
-/* ═══ FIXED MOBILE DASHBOARD NAVIGATION ═══ */
+/* FIXED MOBILE NAVIGATION */
 @media (max-width:1040px){
   .dash-layout{display:flex; flex-direction:column; padding:1rem; gap:1.5rem;}
   .dash-side{
@@ -239,7 +239,7 @@ function authErrorMessage(e){
   return 'Sign-in failed: '+(code||(e&&e.message)||'unknown');
 }
 
-/* LocalStorage helpers for EarnUp features */
+/* LocalStorage helpers */
 function lsGet(key, fallback=[]){ try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;} }
 function lsSet(key, val){ try{localStorage.setItem(key, JSON.stringify(val));}catch(e){} }
 function getSavedSuppliers(uid){ return lsGet('se_saved_'+uid, []); }
@@ -343,6 +343,7 @@ const SCOPE_OPTIONS = [
 ];
 
 const SF={micro:{zm:'K25',usd:'$1.49',label:'Service Fee · Micro'},basic:{zm:'K250',usd:'$25',label:'Service Fee · Basic'},standard:{zm:'K400',usd:'$40',label:'Service Fee · Standard'},complex:{zm:'K750',usd:'$75',label:'Service Fee · Complex'}};
+
 const PAYMENT_METHODS={airtel:{label:'Airtel Money',cls:'pm-airtel',icon:'fa-mobile-alt',title:'Airtel Money',sub:'ZMW · Zambian Kwacha',recipient:'+260 975 914 001 (Airtel)',ussd:'*115#',ussdLbl:'Open Airtel',rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Recipient Note',v:'On behalf of StartEasy',plain:true},{l:'Airtel Number',v:'+260 975 914 001',copy:'+260975914001'}],steps:['Dial <strong>*115#</strong>','Select <strong>Send Money</strong> → <strong>Airtel Money</strong>','Enter <strong>+260 975 914 001</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID'],note:'Available to all applicants.'},mtn:{label:'MTN MoMo',cls:'pm-mtn',icon:'fa-mobile-alt',title:'MTN Mobile Money',sub:'ZMW · Zambian Kwacha',recipient:'076 852 6191 (MTN)',ussd:'*303#',ussdLbl:'Open MTN',rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Recipient Note',v:'On behalf of StartEasy',plain:true},{l:'MTN Number',v:'076 852 6191',copy:'0768526191'}],steps:['Dial <strong>*303#</strong>','Select <strong>Send Money</strong> → <strong>MTN MoMo</strong>','Enter <strong>076 852 6191</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID'],note:'Available to all applicants.'},bank:{label:'Bank / Visa',cls:'pm-bank',icon:'fa-university',title:'Bank or Visa Card',sub:'Standard Chartered',recipient:'Standard Chartered · 0152502166700',rows:[{l:'Bank',v:'Standard Chartered',plain:true},{l:'Account Name',v:'StartEasy (Mwaba Lewis)',plain:true},{l:'Account Number',v:'0152502166700',copy:'0152502166700'},{l:'Reference',v:'Your Full Name + "SE"',plain:true}],steps:['Log into your online banking, or visit any branch','Use the account details shown','Transfer the amount above','Use <strong>your full name + "SE"</strong> as reference','Save your receipt'],note:'For Visa card payments, use your bank card-to-account service.'},paypal:{label:'PayPal',cls:'pm-paypal',icon:'fa-paypal',iconSet:'fab',title:'PayPal',sub:'USD · International',recipient:'lewismwaba@gmail.com (PayPal)',rows:[{l:'Recipient Email',v:'lewismwaba@gmail.com',copy:'lewismwaba@gmail.com'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Payment Type',v:'Send to a friend',plain:true}],steps:['Log into PayPal','Choose <strong>Send & Request</strong> → <strong>Send to a friend</strong>','Enter <strong>lewismwaba@gmail.com</strong>','Enter the amount above','Add <strong>your name + "SE"</strong> in the note','Save the transaction ID'],note:'Ideal for international applicants.'},crypto:{label:'Crypto',cls:'pm-crypto',icon:'fa-bitcoin',iconSet:'fab',title:'Cryptocurrency',sub:'International applicants',recipient:'User ID: 809423171',rows:[{l:'Accepted Coins',v:'BTC · ETH · USDT (TRC20 / ERC20)',plain:true},{l:'User ID',v:'809423171',copy:'809423171'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true}],steps:['Open your crypto wallet or exchange app','Choose <strong>BTC, ETH, or USDT</strong>','Send to User ID <strong>809423171</strong>','Add a note with <strong>your name + "SE"</strong>','Save the transaction hash','Return here and paste as reference'],note:'Send the equivalent at the time of transfer.'}};
 
 const SEED_SUPPLIERS = [
@@ -492,7 +493,7 @@ function PasswordInput({value,onChange,placeholder='••••••••',au
   </div>;
 }
 
-/* ═══════════════════ NAVBAR (EarnUp Style Dropdown) ═══════════════════ */
+/* ═══════════════════ NAVBAR (RESTORED TO ORIGINAL STARTEASY) ═══════════════════ */
 function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   const [menuOpen,setMenuOpen]=useState(false);
   const [acctOpen,setAcctOpen]=useState(false);
@@ -515,19 +516,18 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
     setTimeout(()=>window.dispatchEvent(new CustomEvent('nav-tab', {detail: tab})), 50);
   };
 
-  return <header style={{background:'#fff',borderBottom:'1px solid rgba(10,31,18,.08)',flexShrink:0, position:'relative', zIndex:50}}>
+  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)', flexShrink:0, position:'relative', zIndex:50}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 16px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72,gap:10}}>
-        
         <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0}}>
           <a href="#" onClick={(e)=>{e.preventDefault(); user ? onDashboard() : onSignIn();}} style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none',flexShrink:0}}>
             <Mark size={38}/>
             <span className="hide-sm" style={{textAlign:'left',lineHeight:1}}>
-              <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(10,31,18,.4)',marginBottom:4}}>Directory</span>
-              <span style={{display:'block',fontSize:15,fontWeight:700,color:'#0A1F12'}}>Start<em style={{fontStyle:'normal',color:'#E8730F'}}>Easy</em></span>
+              <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
+              <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
             </span>
           </a>
-          <a href={MAIN_PLATFORM_URL} style={{display:'inline-flex',alignItems:'center',gap:7,padding:'9px 13px',background:'#0A1F12',color:'#fff',borderRadius:'9px',fontSize:'12px',fontWeight:'800',textDecoration:'none',whiteSpace:'nowrap',flexShrink:0}}>
+          <a href={MAIN_PLATFORM_URL} style={{display:'inline-flex',alignItems:'center',gap:7,padding:'9px 13px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:'9px',fontSize:'12px',fontWeight:'800',textDecoration:'none',boxShadow:'0 8px 18px -8px rgba(232,115,15,.6)',whiteSpace:'nowrap',flexShrink:0}}>
             <i className="fas fa-arrow-left" style={{fontSize:11}}></i>
             <span className="hide-sm">Platform</span>
           </a>
@@ -536,10 +536,10 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
         <div style={{display:'flex',alignItems:'center',gap:12}}>
           {user ? (
             <div className="acct" ref={acctRef}>
-              <button className="acct-btn" onClick={()=>setAcctOpen(!acctOpen)}>
-                <span className="avatar">{initials(profile?.name || user.email)}</span>
+              <button className="acct-btn" onClick={()=>setAcctOpen(!acctOpen)} style={{background:'rgba(255,255,255,.08)',borderColor:'rgba(255,255,255,.2)',color:'#fff'}}>
+                <span className="avatar" style={{background:'#E8730F',color:'#fff'}}>{initials(profile?.name || user.email)}</span>
                 <span className="acct-name">{(profile?.name || user.email).split(' ')[0]}</span>
-                <i className={`fas fa-chevron-down`} style={{fontSize:10, marginLeft:4, color:'rgba(10,31,18,.4)'}}></i>
+                <i className={`fas fa-chevron-down`} style={{fontSize:10, marginLeft:4, color:'rgba(255,255,255,.5)'}}></i>
               </button>
               <div className={`acct-menu ${acctOpen?'open':''}`}>
                 <div style={{padding:'.55rem .7rem .3rem'}}>
@@ -569,18 +569,18 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
             </div>
           ) : (
             <>
-              <button onClick={onSignIn} style={{padding:'10px 14px',background:'transparent',border:'1px solid rgba(10,31,18,.2)',color:'#0A1F12',borderRadius:8,fontSize:12,fontWeight:700}}>Sign in</button>
-              <button onClick={()=>onSignUp(null)} style={{padding:'10px 14px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}>Get started</button>
+              <button onClick={onSignIn} style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Sign in</button>
+              <button onClick={()=>onSignUp(null)} style={{padding:'10px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}>Get started</button>
             </>
           )}
-          {user && <button className="nav-hamburger" onClick={()=>setMenuOpen(o=>!o)} style={{display:'none',background:'transparent',border:'none',color:'#0A1F12',fontSize:20,padding:4,cursor:'pointer'}}><i className={`fas ${menuOpen?'fa-times':'fa-bars'}`}></i></button>}
+          {user && <button className="nav-hamburger" onClick={()=>setMenuOpen(o=>!o)} style={{display:'none',background:'transparent',border:'none',color:'#fff',fontSize:20,padding:4,cursor:'pointer'}}><i className={`fas ${menuOpen?'fa-times':'fa-bars'}`}></i></button>}
         </div>
       </div>
     </div>
   </header>;
 }
 
-/* ═══════════════════ HERO, LANDING, PRICING, TRUST, FOOTER (Untouched) ═══════════════════ */
+/* ═══════════════════ HERO, LANDING, PRICING, TRUST, FOOTER (RESTORED) ═══════════════════ */
 function Hero({stats}){
   return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',padding:'clamp(64px,9vw,120px) 24px clamp(56px,8vw,100px)'}}>
     <div style={{position:'absolute',top:-160,right:-120,width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
@@ -638,62 +638,91 @@ function LandingCTA({onSignup,onSignin}){
   </section>;
 }
 
+/* ═══════════════════ NEW PRICING SECTION (FROM COMMERCIAL MODEL) ═══════════════════ */
 function PricingSection(){
   const [activeTab, setActiveTab] = useState('suppliers');
-  const plans = {
-    suppliers: [
-      {title:'Basic Listing',price:'Free',period:'forever',desc:'Get listed in the directory. Build your presence.',features:['Standard directory profile','Basic contact details','Up to 3 product tags'],cta:'Create free account',highlight:false},
-      {title:'Premium Profile',price:'K100',period:'/month',subtext:'or K1000/year',desc:'For local suppliers ready to win more buyers.',features:['Enhanced profile','Full product catalogue','Website links & photos','Priority placement in category'],cta:'Upgrade to Premium',highlight:true},
-      {title:'Qualified Leads',price:'K50',period:'/lead',subtext:'or K400/month access',desc:'We send you buyers actively looking for your products.',features:['Direct buyer enquiries','Verified buying intent','Pay only for relevant leads','Monthly package available'],cta:'Get leads',highlight:false},
-      {title:'Verification Badge',price:'K75',period:'one-off',subtext:'or K600/year renewal',desc:'Build trust instantly with our verification check.',features:['Identity & registration check','Document review','Reference checks','Verified badge on profile'],cta:'Get verified',highlight:false},
-      {title:'Sponsored Campaign',price:'K455',period:'/campaign',desc:'Push your offers to the top of relevant searches.',features:['Promoted products','Category sponsorship','Featured in search results','Campaign report'],cta:'Run campaign',highlight:false}
-    ],
-    buyers: [
-      {title:'Directory Access',price:'Free',period:'forever',desc:'Browse our network of suppliers.',features:['Search the directory','View basic profiles','Contact suppliers directly','Request quotes'],cta:'Browse free',highlight:false},
-      {title:'Sourcing & Procurement',price:'K600',period:'/project',desc:'We handle the sourcing so you don\'t have to.',features:['We find the suppliers','We request and compare quotes','We negotiate terms','You get a shortlist to approve'],cta:'Start sourcing',highlight:true},
-      {title:'International Sourcing',price:'From K400',period:'/retainer',subtext:'or agreed service fee',desc:'Source from China, UAE, South Africa and beyond.',features:['Supplier identification abroad','Documentation coordination','Freight & clearing introductions','Quotation management'],cta:'Source internationally',highlight:false}
-    ]
-  };
 
   return <section style={{ background:'#fff', padding:'clamp(60px, 8vw, 100px) 24px' }}>
     <div style={{ maxWidth:1140, margin:'0 auto' }}>
       <div style={{ textAlign:'center', marginBottom:40 }}>
         <span className="micro" style={{ color:'#E8730F', display:'block', marginBottom:12 }}>Commercial Services</span>
-        <h2 className="serif" style={{ fontSize:'clamp(2rem, 4vw, 2.8rem)', color:'#0A1F12', margin:'0 0 16px' }}>Free directory. Paid growth.</h2>
-        <p style={{ fontSize:15, color:'rgba(10,31,18,.65)', maxWidth:600, margin:'0 auto 24px', lineHeight:1.6 }}>Join for free and get listed. When you're ready to scale, we offer procurement support, qualified leads, and premium visibility.</p>
+        <h2 className="serif" style={{ fontSize:'clamp(2rem, 4vw, 2.8rem)', color:'#0A1F12', margin:'0 0 16px' }}>Free to join. Pay only for growth.</h2>
+        <p style={{ fontSize:15, color:'rgba(10,31,18,.65)', maxWidth:600, margin:'0 auto 24px', lineHeight:1.6 }}>
+          Our directory is free to browse and list. We generate revenue through optional premium services, qualified leads, sourcing support, and supplier verification.
+        </p>
         <div style={{ display:'inline-flex', background:'#F5FAF6', padding:6, borderRadius:12, border:'1px solid rgba(10,31,18,.08)' }}>
           <button onClick={()=>setActiveTab('suppliers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='suppliers'?'#0A1F12':'transparent', color:activeTab==='suppliers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Suppliers</button>
           <button onClick={()=>setActiveTab('buyers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='buyers'?'#0A1F12':'transparent', color:activeTab==='buyers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Buyers</button>
         </div>
       </div>
-      <div className="grid lg:grid-cols-3 gap-6" style={{ alignItems:'stretch' }}>
-        {plans[activeTab].map((plan,i)=>(
-          <div key={i} className="mc" style={{ background:plan.highlight?'#0A1F12':'#fff', border:plan.highlight?'1px solid #0A1F12':'1px solid rgba(10,31,18,.1)', borderRadius:16, padding:'32px 28px', display:'flex', flexDirection:'column', position:'relative', boxShadow:plan.highlight?'0 20px 40px -15px rgba(10,31,18,.4)':'0 4px 20px -10px rgba(10,31,18,.05)' }}>
-            {plan.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', padding:'4px 12px', borderRadius:99 }}>Most Popular</div>}
-            <div style={{ marginBottom:24 }}>
-              <h3 style={{ fontSize:18, fontWeight:800, color:plan.highlight?'#fff':'#0A1F12', margin:'0 0 8px' }}>{plan.title}</h3>
-              <div style={{ display:'flex', alignItems:'flex-end', gap:4, marginBottom:8 }}>
-                <span className="serif" style={{ fontSize:36, fontWeight:800, color:plan.highlight?'#F5A623':'#0A1F12', lineHeight:1 }}>{plan.price}</span>
-                <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.6)':'rgba(10,31,18,.5)', fontWeight:600, paddingBottom:4 }}>{plan.period}</span>
-              </div>
-              {plan.subtext && <div style={{ fontSize:12, color:plan.highlight?'rgba(255,255,255,.5)':'rgba(10,31,18,.4)', marginBottom:8 }}>{plan.subtext}</div>}
-              <p style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.7)':'rgba(10,31,18,.6)', margin:0, lineHeight:1.5 }}>{plan.desc}</p>
-            </div>
-            <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, marginBottom:32 }}>
-              {plan.features.map((f,j)=>(
-                <div key={j} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
-                  <i className="fas fa-check-circle" style={{ color:plan.highlight?'#F5A623':'#1E7B3C', fontSize:14, marginTop:2 }}></i>
-                  <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.8)':'rgba(10,31,18,.7)', lineHeight:1.4 }}>{f}</span>
+
+      {activeTab === 'suppliers' ? (
+        <div className="grid lg:grid-cols-3 gap-6" style={{ alignItems:'stretch' }}>
+          {[
+            { title: 'Premium Profile', price: 'K100', period: '/mo', subtext: 'K140/mo for international | K1000/yr local | K1400/yr intl', desc: 'Get seen first. Enhance your profile with product catalogues, website links, additional photos and priority placement.', features: ['Enhanced profiles', 'Full product catalogues', 'Website links', 'Additional photos', 'Priority placement in category'], cta: 'Upgrade Profile', highlight: false },
+            { title: 'Qualified Buyer Enquiries', price: 'K50', period: '/lead', subtext: 'or K400/month access', desc: 'We send you buyers actively looking for your products. Pay per qualified lead or subscribe for full access.', features: ['Direct buyer enquiries', 'Verified buying intent', 'Pay only for relevant leads', 'Monthly package available'], cta: 'Get Leads', highlight: true },
+            { title: 'Supplier Verification', price: 'K75', period: 'one-off', subtext: 'or K600/year renewal', desc: 'Build trust instantly. We perform identity and business-registration checks, document reviews, and reference checks.', features: ['Identity & registration check', 'Document review', 'Reference checks', 'Verified badge on profile'], cta: 'Get Verified', highlight: false },
+            { title: 'Advertising & Sponsored', price: 'K455', period: '/campaign', subtext: 'Custom packages available', desc: 'Push your offers to the top of relevant searches. Feature selected products, sponsor categories, or promote special offers.', features: ['Promoted products', 'Category sponsorship', 'Featured in search results', 'Campaign report'], cta: 'Run Campaign', highlight: false }
+          ].map((plan, i) => (
+            <div key={i} className="mc" style={{ background:plan.highlight?'#0A1F12':'#fff', border:plan.highlight?'1px solid #0A1F12':'1px solid rgba(10,31,18,.1)', borderRadius:16, padding:'32px 28px', display:'flex', flexDirection:'column', position:'relative', boxShadow:plan.highlight?'0 20px 40px -15px rgba(10,31,18,.4)':'0 4px 20px -10px rgba(10,31,18,.05)' }}>
+              {plan.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', padding:'4px 12px', borderRadius:99 }}>Most Popular</div>}
+              <div style={{ marginBottom:24 }}>
+                <h3 style={{ fontSize:18, fontWeight:800, color:plan.highlight?'#fff':'#0A1F12', margin:'0 0 8px' }}>{plan.title}</h3>
+                <div style={{ display:'flex', alignItems:'flex-end', gap:4, marginBottom:8 }}>
+                  <span className="serif" style={{ fontSize:36, fontWeight:800, color:plan.highlight?'#F5A623':'#0A1F12', lineHeight:1 }}>{plan.price}</span>
+                  <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.6)':'rgba(10,31,18,.5)', fontWeight:600, paddingBottom:4 }}>{plan.period}</span>
                 </div>
-              ))}
+                {plan.subtext && <div style={{ fontSize:11.5, color:plan.highlight?'rgba(255,255,255,.5)':'rgba(10,31,18,.4)', marginBottom:12, lineHeight:1.4 }}>{plan.subtext}</div>}
+                <p style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.7)':'rgba(10,31,18,.6)', margin:0, lineHeight:1.5 }}>{plan.desc}</p>
+              </div>
+              <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, marginBottom:32 }}>
+                {plan.features.map((f, j) => (
+                  <div key={j} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                    <i className="fas fa-check-circle" style={{ color:plan.highlight?'#F5A623':'#1E7B3C', fontSize:14, marginTop:2 }}></i>
+                    <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.8)':'rgba(10,31,18,.7)', lineHeight:1.4 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button style={{ width:'100%', padding:'14px', borderRadius:10, fontSize:14, fontWeight:700, border:'none', background:plan.highlight?'linear-gradient(135deg,#E8730F,#F5A623)':'#F5FAF6', color:plan.highlight?'#fff':'#0A1F12', transition:'all .2s' }} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';}} onMouseLeave={e=>{e.currentTarget.style.transform='none';}}>{plan.cta}</button>
             </div>
-            <button style={{ width:'100%', padding:'14px', borderRadius:10, fontSize:14, fontWeight:700, border:'none', background:plan.highlight?'linear-gradient(135deg,#E8730F,#F5A623)':'#F5FAF6', color:plan.highlight?'#fff':'#0A1F12', transition:'all .2s' }} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';}} onMouseLeave={e=>{e.currentTarget.style.transform='none';}}>{plan.cta}</button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid lg:grid-cols-2 gap-6" style={{ alignItems:'stretch', maxWidth: 800, margin: '0 auto' }}>
+          {[
+            { title: 'Sourcing & Procurement Support', price: 'K600', period: '/project', desc: 'We handle the sourcing so you don\'t have to. Tell us what you want to purchase, and we find suitable suppliers, request quotations, compare offers and present a shortlist.', features: ['We find the suppliers', 'We request and compare quotes', 'We negotiate terms', 'You get a shortlist to approve'], cta: 'Start Sourcing', highlight: true },
+            { title: 'International Sourcing', price: 'From K400', period: '/retainer', subtext: 'or agreed service fee', desc: 'Connect with international manufacturers and distributors. We assist with quotation requests, supplier communication, documentation coordination and introductions to freight/clearing partners.', features: ['Supplier identification abroad', 'Documentation coordination', 'Freight & clearing introductions', 'Quotation management'], cta: 'Source Internationally', highlight: false }
+          ].map((plan, i) => (
+            <div key={i} className="mc" style={{ background:plan.highlight?'#0A1F12':'#fff', border:plan.highlight?'1px solid #0A1F12':'1px solid rgba(10,31,18,.1)', borderRadius:16, padding:'32px 28px', display:'flex', flexDirection:'column', position:'relative', boxShadow:plan.highlight?'0 20px 40px -15px rgba(10,31,18,.4)':'0 4px 20px -10px rgba(10,31,18,.05)' }}>
+              {plan.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', padding:'4px 12px', borderRadius:99 }}>Most Popular</div>}
+              <div style={{ marginBottom:24 }}>
+                <h3 style={{ fontSize:18, fontWeight:800, color:plan.highlight?'#fff':'#0A1F12', margin:'0 0 8px' }}>{plan.title}</h3>
+                <div style={{ display:'flex', alignItems:'flex-end', gap:4, marginBottom:8 }}>
+                  <span className="serif" style={{ fontSize:36, fontWeight:800, color:plan.highlight?'#F5A623':'#0A1F12', lineHeight:1 }}>{plan.price}</span>
+                  <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.6)':'rgba(10,31,18,.5)', fontWeight:600, paddingBottom:4 }}>{plan.period}</span>
+                </div>
+                {plan.subtext && <div style={{ fontSize:11.5, color:plan.highlight?'rgba(255,255,255,.5)':'rgba(10,31,18,.4)', marginBottom:12, lineHeight:1.4 }}>{plan.subtext}</div>}
+                <p style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.7)':'rgba(10,31,18,.6)', margin:0, lineHeight:1.5 }}>{plan.desc}</p>
+              </div>
+              <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, marginBottom:32 }}>
+                {plan.features.map((f, j) => (
+                  <div key={j} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                    <i className="fas fa-check-circle" style={{ color:plan.highlight?'#F5A623':'#1E7B3C', fontSize:14, marginTop:2 }}></i>
+                    <span style={{ fontSize:13, color:plan.highlight?'rgba(255,255,255,.8)':'rgba(10,31,18,.7)', lineHeight:1.4 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button style={{ width:'100%', padding:'14px', borderRadius:10, fontSize:14, fontWeight:700, border:'none', background:plan.highlight?'linear-gradient(135deg,#E8730F,#F5A623)':'#F5FAF6', color:plan.highlight?'#fff':'#0A1F12', transition:'all .2s' }} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';}} onMouseLeave={e=>{e.currentTarget.style.transform='none';}}>{plan.cta}</button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={{ marginTop:32, textAlign:'center', background:'#F5FAF6', padding:'16px 24px', borderRadius:12, border:'1px dashed rgba(10,31,18,.15)', display:'inline-flex', alignItems:'center', gap:12, margin:'32px auto 0', maxWidth:800 }}>
         <i className="fas fa-shield-halved" style={{ color:'#1E7B3C', fontSize:20 }}></i>
-        <p style={{ fontSize:13, color:'rgba(10,31,18,.7)', margin:0, textAlign:'left', lineHeight:1.5 }}><strong style={{ color:'#0A1F12' }}>Transact Directly:</strong> StartEasy does not process buyer payments. Buyers and suppliers transact directly. We earn from the services above, keeping the process simple and transparent.</p>
+        <p style={{ fontSize:13, color:'rgba(10,31,18,.7)', margin:0, textAlign:'left', lineHeight:1.5 }}>
+          <strong style={{ color:'#0A1F12' }}>Transact Directly:</strong> StartEasy does not process buyer payments or take on delivery/dispute responsibilities. Buyers and suppliers transact directly. We earn from the services above, keeping the process simple and transparent.
+        </p>
       </div>
     </div>
   </section>;
@@ -870,6 +899,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     {key:'requests', label:'My requests', icon:'fa-file-invoice'},
     {key:'saved', label:'Saved suppliers', icon:'fa-bookmark'},
     {key:'analytics', label:'Analytics', icon:'fa-chart-simple'},
+    {key:'billing', label:'Purchases', icon:'fa-credit-card'},
   ];
 
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6'}}>
@@ -1103,15 +1133,17 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
           </div>
         )}
 
-        {/* BILLING (Supplier) */}
-        {tab==='billing' && isSupplier && (
+        {/* BILLING (Both) */}
+        {tab==='billing' && (
           <div className="card">
-             <div className="card-h"><h3>Billing & payments</h3></div>
+             <div className="card-h"><h3>{isSupplier?'Billing & payments':'Purchases & sourcing support'}</h3></div>
              <div className="table-wrap" style={{border:0,borderRadius:0}}>
               <table className="dt">
                 <thead><tr><th>Description</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
                 <tbody>
-                  <tr><td colSpan="4" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No transactions found.</td></tr>
+                  <tr><td colSpan="4" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>
+                    No transactions found. {isSupplier?'Upgrade your profile or get verified to boost visibility.':'Request a sourcing quote to see invoices here.'}
+                  </td></tr>
                 </tbody>
               </table>
             </div>
