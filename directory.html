@@ -139,34 +139,55 @@ td .row{gap:.4rem}
 .tl .td{font-size:12.5px;color:rgba(255,255,255,.78);line-height:1.6;margin-bottom:8px}
 .tl .tw{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#F5A623;background:rgba(245,166,35,.2);padding:4px 12px;border-radius:99px;border:1px solid rgba(245,166,35,.35)}
 
-/* FIXED MOBILE NAVIGATION */
+/* ═══ FIXED: MOBILE DASHBOARD NAVIGATION (EARNUP STYLE) ═══ */
 @media (max-width:1040px){
-  .dash-layout{display:flex; flex-direction:column; padding:1rem; gap:1.5rem;}
+  .dash-layout{
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+  }
   .dash-side{
-    position:static; 
-    display:flex; 
-    flex-direction:row; 
-    overflow-x:auto; 
-    gap:0.5rem; 
-    padding:0.5rem; 
-    white-space:nowrap; 
-    -webkit-overflow-scrolling:touch; 
-    border-radius:12px;
+    position: sticky;
+    top: 72px; /* Stays exactly below the StartEasy header */
+    z-index: 40;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    background: #fff;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(10,31,18,.08);
+    border-radius: 0;
+    margin: 0;
+    width: 100%;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    gap: 8px;
   }
   .dash-side::-webkit-scrollbar { display: none; }
-  .dash-side .side-label{display:none}
+  .dash-side .side-label{display: none;}
   .dash-side a{
-    display:inline-flex; 
-    align-items:center; 
-    gap:0.5rem; 
-    padding:0.6rem 1rem; 
-    font-size:0.85rem; 
-    flex-shrink:0;
-    border-radius:8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: rgba(10,31,18,.04);
+    color: rgba(10,31,18,.7);
+    transition: all .2s;
   }
-  .dash-side a i { margin:0; font-size:14px; }
-  .acct-name {display:none;}
+  .dash-side a.active {
+    background: #E8730F;
+    color: #fff;
+  }
+  .dash-main {
+    padding: 20px 16px;
+  }
+  .acct-name {display: none;}
   .dash-head{flex-direction:column; align-items:flex-start; gap:1rem;}
 }
 @media (max-width:640px){
@@ -493,7 +514,7 @@ function PasswordInput({value,onChange,placeholder='••••••••',au
   </div>;
 }
 
-/* ═══════════════════ NAVBAR (RESTORED TO ORIGINAL STARTEASY) ═══════════════════ */
+/* ═══════════════════ NAVBAR (STARTEASY STICKY HEADER) ═══════════════════ */
 function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   const [menuOpen,setMenuOpen]=useState(false);
   const [acctOpen,setAcctOpen]=useState(false);
@@ -516,7 +537,7 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
     setTimeout(()=>window.dispatchEvent(new CustomEvent('nav-tab', {detail: tab})), 50);
   };
 
-  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)', flexShrink:0, position:'relative', zIndex:50}}>
+  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)', flexShrink:0, position:'sticky', top:0, zIndex:50}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 16px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72,gap:10}}>
         <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0}}>
@@ -580,7 +601,7 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   </header>;
 }
 
-/* ═══════════════════ HERO, LANDING, PRICING, TRUST, FOOTER (RESTORED) ═══════════════════ */
+/* ═══════════════════ HERO, LANDING, PRICING, TRUST, FOOTER ═══════════════════ */
 function Hero({stats}){
   return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',padding:'clamp(64px,9vw,120px) 24px clamp(56px,8vw,100px)'}}>
     <div style={{position:'absolute',top:-160,right:-120,width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
@@ -638,7 +659,6 @@ function LandingCTA({onSignup,onSignin}){
   </section>;
 }
 
-/* ═══════════════════ NEW PRICING SECTION (FROM COMMERCIAL MODEL) ═══════════════════ */
 function PricingSection(){
   const [activeTab, setActiveTab] = useState('suppliers');
 
@@ -659,7 +679,7 @@ function PricingSection(){
       {activeTab === 'suppliers' ? (
         <div className="grid lg:grid-cols-3 gap-6" style={{ alignItems:'stretch' }}>
           {[
-            { title: 'Premium Profile', price: 'K100', period: '/mo', subtext: 'K140/mo for international | K1000/yr local | K1400/yr intl', desc: 'Get seen first. Enhance your profile with product catalogues, website links, additional photos and priority placement.', features: ['Enhanced profiles', 'Full product catalogues', 'Website links', 'Additional photos', 'Priority placement in category'], cta: 'Upgrade Profile', highlight: false },
+            { title: 'Premium Profile', price: 'K100', period: '/mo', subtext: 'K140/mo intl | K1000/yr local | K1400/yr intl', desc: 'Get seen first. Enhance your profile with product catalogues, website links, additional photos and priority placement.', features: ['Enhanced profiles', 'Full product catalogues', 'Website links', 'Additional photos', 'Priority placement in category'], cta: 'Upgrade Profile', highlight: false },
             { title: 'Qualified Buyer Enquiries', price: 'K50', period: '/lead', subtext: 'or K400/month access', desc: 'We send you buyers actively looking for your products. Pay per qualified lead or subscribe for full access.', features: ['Direct buyer enquiries', 'Verified buying intent', 'Pay only for relevant leads', 'Monthly package available'], cta: 'Get Leads', highlight: true },
             { title: 'Supplier Verification', price: 'K75', period: 'one-off', subtext: 'or K600/year renewal', desc: 'Build trust instantly. We perform identity and business-registration checks, document reviews, and reference checks.', features: ['Identity & registration check', 'Document review', 'Reference checks', 'Verified badge on profile'], cta: 'Get Verified', highlight: false },
             { title: 'Advertising & Sponsored', price: 'K455', period: '/campaign', subtext: 'Custom packages available', desc: 'Push your offers to the top of relevant searches. Feature selected products, sponsor categories, or promote special offers.', features: ['Promoted products', 'Category sponsorship', 'Featured in search results', 'Campaign report'], cta: 'Run Campaign', highlight: false }
@@ -1228,7 +1248,7 @@ function WelcomeRow({k,v}){
   </div>;
 }
 
-/* ═══════════════════ BROWSE (Untouched) ═══════════════════ */
+/* ═══════════════════ BROWSE ═══════════════════ */
 function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
   const [suppliers,setSuppliers]=useState([]);
   const [buyers,setBuyers]=useState([]);
@@ -1413,7 +1433,7 @@ function BuyerProfileModal({buyer,onClose,onRequestIntro}){
   </Modal>;
 }
 
-/* ═══════════════════ ENGAGEMENT & PAYMENT (Untouched) ═══════════════════ */
+/* ═══════════════════ ENGAGEMENT & PAYMENT ═══════════════════ */
 function EngagementLetterBody({service,clientName,clientBusiness,clientEmail,wizardData,readOnly}){
   const s=service;
   const sf=s.service?SF[s.service]:null;
@@ -1637,7 +1657,7 @@ function Payment({service,client,onClose,onDone}){
   </div>;
 }
 
-/* ═══════════════════ AUTH MODAL (Untouched) ═══════════════════ */
+/* ═══════════════════ AUTH MODAL ═══════════════════ */
 function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuthSuccess}){
   const [mode,setMode]=useState(initialMode);
   const [role,setRole]=useState(initialRole);
@@ -1881,7 +1901,7 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
   </Modal>;
 }
 
-/* ═══════════════════ RFQ & INTRO MODAL (Untouched) ═══════════════════ */
+/* ═══════════════════ RFQ & INTRO MODAL ═══════════════════ */
 function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
   const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deliveryCountry:'Zambia',deadline:'',budget:'',notes:''});
   const [err,setErr]=useState('');
@@ -1987,7 +2007,7 @@ function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
   );
 }
 
-/* ═══════════════════ SEED VIEW (Untouched) ═══════════════════ */
+/* ═══════════════════ SEED VIEW ═══════════════════ */
 function SeedView(){
   const [user,setUser]=useState(null);
   const [isAdmin,setIsAdmin]=useState(false);
