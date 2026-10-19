@@ -68,7 +68,7 @@ const { useState, useEffect, useMemo } = React;
 
 const ADMIN_WHATSAPP = '260762499581';
 const CONTACT_EMAIL = 'directory@starteasyzambia.com';
-const MAIN_PLATFORM_URL = 'https://starteasyzambia.com';
+const MAIN_PLATFORM_URL = 'https://www.starteasyzambia.com';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDdEyxvsd2RjgKVYTGYJfYUB_637lV3n5I",
@@ -130,6 +130,11 @@ async function saveQuote(quote){
   try{await db.collection('se_quotes').add(quote);return true;}
   catch(e){console.warn('[SE] save quote:',e&&e.message);return false;}
 }
+async function saveIntro(intro){
+  if(!firebaseReady) return false;
+  try{await db.collection('se_intros').add(intro);return true;}
+  catch(e){console.warn('[SE] save intro:',e&&e.message);return false;}
+}
 
 async function authSignUp(form){
   if(!firebaseReady) throw new Error('Firebase not ready');
@@ -179,7 +184,6 @@ const CATEGORIES = [
   { key:'packaging', icon:'fa-box-open', color:'#B8564F', title:'Packaging & Distribution' }
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.key,c]));
-const SIZE_OPTIONS = ['Micro','Small','Medium','Large'];
 const FREQUENCY_OPTIONS = ['Weekly','Monthly','Quarterly','One-off'];
 
 const SEED_SUPPLIERS = [
@@ -264,8 +268,6 @@ const INP_STYLE = {width:'100%',background:'#fff',border:'1.5px solid rgba(10,31
 function TIn({value,onChange,placeholder,type='text'}){
   return <input type={type} value={value||''} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={INP_STYLE}/>;
 }
-
-/* ═══════════════════ PASSWORD INPUT (👁 toggle) ═══════════════════ */
 function PasswordInput({value,onChange,placeholder='••••••••',autoComplete='current-password'}){
   const [show,setShow]=useState(false);
   return <div style={{position:'relative'}}>
@@ -305,7 +307,6 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
   const [resetSent,setResetSent]=useState(false);
   const [resetEmail,setResetEmail]=useState('');
   const [signupSuccess,setSignupSuccess]=useState(false);
-  const [registeredEmail,setRegisteredEmail]=useState('');
   const [form,setForm]=useState({name:'',businessName:'',email:'',phone:'',password:'',category:'',location:'',products:'',moq:'',delivery:'',leadTime:'',sources:'',frequency:'Monthly',orderValue:''});
 
   useEffect(()=>{
@@ -316,7 +317,6 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
       setResetSent(false);
       setResetEmail('');
       setSignupSuccess(false);
-      setRegisteredEmail('');
     }
   },[open,initialMode,initialRole]);
 
@@ -370,7 +370,6 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     setSubmitting(true);
     try{
       const result = await authSignUp({...form,role});
-      setRegisteredEmail(result.email);
       setSignupSuccess(true);
       setMode('signin');
       setForm(f=>({...f,email:result.email,password:''}));
@@ -538,6 +537,9 @@ function Nav({user,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
           </span>
         </a>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <a href={MAIN_PLATFORM_URL} className="hide-sm" style={{padding:'10px 14px',background:'transparent',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none',marginRight:6}}>
+            <i className="fas fa-arrow-left" style={{marginRight:6}}></i> Main Platform
+          </a>
           {user?(
             <>
               <button onClick={onDashboard} className="hide-sm" style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Dashboard</button>
@@ -626,6 +628,7 @@ function Footer(){
         <a href={'mailto:'+CONTACT_EMAIL} style={{color:'inherit',textDecoration:'none'}}>{CONTACT_EMAIL}</a>
         <span>+260 762499581</span>
         <span>Lusaka, Zambia</span>
+        <a href={MAIN_PLATFORM_URL} style={{color:'#F5A623',textDecoration:'underline',fontWeight:700}}>Return to Main Platform</a>
       </div>
       <div style={{paddingTop:18,borderTop:'1px solid rgba(255,255,255,.1)',display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
         <p style={{fontSize:11,color:'rgba(255,255,255,.35)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia</p>
@@ -1128,7 +1131,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
 }
 
 /* ═══════════════════ BROWSE ═══════════════════ */
-function Browse({user,onRequestQuote,onDashboard,onSignedOut}){
+function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
   const [suppliers,setSuppliers]=useState([]);
   const [buyers,setBuyers]=useState([]);
   const [loading,setLoading]=useState(true);
@@ -1236,7 +1239,7 @@ function Browse({user,onRequestQuote,onDashboard,onSignedOut}){
     </main>
     <Footer/>
     {profile&&profileType==='supplier'&&<SupplierProfileModal supplier={profile} user={user} onClose={()=>setProfile(null)} onRequestQuote={(s)=>{setProfile(null);onRequestQuote(s);}}/>}
-    {profile&&profileType==='buyer'&&<BuyerProfileModal buyer={profile} onClose={()=>setProfile(null)}/>}
+    {profile&&profileType==='buyer'&&<BuyerProfileModal buyer={profile} user={user} onClose={()=>setProfile(null)} onRequestIntro={(b)=>{setProfile(null);onRequestIntro(b);}}/>}
   </div>;
 }
 
@@ -1264,7 +1267,7 @@ function SupplierProfileModal({supplier,user,onClose,onRequestQuote}){
   </Modal>;
 }
 
-function BuyerProfileModal({buyer,onClose}){
+function BuyerProfileModal({buyer,onClose,onRequestIntro}){
   return <Modal open={true} onClose={onClose} eyebrow="Buyer profile" maxWidth="42rem">
     <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>{buyer.name}</h2>
     <div style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:14}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{buyer.location}</div>
@@ -1273,52 +1276,99 @@ function BuyerProfileModal({buyer,onClose}){
       <div style={{fontSize:11,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Sources</div>
       <div style={{display:'flex',flexWrap:'wrap',gap:8}}>{buyer.sources.map((p,i)=><span key={i} style={{fontSize:12.5,color:'rgba(138,104,40,.9)',background:'#fff',border:'1px solid rgba(232,115,15,.25)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>)}</div>
     </div>}
-    <a href={waUrl(`Hello StartEasy — I'm interested in ${buyer.name}.`)} target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',width:'100%'}}><i className="fab fa-whatsapp"></i> Contact via StartEasy</a>
+    <button onClick={()=>onRequestIntro(buyer)} style={{width:'100%',padding:'14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>Request introduction</button>
   </Modal>;
 }
 
-/* ═══════════════════ RFQ MODAL ═══════════════════ */
-function RFQModal({open,onClose,preselected,user,onSaved}){
+/* ═══════════════════ RFQ & INTRO MODAL ═══════════════════ */
+function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
   const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deadline:'',budget:'',notes:''});
   const [err,setErr]=useState('');
   const [saving,setSaving]=useState(false);
+  const [agreeFee,setAgreeFee]=useState(false);
+
+  const isIntro = type==='intro';
+
   useEffect(()=>{
-    if(open){setForm(f=>({...f,name:user?.displayName||'',email:user?.email||'',category:preselected?preselected.category:'',product:preselected?(preselected.products||[])[0]||'':''}));setErr('');}
+    if(open){
+      setForm(f=>({...f,name:user?.displayName||'',email:user?.email||'',category:preselected?preselected.category:'',product:preselected?(preselected.products||[])[0]||'':''}));
+      setErr('');
+      setAgreeFee(false);
+    }
   },[open,preselected,user]);
+
   const submit=async()=>{
     setErr('');
     if(!form.name.trim()) return setErr('Enter your name.');
     if(!form.phone.trim()) return setErr('Enter your phone.');
     if(!form.product.trim()) return setErr('Describe what you need.');
     if(!user){setErr('You must be signed in.');return;}
+    if(!agreeFee) return setErr('You must agree to the StartEasy Success Fee.');
+    
     setSaving(true);
     try{
-      const quote={userId:user.uid,userName:form.name,userEmail:form.email,supplierId:preselected?.id||null,supplierName:preselected?.name||null,supplierCategory:preselected?.category||form.category,category:form.category,product:form.product,quantity:form.quantity,deliveryCity:form.deliveryCity,deadline:form.deadline,budget:form.budget,notes:form.notes,phone:form.phone,status:'sent',at:Date.now()};
-      const ok=await saveQuote(quote);
-      if(!ok) throw new Error('Could not save your request.');
-      const msg=['*QUOTATION REQUEST*','','*Buyer:*',`Name: ${form.name}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Requirement:*',form.category&&`Category: ${CAT_MAP[form.category]?.title||form.category}`,preselected&&`Supplier: ${preselected.name}`,`Product: ${form.product}`,form.quantity&&`Quantity: ${form.quantity}`,form.deliveryCity&&`Delivery to: ${form.deliveryCity}`,form.deadline&&`Needed by: ${form.deadline}`,form.budget&&`Budget: ${form.budget}`,form.notes&&`Notes: ${form.notes}`].filter(Boolean).join('\n');
-      window.open(waUrl(msg),'_blank');
+      if(isIntro){
+        const intro={
+          userId:user.uid,
+          userName:form.name,
+          userEmail:form.email,
+          buyerId:preselected?.id||null,
+          buyerName:preselected?.name||null,
+          buyerCategory:preselected?.category||form.category,
+          product:form.product,
+          notes:form.notes,
+          phone:form.phone,
+          status:'sent',
+          at:Date.now()
+        };
+        const ok=await saveIntro(intro);
+        if(!ok) throw new Error('Could not save intro request.');
+        const msg=['*INTRODUCTION REQUEST*','','*Supplier:*',`Name: ${form.name}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Buyer:*',preselected?preselected.name:'Unknown Buyer','','*Pitch:*',form.product,form.notes&&`Notes: ${form.notes}`].filter(Boolean).join('\n');
+        window.open(waUrl(msg),'_blank');
+      } else {
+        const quote={userId:user.uid,userName:form.name,userEmail:form.email,supplierId:preselected?.id||null,supplierName:preselected?.name||null,supplierCategory:preselected?.category||form.category,category:form.category,product:form.product,quantity:form.quantity,deliveryCity:form.deliveryCity,deadline:form.deadline,budget:form.budget,notes:form.notes,phone:form.phone,status:'sent',at:Date.now()};
+        const ok=await saveQuote(quote);
+        if(!ok) throw new Error('Could not save your request.');
+        const msg=['*QUOTATION REQUEST*','','*Buyer:*',`Name: ${form.name}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Requirement:*',form.category&&`Category: ${CAT_MAP[form.category]?.title||form.category}`,preselected&&`Supplier: ${preselected.name}`,`Product: ${form.product}`,form.quantity&&`Quantity: ${form.quantity}`,form.deliveryCity&&`Delivery to: ${form.deliveryCity}`,form.deadline&&`Needed by: ${form.deadline}`,form.budget&&`Budget: ${form.budget}`,form.notes&&`Notes: ${form.notes}`].filter(Boolean).join('\n');
+        window.open(waUrl(msg),'_blank');
+      }
       onSaved && onSaved();
       onClose();
     }catch(e){setErr(e.message||'Could not save request.');}
     finally{setSaving(false);}
   };
-  return <Modal open={open} onClose={onClose} eyebrow="Request quotation" maxWidth="44rem">
-    <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Request a quotation</h2>
-    <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>Your request will be tracked in "My Requests" in your dashboard.{preselected&&<span style={{display:'block',marginTop:8,color:'#8A6828',fontWeight:600}}><i className="fas fa-info-circle"></i> Requesting from {preselected.name}</span>}</p>
+
+  return <Modal open={open} onClose={onClose} eyebrow={isIntro?'Request Introduction':'Request Quotation'} maxWidth="44rem">
+    <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>{isIntro?'Pitch to this buyer':'Request a quotation'}</h2>
+    <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>
+      {isIntro?'Introduce your business and why you are a good match for their sourcing needs.':'Your request will be tracked in "My Requests" in your dashboard.'}
+      {preselected&&<span style={{display:'block',marginTop:8,color:'#8A6828',fontWeight:600}}><i className="fas fa-info-circle"></i> Target: {preselected.name}</span>}
+    </p>
+    
     <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))'}}>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Your name *</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business</label><TIn value={form.business} onChange={v=>setForm({...form,business:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone *</label><TIn value={form.phone} onChange={v=>setForm({...form,phone:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label><TIn value={form.email} onChange={v=>setForm({...form,email:v})}/></div>
     </div>
-    <div style={{marginTop:14}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Product *</label><TIn value={form.product} onChange={v=>setForm({...form,product:v})}/></div>
-    <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
+    
+    <div style={{marginTop:14}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isIntro?'Your pitch / offering *':'Product *'}</label><TIn value={form.product} onChange={v=>setForm({...form,product:v})} placeholder={isIntro?'e.g. We supply high quality imported fabric...':'e.g. 50 bags of cement, fabric rolls...'}/></div>
+    
+    {!isIntro && <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Quantity</label><TIn value={form.quantity} onChange={v=>setForm({...form,quantity:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Needed by</label><TIn type="date" value={form.deadline} onChange={v=>setForm({...form,deadline:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget</label><TIn value={form.budget} onChange={v=>setForm({...form,budget:v})}/></div>
-    </div>
+    </div>}
+
+    <label style={{display:'flex',gap:12,alignItems:'flex-start',marginTop:18,cursor:'pointer',background:'rgba(232,115,15,.04)',padding:'12px 14px',borderRadius:8,border:'1px solid rgba(232,115,15,.2)'}}>
+      <input type="checkbox" checked={agreeFee} onChange={e=>setAgreeFee(e.target.checked)} style={{marginTop:3,width:16,height:16,accentColor:'#E8730F',flexShrink:0}}/>
+      <div style={{fontSize:12,color:'rgba(10,31,18,.75)',lineHeight:1.5}}>
+        <strong>StartEasy Commercial Agreement:</strong> I understand that StartEasy facilitates this introduction. If we close a deal, StartEasy may charge a small success fee (e.g., 2% of transaction value) to cover administrative and matchmaking costs.
+      </div>
+    </label>
+
     {err&&<div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5}}>{err}</div>}
+    
     <div style={{display:'flex',gap:10,marginTop:20,flexWrap:'wrap'}}>
       <button onClick={submit} disabled={saving} style={{flex:'1 1 240px',padding:'14px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>
         {saving?<><i className="fas fa-spinner fa-spin"></i> Saving…</>:'Send via WhatsApp & save'}
@@ -1427,6 +1477,7 @@ function App(){
   const [authRole,setAuthRole]=useState('buyer');
   const [rfqOpen,setRfqOpen]=useState(false);
   const [rfqPreselected,setRfqPreselected]=useState(null);
+  const [rfqType,setRfqType]=useState('quote');
   const [justSignedUp,setJustSignedUp]=useState(false);
 
   useEffect(()=>{
@@ -1456,7 +1507,8 @@ function App(){
   const goHome=()=>{window.location.hash='';};
   const goDashboard=()=>{window.location.hash='#dashboard';};
   const goBrowse=()=>{window.location.hash='#browse';};
-  const openRFQ=(supplier)=>{setRfqPreselected(supplier||null);setRfqOpen(true);};
+  const openRFQ=(supplier)=>{setRfqPreselected(supplier||null);setRfqType('quote');setRfqOpen(true);};
+  const openIntro=(buyer)=>{setRfqPreselected(buyer||null);setRfqType('intro');setRfqOpen(true);};
   const closeRFQ=()=>{setRfqOpen(false);setRfqPreselected(null);};
   const signedOut=()=>{setUser(null);setJustSignedUp(false);goHome();};
 
@@ -1476,7 +1528,7 @@ function App(){
     } else if(hash==='#dashboard'){
       mainView = <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
     } else {
-      mainView = <><Browse user={user} onRequestQuote={openRFQ} onDashboard={goDashboard} onSignedOut={signedOut}/><RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} user={user} onSaved={()=>{}}/></>;
+      mainView = <><Browse user={user} onRequestQuote={openRFQ} onRequestIntro={openIntro} onDashboard={goDashboard} onSignedOut={signedOut}/><RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} type={rfqType} user={user} onSaved={()=>{}}/></>;
     }
   } else if(!user){
     mainView = <Landing onSignup={(role)=>openAuth('signup',role||'buyer')} onSignin={()=>openAuth('signin','buyer')}/>;
