@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Businesses &amp; Suppliers Directory — StartEasy Zambia</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+:root{--forest:#0A1F12;--forest-2:#123A1F;--green:#1E7B3C;--orange:#E8730F;--orange-2:#F5A623;--light:#F5FAF6;--red:#B8564F;--purple:#7A4FA3;--blue:#1B6CA8;--teal:#0E7C7B}
+html{overflow-x:hidden;-webkit-text-size-adjust:100%}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--light);overflow-x:hidden;margin:0}
+#root{overflow-x:hidden;width:100%}
+*,*::before,*::after{box-sizing:border-box;min-width:0}
+h1,h2,h3,h4,h5,h6,p,span,a,li,div,button{overflow-wrap:break-word}
+button,a{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.serif{font-family:'Playfair Display',Georgia,serif}
+.micro{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
+::selection{background:var(--orange-2);color:var(--forest)}
+input,select,textarea{font-family:'Inter',system-ui,sans-serif}
+input:focus,select:focus,textarea:focus{outline:none}
+.fadein{animation:fi .5s cubic-bezier(.22,.61,.36,1) both}
+@keyframes fi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.pulse{animation:ps 2s infinite ease-in-out}
+@keyframes ps{0%,100%{opacity:1}50%{opacity:.55}}
+@media (min-width:1024px){html{scroll-behavior:smooth}}
+@media (prefers-reduced-motion:reduce){.fadein{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo } = React;
+
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const ADMIN_WHATSAPP = '260762499581';
+const CONTACT_EMAIL = 'directory@starteasyzambia.com';
+const MAIN_PLATFORM_URL = 'https://starteasyzambia.com'; // change to your live URL
+function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
+function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
+
+/* ============================================================
+   DATA
+   ============================================================ */
+const CATEGORIES = [
+  { key:'clothing', icon:'fa-shirt', color:'#E8730F',
+    title:'Clothing, Fashion & Accessories',
+    short:'Boutiques, shoe shops, handbag shops, children\u2019s clothing stores.',
+    sources:'Clothes, shoes, handbags, belts, jewellery and fabrics.',
+    suppliers:'Clothing wholesalers, importers, local designers and textile manufacturers.' },
+  { key:'grocery', icon:'fa-basket-shopping', color:'#2E9C4A',
+    title:'Grocery Stores & Supermarkets',
+    short:'Mini-markets, grocery shops, supermarkets, convenience stores.',
+    sources:'Mealie meal, rice, cooking oil, sugar, drinks, canned foods and household essentials.',
+    suppliers:'Food manufacturers, wholesalers, distributors and farmers.' },
+  { key:'food', icon:'fa-utensils', color:'#B8564F',
+    title:'Food, Catering & Hospitality',
+    short:'Restaurants, takeaways, bakeries, caterers and hotels.',
+    sources:'Vegetables, meat, fish, flour, spices, cooking oil, packaging and drinks.',
+    suppliers:'Farmers, butcheries, food distributors, bakeries and packaging companies.' },
+  { key:'construction', icon:'fa-trowel-bricks', color:'#1B6CA8',
+    title:'Construction & Hardware',
+    short:'Hardware shops, construction companies, plumbers, building contractors.',
+    sources:'Cement, bricks, roofing sheets, paint, electrical cables, pipes, tiles and tools.',
+    suppliers:'Building-material manufacturers, hardware wholesalers, steel suppliers and distributors.' },
+  { key:'beauty', icon:'fa-scissors', color:'#7A4FA3',
+    title:'Beauty, Cosmetics & Personal Care',
+    short:'Hair salons, barbershops, nail salons, spas and cosmetics shops.',
+    sources:'Hair extensions, shampoo, relaxers, nail polish, makeup, skincare products and salon equipment.',
+    suppliers:'Beauty-product wholesalers, cosmetics distributors and salon-equipment suppliers.' },
+  { key:'auto', icon:'fa-car', color:'#0E7C7B',
+    title:'Automotive & Transport',
+    short:'Auto-spare-parts shops, garages, car washes, transport operators.',
+    sources:'Spare parts, tyres, batteries, lubricants, cleaning products and vehicle accessories.',
+    suppliers:'Auto-parts wholesalers, importers, tyre distributors and lubricant suppliers.' },
+  { key:'agriculture', icon:'fa-seedling', color:'#2E9C4A',
+    title:'Agriculture & Livestock',
+    short:'Crop farmers, poultry farms, fish farms and livestock farmers.',
+    sources:'Seeds, fertiliser, animal feed, chicks, veterinary supplies, irrigation equipment and farming tools.',
+    suppliers:'Agricultural-input dealers, hatcheries, feed manufacturers and equipment dealers.' },
+  { key:'stationery', icon:'fa-pen-ruler', color:'#E8730F',
+    title:'Stationery, Printing & Office Supplies',
+    short:'Stationery shops, printing businesses, schools and office suppliers.',
+    sources:'Paper, pens, notebooks, printer ink, toner, packaging and printing materials.',
+    suppliers:'Stationery wholesalers, paper distributors and printing-equipment dealers.' },
+  { key:'electronics', icon:'fa-mobile-screen', color:'#1B6CA8',
+    title:'Electronics & Technology',
+    short:'Phone shops, computer shops and electronics retailers.',
+    sources:'Phones, chargers, cables, laptops, screens, batteries and networking equipment.',
+    suppliers:'Electronics distributors, importers and authorised wholesalers.' },
+  { key:'furniture', icon:'fa-couch', color:'#7A4FA3',
+    title:'Furniture & Manufacturing',
+    short:'Furniture shops, carpentry workshops, tailors, small manufacturers.',
+    sources:'Timber, foam, fabric, nails, screws, glue, metal, packaging and production tools.',
+    suppliers:'Timber yards, textile wholesalers, hardware distributors and raw-material suppliers.' },
+  { key:'cleaning', icon:'fa-spray-can-sparkles', color:'#0E7C7B',
+    title:'Cleaning & Sanitation',
+    short:'Cleaning companies, laundries, janitorial-product shops.',
+    sources:'Detergents, bleach, disinfectants, gloves, mops, buckets, tissue and cleaning machines.',
+    suppliers:'Chemical manufacturers, cleaning-product wholesalers and equipment dealers.' },
+  { key:'packaging', icon:'fa-box-open', color:'#B8564F',
+    title:'Packaging & Product Distribution',
+    short:'Packaging shops, distributors, self-packaging businesses.',
+    sources:'Boxes, labels, bottles, jars, bags, wrapping materials and takeaway containers.',
+    suppliers:'Packaging manufacturers, printing companies and packaging wholesalers.' }
+];
+
+const SERVICE_BUSINESSES = [
+  { icon:'fa-camera', category:'Photography & Videography', need:'Cameras, lighting, memory cards and printing services.' },
+  { icon:'fa-champagne-glasses', category:'Events & Weddings', need:'Decorations, flowers, chairs, tents, sound equipment and catering.' },
+  { icon:'fa-laptop-code', category:'IT & Computer Services', need:'Computers, software licences, cables and networking equipment.' },
+  { icon:'fa-wand-magic-sparkles', category:'Hair & Beauty Services', need:'Consumable products, tools and replacement equipment.' },
+  { icon:'fa-truck-fast', category:'Transport & Logistics', need:'Fuel, tyres, spare parts and vehicle maintenance.' },
+  { icon:'fa-screwdriver-wrench', category:'Construction & Repairs', need:'Tools, replacement parts, materials and safety equipment.' },
+  { icon:'fa-graduation-cap', category:'Education & Training', need:'Books, stationery, teaching materials and equipment.' }
+];
+
+const ROLES = [
+  { key:'manufacturer', color:'#2E9C4A', icon:'fa-industry',
+    title:'Manufacturer or Producer',
+    desc:'Makes or grows the product.',
+    example:'A farmer growing tomatoes.' },
+  { key:'wholesaler', color:'#E8730F', icon:'fa-warehouse',
+    title:'Wholesaler or Distributor',
+    desc:'Buys products in bulk and sells them to other businesses.',
+    example:'A bulk distributor selling to shops.' },
+  { key:'retailer', color:'#1B6CA8', icon:'fa-store',
+    title:'Retailer',
+    desc:'Sells products directly to the final customer.',
+    example:'A shop selling tomatoes to households.' }
+];
+
+const PILLARS = [
+  { icon:'fa-magnifying-glass-location', title:'Discover', color:'#2E9C4A',
+    desc:'Find suppliers by category, location, minimum order quantity and delivery coverage.' },
+  { icon:'fa-scale-balanced', title:'Compare', color:'#E8730F',
+    desc:'Side-by-side product range, pricing tiers, lead times and reliability signals.' },
+  { icon:'fa-file-invoice', title:'Request', color:'#1B6CA8',
+    desc:'Send a structured quotation request to one supplier or many — in a few clicks.' },
+  { icon:'fa-handshake', title:'Connect', color:'#7A4FA3',
+    desc:'Warm introductions, follow-up and escalation, so enquiries become repeat orders.' }
+];
+
+/* ============================================================
+   MARK
+   ============================================================ */
+function Mark({size=38}){
+  return <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:size,height:size,borderRadius:'50%',background:'#fff',boxShadow:'0 4px 12px -4px rgba(10,31,18,.5)',flexShrink:0}}>
+    <span className="serif" style={{fontSize:size*0.5,fontWeight:800,color:'#0A1F12',lineHeight:1,letterSpacing:'-0.02em'}}>S<span style={{color:'#E8730F'}}>E</span></span>
+  </span>;
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+function Nav(){
+  const [open,setOpen]=useState(false);
+  return <header className="sticky top-0 z-50 bg-[#0A1F12] border-b border-[#F5A623]/10">
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
+        <a href={MAIN_PLATFORM_URL} style={{display:'flex',alignItems:'center',gap:12,textDecoration:'none'}}>
+          <Mark size={38}/>
+          <span className="hidden sm:block" style={{textAlign:'left',lineHeight:1}}>
+            <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
+            <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+          </span>
+        </a>
+        <nav className="hidden lg:flex" style={{gap:22}}>
+          <a href="#categories" style={{fontSize:12.5,color:'rgba(255,255,255,.6)',textDecoration:'none',fontWeight:500}}>Categories</a>
+          <a href="#services" style={{fontSize:12.5,color:'rgba(255,255,255,.6)',textDecoration:'none',fontWeight:500}}>Service businesses</a>
+          <a href="#roles" style={{fontSize:12.5,color:'rgba(255,255,255,.6)',textDecoration:'none',fontWeight:500}}>Supply chain roles</a>
+          <a href="#for-suppliers" style={{fontSize:12.5,color:'rgba(255,255,255,.6)',textDecoration:'none',fontWeight:500}}>For suppliers</a>
+        </nav>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <a href={waUrl('Hello StartEasy — I would like to ask about the Businesses & Suppliers Directory.')} target="_blank" rel="noopener noreferrer"
+             className="hidden sm:inline-flex" style={{padding:'10px 18px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none',alignItems:'center',gap:8}}>
+            <i className="fab fa-whatsapp"></i> Talk to us
+          </a>
+          <button onClick={()=>setOpen(!open)} className="lg:hidden" style={{width:36,height:36,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'none',border:'none',cursor:'pointer'}} aria-label="Menu">
+            <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(45deg) translateY(3.5px)':'none',transition:'transform .2s'}}/>
+            <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(-45deg) translateY(-3.5px)':'none',transition:'transform .2s'}}/>
+          </button>
+        </div>
+      </div>
+    </div>
+    {open && <div className="lg:hidden" style={{borderTop:'1px solid rgba(255,255,255,.1)',background:'#0A1F12'}}>
+      <div style={{padding:'16px 24px'}}>
+        {[['#categories','Categories'],['#services','Service businesses'],['#roles','Supply chain roles'],['#for-suppliers','For suppliers']].map(([h,l])=>
+          <a key={h} href={h} onClick={()=>setOpen(false)} style={{display:'block',padding:'14px 0',borderBottom:'1px solid rgba(255,255,255,.05)',color:'rgba(255,255,255,.7)',fontSize:14,textDecoration:'none'}}>{l}</a>
+        )}
+      </div>
+    </div>}
+  </header>;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+function Footer(){
+  return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
+      <div className="grid lg:grid-cols-[1.5fr_1fr_1fr] gap-10">
+        <div>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
+            <Mark size={38}/>
+            <div style={{lineHeight:1}}>
+              <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
+              <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+            </div>
+          </div>
+          <p style={{fontSize:11,letterSpacing:'.16em',textTransform:'uppercase',color:'#F5A623',fontWeight:700,marginBottom:14}}>Helping businesses buy better. Helping suppliers sell more.</p>
+          <p style={{fontSize:13,lineHeight:1.65,color:'rgba(255,255,255,.5)',maxWidth:340}}>A working marketplace that connects Zambian businesses with the right suppliers — and suppliers with the businesses that will actually buy from them.</p>
+        </div>
+        <div>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Explore</span>
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            {[['#categories','Categories'],['#services','Service businesses'],['#roles','Supply chain roles'],['#for-suppliers','For suppliers']].map(([h,l])=>
+              <a key={h} href={h} style={{fontSize:13,color:'rgba(255,255,255,.5)',textDecoration:'none'}}>{l}</a>
+            )}
+            <a href={MAIN_PLATFORM_URL} style={{fontSize:13,color:'rgba(255,255,255,.5)',textDecoration:'none'}}>StartEasy main platform</a>
+          </div>
+        </div>
+        <div>
+          <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Contact</span>
+          <div style={{display:'flex',flexDirection:'column',gap:12,fontSize:13,color:'rgba(255,255,255,.5)'}}>
+            <a href={'mailto:'+CONTACT_EMAIL} style={{color:'inherit',textDecoration:'none'}}>{CONTACT_EMAIL}</a>
+            <a href={'tel:+'+ADMIN_WHATSAPP} style={{color:'inherit',textDecoration:'none'}}>+260 762499581</a>
+            <p style={{margin:0,color:'rgba(255,255,255,.35)',fontSize:12}}>Lusaka, Zambia</p>
+          </div>
+        </div>
+      </div>
+      <div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
+        <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.75,maxWidth:900}}>
+          <strong style={{color:'rgba(255,255,255,.55)'}}>Important:</strong> StartEasy is a directory and matchmaking service. We help businesses discover suitable suppliers, compare offers and request quotations — but any transaction, contract, delivery or payment is between the buyer and the supplier. We are not a party to that transaction, and we do not guarantee supplier performance. Categories and matches are based on information provided and verified where possible; requirements and supplier availability change.
+        </p>
+        <p style={{fontSize:11,color:'rgba(255,255,255,.3)',marginTop:20,margin:0}}>© {new Date().getFullYear()} StartEasy Zambia · Businesses &amp; Suppliers Directory.</p>
+      </div>
+    </div>
+  </footer>;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+function Hero(){
+  return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',padding:'clamp(64px,9vw,110px) 24px clamp(56px,8vw,88px)'}}>
+    <div style={{position:'absolute',top:-160,right:-120,width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',bottom:-180,left:-100,width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
+    <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
+      <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:18,letterSpacing:'.22em'}}>Businesses &amp; Suppliers Directory</span>
+      <h1 className="serif" style={{fontSize:'clamp(2.1rem,5.2vw,3.6rem)',lineHeight:1.08,marginBottom:22,maxWidth:'52rem'}}>
+        Helping businesses <em style={{fontStyle:'italic',color:'#F5A623'}}>buy better.</em><br/>
+        Helping suppliers <em style={{fontStyle:'italic',color:'#F5A623'}}>sell more.</em>
+      </h1>
+      <p style={{fontSize:'clamp(1rem,1.4vw,1.15rem)',lineHeight:1.75,color:'rgba(255,255,255,.72)',maxWidth:'46rem',marginBottom:32}}>
+        A working marketplace that helps Zambian businesses discover the right suppliers, compare offers, request quotations and make genuine purchasing connections — and helps suppliers reach the businesses that will actually buy from them.
+      </p>
+      <div style={{display:'flex',flexWrap:'wrap',gap:12,marginBottom:40}}>
+        <a href={waUrl('Hello StartEasy — I run a business and I need help finding the right suppliers. Here is what I source: ')} target="_blank" rel="noopener noreferrer"
+           style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',boxShadow:'0 14px 34px -12px rgba(232,115,15,.55)'}}>
+          <i className="fas fa-cart-shopping"></i> I'm a business looking for suppliers
+        </a>
+        <a href={waUrl('Hello StartEasy — I am a supplier and I want to reach businesses that buy what I sell. Here is what I supply: ')} target="_blank" rel="noopener noreferrer"
+           style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'rgba(255,255,255,.06)',color:'#fff',border:'1px solid rgba(255,255,255,.22)',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}>
+          <i className="fas fa-truck-fast"></i> I'm a supplier looking for businesses
+        </a>
+      </div>
+      <div style={{background:'rgba(245,166,35,.10)',border:'1px solid rgba(245,166,35,.32)',borderRadius:12,padding:'16px 20px',display:'flex',gap:14,alignItems:'flex-start',maxWidth:'46rem'}}>
+        <span style={{width:34,height:34,borderRadius:9,background:'rgba(245,166,35,.22)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-chart-line" style={{fontSize:14}}></i></span>
+        <p style={{fontSize:13,lineHeight:1.65,color:'rgba(255,255,255,.8)',margin:0}}>
+          <strong style={{color:'#F5A623'}}>The commercial model —</strong> StartEasy Zambia earns revenue from qualified leads, subscriptions or successful transactions, by matching real business needs with genuine supplier offers.
+        </p>
+      </div>
+    </div>
+  </section>;
+}
+
+/* ============================================================
+   NOT A PHONEBOOK
+   ============================================================ */
+function Pillars(){
+  return <section style={{background:'#fff',borderBottom:'1px solid rgba(10,31,18,.06)'}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
+      <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 44px'}}>
+        <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Beyond a phone book</span>
+        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>
+          A directory that doesn't just list — it <em style={{fontStyle:'italic',color:'#E8730F'}}>connects.</em>
+        </h2>
+        <p style={{fontSize:15,lineHeight:1.75,color:'rgba(10,31,18,.65)',margin:0,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
+          Names and phone numbers aren't enough. StartEasy helps buyers actually find suitable suppliers, compare real offers, request quotations, and turn a first enquiry into a working supply relationship.
+        </p>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {PILLARS.map((f,i)=>(
+          <div key={i} style={{background:'#F5FAF6',border:'1px solid rgba(10,31,18,.06)',borderTop:`3px solid ${f.color}`,borderRadius:14,padding:'24px 22px',display:'flex',flexDirection:'column',gap:14}}>
+            <span style={{width:46,height:46,borderRadius:12,background:f.color+'16',color:f.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>
+              <i className={`fas ${f.icon}`}></i>
+            </span>
+            <h4 className="serif" style={{fontSize:16.5,fontWeight:700,color:'#0A1F12',lineHeight:1.25,margin:0}}>{f.title}</h4>
+            <p style={{fontSize:13,color:'rgba(10,31,18,.65)',lineHeight:1.6,margin:0}}>{f.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>;
+}
+
+/* ============================================================
+   TWO SIDES OF ONE MARKET
+   ============================================================ */
+function TwoSides(){
+  return <section style={{background:'#F5FAF6'}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
+      <div style={{textAlign:'center',maxWidth:760,margin:'0 auto 44px'}}>
+        <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Two sides, one market</span>
+        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>
+          Every transaction has a buyer and a seller.
+        </h2>
+        <p style={{fontSize:15,lineHeight:1.75,color:'rgba(10,31,18,.65)',margin:0,maxWidth:'42rem',marginLeft:'auto',marginRight:'auto'}}>
+          StartEasy is built for both sides of that table — because a supply relationship only works when the buyer finds the right supplier <em>and</em> the supplier finds the right buyer.
+        </p>
+      </div>
+      <div className="grid lg:grid-cols-2 gap-5">
+        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:18,padding:'32px 30px',borderLeft:'4px solid #E8730F',display:'flex',flexDirection:'column',gap:18}}>
+          <div style={{display:'flex',alignItems:'center',gap:14}}>
+            <span style={{width:56,height:56,borderRadius:14,background:'rgba(232,115,15,.14)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
+              <i className="fas fa-cart-shopping"></i>
+            </span>
+            <div>
+              <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:'#E8730F',marginBottom:4}}>The demand side</div>
+              <h3 className="serif" style={{fontSize:'clamp(1.15rem,2.1vw,1.4rem)',fontWeight:800,color:'#0A1F12',lineHeight:1.2,margin:0}}>Businesses looking for suppliers</h3>
+            </div>
+          </div>
+          <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>
+            They need products at affordable prices, reliable quality, consistent stock and trustworthy suppliers.
+          </p>
+          <div style={{background:'#F5FAF6',border:'1px dashed rgba(232,115,15,.3)',borderRadius:10,padding:'16px 18px'}}>
+            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:6}}>Their main challenge</div>
+            <p style={{fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.8)',margin:0}}>
+              Finding the right supplier at the right price — especially when they lack established contacts or cannot buy in large quantities.
+            </p>
+          </div>
+          <a href={waUrl('Hello StartEasy — I run a business and I need help finding the right suppliers. Here is what I source: ')} target="_blank" rel="noopener noreferrer"
+             style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9,padding:'13px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:10,fontSize:13.5,fontWeight:700,textDecoration:'none',marginTop:'auto'}}>
+            <i className="fas fa-arrow-right"></i> I need a supplier
+          </a>
+        </div>
+
+        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:18,padding:'32px 30px',borderLeft:'4px solid #1B6CA8',display:'flex',flexDirection:'column',gap:18}}>
+          <div style={{display:'flex',alignItems:'center',gap:14}}>
+            <span style={{width:56,height:56,borderRadius:14,background:'rgba(27,108,168,.14)',color:'#1B6CA8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
+              <i className="fas fa-truck-fast"></i>
+            </span>
+            <div>
+              <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:'#1B6CA8',marginBottom:4}}>The supply side</div>
+              <h3 className="serif" style={{fontSize:'clamp(1.15rem,2.1vw,1.4rem)',fontWeight:800,color:'#0A1F12',lineHeight:1.2,margin:0}}>Suppliers looking for businesses</h3>
+            </div>
+          </div>
+          <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>
+            They need customers who buy regularly, order sufficient quantities and pay on time.
+          </p>
+          <div style={{background:'#F5FAF6',border:'1px dashed rgba(27,108,168,.3)',borderRadius:10,padding:'16px 18px'}}>
+            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#1B6CA8',marginBottom:6}}>Their main challenge</div>
+            <p style={{fontSize:13,lineHeight:1.65,color:'rgba(10,31,18,.8)',margin:0}}>
+              Finding enough genuine, profitable customers — and turning one-off enquiries into repeat orders.
+            </p>
+          </div>
+          <a href={waUrl('Hello StartEasy — I am a supplier and I want to reach businesses that buy what I sell. Here is what I supply: ')} target="_blank" rel="noopener noreferrer"
+             style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9,padding:'13px 22px',background:'#0A1F12',color:'#fff',borderRadius:10,fontSize:13.5,fontWeight:700,textDecoration:'none',marginTop:'auto'}}>
+            <i className="fas fa-arrow-right"></i> I need business customers
+          </a>
+        </div>
+      </div>
+
+      <p className="serif" style={{textAlign:'center',fontSize:'clamp(1.05rem,2vw,1.3rem)',lineHeight:1.5,color:'#0A1F12',fontStyle:'italic',maxWidth:760,margin:'44px auto 0'}}>
+        At StartEasy, we're helping small businesses and suppliers access markets and customers in Zambia.
+      </p>
+    </div>
+  </section>;
+}
+
+/* ============================================================
+   12 CATEGORIES
+   ============================================================ */
+function Categories(){
+  const [query,setQuery]=useState('');
+  const [active,setActive]=useState(null);
+  const filtered=useMemo(()=>{
+    const q=query.trim().toLowerCase();
+    if(!q) return CATEGORIES;
+    return CATEGORIES.filter(c=>{
+      const hay=(c.title+' '+c.short+' '+c.sources+' '+c.suppliers).toLowerCase();
+      return hay.includes(q);
+    });
+  },[query]);
+
+  return <section id="categories" style={{background:'#fff',borderTop:'1px solid rgba(10,31,18,.06)',borderBottom:'1px solid rgba(10,31,18,.06)',scrollMarginTop:80}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
+      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'space-between',alignItems:'flex-end',gap:16,marginBottom:32}}>
+        <div style={{flex:'1 1 340px'}}>
+          <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:12,letterSpacing:'.24em'}}>Categories of businesses that need suppliers</span>
+          <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,color:'#0A1F12',margin:0}}>
+            Twelve categories. One directory.
+          </h2>
+        </div>
+        <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(10,31,18,.6)',margin:0,maxWidth:'32rem'}}>
+          From Lusaka boutiques to Copperbelt hardware shops — tap a category to see what they source and the kinds of suppliers that serve them.
+        </p>
+      </div>
+
+      <div style={{background:'#F5FAF6',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'14px 16px',marginBottom:24}}>
+        <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'center'}}>
+          <div style={{position:'relative',flex:'1 1 260px',minWidth:0}}>
+            <i className="fas fa-magnifying-glass" style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',color:'rgba(10,31,18,.4)',fontSize:13}}></i>
+            <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search categories — e.g. cement, flour, hair extensions, packaging…"
+              style={{width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:9,padding:'12px 14px 12px 40px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'}}/>
+          </div>
+          <span style={{fontSize:12,color:'rgba(10,31,18,.5)',whiteSpace:'nowrap'}}>{filtered.length} of {CATEGORIES.length} categories</span>
+        </div>
+      </div>
+
+      {filtered.length===0 && <div style={{background:'#F5FAF6',border:'1px dashed rgba(10,31,18,.15)',borderRadius:12,padding:56,textAlign:'center'}}>
+        <p style={{fontSize:14,color:'rgba(10,31,18,.55)',margin:0}}>
+          No categories match. <button onClick={()=>setQuery('')} style={{background:'none',border:'none',color:'#E8730F',fontWeight:700,cursor:'pointer',fontFamily:'inherit',textDecoration:'underline'}}>Clear search</button>
+        </p>
+      </div>}
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filtered.map(c=>{
+          const open = active===c.key;
+          return <div key={c.key} id={'cat-'+c.key} style={{background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:14,overflow:'hidden',borderTop:`3px solid ${c.color}`,transition:'all .25s',scrollMarginTop:100}}>
+            <button onClick={()=>setActive(open?null:c.key)} style={{width:'100%',display:'flex',alignItems:'flex-start',gap:14,padding:'22px 22px 18px',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left'}}>
+              <span style={{width:46,height:46,borderRadius:12,background:c.color+'16',color:c.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>
+                <i className={`fas ${c.icon}`}></i>
+              </span>
+              <div style={{flex:1,minWidth:0}}>
+                <h4 className="serif" style={{fontSize:16,fontWeight:700,color:'#0A1F12',lineHeight:1.3,margin:'0 0 6px'}}>{c.title}</h4>
+                <p style={{fontSize:12,color:'rgba(10,31,18,.55)',lineHeight:1.5,margin:0}}>{c.short}</p>
+              </div>
+              <span style={{width:30,height:30,borderRadius:'50%',background:open?c.color:'rgba(10,31,18,.06)',color:open?'#fff':'rgba(10,31,18,.55)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,transition:'all .25s',transform:open?'rotate(180deg)':'none'}}>
+                <i className="fas fa-chevron-down" style={{fontSize:11}}></i>
+              </span>
+            </button>
+
+            {open && <div style={{padding:'0 22px 22px',borderTop:'1px dashed rgba(10,31,18,.08)'}}>
+              <div style={{paddingTop:16}}>
+                <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:c.color,marginBottom:6}}>What they source</div>
+                <p style={{fontSize:13,color:'rgba(10,31,18,.75)',lineHeight:1.6,margin:'0 0 14px'}}>{c.sources}</p>
+                <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:c.color,marginBottom:6}}>Supplier examples</div>
+                <p style={{fontSize:13,color:'rgba(10,31,18,.75)',lineHeight:1.6,margin:'0 0 16px'}}>{c.suppliers}</p>
+                <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                  <a href={waUrl(`Hello StartEasy — I run a business in "${c.title}" and need suppliers for: ${c.sources}`)} target="_blank" rel="noopener noreferrer"
+                     style={{display:'inline-flex',alignItems:'center',gap:7,padding:'10px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}>
+                    <i className="fas fa-cart-shopping"></i> Find suppliers
+                  </a>
+                  <a href={waUrl(`Hello StartEasy — I supply into "${c.title}". I would like to be listed so businesses can find me.`)} target="_blank" rel="noopener noreferrer"
+                     style={{display:'inline-flex',alignItems:'center',gap:7,padding:'10px 14px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}>
+                    <i className="fas fa-truck-fast"></i> List as supplier
+                  </a>
+                </div>
+              </div>
+            </div>}
+          </div>;
+        })}
+      </div>
+
+      <div style={{marginTop:28,display:'flex',flexWrap:'wrap',gap:10,alignItems:'center',justifyContent:'center',fontSize:12.5,color:'rgba(10,31,18,.55)',lineHeight:1.65,maxWidth:900,marginLeft:'auto',marginRight:'auto',textAlign:'center'}}>
+        <i className="fas fa-location-dot" style={{color:'#E8730F',fontSize:13}}></i>
+        <span>Every category is designed to carry supplier profiles with <strong>location</strong>, <strong>products offered</strong>, <strong>minimum order quantities</strong>, <strong>delivery options</strong> and <strong>business size</strong> (new or established) — so a match is a genuine fit, not just a name.</span>
+      </div>
+    </div>
+  </section>;
+}
+
+/* ============================================================
+   SERVICES BUSINESSES
+   ============================================================ */
+function ServiceBusinesses(){
+  return <section id="services" style={{background:'#0A1F12',color:'#fff',scrollMarginTop:80}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
+      <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 44px'}}>
+        <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Service businesses count too</span>
+        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#fff'}}>
+          What about businesses that sell <em style={{fontStyle:'italic',color:'#F5A623'}}>services?</em>
+        </h2>
+        <p style={{fontSize:15,lineHeight:1.75,color:'rgba(255,255,255,.68)',margin:0,maxWidth:'46rem',marginLeft:'auto',marginRight:'auto'}}>
+          These businesses may not sell physical products to customers — but they still need suppliers to operate. StartEasy connects both sides of that trade too.
+        </p>
+      </div>
+
+      <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:16,overflow:'hidden'}}>
+        <div className="hidden md:grid" style={{gridTemplateColumns:'1fr 2fr',background:'rgba(255,255,255,.06)',borderBottom:'1px solid rgba(255,255,255,.1)'}}>
+          <div style={{padding:'16px 24px',fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(255,255,255,.65)'}}>Business category</div>
+          <div style={{padding:'16px 24px',fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(255,255,255,.65)'}}>What they need from suppliers</div>
+        </div>
+        {SERVICE_BUSINESSES.map((s,i)=>(
+          <div key={i} style={{borderBottom:i<SERVICE_BUSINESSES.length-1?'1px solid rgba(255,255,255,.06)':'none'}}>
+            <div className="md:grid" style={{gridTemplateColumns:'1fr 2fr',alignItems:'center'}}>
+              <div style={{padding:'16px 24px',display:'flex',alignItems:'center',gap:12}}>
+                <span style={{width:34,height:34,borderRadius:9,background:'rgba(245,166,35,.16)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>
+                  <i className={`fas ${s.icon}`}></i>
+                </span>
+                <span style={{fontSize:13.5,fontWeight:700,color:'#fff',lineHeight:1.4}}>{s.category}</span>
+              </div>
+              <div style={{padding:'0 24px 16px',fontSize:13,color:'rgba(255,255,255,.72)',lineHeight:1.6}} className="md:py-4">{s.need}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p style={{textAlign:'center',fontSize:12.5,lineHeight:1.7,color:'rgba(255,255,255,.55)',margin:'24px auto 0',maxWidth:720,fontStyle:'italic'}}>
+        The important distinction: some suppliers provide <strong style={{color:'#F5A623',fontStyle:'normal'}}>physical goods</strong>, others provide <strong style={{color:'#F5A623',fontStyle:'normal'}}>services, equipment rental, maintenance or digital products.</strong>
+      </p>
+    </div>
+  </section>;
+}
+
+/* ============================================================
+   THREE ROLES
+   ============================================================ */
+function Roles(){
+  return <section id="roles" style={{background:'#F5FAF6',scrollMarginTop:80}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
+      <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 44px'}}>
+        <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14,letterSpacing:'.24em'}}>The most important thing to understand</span>
+        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>
+          Three different roles in the supply chain.
+        </h2>
+        <p style={{fontSize:15,lineHeight:1.75,color:'rgba(10,31,18,.65)',margin:0,maxWidth:'44rem',marginLeft:'auto',marginRight:'auto'}}>
+          Understanding these roles lets StartEasy make the right match — whether a business needs a manufacturer, a bulk wholesaler, or a shop down the road.
+        </p>
+      </div>
+
+      <div className="grid sm:grid-cols-3 gap-4">
+        {ROLES.map(r=>(
+          <div key={r.key} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'28px 24px',borderTop:`4px solid ${r.color}`,display:'flex',flexDirection:'column',gap:14}}>
+            <span style={{width:52,height:52,borderRadius:13,background:r.color+'16',color:r.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21,flexShrink:0}}>
+              <i className={`fas ${r.icon}`}></i>
+            </span>
+            <h3 className="serif" style={{fontSize:18,fontWeight:800,color:'#0A1F12',lineHeight:1.25,margin:0}}>{r.title}</h3>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.72)',lineHeight:1.65,margin:0}}>{r.desc}</p>
+            <div style={{background:'#F5FAF6',border:'1px dashed rgba(10,31,18,.12)',borderRadius:9,padding:'12px 14px',marginTop:'auto'}}>
+              <div style={{fontSize:9.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)',marginBottom:4}}>Example</div>
+              <div style={{fontSize:12.5,color:'rgba(10,31,18,.75)',lineHeight:1.55,fontStyle:'italic'}}>{r.example}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{marginTop:32,background:'linear-gradient(135deg,rgba(232,115,15,.06),rgba(245,166,35,.03))',border:'1px solid rgba(232,115,15,.25)',borderRadius:12,padding:'20px 24px',display:'flex',gap:14,alignItems:'flex-start',maxWidth:900,marginLeft:'auto',marginRight:'auto'}}>
+        <span style={{width:34,height:34,borderRadius:9,background:'#E8730F',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-lightbulb" style={{fontSize:14}}></i></span>
+        <div>
+          <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:6}}>One business can wear more than one hat</div>
+          <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>
+            A farmer might sell directly to restaurants <em>and</em> to a wholesaler. A wholesaler might also operate a retail shop. StartEasy tracks all roles a business plays — so buyers find them at the right level and sellers get introduced to the right buyers.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>;
+}
+
+/* ============================================================
+   FOR SUPPLIERS (CTA)
+   ============================================================ */
+function ForSuppliers(){
+  return <section id="for-suppliers" style={{background:'#fff',borderTop:'1px solid rgba(10,31,18,.06)',scrollMarginTop:80}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
+      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'space-between',alignItems:'center',gap:32}}>
+        <div style={{flex:'1 1 380px',maxWidth:640}}>
+          <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14,letterSpacing:'.24em'}}>For suppliers</span>
+          <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>
+            Get listed. Get matched. Get paid.
+          </h2>
+          <p style={{fontSize:15,lineHeight:1.75,color:'rgba(10,31,18,.7)',marginBottom:20}}>
+            If you supply one of the categories above, we want to hear from you. StartEasy receives enquiries from real businesses with real needs — we match them to the right supplier, and connect the two directly.
+          </p>
+          <ul style={{listStyle:'none',padding:0,margin:'0 0 24px'}}>
+            {[
+              'Receive qualified enquiries from businesses that already buy what you sell',
+              'Get matched by category, location, minimum order and delivery coverage',
+              'Verified profile with clear product range, MOQ and lead times',
+              'No upfront listing fee for the first cohort of suppliers'
+            ].map((f,i)=>(
+              <li key={i} style={{display:'flex',gap:12,fontSize:13.5,color:'rgba(10,31,18,.75)',lineHeight:1.6,marginBottom:10,alignItems:'flex-start'}}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E7B3C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{marginTop:4,flexShrink:0}}><path d="M20 6L9 17l-5-5"/></svg>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+          <div style={{display:'flex',flexWrap:'wrap',gap:12}}>
+            <a href={waUrl('Hello StartEasy — I am a supplier and I want to be listed in the Businesses & Suppliers Directory. Here is what I supply: ')} target="_blank" rel="noopener noreferrer"
+               style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}>
+              <i className="fab fa-whatsapp"></i> Apply to be listed
+            </a>
+            <a href={'mailto:'+CONTACT_EMAIL+'?subject='+encodeURIComponent('Supplier listing application')} style={{display:'inline-flex',alignItems:'center',gap:10,padding:'14px 26px',background:'#fff',color:'#0A1F12',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}>
+              <i className="fas fa-envelope"></i> Email us
+            </a>
+          </div>
+        </div>
+        <div style={{flex:'1 1 320px',maxWidth:440,background:'linear-gradient(135deg,#0A1F12,#123A1F)',borderRadius:16,padding:'32px 28px',color:'#fff',position:'relative',overflow:'hidden'}}>
+          <div style={{position:'absolute',top:-60,right:-60,width:200,height:200,background:'radial-gradient(circle, rgba(245,166,35,.2), transparent 65%)',pointerEvents:'none'}}/>
+          <div style={{position:'relative',zIndex:1}}>
+            <div style={{fontSize:10.5,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:'#F5A623',marginBottom:14}}>What you need to tell us</div>
+            <ol style={{listStyle:'none',padding:0,margin:0}}>
+              {[
+                'Your business name and location',
+                'What you supply (product or service)',
+                'Your minimum order quantity',
+                'Your delivery coverage or pickup',
+                'Your typical lead time',
+                'One or two business references'
+              ].map((x,i)=>(
+                <li key={i} style={{display:'flex',gap:12,padding:'8px 0',fontSize:13,color:'rgba(255,255,255,.78)',lineHeight:1.5,alignItems:'flex-start'}}>
+                  <span style={{width:22,height:22,borderRadius:'50%',background:'rgba(245,166,35,.2)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800,flexShrink:0,fontFamily:"'Playfair Display',Georgia,serif",marginTop:1}}>{i+1}</span>
+                  <span>{x}</span>
+                </li>
+              ))}
+            </ol>
+            <div style={{marginTop:18,paddingTop:16,borderTop:'1px solid rgba(255,255,255,.12)',fontSize:11.5,color:'rgba(255,255,255,.55)',lineHeight:1.6,fontStyle:'italic'}}>
+              We verify suppliers before listing them. This protects buyers and keeps the directory credible.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>;
+}
+
+/* ============================================================
+   CLOSING CTA
+   ============================================================ */
+function ClosingCTA(){
+  return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden'}}>
+    <div style={{position:'absolute',top:-140,left:'15%',width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',bottom:-160,right:'-10%',width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.12), transparent 65%)',pointerEvents:'none'}}/>
+    <div style={{maxWidth:920,margin:'0 auto',padding:'clamp(64px,9vw,110px) 24px',textAlign:'center',position:'relative',zIndex:1}}>
+      <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:16,letterSpacing:'.26em'}}>Ready to buy better or sell more?</span>
+      <h2 className="serif" style={{fontSize:'clamp(1.9rem,4.4vw,2.9rem)',lineHeight:1.15,marginBottom:22,color:'#fff',maxWidth:'36rem',marginLeft:'auto',marginRight:'auto'}}>
+        Every connection starts with one message.
+      </h2>
+      <p style={{fontSize:15.5,lineHeight:1.75,color:'rgba(255,255,255,.7)',maxWidth:'40rem',marginLeft:'auto',marginRight:'auto',marginBottom:36}}>
+        Tell us what you need to buy, or what you're able to supply. We'll take it from there — matching, introduction, and follow-up.
+      </p>
+      <div style={{display:'flex',flexWrap:'wrap',gap:14,justifyContent:'center'}}>
+        <a href={waUrl('Hello StartEasy — I run a business and I need help finding the right suppliers. Here is what I source: ')} target="_blank" rel="noopener noreferrer"
+           style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 30px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:11,fontSize:14.5,fontWeight:700,textDecoration:'none',boxShadow:'0 14px 38px -12px rgba(232,115,15,.55)'}}>
+          <i className="fas fa-cart-shopping"></i> I need a supplier
+        </a>
+        <a href={waUrl('Hello StartEasy — I am a supplier and I want to reach businesses that buy what I sell. Here is what I supply: ')} target="_blank" rel="noopener noreferrer"
+           style={{display:'inline-flex',alignItems:'center',gap:10,padding:'15px 30px',background:'rgba(255,255,255,.08)',color:'#fff',border:'1px solid rgba(255,255,255,.25)',borderRadius:11,fontSize:14.5,fontWeight:700,textDecoration:'none'}}>
+          <i className="fas fa-truck-fast"></i> I'm a supplier
+        </a>
+      </div>
+      <div style={{marginTop:36,display:'flex',flexWrap:'wrap',justifyContent:'center',gap:20,fontSize:12,color:'rgba(255,255,255,.5)'}}>
+        <span style={{display:'inline-flex',alignItems:'center',gap:8}}><i className="fab fa-whatsapp" style={{color:'#25D366',fontSize:14}}></i> WhatsApp +260 762499581</span>
+        <span style={{display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-envelope" style={{color:'#F5A623',fontSize:12}}></i> {CONTACT_EMAIL}</span>
+      </div>
+    </div>
+  </section>;
+}
+
+/* ============================================================
+   FLOATING WHATSAPP
+   ============================================================ */
+function FloatingWA(){
+  return <a href={waUrl('Hello StartEasy — I would like to talk about the Businesses & Suppliers Directory.')} target="_blank" rel="noopener noreferrer"
+    style={{position:'fixed',bottom:24,right:24,zIndex:100,width:52,height:52,borderRadius:'50%',background:'#25D366',boxShadow:'0 6px 22px rgba(37,211,102,.45)',display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none'}}
+    aria-label="Chat on WhatsApp">
+    <i className="fab fa-whatsapp" style={{color:'#fff',fontSize:24}}></i>
+  </a>;
+}
+
+/* ============================================================
+   APP
+   ============================================================ */
+function App(){
+  useEffect(()=>{window.scrollTo(0,0);},[]);
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
+    <Nav/>
+    <main style={{flex:1}}>
+      <Hero/>
+      <Pillars/>
+      <TwoSides/>
+      <Categories/>
+      <ServiceBusinesses/>
+      <Roles/>
+      <ForSuppliers/>
+      <ClosingCTA/>
+    </main>
+    <Footer/>
+    <FloatingWA/>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
