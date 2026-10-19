@@ -33,7 +33,6 @@ input:focus,select:focus,textarea:focus{outline:none}
 @keyframes mf{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.fadein,.mc,.mf{animation:none!important}}
 @media (min-width:1024px){html{scroll-behavior:smooth}}
-/* Dashboard */
 .dash-sidebar{transform:translateX(-100%);transition:transform .25s cubic-bezier(.22,.61,.36,1)}
 .dash-sidebar.open{transform:translateX(0)}
 .dash-backdrop{display:none}
@@ -50,9 +49,6 @@ input:focus,select:focus,textarea:focus{outline:none}
 .dash-nav-btn{width:100%;padding:11px 14px;margin-bottom:4px;border-radius:8px;background:transparent;border:1px solid transparent;font-size:13px;font-weight:700;text-align:left;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;color:rgba(255,255,255,.65)}
 .dash-nav-btn:hover{background:rgba(255,255,255,.04);color:#fff}
 .dash-nav-btn.active{background:rgba(232,115,15,.15);color:#F5A623;border-color:rgba(232,115,15,.3)}
-.match-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px dashed rgba(10,31,18,.08);transition:background .15s}
-.match-row:hover{background:#F5FAF6}
-.match-row:last-child{border-bottom:none}
 .activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed rgba(10,31,18,.06);align-items:flex-start}
 .activity-item:last-child{border-bottom:none}
 .profile-ring{position:relative;width:64px;height:64px;flex-shrink:0}
@@ -70,7 +66,6 @@ input:focus,select:focus,textarea:focus{outline:none}
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useMemo } = React;
 
-/* ═══════════════════ CONFIG + FIREBASE ═══════════════════ */
 const ADMIN_WHATSAPP = '260762499581';
 const CONTACT_EMAIL = 'directory@starteasyzambia.com';
 const MAIN_PLATFORM_URL = 'https://starteasyzambia.com';
@@ -91,24 +86,22 @@ try {
   auth = firebase.auth();
   firebaseReady = true;
   auth.signInAnonymously().catch(e => console.warn('[SE] anon auth:', e && e.message));
-  console.log('[SE] Firebase ready:', FIREBASE_CONFIG.projectId);
 } catch (e) { console.error('[SE] Firebase init failed:', e); }
 
 function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
 function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
 function readLS(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
-function writeLS(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
 function splitCSV(str){return (str||'').split(',').map(s=>s.trim()).filter(Boolean);}
 function authErrorMessage(e){
   const code=(e&&e.code)||'';
-  if(code==='auth/email-already-in-use') return 'This email is already registered. Try signing in instead.';
+  if(code==='auth/email-already-in-use') return 'This email is already registered. Try signing in.';
   if(code==='auth/invalid-email') return 'That email address is not valid.';
   if(code==='auth/weak-password') return 'Password must be at least 6 characters.';
   if(code==='auth/wrong-password'||code==='auth/invalid-credential') return 'Incorrect email or password.';
   if(code==='auth/user-not-found') return 'No account with that email.';
-  if(code==='auth/too-many-requests') return 'Too many attempts. Wait a minute and try again.';
-  if(code==='auth/network-request-failed') return 'Network error. Check your connection.';
-  if(code==='auth/operation-not-allowed') return 'Email sign-in is not enabled. Enable it in Firebase Console → Authentication → Sign-in method.';
+  if(code==='auth/too-many-requests') return 'Too many attempts. Try again in a minute.';
+  if(code==='auth/network-request-failed') return 'Network error.';
+  if(code==='auth/operation-not-allowed') return 'Email sign-in is not enabled in Firebase Console.';
   return 'Sign-in failed: '+(code||(e&&e.message)||'unknown');
 }
 async function fsLoadDirectory(){
@@ -116,17 +109,25 @@ async function fsLoadDirectory(){
   try{
     const [s,b]=await Promise.all([db.collection('se_suppliers').get(),db.collection('se_buyers').get()]);
     return {suppliers:s.docs.map(d=>({id:d.id,...d.data()})),buyers:b.docs.map(d=>({id:d.id,...d.data()}))};
-  }catch(e){console.warn('[SE] directory load failed:',e&&e.message);return null;}
-}
-async function fsSubmitLead(lead){
-  if(!firebaseReady) return false;
-  try{await db.collection('se_leads').add({...lead,at:Date.now()});return true;}
-  catch(e){console.warn('[SE] lead submit failed:',e&&e.message);return false;}
+  }catch(e){console.warn('[SE] load dir:',e&&e.message);return null;}
 }
 async function loadUserProfile(uid){
   if(!firebaseReady) return null;
   try{const snap=await db.collection('se_users').doc(uid).get();return snap.exists?snap.data():null;}
-  catch(e){console.warn('[SE] profile load failed:',e&&e.message);return null;}
+  catch(e){console.warn('[SE] load profile:',e&&e.message);return null;}
+}
+async function loadUserQuotes(uid){
+  if(!firebaseReady) return [];
+  try{
+    const snap=await db.collection('se_quotes').where('userId','==',uid).get();
+    const docs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    return docs.sort((a,b)=>(b.at||0)-(a.at||0));
+  }catch(e){console.warn('[SE] load quotes:',e&&e.message);return [];}
+}
+async function saveQuote(quote){
+  if(!firebaseReady) return false;
+  try{await db.collection('se_quotes').add(quote);return true;}
+  catch(e){console.warn('[SE] save quote:',e&&e.message);return false;}
 }
 async function authSignUp(form){
   if(!firebaseReady) throw new Error('Firebase not ready');
@@ -147,7 +148,6 @@ async function authSignUp(form){
     profile.orderValue=form.orderValue||'Contact buyer';
   }
   await db.collection('se_users').doc(cred.user.uid).set(profile);
-  fsSubmitLead({...profile,kind:form.role});
   return cred.user;
 }
 async function authSignIn(email,password){
@@ -173,69 +173,54 @@ const CATEGORIES = [
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.key,c]));
 const SIZE_OPTIONS = ['Micro','Small','Medium','Large'];
-const SIZE_COLORS = {Micro:'#0E7C7B',Small:'#1B6CA8',Medium:'#7A4FA3',Large:'#B8564F'};
 const FREQUENCY_OPTIONS = ['Weekly','Monthly','Quarterly','One-off'];
 
 const SEED_SUPPLIERS = [
-  {id:'sup-001',name:'Copperbelt Textiles Wholesale',category:'clothing',location:'Kitwe',verified:true,since:2018,size:'Medium',products:['Fabric rolls','School uniform fabric','Workwear fabric','Dress materials'],moq:'50 metres',delivery:'Kitwe · Ndola · Lusaka',leadTime:'3–5 days',phone:'+260971000101',email:'sales@copperbelttextiles.zm',desc:'Bulk fabric and textile supplier serving boutique, uniform and tailoring businesses across the Copperbelt.'},
-  {id:'sup-002',name:'Lusaka Fashion Importers',category:'clothing',location:'Lusaka',verified:true,since:2015,size:'Small',products:['Ladies dresses','Handbags','Shoes','Accessories'],moq:'20 pieces per style',delivery:'Nationwide courier',leadTime:'5–7 days',phone:'+260971000102',email:'orders@lusakafashion.zm',desc:'Importer of ready-to-wear fashion and accessories, focused on small boutique buyers.'},
-  {id:'sup-003',name:'Zambezi Foods Distribution',category:'grocery',location:'Lusaka',verified:true,since:2016,size:'Large',products:['Mealie meal','Rice','Cooking oil','Sugar','Canned foods'],moq:'K3,000 order value',delivery:'Lusaka · Central · Copperbelt',leadTime:'2–3 days',phone:'+260971000103',email:'trade@zambezifoods.zm',desc:'FMCG distributor serving mini-markets, grocery shops and convenience stores.'},
-  {id:'sup-004',name:'Chongwe Grain Millers',category:'grocery',location:'Chongwe',verified:true,since:2019,size:'Small',products:['Mealie meal (25kg)','Breakfast meal','Roller meal'],moq:'10 x 25kg bags',delivery:'Lusaka & surrounds',leadTime:'2 days',phone:'+260971000104',email:'info@chongwegrain.zm',desc:'Local grain miller supplying bulk mealie meal directly to grocery retailers and institutions.'},
-  {id:'sup-005',name:'Fresh Valley Produce',category:'food',location:'Lusaka',verified:true,since:2017,size:'Small',products:['Tomatoes','Onions','Leafy greens','Carrots','Seasonal vegetables'],moq:'20 crates per order',delivery:'Lusaka metro · daily',leadTime:'1 day',phone:'+260971000105',email:'orders@freshvalley.zm',desc:'Farm-to-restaurant fresh produce supplier.'},
-  {id:'sup-006',name:'Prime Meat Butchery & Wholesale',category:'food',location:'Lusaka',verified:true,since:2014,size:'Medium',products:['Beef','Chicken','Goat','Fish','Offal'],moq:'K1,500 order value',delivery:'Lusaka · cold chain',leadTime:'1–2 days',phone:'+260971000106',email:'sales@primemeat.zm',desc:'Cold-chain wholesale meat supplier for restaurants, hotels and caterers.'},
-  {id:'sup-007',name:'BuildRight Hardware Wholesale',category:'construction',location:'Lusaka',verified:true,since:2013,size:'Medium',products:['Cement','Roofing sheets','Paint','Electrical cables','Pipes','Tiles'],moq:'K5,000 order value',delivery:'Lusaka & Copperbelt',leadTime:'3–5 days',phone:'+260971000107',email:'trade@buildright.zm',desc:'Wholesale hardware distributor serving hardware shops and contractors.'},
-  {id:'sup-008',name:'Kitwe Steel & Roofing',category:'construction',location:'Kitwe',verified:true,since:2016,size:'Small',products:['Roofing sheets','Steel bars','Mesh wire','Nails','Tools'],moq:'K2,500 order value',delivery:'Copperbelt · Lusaka',leadTime:'3–5 days',phone:'+260971000108',email:'orders@kitwesteel.zm',desc:'Steel and roofing supplier focused on Copperbelt hardware shops.'},
-  {id:'sup-009',name:'Ndola Cement Distributors',category:'construction',location:'Ndola',verified:true,since:2015,size:'Medium',products:['Cement (50kg bags)','Lime','Aggregate','Sand'],moq:'50 bags',delivery:'Copperbelt · Lusaka',leadTime:'2–3 days',phone:'+260971000109',email:'sales@ndolacement.zm',desc:'Bulk cement and aggregate distributor working with hardware stores and builders.'},
-  {id:'sup-010',name:'Glamour Beauty Supplies',category:'beauty',location:'Lusaka',verified:true,since:2018,size:'Small',products:['Hair extensions','Shampoo','Relaxers','Nail polish','Makeup'],moq:'K1,000 order value',delivery:'Lusaka · nationwide courier',leadTime:'2–4 days',phone:'+260971000110',email:'orders@glamourbeauty.zm',desc:'Beauty and cosmetics wholesaler serving salons, barbershops and beauty retailers.'},
-  {id:'sup-011',name:'SalonPro Equipment',category:'beauty',location:'Lusaka',verified:true,since:2019,size:'Micro',products:['Salon chairs','Dryers','Clippers','Sterilizers','Mirrors'],moq:'1 unit',delivery:'Nationwide',leadTime:'5–10 days',phone:'+260971000111',email:'info@salonpro.zm',desc:'Salon equipment supplier offering single-unit purchases.'},
-  {id:'sup-012',name:'AutoCare Parts Zambia',category:'auto',location:'Lusaka',verified:true,since:2014,size:'Medium',products:['Spare parts','Brake pads','Filters','Belts','Lubricants'],moq:'K1,000 order value',delivery:'Lusaka · Copperbelt',leadTime:'3–5 days',phone:'+260971000112',email:'sales@autocare.zm',desc:'Auto-parts wholesaler serving spare-parts shops, garages and fleets.'},
-  {id:'sup-013',name:'Copperbelt Tyre Centre',category:'auto',location:'Kitwe',verified:true,since:2017,size:'Small',products:['Tyres','Batteries','Wheel alignment','Tyre repair'],moq:'4 tyres',delivery:'Kitwe · Ndola',leadTime:'1–2 days',phone:'+260971000113',email:'orders@cptyre.zm',desc:'Tyre and battery distributor focused on transport operators.'},
-  {id:'sup-014',name:'AgriGrow Inputs',category:'agriculture',location:'Lusaka',verified:true,since:2016,size:'Small',products:['Seeds','Fertiliser','Herbicides','Irrigation kits','Tools'],moq:'K800 order value',delivery:'Central · Lusaka · Eastern',leadTime:'3–5 days',phone:'+260971000114',email:'orders@agrigrow.zm',desc:'Agricultural input dealer serving smallholder farmers and cooperatives.'},
-  {id:'sup-015',name:'Zamhatch Poultry & Feed',category:'agriculture',location:'Kabwe',verified:true,since:2015,size:'Medium',products:['Day-old chicks','Starter feed','Grower feed','Finisher feed'],moq:'100 chicks',delivery:'Central · Lusaka · Copperbelt',leadTime:'2–4 days',phone:'+260971000115',email:'sales@zamhatch.zm',desc:'Hatchery and feed supplier for poultry farmers.'},
-  {id:'sup-016',name:'OfficeMart Stationery',category:'stationery',location:'Lusaka',verified:true,since:2018,size:'Small',products:['Paper','Pens','Notebooks','Files','Printer ink','Toner'],moq:'K500 order value',delivery:'Lusaka · nationwide courier',leadTime:'2–3 days',phone:'+260971000116',email:'orders@officemart.zm',desc:'Office and stationery wholesaler serving schools and offices.'},
-  {id:'sup-017',name:'PrintHub Zambia',category:'stationery',location:'Lusaka',verified:true,since:2019,size:'Micro',products:['Printing paper','Vinyl','Ink','Binding supplies'],moq:'K1,000 order value',delivery:'Lusaka metro',leadTime:'2 days',phone:'+260971000117',email:'info@printhub.zm',desc:'Printing materials and consumables supplier for print shops.'},
-  {id:'sup-018',name:'TechSource Distributors',category:'electronics',location:'Lusaka',verified:true,since:2017,size:'Medium',products:['Phones','Chargers','Cables','Laptops','Accessories'],moq:'K2,000 order value',delivery:'Nationwide courier',leadTime:'3–5 days',phone:'+260971000118',email:'trade@techsource.zm',desc:'Electronics distributor serving phone shops and computer retailers.'},
-  {id:'sup-019',name:'NetLink Equipment',category:'electronics',location:'Lusaka',verified:true,since:2020,size:'Micro',products:['Routers','Switches','Cabling','Access points'],moq:'1 unit',delivery:'Lusaka · Copperbelt',leadTime:'5–7 days',phone:'+260971000119',email:'sales@netlink.zm',desc:'Networking equipment supplier for IT service providers.'},
-  {id:'sup-020',name:'WoodWorks Timber Yard',category:'furniture',location:'Lusaka',verified:true,since:2013,size:'Medium',products:['Timber','Plywood','Foam','Upholstery fabric','Hardware'],moq:'K1,500 order value',delivery:'Lusaka · Central',leadTime:'3–5 days',phone:'+260971000120',email:'orders@woodworks.zm',desc:'Timber and upholstery supplier for furniture makers and carpenters.'},
-  {id:'sup-021',name:'Fabric House Zambia',category:'furniture',location:'Lusaka',verified:true,since:2016,size:'Small',products:['Upholstery fabric','Curtain fabric','Foam','Zip and trims'],moq:'20 metres',delivery:'Nationwide courier',leadTime:'3–5 days',phone:'+260971000121',email:'sales@fabrichouse.zm',desc:'Specialist textile supplier for upholsterers and interior decorators.'},
-  {id:'sup-022',name:'CleanPro Chemicals',category:'cleaning',location:'Lusaka',verified:true,since:2017,size:'Small',products:['Detergents','Disinfectants','Bleach','Gloves','Mops & buckets'],moq:'K800 order value',delivery:'Lusaka · Copperbelt',leadTime:'2–4 days',phone:'+260971000122',email:'info@cleanpro.zm',desc:'Cleaning chemicals and consumables supplier for cleaning companies.'},
-  {id:'sup-023',name:'PackRight Solutions',category:'packaging',location:'Lusaka',verified:true,since:2019,size:'Micro',products:['Boxes','Labels','Bottles','Jars','Takeaway containers'],moq:'K1,000 order value',delivery:'Lusaka · Copperbelt',leadTime:'3–5 days',phone:'+260971000123',email:'orders@packright.zm',desc:'Packaging supplier serving restaurants and food producers.'},
-  {id:'sup-024',name:'ZamPack Manufacturers',category:'packaging',location:'Ndola',verified:true,since:2018,size:'Medium',products:['Cartons','Kraft bags','Custom prints','Corrugated boxes'],moq:'500 units per size',delivery:'Nationwide',leadTime:'7–10 days',phone:'+260971000124',email:'sales@zampack.zm',desc:'Packaging manufacturer offering custom-printed cartons.'}
+  {id:'sup-001',name:'Copperbelt Textiles Wholesale',category:'clothing',location:'Kitwe',verified:true,products:['Fabric rolls','School uniform fabric','Dress materials'],moq:'50 metres',delivery:'Kitwe · Ndola · Lusaka',leadTime:'3–5 days',phone:'+260971000101',desc:'Bulk fabric and textile supplier.'},
+  {id:'sup-002',name:'Lusaka Fashion Importers',category:'clothing',location:'Lusaka',verified:true,products:['Ladies dresses','Handbags','Shoes'],moq:'20 pieces per style',delivery:'Nationwide courier',leadTime:'5–7 days',phone:'+260971000102',desc:'Importer of ready-to-wear fashion.'},
+  {id:'sup-003',name:'Zambezi Foods Distribution',category:'grocery',location:'Lusaka',verified:true,products:['Mealie meal','Rice','Cooking oil','Sugar'],moq:'K3,000 order value',delivery:'Lusaka · Central',leadTime:'2–3 days',phone:'+260971000103',desc:'FMCG distributor for grocery shops.'},
+  {id:'sup-004',name:'Chongwe Grain Millers',category:'grocery',location:'Chongwe',verified:true,products:['Mealie meal (25kg)','Roller meal'],moq:'10 bags',delivery:'Lusaka & surrounds',leadTime:'2 days',phone:'+260971000104',desc:'Local grain miller.'},
+  {id:'sup-005',name:'Fresh Valley Produce',category:'food',location:'Lusaka',verified:true,products:['Tomatoes','Onions','Greens','Carrots'],moq:'20 crates',delivery:'Lusaka metro',leadTime:'1 day',phone:'+260971000105',desc:'Farm-to-restaurant produce.'},
+  {id:'sup-006',name:'Prime Meat Wholesale',category:'food',location:'Lusaka',verified:true,products:['Beef','Chicken','Goat','Fish'],moq:'K1,500 order',delivery:'Lusaka cold chain',leadTime:'1–2 days',phone:'+260971000106',desc:'Cold-chain meat supplier.'},
+  {id:'sup-007',name:'BuildRight Hardware',category:'construction',location:'Lusaka',verified:true,products:['Cement','Roofing sheets','Paint','Cables'],moq:'K5,000 order',delivery:'Lusaka & Copperbelt',leadTime:'3–5 days',phone:'+260971000107',desc:'Wholesale hardware distributor.'},
+  {id:'sup-008',name:'Kitwe Steel & Roofing',category:'construction',location:'Kitwe',verified:true,products:['Roofing sheets','Steel bars','Tools'],moq:'K2,500 order',delivery:'Copperbelt',leadTime:'3–5 days',phone:'+260971000108',desc:'Steel and roofing supplier.'},
+  {id:'sup-009',name:'Ndola Cement Distributors',category:'construction',location:'Ndola',verified:true,products:['Cement','Lime','Aggregate'],moq:'50 bags',delivery:'Copperbelt',leadTime:'2–3 days',phone:'+260971000109',desc:'Bulk cement distributor.'},
+  {id:'sup-010',name:'Glamour Beauty Supplies',category:'beauty',location:'Lusaka',verified:true,products:['Hair extensions','Shampoo','Relaxers'],moq:'K1,000 order',delivery:'Lusaka · courier',leadTime:'2–4 days',phone:'+260971000110',desc:'Beauty products wholesaler.'},
+  {id:'sup-011',name:'SalonPro Equipment',category:'beauty',location:'Lusaka',verified:true,products:['Salon chairs','Dryers','Clippers'],moq:'1 unit',delivery:'Nationwide',leadTime:'5–10 days',phone:'+260971000111',desc:'Salon equipment supplier.'},
+  {id:'sup-012',name:'AutoCare Parts Zambia',category:'auto',location:'Lusaka',verified:true,products:['Spare parts','Brake pads','Lubricants'],moq:'K1,000 order',delivery:'Lusaka · Copperbelt',leadTime:'3–5 days',phone:'+260971000112',desc:'Auto-parts wholesaler.'},
+  {id:'sup-013',name:'Copperbelt Tyre Centre',category:'auto',location:'Kitwe',verified:true,products:['Tyres','Batteries'],moq:'4 tyres',delivery:'Kitwe · Ndola',leadTime:'1–2 days',phone:'+260971000113',desc:'Tyre distributor.'},
+  {id:'sup-014',name:'AgriGrow Inputs',category:'agriculture',location:'Lusaka',verified:true,products:['Seeds','Fertiliser','Tools'],moq:'K800 order',delivery:'Central · Lusaka',leadTime:'3–5 days',phone:'+260971000114',desc:'Agricultural input dealer.'},
+  {id:'sup-015',name:'Zamhatch Poultry & Feed',category:'agriculture',location:'Kabwe',verified:true,products:['Day-old chicks','Feed'],moq:'100 chicks',delivery:'Central · Lusaka',leadTime:'2–4 days',phone:'+260971000115',desc:'Hatchery and feed supplier.'},
+  {id:'sup-016',name:'OfficeMart Stationery',category:'stationery',location:'Lusaka',verified:true,products:['Paper','Pens','Notebooks','Printer ink'],moq:'K500 order',delivery:'Lusaka · courier',leadTime:'2–3 days',phone:'+260971000116',desc:'Office supplies wholesaler.'},
+  {id:'sup-017',name:'PrintHub Zambia',category:'stationery',location:'Lusaka',verified:true,products:['Printing paper','Vinyl','Ink'],moq:'K1,000 order',delivery:'Lusaka metro',leadTime:'2 days',phone:'+260971000117',desc:'Printing materials supplier.'},
+  {id:'sup-018',name:'TechSource Distributors',category:'electronics',location:'Lusaka',verified:true,products:['Phones','Chargers','Laptops'],moq:'K2,000 order',delivery:'Nationwide',leadTime:'3–5 days',phone:'+260971000118',desc:'Electronics distributor.'},
+  {id:'sup-019',name:'NetLink Equipment',category:'electronics',location:'Lusaka',verified:true,products:['Routers','Switches','Cabling'],moq:'1 unit',delivery:'Lusaka · Copperbelt',leadTime:'5–7 days',phone:'+260971000119',desc:'Networking equipment supplier.'},
+  {id:'sup-020',name:'WoodWorks Timber Yard',category:'furniture',location:'Lusaka',verified:true,products:['Timber','Plywood','Foam'],moq:'K1,500 order',delivery:'Lusaka',leadTime:'3–5 days',phone:'+260971000120',desc:'Timber and upholstery.'},
+  {id:'sup-021',name:'Fabric House Zambia',category:'furniture',location:'Lusaka',verified:true,products:['Upholstery fabric','Foam'],moq:'20 metres',delivery:'Nationwide',leadTime:'3–5 days',phone:'+260971000121',desc:'Textile specialist.'},
+  {id:'sup-022',name:'CleanPro Chemicals',category:'cleaning',location:'Lusaka',verified:true,products:['Detergents','Disinfectants','Gloves'],moq:'K800 order',delivery:'Lusaka',leadTime:'2–4 days',phone:'+260971000122',desc:'Cleaning chemicals.'},
+  {id:'sup-023',name:'PackRight Solutions',category:'packaging',location:'Lusaka',verified:true,products:['Boxes','Labels','Bottles'],moq:'K1,000 order',delivery:'Lusaka',leadTime:'3–5 days',phone:'+260971000123',desc:'Packaging supplier.'},
+  {id:'sup-024',name:'ZamPack Manufacturers',category:'packaging',location:'Ndola',verified:true,products:['Cartons','Kraft bags'],moq:'500 units',delivery:'Nationwide',leadTime:'7–10 days',phone:'+260971000124',desc:'Custom packaging.'}
 ];
 const SEED_BUYERS = [
-  {id:'buy-001',name:"Mama Chanda's Kitchen",category:'food',location:'Lusaka',size:'Small',established:true,since:2019,verified:true,sources:['Fresh vegetables','Chicken','Cooking oil','Packaging containers'],frequency:'Weekly',orderValue:'K1,500–K3,000 per week',desc:'Popular lunch restaurant near Cairo Road sourcing fresh vegetables and chicken.',phone:'+260971200101'},
-  {id:'buy-002',name:'Fashion Forward Boutique',category:'clothing',location:'Kitwe',size:'Micro',established:false,since:2024,verified:true,sources:['Ladies dresses','Handbags','Shoes','Accessories'],frequency:'Monthly',orderValue:'K2,000–K4,000 per month',desc:'New boutique in Kitwe CBD stocking contemporary fashion.',phone:'+260971200102'},
-  {id:'buy-003',name:'BuildCo Contractors',category:'construction',location:'Lusaka',size:'Medium',established:true,since:2016,verified:true,sources:['Cement','Roofing sheets','Steel bars','Pipes','Paint'],frequency:'Weekly',orderValue:'K15,000–K40,000 per project',desc:'Small-to-medium construction firm building residential homes.',phone:'+260971200103'},
-  {id:'buy-004',name:'Glow Salon & Spa',category:'beauty',location:'Lusaka',size:'Small',established:true,since:2020,verified:true,sources:['Hair extensions','Shampoo','Relaxers','Nail polish','Skincare'],frequency:'Monthly',orderValue:'K1,200–K2,500 per month',desc:'Full-service beauty salon in Kabulonga.',phone:'+260971200104'},
-  {id:'buy-005',name:'Copperbelt Grocers',category:'grocery',location:'Ndola',size:'Medium',established:true,since:2014,verified:true,sources:['Mealie meal','Rice','Cooking oil','Sugar','Canned foods'],frequency:'Weekly',orderValue:'K8,000–K15,000 per week',desc:'Two-branch grocery retailer in Ndola.',phone:'+260971200105'},
-  {id:'buy-006',name:'Golden Crust Bakery',category:'food',location:'Lusaka',size:'Small',established:true,since:2018,verified:true,sources:['Flour','Sugar','Butter','Yeast','Packaging'],frequency:'Weekly',orderValue:'K3,000–K6,000 per week',desc:'Artisan bakery supplying bread and pastries.',phone:'+260971200106'},
-  {id:'buy-007',name:'Kitwe Auto Repairs',category:'auto',location:'Kitwe',size:'Small',established:true,since:2017,verified:true,sources:['Spare parts','Brake pads','Filters','Lubricants'],frequency:'Monthly',orderValue:'K1,000–K2,500 per month',desc:'Independent garage serving Copperbelt fleets.',phone:'+260971200107'},
-  {id:'buy-008',name:'PrintPoint Stationers',category:'stationery',location:'Lusaka',size:'Micro',established:false,since:2024,verified:true,sources:['Printing paper','Ink','Vinyl','Binding supplies'],frequency:'Monthly',orderValue:'K800–K1,500 per month',desc:'New printing and copy shop near UNZA.',phone:'+260971200108'},
-  {id:'buy-009',name:'ZamBuild Projects',category:'construction',location:'Ndola',size:'Medium',established:true,since:2015,verified:true,sources:['Cement','Aggregate','Steel','Roofing'],frequency:'Weekly',orderValue:'K20,000–K50,000 per project',desc:'Commercial contractor specialising in warehouses.',phone:'+260971200109'},
-  {id:'buy-010',name:'Sparkle Clean Services',category:'cleaning',location:'Lusaka',size:'Small',established:true,since:2019,verified:true,sources:['Detergents','Disinfectants','Gloves','Mops','Tissue'],frequency:'Monthly',orderValue:'K1,500–K3,000 per month',desc:'Office and corporate cleaning company.',phone:'+260971200110'},
-  {id:'buy-011',name:'Fresh Bites Catering',category:'food',location:'Lusaka',size:'Small',established:true,since:2020,verified:true,sources:['Fresh produce','Meat','Flour','Packaging','Beverages'],frequency:'Weekly',orderValue:'K4,000–K8,000 per event',desc:'Event caterer covering weddings and corporate functions.',phone:'+260971200111'},
-  {id:'buy-012',name:'Lusaka Tech Hub',category:'electronics',location:'Lusaka',size:'Micro',established:false,since:2023,verified:true,sources:['Laptops','Routers','Cabling','Accessories'],frequency:'Quarterly',orderValue:'K3,000–K8,000 per quarter',desc:'Co-working and startup hub setting up offices.',phone:'+260971200112'}
+  {id:'buy-001',name:"Mama Chanda's Kitchen",category:'food',location:'Lusaka',size:'Small',verified:true,sources:['Fresh vegetables','Chicken','Cooking oil'],frequency:'Weekly',orderValue:'K1,500–K3,000/wk',desc:'Lunch restaurant sourcing fresh produce.'},
+  {id:'buy-002',name:'Fashion Forward Boutique',category:'clothing',location:'Kitwe',size:'Micro',verified:true,sources:['Ladies dresses','Handbags'],frequency:'Monthly',orderValue:'K2,000–K4,000/mo',desc:'Boutique stocking contemporary fashion.'},
+  {id:'buy-003',name:'BuildCo Contractors',category:'construction',location:'Lusaka',size:'Medium',verified:true,sources:['Cement','Roofing','Steel'],frequency:'Weekly',orderValue:'K15,000–K40,000',desc:'Construction firm building residential homes.'},
+  {id:'buy-004',name:'Glow Salon & Spa',category:'beauty',location:'Lusaka',size:'Small',verified:true,sources:['Hair extensions','Shampoo'],frequency:'Monthly',orderValue:'K1,200–K2,500/mo',desc:'Full-service beauty salon.'},
+  {id:'buy-005',name:'Copperbelt Grocers',category:'grocery',location:'Ndola',size:'Medium',verified:true,sources:['Mealie meal','Rice','Oil'],frequency:'Weekly',orderValue:'K8,000–K15,000',desc:'Two-branch grocery retailer.'},
+  {id:'buy-006',name:'Golden Crust Bakery',category:'food',location:'Lusaka',size:'Small',verified:true,sources:['Flour','Sugar','Packaging'],frequency:'Weekly',orderValue:'K3,000–K6,000',desc:'Artisan bakery.'},
+  {id:'buy-007',name:'Kitwe Auto Repairs',category:'auto',location:'Kitwe',size:'Small',verified:true,sources:['Spare parts','Lubricants'],frequency:'Monthly',orderValue:'K1,000–K2,500',desc:'Independent garage.'},
+  {id:'buy-008',name:'PrintPoint Stationers',category:'stationery',location:'Lusaka',size:'Micro',verified:true,sources:['Printing paper','Ink'],frequency:'Monthly',orderValue:'K800–K1,500',desc:'Print and copy shop.'},
+  {id:'buy-009',name:'ZamBuild Projects',category:'construction',location:'Ndola',size:'Medium',verified:true,sources:['Cement','Aggregate','Steel'],frequency:'Weekly',orderValue:'K20,000–K50,000',desc:'Commercial contractor.'},
+  {id:'buy-010',name:'Sparkle Clean Services',category:'cleaning',location:'Lusaka',size:'Small',verified:true,sources:['Detergents','Gloves','Mops'],frequency:'Monthly',orderValue:'K1,500–K3,000',desc:'Office cleaning company.'},
+  {id:'buy-011',name:'Fresh Bites Catering',category:'food',location:'Lusaka',size:'Small',verified:true,sources:['Fresh produce','Meat','Packaging'],frequency:'Weekly',orderValue:'K4,000–K8,000',desc:'Event caterer.'},
+  {id:'buy-012',name:'Lusaka Tech Hub',category:'electronics',location:'Lusaka',size:'Micro',verified:true,sources:['Laptops','Routers'],frequency:'Quarterly',orderValue:'K3,000–K8,000',desc:'Co-working hub.'}
 ];
 const ZAMBIAN_CITIES = ['Lusaka','Kitwe','Ndola','Livingstone','Kabwe','Chingola','Mufulira','Solwezi','Chipata','Choma','Mazabuka','Kasama','Mongu','Chongwe','Kafue'];
-const SERVICE_BUSINESSES = [
-  {icon:'fa-camera',category:'Photography & Videography',need:'Cameras, lighting, memory cards and printing services.'},
-  {icon:'fa-champagne-glasses',category:'Events & Weddings',need:'Decorations, flowers, chairs, tents, sound equipment and catering.'},
-  {icon:'fa-laptop-code',category:'IT & Computer Services',need:'Computers, software licences, cables and networking equipment.'},
-  {icon:'fa-wand-magic-sparkles',category:'Hair & Beauty Services',need:'Consumable products, tools and replacement equipment.'},
-  {icon:'fa-truck-fast',category:'Transport & Logistics',need:'Fuel, tyres, spare parts and vehicle maintenance.'},
-  {icon:'fa-screwdriver-wrench',category:'Construction & Repairs',need:'Tools, replacement parts, materials and safety equipment.'},
-  {icon:'fa-graduation-cap',category:'Education & Training',need:'Books, stationery, teaching materials and equipment.'}
-];
-const ROLES = [
-  {key:'manufacturer',color:'#2E9C4A',icon:'fa-industry',title:'Manufacturer / Producer',desc:'Makes or grows the product.',example:'A farmer growing tomatoes.'},
-  {key:'wholesaler',color:'#E8730F',icon:'fa-warehouse',title:'Wholesaler / Distributor',desc:'Buys in bulk and sells to other businesses.',example:'A bulk distributor selling to shops.'},
-  {key:'retailer',color:'#1B6CA8',icon:'fa-store',title:'Retailer',desc:'Sells products directly to the final customer.',example:'A shop selling tomatoes to households.'}
-];
 
 /* ═══════════════════ SHARED UI ═══════════════════ */
 function Mark({size=38}){
   return <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:size,height:size,borderRadius:'50%',background:'#fff',boxShadow:'0 4px 12px -4px rgba(10,31,18,.5)',flexShrink:0}}>
-    <span className="serif" style={{fontSize:size*0.5,fontWeight:800,color:'#0A1F12',lineHeight:1,letterSpacing:'-0.02em'}}>S<span style={{color:'#E8730F'}}>E</span></span>
+    <span className="serif" style={{fontSize:size*0.5,fontWeight:800,color:'#0A1F12',lineHeight:1}}>S<span style={{color:'#E8730F'}}>E</span></span>
   </span>;
 }
 function Modal({open,onClose,eyebrow,title,children,maxWidth='46rem'}){
@@ -258,8 +243,7 @@ function Modal({open,onClose,eyebrow,title,children,maxWidth='46rem'}){
         <div style={{background:'#0A1F12',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:10,borderBottom:'1px solid rgba(245,166,35,.15)'}}>
           <div style={{display:'flex',alignItems:'center',gap:12,minWidth:0}}>
             <span style={{width:8,height:8,borderRadius:'50%',background:'#F5A623'}}></span>
-            <span style={{fontSize:10.5,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:700,color:'#F5A623',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{eyebrow||'StartEasy'}</span>
-            {title&&<span className="hide-sm" style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,.7)',marginLeft:8}}>{title}</span>}
+            <span style={{fontSize:10.5,letterSpacing:'.2em',textTransform:'uppercase',fontWeight:700,color:'#F5A623'}}>{eyebrow||'StartEasy'}</span>
           </div>
           <button onClick={onClose} style={{background:'none',border:'none',color:'rgba(255,255,255,.6)',cursor:'pointer',padding:6,fontSize:16}} aria-label="Close"><i className="fas fa-times"></i></button>
         </div>
@@ -272,17 +256,6 @@ function Modal({open,onClose,eyebrow,title,children,maxWidth='46rem'}){
 const INP_STYLE = {width:'100%',background:'#fff',border:'1.5px solid rgba(10,31,18,.15)',borderRadius:9,padding:'12px 14px',fontSize:13.5,color:'#0A1F12',fontFamily:'inherit'};
 function TIn({value,onChange,placeholder,type='text'}){
   return <input type={type} value={value||''} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={INP_STYLE}/>;
-}
-function SizeBadge({size}){
-  if(!size) return null;
-  const c=SIZE_COLORS[size]||'#0A1F12';
-  return <span style={{display:'inline-flex',alignItems:'center',gap:4,background:c+'12',color:c,border:'1px solid '+c+'33',padding:'2px 8px',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase'}}><i className="fas fa-building" style={{fontSize:8}}></i>{size}</span>;
-}
-function StatusBadge({established,since}){
-  if(established===undefined) return null;
-  return established
-    ? <span style={{display:'inline-flex',alignItems:'center',gap:4,background:'rgba(30,123,60,.1)',color:'#0F5C2A',border:'1px solid rgba(30,123,60,.28)',padding:'2px 8px',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase'}}><i className="fas fa-check" style={{fontSize:8}}></i>Established{since?` · ${since}`:''}</span>
-    : <span style={{display:'inline-flex',alignItems:'center',gap:4,background:'rgba(232,115,15,.1)',color:'#8A6828',border:'1px solid rgba(232,115,15,.3)',padding:'2px 8px',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase'}}><i className="fas fa-seedling" style={{fontSize:8}}></i>New{since?` · ${since}`:''}</span>;
 }
 
 /* ═══════════════════ AUTH MODAL ═══════════════════ */
@@ -299,7 +272,7 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
       if(!form.email.trim()) return setErr('Enter your email.');
       if(!form.password) return setErr('Enter your password.');
       setSubmitting(true);
-      try{await authSignIn(form.email.trim(),form.password);onAuthSuccess&&onAuthSuccess();onClose();}
+      try{await authSignIn(form.email.trim(),form.password);onAuthSuccess&&onAuthSuccess();}
       catch(e){setErr(authErrorMessage(e));}
       finally{setSubmitting(false);}
       return;
@@ -309,12 +282,12 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     if(!form.email.trim()) return setErr('Enter your email.');
     if(!form.phone.trim()) return setErr('Enter your phone.');
     if(!form.category) return setErr('Choose a category.');
-    if(!form.location) return setErr('Choose a location.');
+    if(!form.location) return setErr('Choose a city.');
     if(form.password.length<6) return setErr('Password must be at least 6 characters.');
     if(role==='supplier' && !form.products.trim()) return setErr('List the products you supply.');
     if(role==='buyer' && !form.sources.trim()) return setErr('List what you buy regularly.');
     setSubmitting(true);
-    try{await authSignUp({...form,role});onAuthSuccess&&onAuthSuccess();onClose();}
+    try{await authSignUp({...form,role});onAuthSuccess&&onAuthSuccess();}
     catch(e){setErr(authErrorMessage(e));}
     finally{setSubmitting(false);}
   };
@@ -329,19 +302,19 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
           <button onClick={()=>setRole('buyer')} style={{padding:'14px 12px',border:role==='buyer'?'2px solid #E8730F':'2px solid rgba(10,31,18,.1)',background:role==='buyer'?'rgba(232,115,15,.06)':'#fff',borderRadius:10,textAlign:'left',cursor:'pointer'}}>
             <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}><i className="fas fa-cart-shopping" style={{color:'#E8730F',fontSize:14}}></i><span style={{fontSize:13,fontWeight:800,color:'#0A1F12'}}>Buyer</span></div>
-            <div style={{fontSize:11,color:'rgba(10,31,18,.6)',lineHeight:1.4}}>I need to source products</div>
+            <div style={{fontSize:11,color:'rgba(10,31,18,.6)',lineHeight:1.4}}>I source products</div>
           </button>
           <button onClick={()=>setRole('supplier')} style={{padding:'14px 12px',border:role==='supplier'?'2px solid #1B6CA8':'2px solid rgba(10,31,18,.1)',background:role==='supplier'?'rgba(27,108,168,.06)':'#fff',borderRadius:10,textAlign:'left',cursor:'pointer'}}>
             <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}><i className="fas fa-truck-fast" style={{color:'#1B6CA8',fontSize:14}}></i><span style={{fontSize:13,fontWeight:800,color:'#0A1F12'}}>Supplier</span></div>
-            <div style={{fontSize:11,color:'rgba(10,31,18,.6)',lineHeight:1.4}}>I want to sell more</div>
+            <div style={{fontSize:11,color:'rgba(10,31,18,.6)',lineHeight:1.4}}>I sell products</div>
           </button>
         </div>
       </div>
       <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',marginBottom:14}}>
-        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Full name *</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})} placeholder="Your name"/></div>
-        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name *</label><TIn value={form.businessName} onChange={v=>setForm({...form,businessName:v})} placeholder="Business name"/></div>
-        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email *</label><TIn type="email" value={form.email} onChange={v=>setForm({...form,email:v})} placeholder="you@business.zm"/></div>
-        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone / WhatsApp *</label><TIn value={form.phone} onChange={v=>setForm({...form,phone:v})} placeholder="+260 …"/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Full name *</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})}/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name *</label><TIn value={form.businessName} onChange={v=>setForm({...form,businessName:v})}/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email *</label><TIn type="email" value={form.email} onChange={v=>setForm({...form,email:v})}/></div>
+        <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone *</label><TIn value={form.phone} onChange={v=>setForm({...form,phone:v})} placeholder="+260 …"/></div>
         <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category *</label>
           <select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
             <option value="">Choose</option>
@@ -356,82 +329,179 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
         </div>
       </div>
       {role==='supplier'&&<div style={{background:'rgba(27,108,168,.04)',border:'1px dashed rgba(27,108,168,.25)',borderRadius:10,padding:'14px 16px',marginBottom:14}}>
-        <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#1B6CA8',marginBottom:10}}>What you supply</div>
+        <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#1B6CA8',marginBottom:10}}>What you supply</div>
         <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
-          <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products / services * (comma-separated)</label><TIn value={form.products} onChange={v=>setForm({...form,products:v})} placeholder="e.g. Fabric rolls, uniform fabric"/></div>
+          <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products * (comma-separated)</label><TIn value={form.products} onChange={v=>setForm({...form,products:v})} placeholder="e.g. Fabric rolls, uniform fabric"/></div>
           <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Minimum order</label><TIn value={form.moq} onChange={v=>setForm({...form,moq:v})} placeholder="e.g. 50 metres"/></div>
           <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label><TIn value={form.leadTime} onChange={v=>setForm({...form,leadTime:v})} placeholder="e.g. 3–5 days"/></div>
-          <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery coverage</label><TIn value={form.delivery} onChange={v=>setForm({...form,delivery:v})} placeholder="e.g. Lusaka · Copperbelt"/></div>
+          <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery coverage</label><TIn value={form.delivery} onChange={v=>setForm({...form,delivery:v})}/></div>
         </div>
       </div>}
       {role==='buyer'&&<div style={{background:'rgba(232,115,15,.04)',border:'1px dashed rgba(232,115,15,.25)',borderRadius:10,padding:'14px 16px',marginBottom:14}}>
-        <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>What you buy</div>
+        <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>What you buy</div>
         <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
-          <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>What you buy regularly * (comma-separated)</label><TIn value={form.sources} onChange={v=>setForm({...form,sources:v})} placeholder="e.g. Fresh vegetables, chicken, packaging"/></div>
+          <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>What you buy * (comma-separated)</label><TIn value={form.sources} onChange={v=>setForm({...form,sources:v})} placeholder="e.g. Fresh vegetables, chicken"/></div>
           <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Frequency</label>
             <select value={form.frequency} onChange={e=>setForm({...form,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
               {FREQUENCY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
             </select>
           </div>
-          <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={form.orderValue} onChange={v=>setForm({...form,orderValue:v})} placeholder="e.g. K2,000–K5,000/mo"/></div>
+          <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={form.orderValue} onChange={v=>setForm({...form,orderValue:v})}/></div>
         </div>
       </div>}
-      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password * <span style={{color:'rgba(10,31,18,.5)',fontWeight:500}}>(min 6 characters)</span></label><TIn type="password" value={form.password} onChange={v=>setForm({...form,password:v})} placeholder="••••••••"/></div>
+      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password * <span style={{color:'rgba(10,31,18,.5)',fontWeight:500}}>(min 6 chars)</span></label><TIn type="password" value={form.password} onChange={v=>setForm({...form,password:v})}/></div>
     </>}
     {mode==='signin'&&<>
-      <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>Sign in to your StartEasy account to reach your dashboard.</p>
-      <div style={{marginBottom:14}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label><TIn type="email" value={form.email} onChange={v=>setForm({...form,email:v})} placeholder="you@business.zm"/></div>
-      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password</label><TIn type="password" value={form.password} onChange={v=>setForm({...form,password:v})} placeholder="••••••••"/></div>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>Sign in to reach your dashboard.</p>
+      <div style={{marginBottom:14}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label><TIn type="email" value={form.email} onChange={v=>setForm({...form,email:v})}/></div>
+      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password</label><TIn type="password" value={form.password} onChange={v=>setForm({...form,password:v})}/></div>
     </>}
-    {err&&<div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5,display:'flex',gap:8,alignItems:'center'}}><i className="fas fa-circle-exclamation"></i> {err}</div>}
-    <button onClick={submit} disabled={submitting} style={{width:'100%',marginTop:18,padding:'14px 24px',background:submitting?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}>
-      {submitting?<><i className="fas fa-spinner fa-spin"></i> Please wait…</>:(mode==='signin'?'Sign in':'Create my account')}
+    {err&&<div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5}}><i className="fas fa-circle-exclamation" style={{marginRight:6}}></i>{err}</div>}
+    <button onClick={submit} disabled={submitting} style={{width:'100%',marginTop:18,padding:'14px',background:submitting?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>
+      {submitting?<><i className="fas fa-spinner fa-spin" style={{marginRight:8}}></i>Please wait…</>:(mode==='signin'?'Sign in':'Create my account')}
     </button>
-    <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',lineHeight:1.6,marginTop:12,textAlign:'center',fontStyle:'italic'}}>
-      {mode==='signin'?'New to StartEasy?':'Already have an account?'}{' '}
-      <button onClick={()=>{setMode(mode==='signin'?'signup':'signin');setErr('');}} style={{background:'none',border:'none',color:'#E8730F',fontWeight:700,cursor:'pointer',textDecoration:'underline',fontSize:'inherit',padding:0,fontFamily:'inherit'}}>{mode==='signin'?'Create an account':'Sign in'}</button>
+    <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',marginTop:12,textAlign:'center',fontStyle:'italic'}}>
+      {mode==='signin'?'New here?':'Have an account?'}{' '}
+      <button onClick={()=>{setMode(mode==='signin'?'signup':'signin');setErr('');}} style={{background:'none',border:'none',color:'#E8730F',fontWeight:700,cursor:'pointer',textDecoration:'underline',fontSize:'inherit',padding:0,fontFamily:'inherit'}}>{mode==='signin'?'Create account':'Sign in'}</button>
     </p>
   </Modal>;
 }
 
-/* ═══════════════════ HERO CTA ═══════════════════ */
-function HeroCTA({user,onSignup,onSignin,onDashboard}){
-  const cards=[
-    {role:'buyer',icon:'fa-cart-shopping',color:'#E8730F',label:'For businesses',headline:'Buy better.',body:'Get matched with verified suppliers in your category, compare quotes, and build supply relationships that hold.',cta:'Get started as a buyer'},
-    {role:'supplier',icon:'fa-truck-fast',color:'#1B6CA8',label:'For suppliers',headline:'Sell more.',body:'Get discovered by real businesses with real sourcing needs, and turn one-off enquiries into repeat orders.',cta:'Get started as a supplier'}
-  ];
-  return <section style={{background:'#F5FAF6',padding:'clamp(48px,7vw,72px) 24px'}}>
-    <div style={{maxWidth:1240,margin:'0 auto'}}>
-      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 32px'}}>
-        <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:12,letterSpacing:'.24em'}}>Two sides, one platform</span>
-        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:14,color:'#0A1F12'}}>Create your account in under a minute.</h2>
-        <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:0}}>Sign up free. Land on your dashboard. Start matching.</p>
+/* ═══════════════════ NAV ═══════════════════ */
+function Nav({user,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
+  const [open,setOpen]=useState(false);
+  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',position:'sticky',top:0,zIndex:50}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
+        <a href="#" onClick={e=>{e.preventDefault();if(user)onDashboard();else if(onSignIn)onSignIn();}} style={{display:'flex',alignItems:'center',gap:12,textDecoration:'none'}}>
+          <Mark size={38}/>
+          <span className="hide-sm" style={{textAlign:'left',lineHeight:1}}>
+            <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
+            <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+          </span>
+        </a>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          {user?(
+            <>
+              <button onClick={onDashboard} className="hide-sm" style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Dashboard</button>
+              {onBrowse&&<button onClick={onBrowse} className="hide-sm" style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Browse</button>}
+              <button onClick={onSignOut} style={{padding:'10px 14px',background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',borderRadius:8,fontSize:12,fontWeight:700}}>Sign out</button>
+            </>
+          ):(<>
+            <button onClick={onSignIn} style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Sign in</button>
+            <button onClick={()=>onSignUp(null)} style={{padding:'10px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}>Get started</button>
+          </>)}
+        </div>
       </div>
-      <div className="grid lg:grid-cols-2 gap-4">
-        {cards.map(c=>(
-          <div key={c.role} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:16,padding:'28px 26px',borderTop:`4px solid ${c.color}`,display:'flex',flexDirection:'column',gap:16}}>
+    </div>
+  </header>;
+}
+
+/* ═══════════════════ HERO ═══════════════════ */
+function Hero({stats}){
+  return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',padding:'clamp(64px,9vw,120px) 24px clamp(56px,8vw,100px)'}}>
+    <div style={{position:'absolute',top:-160,right:-120,width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',bottom:-180,left:-100,width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
+    <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1,textAlign:'center'}}>
+      <span className="micro" style={{color:'#F5A623',display:'inline-block',marginBottom:20,letterSpacing:'.22em'}}>Businesses &amp; Suppliers Directory</span>
+      <h1 className="serif" style={{fontSize:'clamp(2.4rem,6vw,4rem)',lineHeight:1.05,margin:'0 auto 24px',maxWidth:'52rem'}}>
+        Helping businesses <em style={{fontStyle:'italic',color:'#F5A623'}}>buy better.</em><br/>
+        Helping suppliers <em style={{fontStyle:'italic',color:'#F5A623'}}>sell more.</em>
+      </h1>
+      <p style={{fontSize:'clamp(1rem,1.5vw,1.2rem)',lineHeight:1.7,color:'rgba(255,255,255,.7)',maxWidth:'46rem',margin:'0 auto 40px'}}>
+        A two-sided marketplace connecting Zambian businesses with verified suppliers — and suppliers with the businesses that will actually buy from them.
+      </p>
+      {stats && <div style={{display:'flex',flexWrap:'wrap',gap:24,fontSize:12,color:'rgba(255,255,255,.6)',justifyContent:'center'}}>
+        <span><i className="fas fa-check-circle" style={{color:'#2E9C4A',marginRight:6}}></i>{stats.suppliers} suppliers</span>
+        <span><i className="fas fa-cart-shopping" style={{color:'#F5A623',marginRight:6}}></i>{stats.buyers} active buyers</span>
+        <span><i className="fas fa-layer-group" style={{color:'#F5A623',marginRight:6}}></i>{stats.categories} categories</span>
+      </div>}
+    </div>
+  </section>;
+}
+
+/* ═══════════════════ LANDING CTA (only thing below hero) ═══════════════════ */
+function LandingCTA({onSignup,onSignin}){
+  return <section style={{background:'#F5FAF6',padding:'clamp(48px,7vw,80px) 24px'}}>
+    <div style={{maxWidth:1100,margin:'0 auto'}}>
+      <div style={{textAlign:'center',maxWidth:680,margin:'0 auto 40px'}}>
+        <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:12}}>Two sides · one platform</span>
+        <h2 className="serif" style={{fontSize:'clamp(1.8rem,4vw,2.6rem)',lineHeight:1.15,marginBottom:14,color:'#0A1F12'}}>Create your account to get started.</h2>
+        <p style={{fontSize:15,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:0}}>Free to sign up. Instant access to your dashboard, matches, quotes and profile.</p>
+      </div>
+      <div className="grid lg:grid-cols-2 gap-5">
+        {[
+          {role:'buyer',icon:'fa-cart-shopping',color:'#E8730F',label:'I am a business',headline:'I want to buy.',body:'Find and request quotes from verified suppliers in your category. Track every request in your account.',cta:'Sign up as a buyer'},
+          {role:'supplier',icon:'fa-truck-fast',color:'#1B6CA8',label:'I am a supplier',headline:'I want to sell.',body:'Get discovered by businesses with real sourcing needs. Manage your profile and enquiries from one dashboard.',cta:'Sign up as a supplier'}
+        ].map(c=>(
+          <div key={c.role} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:18,padding:'32px 28px',borderTop:`4px solid ${c.color}`,display:'flex',flexDirection:'column',gap:18}}>
             <div style={{display:'flex',alignItems:'center',gap:14}}>
-              <span style={{width:52,height:52,borderRadius:13,background:c.color+'16',color:c.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}><i className={`fas ${c.icon}`}></i></span>
+              <span style={{width:56,height:56,borderRadius:14,background:c.color+'16',color:c.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}><i className={`fas ${c.icon}`}></i></span>
               <div>
-                <div style={{fontSize:10,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:c.color,marginBottom:4}}>{c.label}</div>
-                <h3 className="serif" style={{fontSize:'clamp(1.15rem,2.2vw,1.5rem)',fontWeight:800,color:'#0A1F12',lineHeight:1.15,margin:0}}>{c.headline}</h3>
+                <div style={{fontSize:10.5,letterSpacing:'.16em',textTransform:'uppercase',fontWeight:800,color:c.color,marginBottom:4}}>{c.label}</div>
+                <h3 className="serif" style={{fontSize:'clamp(1.3rem,2.4vw,1.65rem)',fontWeight:800,color:'#0A1F12',lineHeight:1.15,margin:0}}>{c.headline}</h3>
               </div>
             </div>
-            <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:0,flex:1}}>{c.body}</p>
-            <button onClick={()=>user?onDashboard():onSignup(c.role)} style={{padding:'13px 22px',background:`linear-gradient(135deg,${c.color},${c.color}cc)`,color:'#fff',border:'none',borderRadius:10,fontSize:13.5,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9}}>
-              <i className="fas fa-arrow-right"></i> {user?'Go to dashboard':c.cta}
+            <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.7)',margin:0,flex:1}}>{c.body}</p>
+            <button onClick={()=>onSignup(c.role)} style={{padding:'14px 22px',background:`linear-gradient(135deg,${c.color},${c.color}cc)`,color:'#fff',border:'none',borderRadius:11,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:9,boxShadow:`0 12px 28px -10px ${c.color}88`}}>
+              <i className="fas fa-arrow-right"></i> {c.cta}
             </button>
           </div>
         ))}
       </div>
-      <div style={{textAlign:'center',marginTop:24,fontSize:13,color:'rgba(10,31,18,.6)'}}>
-        {user
-          ? <>Signed in as <strong style={{color:'#0A1F12'}}>{user.email}</strong> · <button onClick={onDashboard} style={{background:'none',border:'none',color:'#E8730F',fontWeight:700,textDecoration:'underline',fontSize:'inherit',cursor:'pointer',fontFamily:'inherit',padding:0}}>Open dashboard</button></>
-          : <>Already have an account? <button onClick={onSignin} style={{background:'none',border:'none',color:'#E8730F',fontWeight:700,textDecoration:'underline',fontSize:'inherit',cursor:'pointer',fontFamily:'inherit',padding:0}}>Sign in</button></>
-        }
+      <div style={{textAlign:'center',marginTop:32,fontSize:13.5,color:'rgba(10,31,18,.6)'}}>
+        Already have an account? <button onClick={onSignin} style={{background:'none',border:'none',color:'#E8730F',fontWeight:700,textDecoration:'underline',fontSize:'inherit',cursor:'pointer',fontFamily:'inherit',padding:0}}>Sign in</button>
       </div>
     </div>
   </section>;
+}
+
+/* ═══════════════════ FOOTER ═══════════════════ */
+function Footer(){
+  return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'48px 24px'}}>
+      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+        <Mark size={36}/>
+        <span style={{fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+      </div>
+      <p style={{fontSize:11,textTransform:'uppercase',color:'#F5A623',fontWeight:700,marginBottom:16}}>Helping businesses buy better. Helping suppliers sell more.</p>
+      <div style={{display:'flex',flexWrap:'wrap',gap:20,fontSize:13,color:'rgba(255,255,255,.5)',marginBottom:24}}>
+        <a href={'mailto:'+CONTACT_EMAIL} style={{color:'inherit',textDecoration:'none'}}>{CONTACT_EMAIL}</a>
+        <span>+260 762499581</span>
+        <span>Lusaka, Zambia</span>
+      </div>
+      <div style={{paddingTop:18,borderTop:'1px solid rgba(255,255,255,.1)',display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
+        <p style={{fontSize:11,color:'rgba(255,255,255,.35)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia</p>
+        <a href="#seed" style={{fontSize:10.5,color:'rgba(255,255,255,.2)',textDecoration:'none',textTransform:'uppercase',fontWeight:700}}><i className="fas fa-lock" style={{marginRight:6}}></i>Admin</a>
+      </div>
+    </div>
+  </footer>;
+}
+
+/* ═══════════════════ LANDING PAGE (only hero + CTA) ═══════════════════ */
+function Landing({onSignup,onSignin}){
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
+    <Nav user={null} onSignIn={onSignin} onSignUp={onSignup}/>
+    <main style={{flex:1}}>
+      <Hero/>
+      <LandingCTA onSignup={onSignup} onSignin={onSignin}/>
+    </main>
+    <Footer/>
+  </div>;
+}
+
+/* ═══════════════════ SIGN-IN PROMPT (for protected routes) ═══════════════════ */
+function SignInPrompt({onSignIn,onSignUp,onHome}){
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',alignItems:'center',justifyContent:'center',padding:'32px 20px'}}>
+    <div style={{maxWidth:440,textAlign:'center',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:16,padding:'36px 30px',boxShadow:'0 20px 50px -20px rgba(10,31,18,.15)'}}>
+      <i className="fas fa-lock" style={{fontSize:36,color:'#E8730F',marginBottom:16,display:'block'}}></i>
+      <h2 className="serif" style={{fontSize:24,color:'#0A1F12',marginBottom:10}}>Sign in to continue</h2>
+      <p style={{fontSize:14,color:'rgba(10,31,18,.65)',lineHeight:1.65,marginBottom:24}}>Create an account or sign in to access this page.</p>
+      <button onClick={onSignUp} style={{width:'100%',padding:'14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,marginBottom:10}}>Create account</button>
+      <button onClick={onSignIn} style={{width:'100%',padding:'13px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:10,fontSize:13.5,fontWeight:700,marginBottom:10}}>Sign in</button>
+      <button onClick={onHome} style={{width:'100%',padding:'12px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13,fontWeight:600,color:'#0A1F12'}}>← Back to home</button>
+    </div>
+  </div>;
 }
 
 /* ═══════════════════ DASHBOARD ═══════════════════ */
@@ -441,6 +511,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
   const [tab,setTab]=useState('overview');
   const [sidebarOpen,setSidebarOpen]=useState(false);
   const [matches,setMatches]=useState([]);
+  const [quotes,setQuotes]=useState([]);
   const [editForm,setEditForm]=useState(null);
   const [saving,setSaving]=useState(false);
   const [saveMsg,setSaveMsg]=useState(null);
@@ -467,11 +538,17 @@ function Dashboard({user,onBrowse,onSignedOut}){
     const coll=isSupplier?'se_buyers':'se_suppliers';
     const seeds=isSupplier?SEED_BUYERS:SEED_SUPPLIERS;
     const filterSeed=()=>setMatches(seeds.filter(x=>x.category===profile.category).slice(0,12));
-    if(!firebaseReady){filterSeed();return;}
-    db.collection(coll).where('category','==',profile.category).limit(12).get()
-      .then(snap=>{if(snap.empty) filterSeed();else setMatches(snap.docs.map(d=>({id:d.id,...d.data()})));})
-      .catch(()=>filterSeed());
-  },[profile]);
+    if(!firebaseReady){filterSeed();}
+    else{
+      db.collection(coll).where('category','==',profile.category).limit(12).get()
+        .then(snap=>{if(snap.empty) filterSeed();else setMatches(snap.docs.map(d=>({id:d.id,...d.data()})));})
+        .catch(()=>filterSeed());
+    }
+    // Load user's own quotes (for buyer)
+    if(!isSupplier){
+      loadUserQuotes(user.uid).then(q=>setQuotes(q));
+    }
+  },[profile,user]);
 
   const signOut=async()=>{await authSignOutFn();onSignedOut&&onSignedOut();};
 
@@ -480,10 +557,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
     setSaving(true);setSaveMsg(null);
     try{
       const isSupplier=profile.role==='supplier';
-      const updates={
-        name:editForm.name.trim(),businessName:editForm.businessName.trim(),
-        phone:editForm.phone.trim(),category:editForm.category,location:editForm.location
-      };
+      const updates={name:editForm.name.trim(),businessName:editForm.businessName.trim(),phone:editForm.phone.trim(),category:editForm.category,location:editForm.location};
       if(isSupplier){updates.products=splitCSV(editForm.products);updates.moq=editForm.moq;updates.delivery=editForm.delivery;updates.leadTime=editForm.leadTime;}
       else{updates.sources=splitCSV(editForm.sources);updates.frequency=editForm.frequency;updates.orderValue=editForm.orderValue;}
       if(firebaseReady) await db.collection('se_users').doc(user.uid).update(updates);
@@ -499,7 +573,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
   if(!profile) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6',padding:'32px 20px',textAlign:'center'}}>
     <div style={{maxWidth:400}}>
       <h2 className="serif" style={{fontSize:22,color:'#0A1F12',marginBottom:10}}>Profile not found</h2>
-      <p style={{fontSize:13.5,color:'rgba(10,31,18,.65)',lineHeight:1.6,marginBottom:20}}>Your account exists but we couldn't find your profile. Contact {CONTACT_EMAIL}.</p>
+      <p style={{fontSize:13.5,color:'rgba(10,31,18,.65)',lineHeight:1.6,marginBottom:20}}>Contact {CONTACT_EMAIL}.</p>
       <button onClick={signOut} style={{padding:'12px 22px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13.5,fontWeight:700}}>Sign out</button>
     </div>
   </div>;
@@ -515,29 +589,28 @@ function Dashboard({user,onBrowse,onSignedOut}){
   const circ=2*Math.PI*26;
   const dash=circ*(1-pct/100);
 
+  const tabs=isSupplier
+    ? [['overview','Overview','fa-house'],['matches','Matches','fa-users'],['profile','Profile','fa-user'],['settings','Settings','fa-gear']]
+    : [['overview','Overview','fa-house'],['matches','Matches','fa-truck-fast'],['requests','My Requests','fa-file-invoice'],['profile','Profile','fa-user'],['settings','Settings','fa-gear']];
+
   const kpis=isSupplier
     ? [
         {label:'Buyers matched',value:matches.length,icon:'fa-users',color:'#1B6CA8',sub:'in your category'},
-        {label:'Inquiries',value:0,icon:'fa-envelope',color:'#E8730F',sub:isVerified?'None yet':'Unlocks on verification'},
-        {label:'Profile views',value:'—',icon:'fa-eye',color:'#7A4FA3',sub:isVerified?'Tracking live':'Unlocks on verification'},
+        {label:'Inquiries',value:0,icon:'fa-envelope',color:'#E8730F',sub:'Received from buyers'},
+        {label:'Profile views',value:'—',icon:'fa-eye',color:'#7A4FA3',sub:'Tracking'},
         {label:'Status',value:isVerified?'Verified':'Pending',icon:isVerified?'fa-circle-check':'fa-clock',color:isVerified?'#1E7B3C':'#8A6828',sub:isVerified?'Live in directory':'Being reviewed'}
       ]
     : [
         {label:'Suppliers matched',value:matches.length,icon:'fa-truck-fast',color:'#1B6CA8',sub:'in your category'},
-        {label:'RFQs sent',value:0,icon:'fa-file-invoice',color:'#E8730F',sub:'None yet'},
-        {label:'Suppliers contacted',value:0,icon:'fa-handshake',color:'#7A4FA3',sub:'Start with matches'},
+        {label:'Quotes requested',value:quotes.length,icon:'fa-file-invoice',color:'#E8730F',sub:quotes.length>0?'View My Requests':'None yet'},
+        {label:'Suppliers contacted',value:new Set(quotes.map(q=>q.supplierId).filter(Boolean)).size,icon:'fa-handshake',color:'#7A4FA3',sub:'Across your requests'},
         {label:'Status',value:isVerified?'Verified':'Pending',icon:isVerified?'fa-circle-check':'fa-clock',color:isVerified?'#1E7B3C':'#8A6828',sub:isVerified?'Live in directory':'Being reviewed'}
       ];
 
   const activity=[
-    {icon:'fa-user-plus',color:'#2E9C4A',title:'Account created',detail:`${profile.name} · ${new Date(profile.createdAt||Date.now()).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`},
-    ...(isVerified
-      ? [{icon:'fa-circle-check',color:'#1E7B3C',title:'Profile verified',detail:isSupplier?'Buyers can now find you':'Suppliers can now find you'}]
-      : [{icon:'fa-clock',color:'#8A6828',title:'Verification pending',detail:'Reviewed within 48 hours.'}]),
-    {icon:'fa-users',color:'#1B6CA8',title:`${matches.length} ${isSupplier?'buyer':'supplier'}${matches.length===1?'':'s'} matched`,detail:`In category: ${cat.title}`},
-    ...(pct<100
-      ? [{icon:'fa-pen-to-square',color:'#E8730F',title:'Profile '+pct+'% complete',detail:'Finish your profile to improve matches.'}]
-      : [{icon:'fa-star',color:'#F5A623',title:'Profile complete',detail:'You are fully discoverable.'}])
+    {icon:'fa-user-plus',color:'#2E9C4A',title:'Account created',detail:`${new Date(profile.createdAt||Date.now()).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`},
+    ...(isVerified?[{icon:'fa-circle-check',color:'#1E7B3C',title:'Profile verified',detail:isSupplier?'Buyers can now find you':'Suppliers can now find you'}]:[{icon:'fa-clock',color:'#8A6828',title:'Verification pending',detail:'Reviewed within 48 hours.'}]),
+    ...(quotes.length>0?[{icon:'fa-file-invoice',color:'#E8730F',title:`${quotes.length} quote request${quotes.length===1?'':'s'} sent`,detail:'Track them in My Requests'}]:[{icon:'fa-magnifying-glass',color:'#1B6CA8',title:'Browse suppliers to request quotes',detail:'Your requests will appear here.'}])
   ];
 
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6'}}>
@@ -561,20 +634,21 @@ function Dashboard({user,onBrowse,onSignedOut}){
         </div>
       </div>
       <nav style={{padding:'16px 12px',flex:1}}>
-        {[['overview','Overview','fa-house'],['matches','Matches','fa-users'],['profile','Profile','fa-user'],['settings','Settings','fa-gear']].map(([key,label,icon])=>
+        {tabs.map(([key,label,icon])=>
           <button key={key} onClick={()=>{setTab(key);setSidebarOpen(false);}} className={'dash-nav-btn '+(tab===key?'active':'')}>
             <i className={`fas ${icon}`} style={{fontSize:13,width:16}}></i>{label}
+            {key==='requests' && quotes.length>0 && <span style={{marginLeft:'auto',background:'#E8730F',color:'#fff',fontSize:9.5,fontWeight:800,borderRadius:99,padding:'1px 7px'}}>{quotes.length}</span>}
           </button>
         )}
         <div style={{height:14}}></div>
-        <button onClick={onBrowse} className="dash-nav-btn"><i className="fas fa-arrow-left" style={{fontSize:12,width:16}}></i> Browse directory</button>
+        <button onClick={onBrowse} className="dash-nav-btn"><i className="fas fa-magnifying-glass" style={{fontSize:12,width:16}}></i> Browse directory</button>
       </nav>
       <div style={{padding:'14px 16px',borderTop:'1px solid rgba(255,255,255,.08)'}}>
-        <a href={waUrl(`Hello StartEasy — I'm ${profile.name} (${profile.businessName}) and I need help.`)} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px',marginBottom:8,background:'#25D366',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}>
+        <a href={waUrl(`Hello StartEasy — I'm ${profile.name} (${profile.businessName}).`)} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px',marginBottom:8,background:'#25D366',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}>
           <i className="fab fa-whatsapp"></i> Contact support
         </a>
-        <button onClick={signOut} style={{width:'100%',padding:'10px',borderRadius:8,background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:7}}>
-          <i className="fas fa-right-from-bracket"></i> Sign out
+        <button onClick={signOut} style={{width:'100%',padding:'10px',borderRadius:8,background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',fontSize:12,fontWeight:700}}>
+          <i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out
         </button>
       </div>
     </aside>
@@ -586,7 +660,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
         </button>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)'}}>{isSupplier?'Supplier':'Buyer'} dashboard</div>
-          <div style={{fontSize:14.5,fontWeight:700,color:'#0A1F12'}}>{tab==='overview'?'Overview':tab==='matches'?'Your matches':tab==='profile'?'Your profile':'Settings'}</div>
+          <div style={{fontSize:14.5,fontWeight:700,color:'#0A1F12'}}>{tabs.find(t=>t[0]===tab)?.[1]||'Overview'}</div>
         </div>
         <span style={{display:'inline-flex',alignItems:'center',gap:6,padding:'5px 12px',borderRadius:99,fontSize:10.5,fontWeight:800,textTransform:'uppercase',background:isVerified?'rgba(30,123,60,.12)':'rgba(245,166,35,.15)',color:isVerified?'#0F5C2A':'#8A6828',border:'1px solid '+(isVerified?'rgba(30,123,60,.3)':'rgba(245,166,35,.35)')}}>
           <i className={`fas ${isVerified?'fa-circle-check':'fa-clock'}`} style={{fontSize:9}}></i>
@@ -623,17 +697,14 @@ function Dashboard({user,onBrowse,onSignedOut}){
                 </div>
                 <button onClick={()=>setTab('matches')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>See all</button>
               </div>
-              {matches.length===0?<div style={{padding:'40px 20px',textAlign:'center'}}><i className="fas fa-users" style={{fontSize:26,color:'rgba(10,31,18,.15)',marginBottom:10,display:'block'}}></i><p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No matches yet.</p></div>:
+              {matches.length===0?<div style={{padding:'40px 20px',textAlign:'center'}}><p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No matches yet.</p></div>:
               matches.slice(0,5).map(m=>(
-                <div key={m.id} className="match-row">
+                <div key={m.id} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',borderBottom:'1px dashed rgba(10,31,18,.08)'}}>
                   <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13,fontWeight:700,color:'#0A1F12',marginBottom:2}}>{m.name}</div>
-                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{m.location}{' · '}{isSupplier?(m.sources||[]).slice(0,2).join(', '):(m.products||[]).slice(0,2).join(', ')}</div>
+                    <div style={{fontSize:13,fontWeight:700,color:'#0A1F12'}}>{m.name}</div>
+                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{m.location}</div>
                   </div>
-                  <a href={waUrl(isSupplier?`Hello StartEasy — I'm ${profile.name}, a supplier. I'd like an intro to ${m.name}.`:`Hello StartEasy — I'm ${profile.name}. I'd like a quote from ${m.name}.`)} target="_blank" rel="noopener noreferrer" style={{padding:'7px 12px',background:'#25D366',color:'#fff',borderRadius:7,fontSize:11,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',gap:5,flexShrink:0}}>
-                    <i className="fab fa-whatsapp"></i> <span className="hide-sm">Contact</span>
-                  </a>
                 </div>
               ))}
             </div>
@@ -649,17 +720,17 @@ function Dashboard({user,onBrowse,onSignedOut}){
                     <div className="inner" style={{color:pct===100?'#1E7B3C':'#E8730F'}}>{pct}%</div>
                   </div>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13,fontWeight:800,color:'#0A1F12',marginBottom:2}}>{pct===100?'Profile complete':'Profile '+pct+'% complete'}</div>
-                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.6)',lineHeight:1.5}}>{pct===100?'Fully discoverable.':'Complete to unlock more matches.'}</div>
+                    <div style={{fontSize:13,fontWeight:800,color:'#0A1F12',marginBottom:2}}>{pct===100?'Profile complete':'Profile '+pct+'%'}</div>
+                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.6)',lineHeight:1.5}}>{pct===100?'Fully discoverable.':'Complete to unlock matches.'}</div>
                   </div>
                 </div>
-                {pct<100&&<button onClick={()=>setTab('profile')} style={{width:'100%',padding:'10px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Complete profile</button>}
+                {pct<100&&<button onClick={()=>setTab('profile')} style={{width:'100%',padding:'10px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}>Complete profile</button>}
               </div>
 
               <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px'}}>
                 <h3 className="serif" style={{fontSize:14,fontWeight:800,color:'#0A1F12',margin:'0 0 10px'}}>Recent activity</h3>
                 {activity.map((a,i)=>(
-                  <div key={i} className="activity-item">
+                  <div key={i} style={{display:'flex',gap:12,padding:'10px 0',borderBottom:i<activity.length-1?'1px dashed rgba(10,31,18,.06)':'none',alignItems:'flex-start'}}>
                     <span style={{width:28,height:28,borderRadius:'50%',background:a.color+'15',color:a.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,flexShrink:0}}><i className={`fas ${a.icon}`}></i></span>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:12.5,fontWeight:700,color:'#0A1F12',marginBottom:2}}>{a.title}</div>
@@ -670,44 +741,56 @@ function Dashboard({user,onBrowse,onSignedOut}){
               </div>
             </div>
           </div>
-
-          <div style={{marginTop:18,background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px'}}>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,marginBottom:10,flexWrap:'wrap'}}>
-              <h3 className="serif" style={{fontSize:14,fontWeight:800,color:'#0A1F12',margin:0}}>{isSupplier?'What you supply':'What you source'}</h3>
-              <button onClick={()=>setTab('profile')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>Edit</button>
-            </div>
-            <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-              {((isSupplier?profile.products:profile.sources)||[]).length===0
-                ? <span style={{fontSize:12,color:'rgba(10,31,18,.5)',fontStyle:'italic'}}>Add products to improve matches.</span>
-                : (isSupplier?profile.products:profile.sources).map((p,i)=><span key={i} style={{fontSize:11.5,color:'rgba(10,31,18,.75)',background:'rgba(10,31,18,.05)',border:'1px solid rgba(10,31,18,.08)',padding:'4px 10px',borderRadius:99,fontWeight:600}}>{p}</span>)}
-            </div>
-          </div>
         </>}
 
         {tab==='matches'&&<>
           <div style={{marginBottom:20}}>
             <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Your matches</h1>
-            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{matches.length} {isSupplier?'buyers':'suppliers'} in {cat.title} · {profile.location}</p>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>{matches.length} in {cat.title}</p>
           </div>
-          {matches.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:12,padding:'56px 24px',textAlign:'center'}}>
-            <i className="fas fa-users" style={{fontSize:32,color:'rgba(10,31,18,.15)',marginBottom:12,display:'block'}}></i>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700,color:'#0A1F12',margin:'0 0 8px'}}>No matches yet</h3>
-            <button onClick={onBrowse} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Browse directory</button>
-          </div>:
           <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
             {matches.map(m=>(
-              <div key={m.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 18px 16px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
+              <div key={m.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
                 <div style={{display:'flex',alignItems:'center',gap:10}}>
                   <span style={{width:38,height:38,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${isSupplier?'fa-cart-shopping':'fa-truck-fast'}`}></i></span>
                   <div style={{minWidth:0,flex:1}}>
-                    <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.name}</div>
-                    <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{m.location}</div>
+                    <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{m.name}</div>
+                    <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}>{m.location}</div>
                   </div>
                 </div>
-                <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{m.desc}</p>
-                <a href={waUrl(isSupplier?`Hello StartEasy — I'm ${profile.name}, a supplier. I'd like an intro to ${m.name}.`:`Hello StartEasy — I'm ${profile.name}. I'd like a quote from ${m.name}.`)} target="_blank" rel="noopener noreferrer" style={{padding:'9px',background:'#25D366',color:'#fff',borderRadius:8,fontSize:11.5,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:7}}>
-                  <i className="fab fa-whatsapp"></i> {isSupplier?'Request intro':'Request quote'}
-                </a>
+                <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{m.desc}</p>
+                {!isSupplier && <button onClick={()=>onBrowse(m)} style={{padding:'9px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Request quote</button>}
+              </div>
+            ))}
+          </div>
+        </>}
+
+        {tab==='requests'&&!isSupplier&&<>
+          <div style={{marginBottom:20}}>
+            <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>My Requests</h1>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>Quotes you've requested — tracked here.</p>
+          </div>
+          {quotes.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:12,padding:'56px 24px',textAlign:'center'}}>
+            <i className="fas fa-file-invoice" style={{fontSize:32,color:'rgba(10,31,18,.15)',marginBottom:12,display:'block'}}></i>
+            <h3 className="serif" style={{fontSize:17,fontWeight:700,color:'#0A1F12',margin:'0 0 8px'}}>No requests yet</h3>
+            <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:'0 0 20px'}}>Request a quote from a supplier and it will appear here.</p>
+            <button onClick={onBrowse} style={{padding:'12px 22px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Browse suppliers</button>
+          </div>:
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            {quotes.map(q=>(
+              <div key={q.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px',borderLeft:'4px solid #E8730F'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginBottom:10}}>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:800,color:'#0A1F12'}}>{q.supplierName||'Supplier'}</div>
+                    <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}>{CAT_MAP[q.category]?.title||q.category} · {q.at?new Date(q.at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
+                  </div>
+                  <span style={{padding:'3px 10px',background:'rgba(232,115,15,.12)',color:'#8A6828',borderRadius:99,fontSize:10,fontWeight:800,textTransform:'uppercase'}}>{q.status||'sent'}</span>
+                </div>
+                <div style={{display:'grid',gap:6,gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',fontSize:12.5}}>
+                  <div><span style={{color:'rgba(10,31,18,.5)'}}>Product:</span> <strong style={{color:'#0A1F12'}}>{q.product}</strong></div>
+                  {q.quantity&&<div><span style={{color:'rgba(10,31,18,.5)'}}>Qty:</span> <strong style={{color:'#0A1F12'}}>{q.quantity}</strong></div>}
+                  {q.budget&&<div><span style={{color:'rgba(10,31,18,.5)'}}>Budget:</span> <strong style={{color:'#0A1F12'}}>{q.budget}</strong></div>}
+                </div>
               </div>
             ))}
           </div>}
@@ -716,50 +799,46 @@ function Dashboard({user,onBrowse,onSignedOut}){
         {tab==='profile'&&editForm&&<>
           <div style={{marginBottom:20}}>
             <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Your profile</h1>
-            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>Keep this up to date — it powers your matches.</p>
+            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',margin:0}}>This is what buyers or suppliers will see.</p>
           </div>
-          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 22px'}}>
-            <div style={{marginBottom:16}}>
-              <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>Business details</div>
-              <div className="form-grid">
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Full name</label><TIn value={editForm.name} onChange={v=>setEditForm({...editForm,name:v})}/></div>
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name</label><TIn value={editForm.businessName} onChange={v=>setEditForm({...editForm,businessName:v})}/></div>
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone</label><TIn value={editForm.phone} onChange={v=>setEditForm({...editForm,phone:v})}/></div>
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category</label>
-                  <select value={editForm.category} onChange={e=>setEditForm({...editForm,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                    <option value="">Choose</option>
-                    {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
-                  </select>
-                </div>
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>City</label>
-                  <select value={editForm.location} onChange={e=>setEditForm({...editForm,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                    <option value="">Choose</option>
-                    {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
+          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px'}}>
+            <div className="form-grid">
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Full name</label><TIn value={editForm.name} onChange={v=>setEditForm({...editForm,name:v})}/></div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business name</label><TIn value={editForm.businessName} onChange={v=>setEditForm({...editForm,businessName:v})}/></div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone</label><TIn value={editForm.phone} onChange={v=>setEditForm({...editForm,phone:v})}/></div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category</label>
+                <select value={editForm.category} onChange={e=>setEditForm({...editForm,category:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                  {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
+                </select>
+              </div>
+              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>City</label>
+                <select value={editForm.location} onChange={e=>setEditForm({...editForm,location:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                  {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
+                </select>
               </div>
             </div>
-            <div style={{marginBottom:16}}>
-              <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>{isSupplier?'What you supply':'What you source'}</div>
-              {isSupplier?<div className="form-grid">
-                <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products / services (comma-separated)</label><TIn value={editForm.products} onChange={v=>setEditForm({...editForm,products:v})}/></div>
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Minimum order</label><TIn value={editForm.moq} onChange={v=>setEditForm({...editForm,moq:v})}/></div>
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label><TIn value={editForm.leadTime} onChange={v=>setEditForm({...editForm,leadTime:v})}/></div>
-                <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery</label><TIn value={editForm.delivery} onChange={v=>setEditForm({...editForm,delivery:v})}/></div>
-              </div>:<div className="form-grid">
-                <div style={{gridColumn:'1/-1'}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>What you buy (comma-separated)</label><TIn value={editForm.sources} onChange={v=>setEditForm({...editForm,sources:v})}/></div>
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Frequency</label>
-                  <select value={editForm.frequency} onChange={e=>setEditForm({...editForm,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                    {FREQUENCY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
-                  </select>
+            <div style={{marginTop:16}}>
+              {isSupplier?<>
+                <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products (comma-separated)</label><TIn value={editForm.products} onChange={v=>setEditForm({...editForm,products:v})}/>
+                <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>MOQ</label><TIn value={editForm.moq} onChange={v=>setEditForm({...editForm,moq:v})}/></div>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label><TIn value={editForm.leadTime} onChange={v=>setEditForm({...editForm,leadTime:v})}/></div>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery</label><TIn value={editForm.delivery} onChange={v=>setEditForm({...editForm,delivery:v})}/></div>
                 </div>
-                <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={editForm.orderValue} onChange={v=>setEditForm({...editForm,orderValue:v})}/></div>
-              </div>}
+              </>:<>
+                <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>What you buy (comma-separated)</label><TIn value={editForm.sources} onChange={v=>setEditForm({...editForm,sources:v})}/>
+                <div style={{marginTop:12,display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))'}}>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Frequency</label>
+                    <select value={editForm.frequency} onChange={e=>setEditForm({...editForm,frequency:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
+                      {FREQUENCY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
+                    </select>
+                  </div>
+                  <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={editForm.orderValue} onChange={v=>setEditForm({...editForm,orderValue:v})}/></div>
+                </div>
+              </>}
             </div>
-            {saveMsg&&<div style={{background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',border:'1px solid '+(saveMsg.kind==='ok'?'rgba(30,123,60,.3)':'rgba(184,86,79,.3)'),borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318',marginBottom:14}}>{saveMsg.msg}</div>}
-            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-              <button onClick={saveProfile} disabled={saving} style={{padding:'12px 22px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700,cursor:saving?'wait':'pointer',fontFamily:'inherit'}}>{saving?'Saving…':'Save changes'}</button>
-            </div>
+            {saveMsg&&<div style={{background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',border:'1px solid '+(saveMsg.kind==='ok'?'rgba(30,123,60,.3)':'rgba(184,86,79,.3)'),borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318',marginTop:14}}>{saveMsg.msg}</div>}
+            <button onClick={saveProfile} disabled={saving} style={{marginTop:18,padding:'12px 22px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>{saving?'Saving…':'Save changes'}</button>
           </div>
         </>}
 
@@ -767,20 +846,20 @@ function Dashboard({user,onBrowse,onSignedOut}){
           <div style={{marginBottom:20}}>
             <h1 className="serif" style={{fontSize:'clamp(1.5rem,3.5vw,2.2rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>Settings</h1>
           </div>
-          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 22px',marginBottom:16}}>
-            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Account</div>
-            <div style={{display:'flex',justifyContent:'space-between',gap:14,padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Email</span><span style={{fontWeight:700,color:'#0A1F12'}}>{profile.email}</span></div>
-            <div style={{display:'flex',justifyContent:'space-between',gap:14,padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Type</span><span style={{fontWeight:700,color:'#0A1F12'}}>{isSupplier?'Supplier':'Buyer'}</span></div>
-            <div style={{display:'flex',justifyContent:'space-between',gap:14,padding:'10px 0',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Status</span><span style={{fontWeight:700,color:isVerified?'#0F5C2A':'#8A6828'}}>{isVerified?'Verified':'Pending'}</span></div>
+          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px',marginBottom:16}}>
+            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Account</div>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Email</span><span style={{fontWeight:700,color:'#0A1F12'}}>{profile.email}</span></div>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Role</span><span style={{fontWeight:700,color:'#0A1F12'}}>{isSupplier?'Supplier':'Buyer'}</span></div>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontSize:13}}><span style={{color:'rgba(10,31,18,.6)'}}>Status</span><span style={{fontWeight:700,color:isVerified?'#0F5C2A':'#8A6828'}}>{isVerified?'Verified':'Pending'}</span></div>
           </div>
-          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px 22px',marginBottom:16}}>
-            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Password</div>
-            <button onClick={async()=>{try{await auth.sendPasswordResetEmail(profile.email);setSaveMsg({kind:'ok',msg:'Reset email sent to '+profile.email});setTimeout(()=>setSaveMsg(null),4000);}catch(e){setSaveMsg({kind:'err',msg:'Could not send: '+(e.code||e.message)});setTimeout(()=>setSaveMsg(null),4000);}}} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><i className="fas fa-key" style={{marginRight:6}}></i> Send reset email</button>
-            {saveMsg&&<div style={{marginTop:12,background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',border:'1px solid '+(saveMsg.kind==='ok'?'rgba(30,123,60,.3)':'rgba(184,86,79,.3)'),borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318'}}>{saveMsg.msg}</div>}
+          <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'22px',marginBottom:16}}>
+            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:12}}>Password</div>
+            <button onClick={async()=>{try{await auth.sendPasswordResetEmail(profile.email);setSaveMsg({kind:'ok',msg:'Reset email sent.'});setTimeout(()=>setSaveMsg(null),4000);}catch(e){setSaveMsg({kind:'err',msg:'Could not send.'});setTimeout(()=>setSaveMsg(null),4000);}}} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-key" style={{marginRight:6}}></i> Send reset email</button>
+            {saveMsg&&<div style={{marginTop:12,background:saveMsg.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',borderRadius:8,padding:'10px 14px',fontSize:12.5,color:saveMsg.kind==='ok'?'#0F5C2A':'#7C2318'}}>{saveMsg.msg}</div>}
           </div>
-          <div style={{background:'#fff',border:'1px solid rgba(184,86,79,.2)',borderRadius:12,padding:'22px 22px'}}>
-            <div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#7C2318',marginBottom:12}}>Danger zone</div>
-            <button onClick={signOut} style={{padding:'10px 18px',background:'#B8564F',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out</button>
+          <div style={{background:'#fff',border:'1px solid rgba(184,86,79,.2)',borderRadius:12,padding:'22px'}}>
+            <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#7C2318',marginBottom:12}}>Danger zone</div>
+            <button onClick={signOut} style={{padding:'10px 18px',background:'#B8564F',color:'#fff',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700}}><i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> Sign out</button>
           </div>
         </>}
       </main>
@@ -788,131 +867,60 @@ function Dashboard({user,onBrowse,onSignedOut}){
   </div>;
 }
 
-/* ═══════════════════ NAV ═══════════════════ */
-function Nav({user,onSignIn,onSignUp,onDashboard}){
-  const [open,setOpen]=useState(false);
-  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',position:'sticky',top:0,zIndex:50}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
-        <a href={MAIN_PLATFORM_URL} style={{display:'flex',alignItems:'center',gap:12,textDecoration:'none'}}>
-          <Mark size={38}/>
-          <span className="hide-sm" style={{textAlign:'left',lineHeight:1}}>
-            <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
-            <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
-          </span>
-        </a>
-        <nav className="hidden lg:flex" style={{gap:22}}>
-          <a href="#directory" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Browse</a>
-          <a href="#two-sides" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Two sides</a>
-          <a href="#services" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Services</a>
-          <a href="#roles" style={{fontSize:12.5,color:'rgba(255,255,255,.65)',textDecoration:'none',fontWeight:500}}>Roles</a>
-        </nav>
-        <div style={{display:'flex',alignItems:'center',gap:8}}>
-          {user?(
-            <button onClick={onDashboard} style={{padding:'10px 16px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}><i className="fas fa-user-circle" style={{marginRight:6}}></i> Dashboard</button>
-          ):(<>
-            <button onClick={onSignIn} style={{padding:'10px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.2)',color:'#fff',borderRadius:8,fontSize:12,fontWeight:700}}>Sign in</button>
-            <button onClick={()=>onSignUp(null)} style={{padding:'10px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}>Get started</button>
-          </>)}
-          <button onClick={()=>setOpen(!open)} className="lg:hidden" style={{width:36,height:36,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'none',border:'none'}} aria-label="Menu">
-            <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(45deg) translateY(3.5px)':'none',transition:'transform .2s'}}/>
-            <span style={{display:'block',width:20,height:2,background:'#fff',borderRadius:99,transform:open?'rotate(-45deg) translateY(-3.5px)':'none',transition:'transform .2s'}}/>
-          </button>
-        </div>
-      </div>
-    </div>
-    {open&&<div className="lg:hidden" style={{borderTop:'1px solid rgba(255,255,255,.1)',background:'#0A1F12'}}>
-      <div style={{padding:'16px 24px'}}>
-        {[['#directory','Browse'],['#two-sides','Two sides'],['#services','Services'],['#roles','Roles']].map(([h,l])=>
-          <a key={h} href={h} onClick={()=>setOpen(false)} style={{display:'block',padding:'14px 0',borderBottom:'1px solid rgba(255,255,255,.05)',color:'rgba(255,255,255,.7)',fontSize:14,textDecoration:'none'}}>{l}</a>
-        )}
-      </div>
-    </div>}
-  </header>;
-}
-
-/* ═══════════════════ HERO ═══════════════════ */
-function Hero({stats}){
-  return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',padding:'clamp(60px,8vw,100px) 24px clamp(50px,7vw,80px)'}}>
-    <div style={{position:'absolute',top:-160,right:-120,width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
-    <div style={{position:'absolute',bottom:-180,left:-100,width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
-    <div style={{maxWidth:1240,margin:'0 auto',position:'relative',zIndex:1}}>
-      <span className="micro" style={{color:'#F5A623',display:'block',marginBottom:18,letterSpacing:'.22em'}}>Businesses &amp; Suppliers Directory</span>
-      <h1 className="serif" style={{fontSize:'clamp(2.1rem,5.2vw,3.6rem)',lineHeight:1.08,margin:'0 0 22px',maxWidth:'52rem'}}>
-        Helping businesses <em style={{fontStyle:'italic',color:'#F5A623'}}>buy better.</em><br/>
-        Helping suppliers <em style={{fontStyle:'italic',color:'#F5A623'}}>sell more.</em>
-      </h1>
-      <p style={{fontSize:'clamp(1rem,1.4vw,1.15rem)',lineHeight:1.75,color:'rgba(255,255,255,.72)',maxWidth:'46rem',margin:'0 0 24px'}}>
-        A two-sided marketplace connecting Zambian businesses with verified suppliers — and suppliers with the businesses that will actually buy from them.
-      </p>
-      <div style={{display:'flex',flexWrap:'wrap',gap:20,fontSize:12,color:'rgba(255,255,255,.65)'}}>
-        <span style={{display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-check-circle" style={{color:'#2E9C4A'}}></i> {stats.suppliers} suppliers</span>
-        <span style={{display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-cart-shopping" style={{color:'#F5A623'}}></i> {stats.buyers} active buyers</span>
-        <span style={{display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-layer-group" style={{color:'#F5A623'}}></i> {stats.categories} categories</span>
-      </div>
-    </div>
-  </section>;
-}
-
-/* ═══════════════════ TWO SIDES ═══════════════════ */
-function TwoSides(){
-  return <section id="two-sides" style={{background:'#F5FAF6',scrollMarginTop:80}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
-      <div style={{textAlign:'center',maxWidth:820,margin:'0 auto 44px'}}>
-        <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:14,letterSpacing:'.24em'}}>Two sides, one market</span>
-        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:16,color:'#0A1F12'}}>Every transaction has a buyer and a seller.</h2>
-      </div>
-      <div className="grid lg:grid-cols-2 gap-5">
-        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:18,padding:'32px 30px',borderLeft:'4px solid #E8730F'}}>
-          <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:16}}>
-            <span style={{width:56,height:56,borderRadius:14,background:'rgba(232,115,15,.14)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}><i className="fas fa-cart-shopping"></i></span>
-            <div><div style={{fontSize:10,textTransform:'uppercase',fontWeight:800,color:'#E8730F',marginBottom:4}}>The demand side</div><h3 className="serif" style={{fontSize:'clamp(1.15rem,2.1vw,1.4rem)',fontWeight:800,color:'#0A1F12',margin:0}}>Businesses looking for suppliers</h3></div>
-          </div>
-          <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>They need products at affordable prices, reliable quality, consistent stock and trustworthy suppliers.</p>
-        </div>
-        <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:18,padding:'32px 30px',borderLeft:'4px solid #1B6CA8'}}>
-          <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:16}}>
-            <span style={{width:56,height:56,borderRadius:14,background:'rgba(27,108,168,.14)',color:'#1B6CA8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}><i className="fas fa-truck-fast"></i></span>
-            <div><div style={{fontSize:10,textTransform:'uppercase',fontWeight:800,color:'#1B6CA8',marginBottom:4}}>The supply side</div><h3 className="serif" style={{fontSize:'clamp(1.15rem,2.1vw,1.4rem)',fontWeight:800,color:'#0A1F12',margin:0}}>Suppliers looking for businesses</h3></div>
-          </div>
-          <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',margin:0}}>They need customers who buy regularly, order sufficient quantities and pay on time.</p>
-        </div>
-      </div>
-    </div>
-  </section>;
-}
-
-/* ═══════════════════ DIRECTORY ═══════════════════ */
-function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote}){
+/* ═══════════════════ BROWSE (signed-in directory) ═══════════════════ */
+function Browse({user,onRequestQuote,onDashboard,onSignedOut}){
+  const [suppliers,setSuppliers]=useState([]);
+  const [buyers,setBuyers]=useState([]);
+  const [loading,setLoading]=useState(true);
   const [tab,setTab]=useState('suppliers');
   const [query,setQuery]=useState('');
   const [category,setCategory]=useState('all');
   const [city,setCity]=useState('all');
-  const cities=useMemo(()=>{const src=tab==='suppliers'?suppliers:buyers;return ['all',...Array.from(new Set(src.map(x=>x.location))).sort()];},[tab,suppliers,buyers]);
+  const [profile,setProfile]=useState(null);
+  const [profileType,setProfileType]=useState(null);
+
+  useEffect(()=>{
+    fsLoadDirectory().then(res=>{
+      if(res && (res.suppliers.length||res.buyers.length)){
+        setSuppliers(res.suppliers);
+        setBuyers(res.buyers);
+      }else{
+        setSuppliers(SEED_SUPPLIERS);
+        setBuyers(SEED_BUYERS);
+      }
+      setLoading(false);
+    });
+  },[]);
+
   const filteredSuppliers=useMemo(()=>{
     const q=query.trim().toLowerCase();
     return suppliers.filter(s=>{
       if(category!=='all'&&s.category!==category) return false;
       if(city!=='all'&&s.location!==city) return false;
       if(!q) return true;
-      return (s.name+' '+s.location+' '+s.desc+' '+(s.products||[]).join(' ')).toLowerCase().includes(q);
+      return (s.name+' '+s.location+' '+(s.desc||'')+' '+(s.products||[]).join(' ')).toLowerCase().includes(q);
     });
   },[suppliers,query,category,city]);
+
   const filteredBuyers=useMemo(()=>{
     const q=query.trim().toLowerCase();
     return buyers.filter(b=>{
       if(category!=='all'&&b.category!==category) return false;
       if(city!=='all'&&b.location!==city) return false;
       if(!q) return true;
-      return (b.name+' '+b.location+' '+b.desc+' '+(b.sources||[]).join(' ')).toLowerCase().includes(q);
+      return (b.name+' '+b.location+' '+(b.desc||'')+' '+(b.sources||[]).join(' ')).toLowerCase().includes(q);
     });
   },[buyers,query,category,city]);
+
   const list=tab==='suppliers'?filteredSuppliers:filteredBuyers;
-  return <section id="directory" style={{background:'#F5FAF6',scrollMarginTop:80}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(48px,6vw,72px) 24px'}}>
+  const signOut=async()=>{await authSignOutFn();onSignedOut&&onSignedOut();};
+
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
+    <Nav user={user} onDashboard={onDashboard} onSignOut={signOut}/>
+    <main style={{flex:1,maxWidth:1240,margin:'0 auto',padding:'32px 24px 60px',width:'100%'}}>
       <div style={{marginBottom:24}}>
         <span className="micro" style={{color:'#E8730F',display:'block',marginBottom:12}}>Browse directory</span>
-        <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 12px'}}>{list.length} {tab==='suppliers'?'supplier':'buyer'}{list.length===1?'':'s'}</h2>
+        <h1 className="serif" style={{fontSize:'clamp(1.8rem,4vw,2.5rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 12px'}}>{list.length} {tab==='suppliers'?'supplier':'buyer'}{list.length===1?'':'s'}</h1>
       </div>
       <div style={{display:'flex',gap:6,marginBottom:16,background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:6}}>
         <button onClick={()=>{setTab('suppliers');setCategory('all');}} style={{flex:1,padding:'12px',background:tab==='suppliers'?'#0A1F12':'transparent',color:tab==='suppliers'?'#fff':'rgba(10,31,18,.7)',border:'none',borderRadius:8,fontSize:13.5,fontWeight:700}}>Suppliers ({suppliers.length})</button>
@@ -929,103 +937,133 @@ function Directory({suppliers,buyers,onOpenSupplier,onOpenBuyer,onRequestQuote})
             {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
           </select>
           <select value={city} onChange={e=>setCity(e.target.value)} style={{...INP_STYLE,minWidth:140,cursor:'pointer'}}>
-            {cities.map(c=><option key={c} value={c}>{c==='all'?'All cities':c}</option>)}
+            <option value="all">All cities</option>
+            {ZAMBIAN_CITIES.map(c=><option key={c} value={c}>{c}</option>)}
           </select>
         </div>
       </div>
-      {list.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:14,padding:'64px 24px',textAlign:'center'}}>
-        <i className="fas fa-magnifying-glass" style={{fontSize:32,color:'rgba(10,31,18,.2)',marginBottom:14,display:'block'}}></i>
-        <h4 className="serif" style={{fontSize:19,fontWeight:700,color:'#0A1F12',margin:0}}>No results</h4>
-      </div>:<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tab==='suppliers'?filteredSuppliers.map(s=><SupplierCard key={s.id} supplier={s} onOpen={()=>onOpenSupplier(s)} onQuote={()=>onRequestQuote(s)}/>):filteredBuyers.map(b=><BuyerCard key={b.id} buyer={b} onOpen={()=>onOpenBuyer(b)}/>)}
+      {loading?<div style={{textAlign:'center',padding:'60px 0'}}><i className="fas fa-spinner fa-spin" style={{fontSize:24,color:'#E8730F'}}></i></div>:
+      list.length===0?<div style={{background:'#fff',border:'1px dashed rgba(10,31,18,.15)',borderRadius:14,padding:'48px',textAlign:'center'}}>
+        <p style={{fontSize:13,color:'rgba(10,31,18,.55)',margin:0}}>No results.</p>
+      </div>:<div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
+        {tab==='suppliers'?filteredSuppliers.map(s=>{
+          const cat=CAT_MAP[s.category]||{color:'#E8730F',icon:'fa-building',title:'Supplier'};
+          return <div key={s.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:`3px solid ${cat.color}`}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{width:40,height:40,borderRadius:10,background:cat.color+'15',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{s.name}</div>
+                <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{s.location}</div>
+              </div>
+            </div>
+            <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{s.desc}</p>
+            <button onClick={()=>{setProfile(s);setProfileType('supplier');}} style={{padding:'9px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700,marginTop:'auto'}}>View profile</button>
+          </div>;
+        }):filteredBuyers.map(b=>(
+          <div key={b.id} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px',display:'flex',flexDirection:'column',gap:10,borderTop:'3px solid #E8730F'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{width:40,height:40,borderRadius:10,background:'rgba(232,115,15,.15)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}><i className="fas fa-cart-shopping"></i></span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13.5,fontWeight:800,color:'#0A1F12'}}>{b.name}</div>
+                <div style={{fontSize:11,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{b.location}</div>
+              </div>
+            </div>
+            <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{b.desc}</p>
+            <button onClick={()=>{setProfile(b);setProfileType('buyer');}} style={{padding:'9px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700,marginTop:'auto'}}>View buyer</button>
+          </div>
+        ))}
       </div>}
-    </div>
-  </section>;
-}
-function SupplierCard({supplier,onOpen,onQuote}){
-  const cat=CAT_MAP[supplier.category]||{color:'#E8730F',icon:'fa-building',title:'Supplier'};
-  return <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'20px',display:'flex',flexDirection:'column',gap:12,borderTop:`3px solid ${cat.color}`}}>
-    <div style={{display:'flex',alignItems:'center',gap:12}}>
-      <span style={{width:44,height:44,borderRadius:11,background:cat.color+'16',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
-      <div style={{flex:1,minWidth:0}}>
-        <h3 style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15.5,fontWeight:700,color:'#0A1F12',margin:0,lineHeight:1.25}}>{supplier.name}</h3>
-        <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{supplier.location}</div>
-      </div>
-    </div>
-    <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',lineHeight:1.55,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{supplier.desc}</p>
-    <div style={{display:'flex',gap:8,marginTop:'auto'}}>
-      <button onClick={onOpen} style={{flex:1,padding:'10px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#0A1F12'}}>Profile</button>
-      <button onClick={onQuote} style={{flex:1,padding:'10px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#fff'}}>Quote</button>
-    </div>
-  </div>;
-}
-function BuyerCard({buyer,onOpen}){
-  return <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'20px',display:'flex',flexDirection:'column',gap:12,borderTop:`3px solid #E8730F`}}>
-    <div style={{display:'flex',alignItems:'center',gap:12}}>
-      <span style={{width:44,height:44,borderRadius:11,background:'rgba(232,115,15,.14)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}><i className="fas fa-cart-shopping"></i></span>
-      <div style={{flex:1,minWidth:0}}>
-        <h3 style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15.5,fontWeight:700,color:'#0A1F12',margin:0,lineHeight:1.25}}>{buyer.name}</h3>
-        <div style={{fontSize:11.5,color:'rgba(10,31,18,.55)'}}><i className="fas fa-location-dot" style={{marginRight:4,fontSize:9}}></i>{buyer.location}</div>
-      </div>
-    </div>
-    <p style={{fontSize:12.5,color:'rgba(10,31,18,.65)',lineHeight:1.55,margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{buyer.desc}</p>
-    <button onClick={onOpen} style={{padding:'10px',background:'linear-gradient(135deg,#E8730F,#F5A623)',border:'none',borderRadius:8,fontSize:12.5,fontWeight:700,color:'#fff',marginTop:'auto'}}>View buyer</button>
+    </main>
+    <Footer/>
+    {profile&&profileType==='supplier'&&<SupplierProfileModal supplier={profile} user={user} onClose={()=>setProfile(null)} onRequestQuote={(s)=>{setProfile(null);onRequestQuote(s);}}/>}
+    {profile&&profileType==='buyer'&&<BuyerProfileModal buyer={profile} onClose={()=>setProfile(null)}/>}
   </div>;
 }
 
-/* ═══════════════════ MODALS ═══════════════════ */
-function SupplierProfile({supplier,onClose,onQuote}){
-  if(!supplier) return null;
+function SupplierProfileModal({supplier,user,onClose,onRequestQuote}){
   const cat=CAT_MAP[supplier.category]||{color:'#E8730F',icon:'fa-building',title:'Supplier'};
-  return <Modal open={!!supplier} onClose={onClose} eyebrow={`${cat.title} · ${supplier.location}`} maxWidth="48rem">
+  return <Modal open={true} onClose={onClose} eyebrow={cat.title} maxWidth="44rem">
     <div style={{display:'flex',alignItems:'flex-start',gap:14,marginBottom:16}}>
       <span style={{width:64,height:64,borderRadius:15,background:cat.color+'16',color:cat.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}><i className={`fas ${cat.icon}`}></i></span>
       <div style={{flex:1,minWidth:0}}>
         <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 4px'}}>{supplier.name}</h2>
-        <div style={{fontSize:13,color:'rgba(10,31,18,.6)'}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{supplier.location} · {cat.title}</div>
+        <div style={{fontSize:13,color:'rgba(10,31,18,.6)'}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{supplier.location}</div>
       </div>
     </div>
-    <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',marginBottom:20}}>{supplier.desc}</p>
-    <div style={{marginBottom:16}}>
-      <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Products</div>
-      <div style={{display:'flex',flexWrap:'wrap',gap:8}}>{(supplier.products||[]).map((p,i)=><span key={i} style={{fontSize:12.5,color:'rgba(10,31,18,.75)',background:'#fff',border:'1px solid rgba(10,31,18,.1)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>)}</div>
+    <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',marginBottom:16}}>{supplier.desc}</p>
+    {supplier.products&&<div style={{marginBottom:16}}>
+      <div style={{fontSize:11,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Products</div>
+      <div style={{display:'flex',flexWrap:'wrap',gap:8}}>{supplier.products.map((p,i)=><span key={i} style={{fontSize:12.5,color:'rgba(10,31,18,.75)',background:'#fff',border:'1px solid rgba(10,31,18,.1)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>)}</div>
+    </div>}
+    <div style={{display:'grid',gap:12,gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',marginBottom:18}}>
+      {supplier.moq&&<div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:9,padding:'12px 14px'}}><div style={{fontSize:10,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:4}}>MOQ</div><div style={{fontSize:13,fontWeight:700,color:'#0A1F12'}}>{supplier.moq}</div></div>}
+      {supplier.leadTime&&<div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:9,padding:'12px 14px'}}><div style={{fontSize:10,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:4}}>Lead time</div><div style={{fontSize:13,fontWeight:700,color:'#0A1F12'}}>{supplier.leadTime}</div></div>}
+      {supplier.delivery&&<div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:9,padding:'12px 14px'}}><div style={{fontSize:10,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:4}}>Delivery</div><div style={{fontSize:13,fontWeight:700,color:'#0A1F12'}}>{supplier.delivery}</div></div>}
     </div>
-    <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-      <button onClick={()=>onQuote(supplier)} style={{flex:'1 1 200px',padding:'14px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>Request quote</button>
-      <a href={waUrl(`Hello StartEasy — I saw ${supplier.name} and would like to enquire.`)} target="_blank" rel="noopener noreferrer" style={{flex:'1 1 180px',padding:'14px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8}}><i className="fab fa-whatsapp"></i> WhatsApp</a>
-    </div>
+    <button onClick={()=>onRequestQuote(supplier)} style={{width:'100%',padding:'14px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>Request quote</button>
   </Modal>;
 }
-function BuyerProfile({buyer,onClose}){
-  if(!buyer) return null;
-  return <Modal open={!!buyer} onClose={onClose} eyebrow={`Buyer · ${buyer.location}`} maxWidth="46rem">
-    <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 12px'}}>{buyer.name}</h2>
+
+function BuyerProfileModal({buyer,onClose}){
+  return <Modal open={true} onClose={onClose} eyebrow="Buyer profile" maxWidth="42rem">
+    <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 6px'}}>{buyer.name}</h2>
+    <div style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:14}}><i className="fas fa-location-dot" style={{marginRight:5}}></i>{buyer.location}</div>
     <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.75)',marginBottom:16}}>{buyer.desc}</p>
-    <div style={{marginBottom:16}}>
+    {buyer.sources&&<div style={{marginBottom:16}}>
       <div style={{fontSize:11,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Sources</div>
-      <div style={{display:'flex',flexWrap:'wrap',gap:8}}>{(buyer.sources||[]).map((p,i)=><span key={i} style={{fontSize:12.5,color:'rgba(138,104,40,.9)',background:'#fff',border:'1px solid rgba(232,115,15,.25)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>)}</div>
-    </div>
-    <a href={waUrl(`Hello StartEasy — I'm a supplier and I'd like an intro to ${buyer.name}.`)} target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}><i className="fab fa-whatsapp"></i> Request introduction</a>
+      <div style={{display:'flex',flexWrap:'wrap',gap:8}}>{buyer.sources.map((p,i)=><span key={i} style={{fontSize:12.5,color:'rgba(138,104,40,.9)',background:'#fff',border:'1px solid rgba(232,115,15,.25)',padding:'6px 12px',borderRadius:99,fontWeight:600}}>{p}</span>)}</div>
+    </div>}
+    <a href={waUrl(`Hello StartEasy — I'm interested in ${buyer.name}.`)} target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px 22px',background:'#25D366',color:'#fff',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none',width:'100%'}}><i className="fab fa-whatsapp"></i> Contact via StartEasy</a>
   </Modal>;
 }
-function RFQModal({open,onClose,preselected}){
+
+/* ═══════════════════ RFQ MODAL ═══════════════════ */
+function RFQModal({open,onClose,preselected,user,onSaved}){
   const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deadline:'',budget:'',notes:''});
   const [err,setErr]=useState('');
+  const [saving,setSaving]=useState(false);
   useEffect(()=>{
-    if(open){setForm(f=>({...f,category:preselected?preselected.category:'',product:preselected?(preselected.products||[])[0]||'':'',business:''}));setErr('');}
-  },[open,preselected]);
-  const submit=()=>{
+    if(open){setForm(f=>({...f,name:user?.displayName||'',email:user?.email||'',category:preselected?preselected.category:'',product:preselected?(preselected.products||[])[0]||'':''}));setErr('');}
+  },[open,preselected,user]);
+  const submit=async()=>{
     setErr('');
     if(!form.name.trim()) return setErr('Enter your name.');
     if(!form.phone.trim()) return setErr('Enter your phone.');
     if(!form.product.trim()) return setErr('Describe what you need.');
-    const msg=['*QUOTATION REQUEST*','','*Buyer:*',`Name: ${form.name}`,form.business&&`Business: ${form.business}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Requirement:*',form.category&&`Category: ${CAT_MAP[form.category]?.title||form.category}`,preselected&&`Supplier: ${preselected.name}`,`Product: ${form.product}`,form.quantity&&`Quantity: ${form.quantity}`,form.deliveryCity&&`Delivery to: ${form.deliveryCity}`,form.deadline&&`Needed by: ${form.deadline}`,form.budget&&`Budget: ${form.budget}`,form.notes&&`Notes: ${form.notes}`].filter(Boolean).join('\n');
-    window.open(waUrl(msg),'_blank');
-    onClose();
+    if(!user){setErr('You must be signed in.');return;}
+    setSaving(true);
+    try{
+      const quote={
+        userId:user.uid,
+        userName:form.name,
+        userEmail:form.email,
+        supplierId:preselected?.id||null,
+        supplierName:preselected?.name||null,
+        supplierCategory:preselected?.category||form.category,
+        category:form.category,
+        product:form.product,
+        quantity:form.quantity,
+        deliveryCity:form.deliveryCity,
+        deadline:form.deadline,
+        budget:form.budget,
+        notes:form.notes,
+        phone:form.phone,
+        status:'sent',
+        at:Date.now()
+      };
+      const ok=await saveQuote(quote);
+      if(!ok) throw new Error('Could not save your request. Please try again.');
+      const msg=['*QUOTATION REQUEST*','','*Buyer:*',`Name: ${form.name}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Requirement:*',form.category&&`Category: ${CAT_MAP[form.category]?.title||form.category}`,preselected&&`Supplier: ${preselected.name}`,`Product: ${form.product}`,form.quantity&&`Quantity: ${form.quantity}`,form.deliveryCity&&`Delivery to: ${form.deliveryCity}`,form.deadline&&`Needed by: ${form.deadline}`,form.budget&&`Budget: ${form.budget}`,form.notes&&`Notes: ${form.notes}`].filter(Boolean).join('\n');
+      window.open(waUrl(msg),'_blank');
+      onSaved && onSaved();
+      onClose();
+    }catch(e){setErr(e.message||'Could not save request.');}
+    finally{setSaving(false);}
   };
   return <Modal open={open} onClose={onClose} eyebrow="Request quotation" maxWidth="44rem">
     <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Request a quotation</h2>
-    <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',marginTop:14}}>
+    <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>Your request will be tracked in "My Requests" in your dashboard.{preselected&&<span style={{display:'block',marginTop:8,color:'#8A6828',fontWeight:600}}><i className="fas fa-info-circle"></i> Requesting from {preselected.name}</span>}</p>
+    <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))'}}>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Your name *</label><TIn value={form.name} onChange={v=>setForm({...form,name:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Business</label><TIn value={form.business} onChange={v=>setForm({...form,business:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Phone *</label><TIn value={form.phone} onChange={v=>setForm({...form,phone:v})}/></div>
@@ -1035,133 +1073,16 @@ function RFQModal({open,onClose,preselected}){
     <div style={{marginTop:14,display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}}>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Quantity</label><TIn value={form.quantity} onChange={v=>setForm({...form,quantity:v})}/></div>
       <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Needed by</label><TIn type="date" value={form.deadline} onChange={v=>setForm({...form,deadline:v})}/></div>
+      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget</label><TIn value={form.budget} onChange={v=>setForm({...form,budget:v})}/></div>
     </div>
     {err&&<div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5}}>{err}</div>}
     <div style={{display:'flex',gap:10,marginTop:20,flexWrap:'wrap'}}>
-      <button onClick={submit} style={{flex:'1 1 240px',padding:'14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>Send via WhatsApp</button>
+      <button onClick={submit} disabled={saving} style={{flex:'1 1 240px',padding:'14px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>
+        {saving?<><i className="fas fa-spinner fa-spin"></i> Saving…</>:'Send via WhatsApp & save'}
+      </button>
       <button onClick={onClose} style={{padding:'14px 22px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13.5,fontWeight:600,color:'#0A1F12'}}>Cancel</button>
     </div>
   </Modal>;
-}
-
-/* ═══════════════════ INFO SECTIONS ═══════════════════ */
-function ServiceBusinesses(){
-  return <section id="services" style={{background:'#0A1F12',color:'#fff',scrollMarginTop:80}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
-      <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:20,color:'#fff'}}>Service businesses need suppliers too.</h2>
-      <div style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.1)',borderRadius:16,overflow:'hidden'}}>
-        {SERVICE_BUSINESSES.map((s,i)=>(
-          <div key={i} style={{borderBottom:i<SERVICE_BUSINESSES.length-1?'1px solid rgba(255,255,255,.06)':'none',padding:'14px 22px',display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
-            <span style={{width:34,height:34,borderRadius:9,background:'rgba(245,166,35,.16)',color:'#F5A623',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}><i className={`fas ${s.icon}`}></i></span>
-            <div style={{flex:'1 1 200px',fontSize:13.5,fontWeight:700,color:'#fff'}}>{s.category}</div>
-            <div style={{flex:'2 1 300px',fontSize:12.5,color:'rgba(255,255,255,.65)'}}>{s.need}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>;
-}
-function Roles(){
-  return <section id="roles" style={{background:'#F5FAF6',scrollMarginTop:80}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'clamp(56px,7vw,80px) 24px'}}>
-      <h2 className="serif" style={{fontSize:'clamp(1.7rem,3.8vw,2.5rem)',lineHeight:1.15,marginBottom:30,color:'#0A1F12'}}>Three roles in the supply chain.</h2>
-      <div className="grid sm:grid-cols-3 gap-4">
-        {ROLES.map(r=>(
-          <div key={r.key} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'28px 24px',borderTop:`4px solid ${r.color}`}}>
-            <span style={{width:52,height:52,borderRadius:13,background:r.color+'16',color:r.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21,marginBottom:14}}><i className={`fas ${r.icon}`}></i></span>
-            <h3 className="serif" style={{fontSize:18,fontWeight:800,color:'#0A1F12',marginBottom:10}}>{r.title}</h3>
-            <p style={{fontSize:13.5,color:'rgba(10,31,18,.72)',lineHeight:1.65,marginBottom:12}}>{r.desc}</p>
-            <div style={{background:'#F5FAF6',border:'1px dashed rgba(10,31,18,.12)',borderRadius:9,padding:'12px 14px'}}>
-              <div style={{fontSize:9.5,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.45)',marginBottom:4}}>Example</div>
-              <div style={{fontSize:12.5,color:'rgba(10,31,18,.75)',fontStyle:'italic'}}>{r.example}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>;
-}
-function Footer(){
-  return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}>
-      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
-        <Mark size={38}/>
-        <span style={{fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
-      </div>
-      <p style={{fontSize:11,textTransform:'uppercase',color:'#F5A623',fontWeight:700,marginBottom:14}}>Helping businesses buy better. Helping suppliers sell more.</p>
-      <div style={{display:'flex',flexWrap:'wrap',gap:20,fontSize:13,color:'rgba(255,255,255,.5)'}}>
-        <a href={'mailto:'+CONTACT_EMAIL} style={{color:'inherit',textDecoration:'none'}}>{CONTACT_EMAIL}</a>
-        <span>+260 762499581</span>
-        <span>Lusaka, Zambia</span>
-      </div>
-      <div style={{marginTop:32,paddingTop:20,borderTop:'1px solid rgba(255,255,255,.1)'}}>
-        <p style={{fontSize:11,color:'rgba(255,255,255,.35)',lineHeight:1.7,margin:0}}>StartEasy is a directory and matchmaking service. Any transaction is between buyer and supplier.</p>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap',marginTop:16}}>
-          <p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia</p>
-          <a href="#seed" style={{fontSize:10.5,color:'rgba(255,255,255,.2)',textDecoration:'none',textTransform:'uppercase',fontWeight:700}}><i className="fas fa-lock" style={{marginRight:6}}></i>Admin</a>
-        </div>
-      </div>
-    </div>
-  </footer>;
-}
-function FloatingWA(){
-  return <a href={waUrl('Hello StartEasy — I would like to talk about the directory.')} target="_blank" rel="noopener noreferrer" style={{position:'fixed',bottom:24,right:24,zIndex:100,width:52,height:52,borderRadius:'50%',background:'#25D366',boxShadow:'0 6px 22px rgba(37,211,102,.45)',display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none'}} aria-label="WhatsApp"><i className="fab fa-whatsapp" style={{color:'#fff',fontSize:24}}></i></a>;
-}
-
-/* ═══════════════════ DIRECTORY VIEW ═══════════════════ */
-function DirectoryView({user,authOpen,authMode,authRole,onOpenAuth,onCloseAuth,onDashboard}){
-  const [localSuppliers]=useState(()=>readLS('se_directory_suppliers',[]));
-  const [localBuyers]=useState(()=>readLS('se_directory_buyers',[]));
-  const [remoteSuppliers,setRemoteSuppliers]=useState(null);
-  const [remoteBuyers,setRemoteBuyers]=useState(null);
-  const [supplierProfile,setSupplierProfile]=useState(null);
-  const [buyerProfile,setBuyerProfile]=useState(null);
-  const [rfqOpen,setRfqOpen]=useState(false);
-  const [rfqPreselected,setRfqPreselected]=useState(null);
-
-  useEffect(()=>{window.scrollTo(0,0);},[]);
-  useEffect(()=>{
-    let cancelled=false;
-    const attempt=()=>{
-      if(!firebaseReady){setTimeout(attempt,400);return;}
-      fsLoadDirectory().then(res=>{
-        if(cancelled) return;
-        if(res&&(res.suppliers.length||res.buyers.length)){
-          setRemoteSuppliers(res.suppliers);
-          setRemoteBuyers(res.buyers);
-        }
-      });
-    };
-    attempt();
-    return ()=>{cancelled=true;};
-  },[]);
-
-  const baseSuppliers=remoteSuppliers!==null?remoteSuppliers:SEED_SUPPLIERS;
-  const baseBuyers=remoteBuyers!==null?remoteBuyers:SEED_BUYERS;
-  const allSuppliers=useMemo(()=>[...baseSuppliers,...localSuppliers],[baseSuppliers,localSuppliers]);
-  const allBuyers=useMemo(()=>[...baseBuyers,...localBuyers],[baseBuyers,localBuyers]);
-  const stats=useMemo(()=>({suppliers:allSuppliers.length,buyers:allBuyers.length,categories:CATEGORIES.length}),[allSuppliers,allBuyers]);
-
-  const openRFQ=(supplier)=>{setRfqPreselected(supplier||null);setRfqOpen(true);};
-  const closeRFQ=()=>{setRfqOpen(false);setRfqPreselected(null);};
-
-  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
-    <Nav user={user} onSignIn={()=>onOpenAuth('signin','buyer')} onSignUp={(role)=>onOpenAuth('signup',role||'buyer')} onDashboard={onDashboard}/>
-    <main style={{flex:1}}>
-      <Hero stats={stats}/>
-      <HeroCTA user={user} onSignup={(role)=>onOpenAuth('signup',role)} onSignin={()=>onOpenAuth('signin','buyer')} onDashboard={onDashboard}/>
-      <TwoSides/>
-      <Directory suppliers={allSuppliers} buyers={allBuyers} onOpenSupplier={setSupplierProfile} onOpenBuyer={setBuyerProfile} onRequestQuote={openRFQ}/>
-      <ServiceBusinesses/>
-      <Roles/>
-    </main>
-    <Footer/>
-    <FloatingWA/>
-    <SupplierProfile supplier={supplierProfile} onClose={()=>setSupplierProfile(null)} onQuote={(s)=>{setSupplierProfile(null);openRFQ(s);}}/>
-    <BuyerProfile buyer={buyerProfile} onClose={()=>setBuyerProfile(null)}/>
-    <RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected}/>
-    <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={onCloseAuth} onAuthSuccess={()=>{onCloseAuth();setTimeout(()=>{window.location.hash='#dashboard';},100);}}/>
-  </div>;
 }
 
 /* ═══════════════════ SEED VIEW ═══════════════════ */
@@ -1188,7 +1109,7 @@ function SeedView(){
       setUser(u);setIsAdmin(false);
       if(u&&u.email&&u.providerData&&u.providerData.length){
         try{const snap=await db.collection('se_admins').doc(u.uid).get();setIsAdmin(snap.exists);if(snap.exists) loadCounts();}
-        catch(e){console.warn(e.message);}
+        catch(e){}
       }
       setChecking(false);
     });
@@ -1204,7 +1125,7 @@ function SeedView(){
   };
   const handleSignOut=async()=>{await auth.signOut();setEmail('');setPw('');setStatus(null);};
   const handleSeed=async()=>{
-    if(!isAdmin){setStatus({kind:'err',msg:'Only admins can seed.'});return;}
+    if(!isAdmin){setStatus({kind:'err',msg:'Admins only.'});return;}
     setSeeding(true);setStatus({kind:'info',msg:'Seeding…'});
     try{
       const batch=db.batch();
@@ -1216,40 +1137,38 @@ function SeedView(){
     }catch(e){setStatus({kind:'err',msg:'Failed: '+(e.code||e.message)});}
     finally{setSeeding(false);}
   };
-  const statusBg=status?(status.kind==='ok'?{bg:'rgba(30,123,60,.1)',border:'1px solid rgba(30,123,60,.3)',color:'#0F5C2A'}:status.kind==='err'?{bg:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',color:'#7C2318'}:{bg:'rgba(27,108,168,.08)',border:'1px solid rgba(27,108,168,.25)',color:'#1B4C7A'}):null;
-
   return <div style={{minHeight:'100vh',background:'#F5FAF6',padding:'32px 20px'}}>
     <div style={{maxWidth:560,margin:'0 auto',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:14,padding:'28px'}}>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:18}}>
         <Mark size={42}/>
         <div><div style={{fontSize:9,textTransform:'uppercase',fontWeight:700,color:'rgba(10,31,18,.4)'}}>StartEasy</div><div className="serif" style={{fontSize:20,fontWeight:800,color:'#0A1F12'}}>Seed panel</div></div>
       </div>
-      {checking?<div style={{textAlign:'center',padding:'24px 0',color:'rgba(10,31,18,.5)'}}><i className="fas fa-spinner fa-spin"></i> Checking auth…</div>:
+      {checking?<div style={{textAlign:'center',padding:'24px 0'}}><i className="fas fa-spinner fa-spin"></i></div>:
       !user||!user.email?<>
-        <p style={{fontSize:13,color:'rgba(10,31,18,.7)',margin:'0 0 18px'}}>Sign in with your Firebase admin account.</p>
+        <p style={{fontSize:13,color:'rgba(10,31,18,.7)',margin:'0 0 18px'}}>Sign in with your admin account.</p>
         <label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label>
         <input type="email" value={email} onChange={e=>setEmail(e.target.value)} style={{...INP_STYLE,marginBottom:12}}/>
         <label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password</label>
         <input type="password" value={pw} onChange={e=>setPw(e.target.value)} style={{...INP_STYLE,marginBottom:14}} onKeyDown={e=>{if(e.key==='Enter')handleSignIn();}}/>
-        <button onClick={handleSignIn} disabled={signingIn} style={{width:'100%',padding:'13px',background:signingIn?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:signingIn?'wait':'pointer',marginBottom:10}}>{signingIn?'Signing in…':'Sign in'}</button>
-        <a href="#" onClick={e=>{e.preventDefault();window.location.hash='';window.location.reload();}} style={{display:'block',textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.5)',textDecoration:'none',padding:'8px'}}>← Back</a>
+        <button onClick={handleSignIn} disabled={signingIn} style={{width:'100%',padding:'13px',background:signingIn?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,marginBottom:10}}>{signingIn?'Signing in…':'Sign in'}</button>
+        <a href="#" onClick={e=>{e.preventDefault();window.location.hash='';}} style={{display:'block',textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.5)',textDecoration:'none',padding:'8px'}}>← Back</a>
         {err&&<div style={{background:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',borderRadius:9,padding:'10px 14px',fontSize:12.5,color:'#7C2318',marginTop:12}}>{err}</div>}
       </>:
       !isAdmin?<>
-        <div style={{background:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',borderRadius:9,padding:'12px 14px',fontSize:13,color:'#7C2318',marginBottom:16}}>Signed in as {user.email} but not in <code>se_admins</code>.</div>
+        <div style={{background:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',borderRadius:9,padding:'12px 14px',fontSize:13,color:'#7C2318',marginBottom:16}}>Signed in as {user.email} but not admin.</div>
         <button onClick={handleSignOut} style={{width:'100%',padding:'12px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700}}>Sign out</button>
       </>:<>
         <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}><i className="fas fa-circle-check" style={{color:'#1E7B3C'}}></i><span style={{fontSize:13,color:'rgba(10,31,18,.7)'}}>{user.email}</span></div>
         <div style={{background:'#F5FAF6',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:'14px 16px',marginBottom:16}}>
-          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}><span>In payload: suppliers</span><strong>{SEED_SUPPLIERS.length}</strong></div>
-          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}><span>In payload: buyers</span><strong>{SEED_BUYERS.length}</strong></div>
-          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}><span>In Firestore: suppliers</span><strong>{counts.sup===null?'—':counts.sup}</strong></div>
-          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0'}}><span>In Firestore: buyers</span><strong>{counts.buy===null?'—':counts.buy}</strong></div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}><span>Payload: suppliers</span><strong>{SEED_SUPPLIERS.length}</strong></div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}><span>Payload: buyers</span><strong>{SEED_BUYERS.length}</strong></div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0',borderBottom:'1px dashed rgba(10,31,18,.08)'}}><span>Firestore: suppliers</span><strong>{counts.sup===null?'—':counts.sup}</strong></div>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,padding:'6px 0'}}><span>Firestore: buyers</span><strong>{counts.buy===null?'—':counts.buy}</strong></div>
         </div>
-        <button onClick={handleSeed} disabled={seeding} style={{width:'100%',padding:'13px',background:seeding?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,cursor:seeding?'wait':'pointer',marginBottom:10}}>{seeding?'Seeding…':'Seed directory'}</button>
+        <button onClick={handleSeed} disabled={seeding} style={{width:'100%',padding:'13px',background:seeding?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,marginBottom:10}}>{seeding?'Seeding…':'Seed directory'}</button>
         <button onClick={handleSignOut} style={{width:'100%',padding:'11px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:9,fontSize:13,fontWeight:700,marginBottom:10}}>Sign out</button>
-        <a href="#" onClick={e=>{e.preventDefault();window.location.hash='';window.location.reload();}} style={{display:'block',textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.5)',textDecoration:'none',padding:'8px'}}>← Back to directory</a>
-        {status&&<div style={{background:statusBg.bg,border:statusBg.border,color:statusBg.color,borderRadius:9,padding:'12px 14px',fontSize:12.5,lineHeight:1.6,marginTop:16}}>{status.msg}</div>}
+        <a href="#" onClick={e=>{e.preventDefault();window.location.hash='';}} style={{display:'block',textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.5)',textDecoration:'none',padding:'8px'}}>← Back</a>
+        {status&&<div style={{background:status.kind==='ok'?'rgba(30,123,60,.1)':'rgba(184,86,79,.1)',border:'1px solid '+(status.kind==='ok'?'rgba(30,123,60,.3)':'rgba(184,86,79,.3)'),color:status.kind==='ok'?'#0F5C2A':'#7C2318',borderRadius:9,padding:'12px 14px',fontSize:12.5,marginTop:16}}>{status.msg}</div>}
       </>}
     </div>
   </div>;
@@ -1263,13 +1182,14 @@ function App(){
   const [authOpen,setAuthOpen]=useState(false);
   const [authMode,setAuthMode]=useState('signup');
   const [authRole,setAuthRole]=useState('buyer');
+  const [rfqOpen,setRfqOpen]=useState(false);
+  const [rfqPreselected,setRfqPreselected]=useState(null);
 
   useEffect(()=>{
     if(!firebaseReady){setAuthLoading(false);return;}
     const unsub=auth.onAuthStateChanged(u=>{setUser(u&&u.email?u:null);setAuthLoading(false);});
     return unsub;
   },[]);
-
   useEffect(()=>{
     const onHash=()=>setHash(window.location.hash);
     window.addEventListener('hashchange',onHash);
@@ -1278,31 +1198,38 @@ function App(){
 
   const openAuth=(mode,role)=>{setAuthMode(mode||'signup');setAuthRole(role||'buyer');setAuthOpen(true);};
   const closeAuth=()=>setAuthOpen(false);
+  const goHome=()=>{window.location.hash='';};
   const goDashboard=()=>{window.location.hash='#dashboard';};
+  const goBrowse=()=>{window.location.hash='#browse';};
+  const openRFQ=(supplier)=>{setRfqPreselected(supplier||null);setRfqOpen(true);};
+  const closeRFQ=()=>{setRfqOpen(false);setRfqPreselected(null);};
+  const signedOut=()=>{setUser(null);goHome();};
 
   if(hash==='#seed') return <SeedView/>;
 
-  if(hash==='#dashboard'){
-    if(authLoading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
-    if(!user){
-      return <div style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',alignItems:'center',justifyContent:'center',padding:'32px 20px'}}>
-        <div style={{maxWidth:420,textAlign:'center',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:14,padding:'32px 28px'}}>
-          <i className="fas fa-lock" style={{fontSize:32,color:'#E8730F',marginBottom:14,display:'block'}}></i>
-          <h2 className="serif" style={{fontSize:22,color:'#0A1F12',marginBottom:10}}>Please sign in</h2>
-          <p style={{fontSize:13.5,color:'rgba(10,31,18,.65)',lineHeight:1.6,marginBottom:22}}>You need to be signed in to access your dashboard.</p>
-          <button onClick={()=>openAuth('signin','buyer')} style={{width:'100%',padding:'13px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,marginBottom:10}}>Sign in</button>
-          <button onClick={()=>{window.location.hash='';}} style={{width:'100%',padding:'11px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:9,fontSize:13,fontWeight:600,color:'#0A1F12'}}>Go to home</button>
-          <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={closeAuth}/>
-        </div>
-      </div>;
-    }
+  if(authLoading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+
+  // Protected routes require auth
+  if(hash==='#dashboard' || hash==='#browse'){
+    if(!user) return <>
+      <SignInPrompt onSignIn={()=>openAuth('signin','buyer')} onSignUp={()=>openAuth('signup','buyer')} onHome={goHome}/>
+      <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={()=>{closeAuth();if(authMode==='signin'||authRole){goDashboard();}}}/>
+    </>;
+    if(hash==='#dashboard') return <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
     return <>
-      <Dashboard user={user} onBrowse={()=>{window.location.hash='';}} onSignedOut={()=>{setUser(null);window.location.hash='';}}/>
-      <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={closeAuth}/>
+      <Browse user={user} onRequestQuote={openRFQ} onDashboard={goDashboard} onSignedOut={signedOut}/>
+      <RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} user={user} onSaved={()=>{}}/>
     </>;
   }
 
-  return <DirectoryView user={user} authOpen={authOpen} authMode={authMode} authRole={authRole} onOpenAuth={openAuth} onCloseAuth={closeAuth} onDashboard={goDashboard}/>;
+  // Home route
+  if(!user) return <>
+    <Landing onSignup={(role)=>openAuth('signup',role||'buyer')} onSignin={()=>openAuth('signin','buyer')}/>
+    <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={()=>{closeAuth();goDashboard();}}/>
+  </>;
+
+  // Signed in, no explicit route → dashboard
+  return <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
