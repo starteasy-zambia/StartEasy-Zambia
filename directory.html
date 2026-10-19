@@ -660,7 +660,7 @@ function Nav({user,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   </header>;
 }
 
-/* ═══════════════════ HERO ═══════════════════ */
+/* ═══════════════════ HERO (original) ═══════════════════ */
 function Hero({stats}){
   return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',padding:'clamp(64px,9vw,120px) 24px clamp(56px,8vw,100px)'}}>
     <div style={{position:'absolute',top:-160,right:-120,width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
@@ -672,7 +672,7 @@ function Hero({stats}){
         Helping suppliers <em style={{fontStyle:'italic',color:'#F5A623'}}>sell more.</em>
       </h1>
       <p style={{fontSize:'clamp(1rem,1.5vw,1.2rem)',lineHeight:1.7,color:'rgba(255,255,255,.7)',maxWidth:'46rem',margin:'0 auto 40px'}}>
-        A two-sided marketplace connecting Zambian businesses with verified suppliers — locally and internationally — and suppliers with the businesses that will actually buy from them.
+        A two-sided marketplace connecting Zambian businesses with verified suppliers — and suppliers with the businesses that will actually buy from them.
       </p>
       {stats && <div style={{display:'flex',flexWrap:'wrap',gap:24,fontSize:12,color:'rgba(255,255,255,.6)',justifyContent:'center'}}>
         <span><i className="fas fa-check-circle" style={{color:'#2E9C4A',marginRight:6}}></i>{stats.suppliers} suppliers</span>
@@ -683,7 +683,7 @@ function Hero({stats}){
   </section>;
 }
 
-/* ═══════════════════ TRUST / VERIFY SECTION ═══════════════════ */
+/* ═══════════════════ TRUST / VERIFY (moved near footer) ═══════════════════ */
 function TrustSection(){
   const steps=[
     {icon:'fa-magnifying-glass-location',color:'#1B6CA8',title:'We identify suppliers',body:'Local and international suppliers matched to your exact category, quantities and terms.'},
@@ -691,23 +691,23 @@ function TrustSection(){
     {icon:'fa-file-signature',color:'#E8730F',title:'We obtain quotes & negotiate',body:'We gather quotes and help you negotiate terms, so you are not overpaying.'},
     {icon:'fa-handshake-angle',color:'#7A4FA3',title:'We coordinate',body:'Final engagement and performance rest with the supplier — but we help coordinate disputes.'}
   ];
-  return <section style={{background:'#fff',padding:'clamp(48px,7vw,80px) 24px'}}>
+  return <section style={{background:'#F5FAF6',padding:'clamp(40px,6vw,64px) 24px clamp(32px,5vw,48px)'}}>
     <div style={{maxWidth:1140,margin:'0 auto'}}>
-      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 36px'}}>
-        <span className="micro" style={{color:'#1E7B3C',display:'block',marginBottom:12}}>Verified · shortlisted · negotiated</span>
-        <h2 className="serif" style={{fontSize:'clamp(1.7rem,4vw,2.5rem)',lineHeight:1.15,margin:'0 0 12px',color:'#0A1F12'}}>We verify and shortlist — so you don't buy blind.</h2>
-        <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:0}}>We identify suppliers, verify their legitimacy, obtain quotes and help you negotiate terms. Final engagement and performance are the supplier's responsibility — but we help coordinate disputes.</p>
+      <div style={{textAlign:'center',maxWidth:720,margin:'0 auto 32px'}}>
+        <span className="micro" style={{color:'#1E7B3C',display:'block',marginBottom:10}}>Verified · shortlisted · negotiated</span>
+        <h2 className="serif" style={{fontSize:'clamp(1.6rem,3.5vw,2.2rem)',lineHeight:1.15,margin:'0 0 12px',color:'#0A1F12'}}>We verify and shortlist — so you don't buy blind.</h2>
+        <p style={{fontSize:14,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:0}}>We identify suppliers, verify their legitimacy, obtain quotes and help you negotiate terms. Final engagement and performance are the supplier's responsibility — but we help coordinate disputes.</p>
       </div>
       <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(230px,1fr))'}}>
         {steps.map((s,i)=>(
-          <div key={i} style={{background:'#F5FAF6',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'22px 20px',borderTop:`3px solid ${s.color}`}}>
-            <span style={{width:44,height:44,borderRadius:11,background:s.color+'15',color:s.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,marginBottom:14}}><i className={`fas ${s.icon}`}></i></span>
-            <h3 style={{fontSize:14,fontWeight:800,color:'#0A1F12',margin:'0 0 6px'}}>{s.title}</h3>
+          <div key={i} style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:14,padding:'20px 18px',borderTop:`3px solid ${s.color}`}}>
+            <span style={{width:42,height:42,borderRadius:11,background:s.color+'15',color:s.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,marginBottom:12}}><i className={`fas ${s.icon}`}></i></span>
+            <h3 style={{fontSize:13.5,fontWeight:800,color:'#0A1F12',margin:'0 0 6px'}}>{s.title}</h3>
             <p style={{fontSize:12.5,lineHeight:1.6,color:'rgba(10,31,18,.65)',margin:0}}>{s.body}</p>
           </div>
         ))}
       </div>
-      <div style={{marginTop:24,background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:12,padding:'14px 18px',display:'flex',gap:12,alignItems:'flex-start',maxWidth:820,margin:'24px auto 0'}}>
+      <div style={{marginTop:20,background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:12,padding:'14px 18px',display:'flex',gap:12,alignItems:'flex-start',maxWidth:820,margin:'20px auto 0'}}>
         <i className="fas fa-circle-info" style={{color:'#1B6CA8',fontSize:16,marginTop:1}}></i>
         <p style={{fontSize:12.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:0}}><strong style={{color:'#0A1F12'}}>International sourcing:</strong> We source locally and internationally. Import duties, customs clearance and international freight are separate from supplier quotes and are the buyer's responsibility.</p>
       </div>
@@ -789,9 +789,12 @@ function Landing({onSignup,onSignin}){
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
     <Nav user={null} onSignIn={onSignin} onSignUp={onSignup}/>
     <main style={{flex:1}}>
+      {/* Original hero, unchanged */}
       <Hero/>
-      <TrustSection/>
+      {/* Account CTAs stay directly under the hero */}
       <LandingCTA onSignup={onSignup} onSignin={onSignin}/>
+      {/* Verification / trust info now lives just above the footer */}
+      <TrustSection/>
     </main>
     <Footer/>
   </div>;
