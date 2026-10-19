@@ -517,7 +517,7 @@ function PasswordInput({value,onChange,placeholder='••••••••',au
   </div>;
 }
 
-/* ═══════════════════ NAVBAR (STARTEASY FIXED HEADER) ═══════════════════ */
+/* ═══════════════════ NAVBAR (FIXED & MATCHING SCREENSHOT) ═══════════════════ */
 function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   const [menuOpen,setMenuOpen]=useState(false);
   const [acctOpen,setAcctOpen]=useState(false);
@@ -599,10 +599,22 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
               <button onClick={()=>onSignUp(null)} style={{padding:'10px 14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:700}}>Get started</button>
             </>
           )}
-          {user && <button className="nav-hamburger" onClick={()=>setMenuOpen(o=>!o)} style={{display:'none',background:'transparent',border:'none',color:'#fff',fontSize:20,padding:4,cursor:'pointer'}}><i className={`fas ${menuOpen?'fa-times':'fa-bars'}`}></i></button>}
+
+          {/* Always visible Hamburger Menu Button */}
+          <button className="nav-hamburger" onClick={()=>setMenuOpen(o=>!o)} style={{display:'flex', alignItems:'center', justifyContent:'center', width:40, height:40, borderRadius:9, background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.18)', color:'#fff', fontSize:15, cursor:'pointer', flexShrink:0}}>
+            <i className={`fas ${menuOpen?'fa-times':'fa-bars'}`}></i>
+          </button>
         </div>
       </div>
     </div>
+    
+    {/* Mobile / General Menu Overlay */}
+    {menuOpen && <div style={{position:'absolute', top:72, left:0, right:0, background:'#08170D', borderTop:'1px solid rgba(245,166,35,.15)', padding:'12px 16px 18px', display:'flex', flexDirection:'column', gap:'6px', boxShadow:'0 20px 30px -12px rgba(0,0,0,.5)'}}>
+      <a href="#dashboard" onClick={()=>setMenuOpen(false)} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,textDecoration:'none'}}><i className="fas fa-house" style={{width:18,color:'#F5A623'}}></i> Dashboard</a>
+      <button onClick={()=>{setMenuOpen(false); onBrowse();}} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:9,color:'#fff',fontSize:'13.5px',fontWeight:700,border:'none',textAlign:'left',width:'100%',fontFamily:'inherit'}}><i className="fas fa-magnifying-glass" style={{width:18,color:'#F5A623'}}></i> Browse Directory</button>
+      <a href={MAIN_PLATFORM_URL} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'linear-gradient(135deg,rgba(232,115,15,.18),rgba(245,166,35,.12))',border:'1px solid rgba(232,115,15,.4)',borderRadius:9,color:'#FFD9A6',fontSize:'13.5px',fontWeight:700,textDecoration:'none',justifyContent:'space-between'}}><span style={{display:'flex',alignItems:'center',gap:12}}><i className="fas fa-arrow-left" style={{color:'#F5A623'}}></i> Back to StartEasy Platform</span><i className="fas fa-chevron-right" style={{opacity:.5,fontSize:11}}></i></a>
+      {user && <button onClick={()=>{setMenuOpen(false); onSignOut();}} style={{display:'flex',alignItems:'center',gap:12,padding:'13px 14px',background:'rgba(184,86,79,.12)',border:'1px solid rgba(184,86,79,.35)',borderRadius:9,color:'#FFB4A8',fontSize:'13.5px',fontWeight:700,border:'none',textAlign:'left',width:'100%',fontFamily:'inherit'}}><i className="fas fa-right-from-bracket" style={{width:18,color:'#FFB4A8'}}></i> Sign out</button>}
+    </div>}
   </header>;
 }
 
