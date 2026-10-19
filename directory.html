@@ -90,7 +90,6 @@ try {
 
 function isMobile(){return typeof navigator!=='undefined'&&/android|iphone|ipad|ipod|mobile/i.test((navigator.userAgent||'').toLowerCase());}
 function waUrl(msg,p){const phone=p||ADMIN_WHATSAPP;const e=encodeURIComponent(msg);return isMobile()?'whatsapp://send?phone='+phone+'&text='+e:'https://wa.me/'+phone+'?text='+e;}
-function readLS(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
 function splitCSV(str){return (str||'').split(',').map(s=>s.trim()).filter(Boolean);}
 function authErrorMessage(e){
   const code=(e&&e.code)||'';
@@ -102,8 +101,10 @@ function authErrorMessage(e){
   if(code==='auth/too-many-requests') return 'Too many attempts. Try again in a minute.';
   if(code==='auth/network-request-failed') return 'Network error.';
   if(code==='auth/operation-not-allowed') return 'Email sign-in is not enabled in Firebase Console.';
+  if(code==='auth/missing-email') return 'Enter your email address.';
   return 'Sign-in failed: '+(code||(e&&e.message)||'unknown');
 }
+
 async function fsLoadDirectory(){
   if(!firebaseReady) return null;
   try{
@@ -258,25 +259,95 @@ function TIn({value,onChange,placeholder,type='text'}){
   return <input type={type} value={value||''} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={INP_STYLE}/>;
 }
 
-/* ═══════════════════ AUTH MODAL ═══════════════════ */
+/* ═══════════════════ PASSWORD INPUT (👁 toggle) ═══════════════════ */
+function PasswordInput({value,onChange,placeholder='••••••••',autoComplete='current-password'}){
+  const [show,setShow]=useState(false);
+  return <div style={{position:'relative'}}>
+    <input
+      type={show?'text':'password'}
+      value={value||''}
+      onChange={e=>onChange(e.target.value)}
+      placeholder={placeholder}
+      autoComplete={autoComplete}
+      style={{...INP_STYLE,paddingRight:46}}
+    />
+    <button
+      type="button"
+      onClick={()=>setShow(!show)}
+      aria-label={show?'Hide password':'Show password'}
+      title={show?'Hide password':'Show password'}
+      style={{
+        position:'absolute',right:6,top:'50%',transform:'translateY(-50%)',
+        background:'none',border:'none',padding:8,cursor:'pointer',
+        color:'rgba(10,31,18,.5)',fontSize:15,lineHeight:1,
+        display:'flex',alignItems:'center',justifyContent:'center',
+        borderRadius:6,transition:'color .15s'
+      }}
+      onMouseEnter={e=>{e.currentTarget.style.color='#E8730F';}}
+      onMouseLeave={e=>{e.currentTarget.style.color='rgba(10,31,18,.5)';}}>
+      <i className={`fas ${show?'fa-eye-slash':'fa-eye'}`}></i>
+    </button>
+  </div>;
+}
+
+/* ═══════════════════ AUTH MODAL (with forgot-password) ═══════════════════ */
 function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuthSuccess}){
   const [mode,setMode]=useState(initialMode);
   const [role,setRole]=useState(initialRole);
   const [err,setErr]=useState('');
   const [submitting,setSubmitting]=useState(false);
+  const [resetSent,setResetSent]=useState(false);
+  const [resetEmail,setResetEmail]=useState('');
   const [form,setForm]=useState({name:'',businessName:'',email:'',phone:'',password:'',category:'',location:'',products:'',moq:'',delivery:'',leadTime:'',sources:'',frequency:'Monthly',orderValue:''});
-  useEffect(()=>{if(open){setMode(initialMode);setRole(initialRole);setErr('');}},[open,initialMode,initialRole]);
+
+  useEffect(()=>{
+    if(open){
+      setMode(initialMode);
+      setRole(initialRole);
+      setErr('');
+      setResetSent(false);
+      setResetEmail('');
+    }
+  },[open,initialMode,initialRole]);
+
   const submit=async()=>{
     setErr('');
+
+    if(mode==='forgot'){
+      const email=form.email.trim();
+      if(!email) return setErr('Enter your email.');
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr('That email address is not valid.');
+      if(!firebaseReady) return setErr('Auth service unavailable. Please try again.');
+      setSubmitting(true);
+      try{
+        await auth.sendPasswordResetEmail(email);
+        setResetEmail(email);
+        setResetSent(true);
+      }catch(e){
+        const code=(e&&e.code)||'';
+        if(code==='auth/user-not-found'){
+          setResetEmail(email);
+          setResetSent(true);
+        }else{
+          setErr(authErrorMessage(e));
+        }
+      }finally{setSubmitting(false);}
+      return;
+    }
+
     if(mode==='signin'){
       if(!form.email.trim()) return setErr('Enter your email.');
       if(!form.password) return setErr('Enter your password.');
       setSubmitting(true);
-      try{await authSignIn(form.email.trim(),form.password);onAuthSuccess&&onAuthSuccess();}
-      catch(e){setErr(authErrorMessage(e));}
-      finally{setSubmitting(false);}
+      try{
+        await authSignIn(form.email.trim(),form.password);
+        onAuthSuccess && onAuthSuccess('dashboard');
+      }catch(e){
+        setErr(authErrorMessage(e));
+      }finally{setSubmitting(false);}
       return;
     }
+
     if(!form.name.trim()) return setErr('Enter your full name.');
     if(!form.businessName.trim()) return setErr('Enter your business name.');
     if(!form.email.trim()) return setErr('Enter your email.');
@@ -287,15 +358,66 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
     if(role==='supplier' && !form.products.trim()) return setErr('List the products you supply.');
     if(role==='buyer' && !form.sources.trim()) return setErr('List what you buy regularly.');
     setSubmitting(true);
-    try{await authSignUp({...form,role});onAuthSuccess&&onAuthSuccess();}
-    catch(e){setErr(authErrorMessage(e));}
-    finally{setSubmitting(false);}
+    try{
+      await authSignUp({...form,role});
+      onAuthSuccess && onAuthSuccess('signup');
+    }catch(e){
+      setErr(authErrorMessage(e));
+    }finally{setSubmitting(false);}
   };
+
+  // Reset-sent confirmation view
+  if(mode==='forgot' && resetSent){
+    return <Modal open={open} onClose={onClose} eyebrow="Reset link sent" maxWidth="40rem">
+      <div style={{textAlign:'center',padding:'12px 0'}}>
+        <div style={{width:64,height:64,borderRadius:'50%',background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,margin:'0 auto 16px'}}>
+          <i className="fas fa-envelope-circle-check"></i>
+        </div>
+        <h2 className="serif" style={{fontSize:'clamp(1.4rem,3vw,1.75rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 10px'}}>Check your email</h2>
+        <p style={{fontSize:13.5,lineHeight:1.7,color:'rgba(10,31,18,.7)',margin:'0 auto 8px',maxWidth:380}}>
+          If an account exists for <strong style={{color:'#0A1F12',wordBreak:'break-all'}}>{resetEmail}</strong>, we've sent a password reset link.
+        </p>
+        <p style={{fontSize:12,lineHeight:1.6,color:'rgba(10,31,18,.55)',margin:'0 auto 22px',maxWidth:380}}>
+          Click the link in that email to set a new password. Check your spam folder if it doesn't arrive within a minute.
+        </p>
+        <button onClick={()=>{setMode('signin');setResetSent(false);setErr('');}} style={{width:'100%',padding:'14px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,marginBottom:10}}>
+          Back to sign in
+        </button>
+        <button onClick={()=>{setResetSent(false);setErr('');}} style={{width:'100%',padding:'12px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13,fontWeight:600,color:'#0A1F12'}}>
+          Use a different email
+        </button>
+      </div>
+    </Modal>;
+  }
+
+  // Forgot-password email entry view
+  if(mode==='forgot'){
+    return <Modal open={open} onClose={onClose} eyebrow="Reset password" maxWidth="40rem">
+      <h2 className="serif" style={{fontSize:'clamp(1.35rem,3vw,1.7rem)',lineHeight:1.2,color:'#0A1F12',margin:'0 0 8px'}}>Forgot your password?</h2>
+      <p style={{fontSize:13.5,lineHeight:1.65,color:'rgba(10,31,18,.7)',margin:'0 0 20px'}}>
+        Enter the email you signed up with. We'll send a secure link to reset your password.
+      </p>
+      <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label>
+      <TIn type="email" value={form.email} onChange={v=>setForm({...form,email:v})} placeholder="you@business.zm"/>
+      {err && <div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5}}>
+        <i className="fas fa-circle-exclamation" style={{marginRight:6}}></i>{err}
+      </div>}
+      <button onClick={submit} disabled={submitting} style={{width:'100%',marginTop:18,padding:'14px',background:submitting?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>
+        {submitting?<><i className="fas fa-spinner fa-spin" style={{marginRight:8}}></i>Sending…</>:'Send reset link'}
+      </button>
+      <button onClick={()=>{setMode('signin');setErr('');}} style={{width:'100%',marginTop:10,padding:'12px',background:'transparent',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13,fontWeight:600,color:'#0A1F12'}}>
+        ← Back to sign in
+      </button>
+    </Modal>;
+  }
+
+  // Signup / Signin
   return <Modal open={open} onClose={onClose} eyebrow={mode==='signin'?'Welcome back':'Create your account'} maxWidth="40rem">
     <div style={{display:'flex',gap:6,marginBottom:18,background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:10,padding:5}}>
       <button onClick={()=>{setMode('signup');setErr('');}} style={{flex:1,padding:'10px',border:'none',borderRadius:8,fontSize:13,fontWeight:700,background:mode==='signup'?'#0A1F12':'transparent',color:mode==='signup'?'#fff':'rgba(10,31,18,.65)'}}>Create account</button>
       <button onClick={()=>{setMode('signin');setErr('');}} style={{flex:1,padding:'10px',border:'none',borderRadius:8,fontSize:13,fontWeight:700,background:mode==='signin'?'#0A1F12':'transparent',color:mode==='signin'?'#fff':'rgba(10,31,18,.65)'}}>Sign in</button>
     </div>
+
     {mode==='signup'&&<>
       <div style={{marginBottom:16}}>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:8}}>I am registering as a…</label>
@@ -349,14 +471,25 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
           <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Typical order</label><TIn value={form.orderValue} onChange={v=>setForm({...form,orderValue:v})}/></div>
         </div>
       </div>}
-      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password * <span style={{color:'rgba(10,31,18,.5)',fontWeight:500}}>(min 6 chars)</span></label><TIn type="password" value={form.password} onChange={v=>setForm({...form,password:v})}/></div>
+      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password * <span style={{color:'rgba(10,31,18,.5)',fontWeight:500}}>(min 6 chars)</span></label><PasswordInput value={form.password} onChange={v=>setForm({...form,password:v})} autoComplete="new-password"/></div>
     </>}
+
     {mode==='signin'&&<>
       <p style={{fontSize:13.5,color:'rgba(10,31,18,.7)',margin:'0 0 16px'}}>Sign in to reach your dashboard.</p>
       <div style={{marginBottom:14}}><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label><TIn type="email" value={form.email} onChange={v=>setForm({...form,email:v})}/></div>
-      <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password</label><TIn type="password" value={form.password} onChange={v=>setForm({...form,password:v})}/></div>
+      <div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+          <label style={{fontSize:11.5,fontWeight:700,color:'#0A1F12'}}>Password</label>
+          <button onClick={()=>{setMode('forgot');setErr('');}} style={{background:'none',border:'none',color:'#E8730F',fontSize:11.5,fontWeight:700,cursor:'pointer',textDecoration:'underline',padding:0,fontFamily:'inherit'}}>
+            Forgot password?
+          </button>
+        </div>
+        <PasswordInput value={form.password} onChange={v=>setForm({...form,password:v})} autoComplete="current-password"/>
+      </div>
     </>}
+
     {err&&<div style={{background:'rgba(184,86,79,.08)',border:'1px solid rgba(184,86,79,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,color:'#7C2318',fontSize:12.5}}><i className="fas fa-circle-exclamation" style={{marginRight:6}}></i>{err}</div>}
+
     <button onClick={submit} disabled={submitting} style={{width:'100%',marginTop:18,padding:'14px',background:submitting?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700}}>
       {submitting?<><i className="fas fa-spinner fa-spin" style={{marginRight:8}}></i>Please wait…</>:(mode==='signin'?'Sign in':'Create my account')}
     </button>
@@ -369,7 +502,6 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
 
 /* ═══════════════════ NAV ═══════════════════ */
 function Nav({user,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
-  const [open,setOpen]=useState(false);
   return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',position:'sticky',top:0,zIndex:50}}>
     <div style={{maxWidth:1240,margin:'0 auto',padding:'0 24px'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
@@ -420,7 +552,7 @@ function Hero({stats}){
   </section>;
 }
 
-/* ═══════════════════ LANDING CTA (only thing below hero) ═══════════════════ */
+/* ═══════════════════ LANDING CTA ═══════════════════ */
 function LandingCTA({onSignup,onSignin}){
   return <section style={{background:'#F5FAF6',padding:'clamp(48px,7vw,80px) 24px'}}>
     <div style={{maxWidth:1100,margin:'0 auto'}}>
@@ -478,7 +610,7 @@ function Footer(){
   </footer>;
 }
 
-/* ═══════════════════ LANDING PAGE (only hero + CTA) ═══════════════════ */
+/* ═══════════════════ LANDING (hero + CTA only) ═══════════════════ */
 function Landing({onSignup,onSignin}){
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
     <Nav user={null} onSignIn={onSignin} onSignUp={onSignup}/>
@@ -490,7 +622,7 @@ function Landing({onSignup,onSignin}){
   </div>;
 }
 
-/* ═══════════════════ SIGN-IN PROMPT (for protected routes) ═══════════════════ */
+/* ═══════════════════ SIGN-IN PROMPT ═══════════════════ */
 function SignInPrompt({onSignIn,onSignUp,onHome}){
   return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',alignItems:'center',justifyContent:'center',padding:'32px 20px'}}>
     <div style={{maxWidth:440,textAlign:'center',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:16,padding:'36px 30px',boxShadow:'0 20px 50px -20px rgba(10,31,18,.15)'}}>
@@ -501,6 +633,113 @@ function SignInPrompt({onSignIn,onSignUp,onHome}){
       <button onClick={onSignIn} style={{width:'100%',padding:'13px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:10,fontSize:13.5,fontWeight:700,marginBottom:10}}>Sign in</button>
       <button onClick={onHome} style={{width:'100%',padding:'12px',background:'#fff',border:'1px solid rgba(10,31,18,.15)',borderRadius:10,fontSize:13,fontWeight:600,color:'#0A1F12'}}>← Back to home</button>
     </div>
+  </div>;
+}
+
+/* ═══════════════════ WELCOME (post-signup) ═══════════════════ */
+function Welcome({user,onDashboard,onBrowse,onSignedOut}){
+  const [profile,setProfile]=useState(null);
+  const [loading,setLoading]=useState(true);
+  const [signingOut,setSigningOut]=useState(false);
+
+  useEffect(()=>{
+    if(!user){setLoading(false);return;}
+    loadUserProfile(user.uid).then(p=>{setProfile(p);setLoading(false);});
+  },[user]);
+
+  const handleSignOut=async()=>{
+    setSigningOut(true);
+    try{await authSignOutFn();}catch(e){}
+    setSigningOut(false);
+    onSignedOut&&onSignedOut();
+  };
+
+  if(loading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
+
+  const isSupplier=profile?.role==='supplier';
+  const cat=profile&&CAT_MAP[profile.category]?CAT_MAP[profile.category]:{title:profile?.category||'General'};
+  const isVerified=profile?.status==='verified';
+  const firstName=(profile?.name||user.email||'').split(' ')[0];
+
+  return <div className="fadein" style={{minHeight:'100vh',background:'#F5FAF6',display:'flex',flexDirection:'column'}}>
+    <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)',padding:'0 24px'}}>
+      <div style={{maxWidth:1240,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',height:72}}>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <Mark size={38}/>
+          <span className="hide-sm" style={{lineHeight:1}}>
+            <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Directory</span>
+            <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+          </span>
+        </div>
+        <button onClick={handleSignOut} disabled={signingOut} style={{padding:'10px 14px',background:'rgba(184,86,79,.15)',color:'#FFB4A8',border:'1px solid rgba(184,86,79,.35)',borderRadius:8,fontSize:12,fontWeight:700}}>
+          <i className="fas fa-right-from-bracket" style={{marginRight:6}}></i> {signingOut?'Signing out…':'Sign out'}
+        </button>
+      </div>
+    </header>
+
+    <main style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px 24px'}}>
+      <div style={{maxWidth:560,width:'100%'}}>
+        <div style={{textAlign:'center',marginBottom:28}}>
+          <div style={{width:76,height:76,borderRadius:'50%',background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:34,margin:'0 auto 20px'}}>
+            <i className="fas fa-check"></i>
+          </div>
+          <h1 className="serif" style={{fontSize:'clamp(1.7rem,4vw,2.3rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 12px'}}>
+            Welcome to StartEasy, {firstName}!
+          </h1>
+          <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:'0 auto',maxWidth:420}}>
+            Your {isSupplier?'supplier':'buyer'} account is ready. {isVerified?'Your profile is verified and live in the directory.':'Our team will verify your profile — usually within 48 hours.'}
+          </p>
+        </div>
+
+        {profile && <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px',marginBottom:20}}>
+          <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Your account</div>
+          <WelcomeRow k="Business" v={profile.businessName}/>
+          <WelcomeRow k="Role" v={isSupplier?'Supplier':'Buyer'}/>
+          <WelcomeRow k="Category" v={cat.title}/>
+          <WelcomeRow k="City" v={profile.location}/>
+          <WelcomeRow k="Status" v={isVerified?'Verified':'Pending verification'}/>
+        </div>}
+
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'#8A6828',marginBottom:10}}>What would you like to do first?</div>
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            <button onClick={onBrowse} style={{padding:'16px 18px',background:'#fff',border:'1.5px solid rgba(10,31,18,.12)',borderRadius:10,textAlign:'left',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:14,transition:'all .2s'}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor='#1B6CA8';e.currentTarget.style.transform='translateY(-2px)';}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(10,31,18,.12)';e.currentTarget.style.transform='none';}}>
+              <span style={{width:44,height:44,borderRadius:11,background:'rgba(27,108,168,.12)',color:'#1B6CA8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>
+                <i className="fas fa-magnifying-glass"></i>
+              </span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:800,color:'#0A1F12'}}>Browse {isSupplier?'buyers':'suppliers'} first</div>
+                <div style={{fontSize:12,color:'rgba(10,31,18,.6)',marginTop:2}}>See who's in your category right now</div>
+              </div>
+              <i className="fas fa-arrow-right" style={{color:'rgba(10,31,18,.3)'}}></i>
+            </button>
+
+            <button onClick={onDashboard} style={{padding:'16px 18px',background:'linear-gradient(135deg,#E8730F,#F5A623)',border:'none',borderRadius:10,textAlign:'left',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:14,color:'#fff',boxShadow:'0 12px 28px -10px rgba(232,115,15,.5)'}}>
+              <span style={{width:44,height:44,borderRadius:11,background:'rgba(255,255,255,.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>
+                <i className="fas fa-house"></i>
+              </span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:800}}>Open my dashboard</div>
+                <div style={{fontSize:12,color:'rgba(255,255,255,.85)',marginTop:2}}>Track matches, requests, and your profile</div>
+              </div>
+              <i className="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <p style={{fontSize:11.5,color:'rgba(10,31,18,.5)',textAlign:'center',lineHeight:1.6,margin:0,fontStyle:'italic'}}>
+          You can switch between Browse and Dashboard anytime from the top menu.
+        </p>
+      </div>
+    </main>
+  </div>;
+}
+function WelcomeRow({k,v}){
+  return <div style={{display:'flex',justifyContent:'space-between',gap:12,padding:'7px 0',borderBottom:'1px dashed rgba(10,31,18,.06)',fontSize:13}}>
+    <span style={{color:'rgba(10,31,18,.55)',fontWeight:600}}>{k}</span>
+    <span style={{color:'#0A1F12',fontWeight:700,textAlign:'right'}}>{v||'—'}</span>
   </div>;
 }
 
@@ -544,10 +783,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
         .then(snap=>{if(snap.empty) filterSeed();else setMatches(snap.docs.map(d=>({id:d.id,...d.data()})));})
         .catch(()=>filterSeed());
     }
-    // Load user's own quotes (for buyer)
-    if(!isSupplier){
-      loadUserQuotes(user.uid).then(q=>setQuotes(q));
-    }
+    if(!isSupplier){loadUserQuotes(user.uid).then(q=>setQuotes(q));}
   },[profile,user]);
 
   const signOut=async()=>{await authSignOutFn();onSignedOut&&onSignedOut();};
@@ -759,7 +995,6 @@ function Dashboard({user,onBrowse,onSignedOut}){
                   </div>
                 </div>
                 <p style={{fontSize:12,color:'rgba(10,31,18,.65)',lineHeight:1.5,margin:0}}>{m.desc}</p>
-                {!isSupplier && <button onClick={()=>onBrowse(m)} style={{padding:'9px',background:`linear-gradient(135deg,${cat.color},${cat.color}cc)`,color:'#fff',border:'none',borderRadius:8,fontSize:11.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Request quote</button>}
               </div>
             ))}
           </div>
@@ -867,7 +1102,7 @@ function Dashboard({user,onBrowse,onSignedOut}){
   </div>;
 }
 
-/* ═══════════════════ BROWSE (signed-in directory) ═══════════════════ */
+/* ═══════════════════ BROWSE ═══════════════════ */
 function Browse({user,onRequestQuote,onDashboard,onSignedOut}){
   const [suppliers,setSuppliers]=useState([]);
   const [buyers,setBuyers]=useState([]);
@@ -1033,26 +1268,9 @@ function RFQModal({open,onClose,preselected,user,onSaved}){
     if(!user){setErr('You must be signed in.');return;}
     setSaving(true);
     try{
-      const quote={
-        userId:user.uid,
-        userName:form.name,
-        userEmail:form.email,
-        supplierId:preselected?.id||null,
-        supplierName:preselected?.name||null,
-        supplierCategory:preselected?.category||form.category,
-        category:form.category,
-        product:form.product,
-        quantity:form.quantity,
-        deliveryCity:form.deliveryCity,
-        deadline:form.deadline,
-        budget:form.budget,
-        notes:form.notes,
-        phone:form.phone,
-        status:'sent',
-        at:Date.now()
-      };
+      const quote={userId:user.uid,userName:form.name,userEmail:form.email,supplierId:preselected?.id||null,supplierName:preselected?.name||null,supplierCategory:preselected?.category||form.category,category:form.category,product:form.product,quantity:form.quantity,deliveryCity:form.deliveryCity,deadline:form.deadline,budget:form.budget,notes:form.notes,phone:form.phone,status:'sent',at:Date.now()};
       const ok=await saveQuote(quote);
-      if(!ok) throw new Error('Could not save your request. Please try again.');
+      if(!ok) throw new Error('Could not save your request.');
       const msg=['*QUOTATION REQUEST*','','*Buyer:*',`Name: ${form.name}`,`Phone: ${form.phone}`,form.email&&`Email: ${form.email}`,'','*Requirement:*',form.category&&`Category: ${CAT_MAP[form.category]?.title||form.category}`,preselected&&`Supplier: ${preselected.name}`,`Product: ${form.product}`,form.quantity&&`Quantity: ${form.quantity}`,form.deliveryCity&&`Delivery to: ${form.deliveryCity}`,form.deadline&&`Needed by: ${form.deadline}`,form.budget&&`Budget: ${form.budget}`,form.notes&&`Notes: ${form.notes}`].filter(Boolean).join('\n');
       window.open(waUrl(msg),'_blank');
       onSaved && onSaved();
@@ -1149,8 +1367,8 @@ function SeedView(){
         <label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Email</label>
         <input type="email" value={email} onChange={e=>setEmail(e.target.value)} style={{...INP_STYLE,marginBottom:12}}/>
         <label style={{display:'block',fontSize:12,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Password</label>
-        <input type="password" value={pw} onChange={e=>setPw(e.target.value)} style={{...INP_STYLE,marginBottom:14}} onKeyDown={e=>{if(e.key==='Enter')handleSignIn();}}/>
-        <button onClick={handleSignIn} disabled={signingIn} style={{width:'100%',padding:'13px',background:signingIn?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,marginBottom:10}}>{signingIn?'Signing in…':'Sign in'}</button>
+        <PasswordInput value={pw} onChange={setPw} autoComplete="current-password"/>
+        <button onClick={handleSignIn} disabled={signingIn} style={{width:'100%',padding:'13px',background:signingIn?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:9,fontSize:14,fontWeight:700,marginTop:14,marginBottom:10}}>{signingIn?'Signing in…':'Sign in'}</button>
         <a href="#" onClick={e=>{e.preventDefault();window.location.hash='';}} style={{display:'block',textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.5)',textDecoration:'none',padding:'8px'}}>← Back</a>
         {err&&<div style={{background:'rgba(184,86,79,.1)',border:'1px solid rgba(184,86,79,.3)',borderRadius:9,padding:'10px 14px',fontSize:12.5,color:'#7C2318',marginTop:12}}>{err}</div>}
       </>:
@@ -1184,6 +1402,7 @@ function App(){
   const [authRole,setAuthRole]=useState('buyer');
   const [rfqOpen,setRfqOpen]=useState(false);
   const [rfqPreselected,setRfqPreselected]=useState(null);
+  const [justSignedUp,setJustSignedUp]=useState(false);
 
   useEffect(()=>{
     if(!firebaseReady){setAuthLoading(false);return;}
@@ -1198,22 +1417,29 @@ function App(){
 
   const openAuth=(mode,role)=>{setAuthMode(mode||'signup');setAuthRole(role||'buyer');setAuthOpen(true);};
   const closeAuth=()=>setAuthOpen(false);
+  const handleAuthSuccess=(target='dashboard')=>{
+    closeAuth();
+    if(target==='signup'){setJustSignedUp(true);return;}
+    if(target==='browse'){window.location.hash='#browse';return;}
+    window.location.hash='#dashboard';
+  };
   const goHome=()=>{window.location.hash='';};
   const goDashboard=()=>{window.location.hash='#dashboard';};
   const goBrowse=()=>{window.location.hash='#browse';};
   const openRFQ=(supplier)=>{setRfqPreselected(supplier||null);setRfqOpen(true);};
   const closeRFQ=()=>{setRfqOpen(false);setRfqPreselected(null);};
-  const signedOut=()=>{setUser(null);goHome();};
+  const signedOut=()=>{setUser(null);setJustSignedUp(false);goHome();};
+
+  if(justSignedUp && user) return <Welcome user={user} onDashboard={()=>{setJustSignedUp(false);window.location.hash='#dashboard';}} onBrowse={()=>{setJustSignedUp(false);window.location.hash='#browse';}} onSignedOut={()=>{setJustSignedUp(false);setUser(null);window.location.hash='';}}/>;
 
   if(hash==='#seed') return <SeedView/>;
 
   if(authLoading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
 
-  // Protected routes require auth
   if(hash==='#dashboard' || hash==='#browse'){
     if(!user) return <>
       <SignInPrompt onSignIn={()=>openAuth('signin','buyer')} onSignUp={()=>openAuth('signup','buyer')} onHome={goHome}/>
-      <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={()=>{closeAuth();if(authMode==='signin'||authRole){goDashboard();}}}/>
+      <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={handleAuthSuccess}/>
     </>;
     if(hash==='#dashboard') return <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
     return <>
@@ -1222,13 +1448,11 @@ function App(){
     </>;
   }
 
-  // Home route
   if(!user) return <>
     <Landing onSignup={(role)=>openAuth('signup',role||'buyer')} onSignin={()=>openAuth('signin','buyer')}/>
-    <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={()=>{closeAuth();goDashboard();}}/>
+    <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={handleAuthSuccess}/>
   </>;
 
-  // Signed in, no explicit route → dashboard
   return <Dashboard user={user} onBrowse={goBrowse} onSignedOut={signedOut}/>;
 }
 
