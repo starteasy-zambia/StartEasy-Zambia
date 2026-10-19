@@ -14,9 +14,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 :root{--forest:#0A1F12;--forest-2:#123A1F;--green:#1E7B3C;--orange:#E8730F;--orange-2:#F5A623;--light:#F5FAF6;--red:#B8564F;--purple:#7A4FA3;--blue:#1B6CA8;--teal:#0E7C7B}
-html{overflow-x:clip;-webkit-text-size-adjust:100%}
-body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--light);overflow-x:clip;margin:0}
-#root{overflow-x:clip;width:100%}
+html{overflow-x:hidden !important;width:100%;-webkit-text-size-adjust:100%}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--light);margin:0}
+#root{overflow-x:hidden;width:100%}
 *,*::before,*::after{box-sizing:border-box;min-width:0}
 h1,h2,h3,h4,h5,h6,p,span,a,li,div,button{overflow-wrap:break-word}
 button,a{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
@@ -70,7 +70,7 @@ td .row{gap:.4rem}
 
 .empty{text-align:center;padding:3.4rem 1.5rem;background:#fff;border:1px dashed rgba(10,31,18,.15);border-radius:14px}
 .empty .e-icon{width:54px;height:54px;border-radius:16px;background:rgba(232,115,15,.1);color:#E8730F;display:grid;place-items:center;margin:0 auto 1rem;font-size:22px}
-.empty h3{margin:0 0 .4rem;font-family:'Playfair Display',serif;font-size:1.2rem;color:#0A1F12}
+.empty h3{margin:0 0 .4rem;font-family:'Playfair Display',serif;font-size:1.2rem;color:'#0A1F12'}
 .empty p{color:rgba(10,31,18,.55);font-size:.9rem;max-width:44ch;margin:0 auto 1.2rem;line-height:1.6}
 
 /* Account Dropdown */
@@ -146,10 +146,11 @@ td .row{gap:.4rem}
     flex-direction: column;
     padding: 0;
     gap: 0;
+    max-width: 100vw;
   }
   .dash-side{
     position: sticky;
-    top: 72px; /* Stays exactly below the StartEasy header */
+    top: 72px; /* Stays exactly below the fixed StartEasy header */
     z-index: 40;
     display: flex;
     flex-direction: row;
@@ -162,7 +163,7 @@ td .row{gap:.4rem}
     width: 100%;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    scrollbar-width: none; /* Hide scrollbar for clean look */
     gap: 8px;
   }
   .dash-side::-webkit-scrollbar { display: none; }
@@ -186,6 +187,8 @@ td .row{gap:.4rem}
   }
   .dash-main {
     padding: 20px 16px;
+    width: 100%;
+    max-width: 100vw;
   }
   .acct-name {display: none;}
   .dash-head{flex-direction:column; align-items:flex-start; gap:1rem;}
@@ -514,7 +517,7 @@ function PasswordInput({value,onChange,placeholder='••••••••',au
   </div>;
 }
 
-/* ═══════════════════ NAVBAR (STARTEASY STICKY HEADER) ═══════════════════ */
+/* ═══════════════════ NAVBAR (STARTEASY FIXED HEADER) ═══════════════════ */
 function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   const [menuOpen,setMenuOpen]=useState(false);
   const [acctOpen,setAcctOpen]=useState(false);
@@ -537,9 +540,10 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
     setTimeout(()=>window.dispatchEvent(new CustomEvent('nav-tab', {detail: tab})), 50);
   };
 
-  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)', flexShrink:0, position:'sticky', top:0, zIndex:50}}>
-    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 16px'}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:72,gap:10}}>
+  return <header style={{background:'#0A1F12',borderBottom:'1px solid rgba(245,166,35,.1)', position:'fixed', top:0, left:0, right:0, zIndex:1000, height:72, display:'flex', alignItems:'center'}}>
+    <div style={{maxWidth:1240,margin:'0 auto',padding:'0 16px', width:'100%'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:'100%',gap:10}}>
+        
         <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0}}>
           <a href="#" onClick={(e)=>{e.preventDefault(); user ? onDashboard() : onSignIn();}} style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none',flexShrink:0}}>
             <Mark size={38}/>
@@ -548,13 +552,14 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
               <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
             </span>
           </a>
+          
           <a href={MAIN_PLATFORM_URL} style={{display:'inline-flex',alignItems:'center',gap:7,padding:'9px 13px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',borderRadius:'9px',fontSize:'12px',fontWeight:'800',textDecoration:'none',boxShadow:'0 8px 18px -8px rgba(232,115,15,.6)',whiteSpace:'nowrap',flexShrink:0}}>
             <i className="fas fa-arrow-left" style={{fontSize:11}}></i>
             <span className="hide-sm">Platform</span>
           </a>
         </div>
         
-        <div style={{display:'flex',alignItems:'center',gap:12}}>
+        <div style={{display:'flex',alignItems:'center',gap:12, flexShrink:0}}>
           {user ? (
             <div className="acct" ref={acctRef}>
               <button className="acct-btn" onClick={()=>setAcctOpen(!acctOpen)} style={{background:'rgba(255,255,255,.08)',borderColor:'rgba(255,255,255,.2)',color:'#fff'}}>
@@ -2166,13 +2171,11 @@ function App(){
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#F5FAF6', paddingTop: 72 }}>
       {!authLoading && (
         <Nav user={user} profile={profile} onSignIn={()=>openAuth('signin','buyer')} onSignUp={(role)=>openAuth('signup',role||'buyer')} onDashboard={goDashboard} onBrowse={goBrowse} onSignOut={signedOut}/>
       )}
-      <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', position: 'relative' }}>
-        {mainView}
-      </div>
+      {mainView}
       <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={handleAuthSuccess}/>
     </div>
   );
