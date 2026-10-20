@@ -88,9 +88,6 @@ td .row{gap:.4rem}
 .chip-danger{background:rgba(184,86,79,.1);color:#B8564F;border-color:rgba(184,86,79,.2)}
 
 .form-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.profile-ring{position:relative;width:64px;height:64px;flex-shrink:0}
-.profile-ring svg{transform:rotate(-90deg)}
-.profile-ring .inner{position:absolute;inset:6px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#0A1F12}
 .el{background:#fff;border:1px solid #D0D0D0;border-radius:8px;padding:34px 42px;font-size:13px;line-height:1.65;color:#222}
 .el .eh{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:3px solid #0A1F12;margin-bottom:22px;flex-wrap:wrap}
 .el .eh .brand{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:800;color:#0A1F12;letter-spacing:1px}
@@ -108,9 +105,6 @@ td .row{gap:.4rem}
 .el .total .tv{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:800;color:#E8730F}
 .el .sign{margin-top:26px;padding-top:20px;border-top:1px solid #E0E0E0;display:grid;grid-template-columns:1fr 1fr;gap:30px}
 .el .sign .sigval{font-family:'Playfair Display',Georgia,serif;font-size:16px;font-weight:700;color:#0A1F12;letter-spacing:.04em;font-style:italic;padding-bottom:8px;border-bottom:1px solid #333;margin-bottom:10px;min-height:38px}
-.el .sign .siginput{width:100%;font-family:'Playfair Display',Georgia,serif;font-size:16px;font-weight:700;color:#0A1F12;letter-spacing:.04em;font-style:italic;padding:0 0 8px;border:none;border-bottom:1px solid #333;background:transparent;outline:none;margin-bottom:10px;min-height:38px;transition:border-color .2s}
-.el .sign .siginput:focus{border-bottom-color:#E8730F}
-.el .sign .siginput::placeholder{font-family:'Inter',system-ui,sans-serif;font-size:12px;font-weight:500;font-style:normal;letter-spacing:normal;color:rgba(10,31,18,.4)}
 .el .sign .lbl{font-size:10.5px;color:#666;font-weight:600}
 .el .ft{margin-top:22px;padding-top:16px;border-top:2px solid #0A1F12;font-size:10.5px;color:#666;line-height:1.6}
 .paygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
@@ -242,6 +236,8 @@ function getCampaigns(uid){ return lsGet('se_campaigns_'+uid, []); }
 function saveCampaigns(uid, arr){ lsSet('se_campaigns_'+uid, arr); }
 function getListings(uid){ return lsGet('se_listings_'+uid, []); }
 function saveListings(uid, arr){ lsSet('se_listings_'+uid, arr); }
+function getSubs(uid){ return lsGet('se_subs_'+uid, {}); }
+function saveSubs(uid, data){ lsSet('se_subs_'+uid, data); }
 
 async function fsLoadDirectory(){
   if(!firebaseReady) return null;
@@ -262,16 +258,6 @@ async function loadUserQuotes(uid){
     const docs=snap.docs.map(d=>({id:d.id,...d.data()}));
     return docs.sort((a,b)=>(b.at||0)-(a.at||0));
   }catch(e){console.warn('[SE] load quotes:',e&&e.message);return [];}
-}
-async function saveQuote(quote){
-  if(!firebaseReady) return false;
-  try{await db.collection('se_quotes').add(quote);return true;}
-  catch(e){console.warn('[SE] save quote:',e&&e.message);return false;}
-}
-async function saveIntro(intro){
-  if(!firebaseReady) return false;
-  try{await db.collection('se_intros').add(intro);return true;}
-  catch(e){console.warn('[SE] save intro:',e&&e.message);return false;}
 }
 async function addPayment(rec){
   if(!firebaseReady) return null;
@@ -373,7 +359,20 @@ const SCOPE_OPTIONS = [
   {key:'both',label:'Both local & international'}
 ];
 
-const SF={micro:{zm:'K25',usd:'$1.49',label:'Service Fee · Micro'},basic:{zm:'K250',usd:'$25',label:'Service Fee · Basic'},standard:{zm:'K400',usd:'$40',label:'Service Fee · Standard'},complex:{zm:'K750',usd:'$75',label:'Service Fee · Complex'}};
+// Updated SF (Service Fees) for new Commercial Model
+const SF = {
+  listing_monthly_local: { zm:'K100', usd:'$10', label:'Listing Subscription · Monthly Local' },
+  listing_monthly_intl: { zm:'K140', usd:'$14', label:'Listing Subscription · Monthly Intl' },
+  listing_annual_local: { zm:'K1000', usd:'$100', label:'Listing Subscription · Annual Local' },
+  listing_annual_intl: { zm:'K1400', usd:'$140', label:'Listing Subscription · Annual Intl' },
+  buyer_monthly: { zm:'K50', usd:'$5', label:'Buyer Subscription · Monthly' },
+  verification_oneoff: { zm:'K75', usd:'$7.5', label:'Verification · One-off' },
+  verification_annual: { zm:'K600', usd:'$60', label:'Verification · Annual' },
+  campaign: { zm:'K455', usd:'$45', label:'Campaign Placement' },
+  lead_package: { zm:'K400', usd:'$40', label:'Lead Access · Monthly' },
+  sourcing_support: { zm:'K600', usd:'$60', label:'Sourcing & Procurement Support' },
+  intl_sourcing: { zm:'K400', usd:'$40', label:'International Sourcing Retainer' }
+};
 
 const PAYMENT_METHODS={airtel:{label:'Airtel Money',cls:'pm-airtel',icon:'fa-mobile-alt',title:'Airtel Money',sub:'ZMW · Zambian Kwacha',recipient:'+260 975 914 001 (Airtel)',ussd:'*115#',ussdLbl:'Open Airtel',rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Recipient Note',v:'On behalf of StartEasy',plain:true},{l:'Airtel Number',v:'+260 975 914 001',copy:'+260975914001'}],steps:['Dial <strong>*115#</strong>','Select <strong>Send Money</strong> → <strong>Airtel Money</strong>','Enter <strong>+260 975 914 001</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID'],note:'Available to all applicants.'},mtn:{label:'MTN MoMo',cls:'pm-mtn',icon:'fa-mobile-alt',title:'MTN Mobile Money',sub:'ZMW · Zambian Kwacha',recipient:'076 852 6191 (MTN)',ussd:'*303#',ussdLbl:'Open MTN',rows:[{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Recipient Note',v:'On behalf of StartEasy',plain:true},{l:'MTN Number',v:'076 852 6191',copy:'0768526191'}],steps:['Dial <strong>*303#</strong>','Select <strong>Send Money</strong> → <strong>MTN MoMo</strong>','Enter <strong>076 852 6191</strong>','Enter the amount shown','Confirm recipient <strong>Mwaba Lewis</strong>','Save the transaction ID'],note:'Available to all applicants.'},bank:{label:'Bank / Visa',cls:'pm-bank',icon:'fa-university',title:'Bank or Visa Card',sub:'Standard Chartered',recipient:'Standard Chartered · 0152502166700',rows:[{l:'Bank',v:'Standard Chartered',plain:true},{l:'Account Name',v:'StartEasy (Mwaba Lewis)',plain:true},{l:'Account Number',v:'0152502166700',copy:'0152502166700'},{l:'Reference',v:'Your Full Name + "SE"',plain:true}],steps:['Log into your online banking, or visit any branch','Use the account details shown','Transfer the amount above','Use <strong>your full name + "SE"</strong> as reference','Save your receipt'],note:'For Visa card payments, use your bank card-to-account service.'},paypal:{label:'PayPal',cls:'pm-paypal',icon:'fa-paypal',iconSet:'fab',title:'PayPal',sub:'USD · International',recipient:'lewismwaba@gmail.com (PayPal)',rows:[{l:'Recipient Email',v:'lewismwaba@gmail.com',copy:'lewismwaba@gmail.com'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true},{l:'Payment Type',v:'Send to a friend',plain:true}],steps:['Log into PayPal','Choose <strong>Send & Request</strong> → <strong>Send to a friend</strong>','Enter <strong>lewismwaba@gmail.com</strong>','Enter the amount above','Add <strong>your name + "SE"</strong> in the note','Save the transaction ID'],note:'Ideal for international applicants.'},crypto:{label:'Crypto',cls:'pm-crypto',icon:'fa-bitcoin',iconSet:'fab',title:'Cryptocurrency',sub:'International applicants',recipient:'User ID: 809423171',rows:[{l:'Accepted Coins',v:'BTC · ETH · USDT (TRC20 / ERC20)',plain:true},{l:'User ID',v:'809423171',copy:'809423171'},{l:'Recipient Name',v:'Mwaba Lewis',plain:true}],steps:['Open your crypto wallet or exchange app','Choose <strong>BTC, ETH, or USDT</strong>','Send to User ID <strong>809423171</strong>','Add a note with <strong>your name + "SE"</strong>','Save the transaction hash','Return here and paste as reference'],note:'Send the equivalent at the time of transfer.'}};
 
@@ -761,7 +760,7 @@ function PricingPage({onSignup}){
         <span className="micro" style={{ color:'#E8730F', display:'block', marginBottom:12 }}>Commercial Services</span>
         <h2 className="serif" style={{ fontSize:'clamp(2rem, 4vw, 2.8rem)', color:'#0A1F12', margin:'0 0 16px' }}>Free to join. Pay only for growth.</h2>
         <p style={{ fontSize:15, color:'rgba(10,31,18,.65)', maxWidth:600, margin:'0 auto 24px', lineHeight:1.6 }}>
-          Our directory is free to browse and list. We generate revenue through optional premium services, qualified leads, sourcing support, and supplier verification.
+          Our directory is free to browse. We generate revenue through optional premium services, qualified leads, sourcing support, and supplier verification.
         </p>
         <div style={{ display:'inline-flex', background:'#fff', padding:6, borderRadius:12, border:'1px solid rgba(10,31,18,.08)' }}>
           <button onClick={()=>setActiveTab('suppliers')} style={{ padding:'10px 24px', borderRadius:8, fontSize:14, fontWeight:700, border:'none', background:activeTab==='suppliers'?'#0A1F12':'transparent', color:activeTab==='suppliers'?'#fff':'rgba(10,31,18,.6)', transition:'all .2s' }}>For Suppliers</button>
@@ -946,7 +945,7 @@ function HelpPage(){
         <h2 style={{marginTop:0}}>For buyers</h2>
         {[
           ['How do I find suppliers?', 'Browse the directory using filters for category, location and international scope. You can search by keyword or open a supplier profile to request a quote. Every request appears in your dashboard under "My requests".'],
-          ['Is it free to use?', 'Yes — browsing the directory and requesting quotes is free. We charge for optional premium services like sourcing support, project coordination and international sourcing.'],
+          ['Is it free to use?', 'Browsing the directory is free. However, posting requests and accessing premium features requires a buyer subscription (K50/mo).'],
           ['How are suppliers verified?', 'Verified suppliers have provided business registration documents, references and identity checks. Verification is a signal of good faith — it is not a guarantee. Always do your own due diligence before large transactions.'],
           ['What about international sourcing?', 'We work with suppliers in China, South Africa, UAE and beyond. Import duties, customs clearance and international freight are separate from the supplier\'s quoted price and are your responsibility.'],
           ['Can I save suppliers?', 'Yes — click the bookmark icon on any supplier card or profile to save them. Saved suppliers appear in your dashboard.']
@@ -955,10 +954,9 @@ function HelpPage(){
         ))}
         <h2>For suppliers</h2>
         {[
-          ['How do I join the directory?', 'Create a free supplier account, complete your profile (business name, category, products, MOQ, delivery, lead time), and you\'ll appear in the directory. You can also list specific products using the "New listing" button on your dashboard.'],
-          ['How does verification work?', 'Send us your business registration documents, references and identity proof. Verification takes about 3–5 working days. Verified suppliers receive a badge and rank higher in search.'],
-          ['What are the paid packages?', 'Featured listings (K100/month), qualified buyer leads (K50/lead or K400/month), verification (K75 one-off), and sponsored campaigns (K455 per campaign). See the Pricing page for full details.'],
-          ['How do campaigns work?', 'Campaigns group your promotions and track impressions, clicks and leads. You create a campaign from your dashboard (Campaigns tab), choose a package, set a budget and date range, and it appears in your Overview with live stats.'],
+          ['How do I join the directory?', 'Create a free supplier account, complete your profile. To appear in search and publish listings, you must subscribe to a listing plan (K100/mo local, K140/mo intl).'],
+          ['How does verification work?', 'Send us your business registration documents, references and identity proof. Pay the verification fee (K75 one-off or K600 annual). Verified suppliers receive a badge and rank higher in search.'],
+          ['How do campaigns work?', 'Campaigns group your promotions and track impressions, clicks and leads. You create a campaign from your dashboard (K455), choose a package, set a budget and date range, and it appears in your Overview with live stats.'],
           ['Can I edit or remove a listing?', 'Yes — from your dashboard under "My Listings", you can view and delete any listing. Updates to your main profile are made under "Organisation profile".']
         ].map(([q,a],i)=>(
           <details key={'s'+i} className="faq-item"><summary>{q}</summary><div className="faq-body">{a}</div></details>
@@ -981,18 +979,18 @@ function TermsPage(){
         <p>By accessing or using the StartEasy Zambia directory ("the Directory"), you agree to these Terms of Service. Please read them carefully.</p>
         <h2>1. What the Directory is</h2>
         <p>The Directory is a marketplace that helps Zambian businesses find suppliers, and helps suppliers be discovered by buyers. We provide a platform for connection, plus optional paid services including supplier verification, qualified leads, premium placements, and sourcing support.</p>
-        <h2>2. Accounts</h2>
-        <p>You are responsible for maintaining the confidentiality of your account credentials. You agree to provide accurate information and to keep your profile up to date. Accounts found to be fraudulent or misleading may be suspended.</p>
+        <h2>2. Accounts and Subscriptions</h2>
+        <p>You are responsible for maintaining the confidentiality of your account credentials. Certain features (like publishing listings, posting requests, verification, and campaigns) require paid subscriptions or one-off payments. Fees are clearly disclosed in the Pricing section and are non-refundable except as required by law.</p>
         <h2>3. Using the Directory</h2>
         <p>You agree not to misuse the Directory — including by attempting to scrape data, post false or misleading listings, impersonate others, or interfere with other users. We may suspend accounts that violate these rules.</p>
         <h2>4. Transactions between buyers and suppliers</h2>
-        <p>StartEasy does not process payments or take ownership of goods. All transactions, deliveries, and warranties are between buyer and supplier directly. We do not guarantee the quality, safety or legality of any product or service offered by third parties.</p>
+        <p>StartEasy does not process buyer payments or take ownership of goods. All transactions, deliveries, and warranties are between buyer and supplier directly. We do not guarantee the quality, safety or legality of any product or service offered by third parties.</p>
         <h2>5. Verification and trust signals</h2>
         <p>Verification indicates that we have reviewed certain documents and references, but is not a guarantee of performance. Always perform your own due diligence before large transactions, especially with international suppliers.</p>
         <h2>6. International sourcing</h2>
         <p>For international suppliers, import duties, customs clearance and international freight are the responsibility of the buyer and are not included in the supplier's quoted prices.</p>
         <h2>7. Paid services</h2>
-        <p>Paid packages (featured listings, qualified leads, verification, campaigns, sourcing support) are subject to their own terms and fees. Fees are payable in advance and are non-refundable except where required by law or explicitly stated.</p>
+        <p>Paid packages are subject to their own terms and fees. Fees are payable in advance and are non-refundable except where required by law or explicitly stated.</p>
         <h2>8. Content</h2>
         <p>By submitting content (profile information, listings, images), you grant StartEasy a non-exclusive, worldwide, royalty-free licence to display that content on the Directory and in our marketing.</p>
         <h2>9. Limitation of liability</h2>
@@ -1063,6 +1061,7 @@ function Landing({onSignup,onSignin}){
   </div>;
 }
 
+/* ═══════════════════ DASHBOARD (MONETIZED) ═══════════════════ */
 function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const [profile,setProfile]=useState(null);
   const [loading,setLoading]=useState(true);
@@ -1074,11 +1073,16 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const [saving,setSaving]=useState(false);
   const [saveMsg,setSaveMsg]=useState(null);
   const [allSuppliers,setAllSuppliers]=useState([]);
-
+  
+  // Paid Services State
+  const [subs, setSubs] = useState({});
   const [campaigns,setCampaignsState]=useState([]);
   const [listings,setListingsState]=useState([]);
+  
+  // Modals
   const [campaignModalOpen,setCampaignModalOpen]=useState(false);
   const [listingModalOpen,setListingModalOpen]=useState(false);
+  const [checkout, setCheckout] = useState(null); // { type, title, amount, service, onSuccess }
 
   useEffect(()=>{
     if(!user){setLoading(false);return;}
@@ -1092,6 +1096,11 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
         sources:Array.isArray(p.sources)?p.sources.join(', '):(p.sources||''),
         frequency:p.frequency||'Monthly',orderValue:p.orderValue||''
       });
+      
+      // Load Subscriptions
+      const storedSubs = getSubs(user.uid);
+      setSubs(storedSubs);
+
       const [cloudListings, cloudCampaigns] = await Promise.all([
         loadUserListings(user.uid),
         loadUserCampaigns(user.uid)
@@ -1151,15 +1160,97 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     toast('Removed from saved suppliers.', 'success');
   };
 
-  const handleAddCampaign = async (newCamp) => {
-    const payload = { ...newCamp, userId: user.uid };
-    const saved = await saveCampaignToCloud(payload);
-    const record = saved || { ...payload, id: 'local-'+Date.now(), createdAt: Date.now(), status:'active', impressions:0, clicks:0, leads:0 };
-    const next = [record, ...campaigns];
-    setCampaignsState(next);
-    saveCampaigns(user.uid, next);
-    setCampaignModalOpen(false);
-    toast('Campaign created successfully.', 'success');
+  // --- Payment Gate Logic ---
+  const handleServicePayment = async (type, code, title, amount, onSuccess) => {
+    setCheckout({
+      type, code, title, amount,
+      serviceDef: {
+        code: code,
+        desk: 'directory',
+        title: title,
+        clientDesc: `This is a payment for ${title}. Once paid, your feature will unlock immediately.`,
+        whatsCovered: ['Access to premium feature', 'System processing', 'Support'],
+        timeline: 'Immediate activation',
+        amountOverride: amount,
+        feeLabelOverride: 'Service Fee'
+      },
+      onSuccess
+    });
+  };
+
+  const handleCheckoutSuccess = () => {
+    if(checkout) {
+      const updatedSubs = { ...subs };
+      
+      if (checkout.type === 'listing') {
+        updatedSubs.listing = true; // Simplified for demo
+      } else if (checkout.type === 'verification') {
+        updatedSubs.verified = true;
+        setProfile(prev => ({ ...prev, status: 'verified' }));
+        if (firebaseReady) db.collection('se_users').doc(user.uid).update({ status: 'verified' }).catch(()=>{});
+      } else if (checkout.type === 'campaign') {
+        updatedSubs.campaigns = true;
+      } else if (checkout.type === 'leads') {
+        updatedSubs.leads = true;
+      } else if (checkout.type === 'buyer') {
+        updatedSubs.buyerSub = true;
+      }
+      
+      setSubs(updatedSubs);
+      saveSubs(user.uid, updatedSubs);
+      
+      if (checkout.onSuccess) checkout.onSuccess();
+      toast('Payment successful! Feature unlocked.', 'success');
+    }
+    setCheckout(null);
+  };
+
+  const handleOpenListingModal = () => {
+    if (!subs.listing) {
+      handleServicePayment(
+        'listing', 
+        'DIR-LIST', 
+        'Supplier Listing Subscription', 
+        profile.scope === 'international' ? 'K140' : 'K100', 
+        () => setListingModalOpen(true)
+      );
+    } else {
+      setListingModalOpen(true);
+    }
+  };
+
+  const handleOpenCampaignModal = () => {
+    if (!subs.campaigns) {
+      handleServicePayment(
+        'campaign', 
+        'DIR-CAMP', 
+        'Campaign Placement', 
+        'K455', 
+        () => setCampaignModalOpen(true)
+      );
+    } else {
+      setCampaignModalOpen(true);
+    }
+  };
+
+  const handleVerification = () => {
+    handleServicePayment(
+      'verification', 
+      'DIR-VERIFY', 
+      'Profile Verification', 
+      'K75', 
+      () => {}
+    );
+  };
+
+  const handleBuyerSubscription = () => {
+    handleServicePayment(
+      'buyer', 
+      'DIR-BUYER', 
+      'Buyer Access Subscription', 
+      'K50', 
+      () => {}
+    );
   };
 
   const handleAddListing = async (newList) => {
@@ -1174,14 +1265,24 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     setTab('overview');
   };
 
+  const handleAddCampaign = async (newCamp) => {
+    const payload = { ...newCamp, userId: user.uid };
+    const saved = await saveCampaignToCloud(payload);
+    const record = saved || { ...payload, id: 'local-'+Date.now(), createdAt: Date.now(), status:'active', impressions:0, clicks:0, leads:0 };
+    const next = [record, ...campaigns];
+    setCampaignsState(next);
+    saveCampaigns(user.uid, next);
+    setCampaignModalOpen(false);
+    toast('Campaign launched.', 'success');
+  };
+
   const handleDeleteListing = async (id) => {
     if(!window.confirm('Delete this listing?')) return;
     const ok = await deleteListingFromCloud(id);
     const next = listings.filter(l => l.id !== id);
     setListingsState(next);
     saveListings(user.uid, next);
-    if(ok || !firebaseReady) toast('Listing deleted.', 'success');
-    else toast('Listing removed from your view.', 'success');
+    toast('Listing removed.', 'success');
   };
 
   if(loading) return <div style={{minHeight:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
@@ -1203,6 +1304,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     {key:'profile', label:'Organisation profile', icon:'fa-building'},
     {key:'catalogue', label:'My Listings', icon:'fa-list'},
     {key:'campaigns', label:'Campaigns', icon:'fa-bullhorn'},
+    {key:'leads', label:'Qualified Leads', icon:'fa-users-viewfinder'},
     {key:'analytics', label:'Analytics', icon:'fa-chart-simple'},
     {key:'billing', label:'Billing', icon:'fa-credit-card'},
   ] : [
@@ -1210,13 +1312,13 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     {key:'profile', label:'My profile', icon:'fa-user'},
     {key:'requests', label:'My requests', icon:'fa-file-invoice'},
     {key:'saved', label:'Saved suppliers', icon:'fa-bookmark'},
+    {key:'sourcing', label:'Sourcing Support', icon:'fa-truck-fast'},
     {key:'analytics', label:'Analytics', icon:'fa-chart-simple'},
     {key:'billing', label:'Purchases', icon:'fa-credit-card'},
   ];
 
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6'}}>
     <div className="dash-layout">
-
       <aside className="dash-side">
         {navItems.map(item=>(
           <a key={item.key} href="#" onClick={(e)=>{e.preventDefault(); setTab(item.key);}} className={tab===item.key?'active':''}>
@@ -1226,14 +1328,13 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
       </aside>
 
       <div className="dash-main">
-
         <div className="dash-head">
           <div>
             <h1>{isSupplier ? profile.businessName : profile.name}</h1>
-            <p>{isSupplier ? 'Supplier dashboard' : 'Buyer dashboard'} · <span className={`chip ${isVerified?'':'chip-neutral'}`}>{isVerified?'Verified':'Not verified'}</span></p>
+            <p>{isSupplier ? 'Supplier dashboard' : 'Buyer dashboard'} · <span className={`chip ${isVerified?'':'chip-danger'}`}>{isVerified?'Verified':'Unverified'}</span></p>
           </div>
           {isSupplier ? (
-            <button onClick={()=>setListingModalOpen(true)} style={{padding:'10px 18px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-plus"></i> New listing</button>
+            <button onClick={handleOpenListingModal} style={{padding:'10px 18px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-plus"></i> New listing</button>
           ) : (
             <button onClick={onBrowse} style={{padding:'10px 18px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-magnifying-glass"></i> Find suppliers</button>
           )}
@@ -1244,36 +1345,59 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
             <div className="stat-grid">
               {isSupplier ? (
                 <>
-                  <StatCard label="Live listings" value={listings.length} hint={`${listings.length} published`} />
-                  <StatCard label="Active campaigns" value={campaigns.length} hint={campaigns.length?`${campaigns.length} running`:'none yet'} />
-                  <StatCard label="Total views" value="0" hint="across all listings" />
-                  <StatCard label="Qualified leads" value="0" hint="0 new this month" />
+                  <StatCard label="Live listings" value={listings.length} hint={subs.listing?'Active':'Unpaid'} warn={!subs.listing} />
+                  <StatCard label="Campaigns" value={campaigns.length} hint={subs.campaigns?'Running':'None'} />
+                  <StatCard label="Profile Status" value={isVerified?'Verified':'Unverified'} hint={isVerified?'Badge active':'Get verified'} warn={!isVerified} />
+                  <StatCard label="Leads Package" value={subs.leads?'Active':'None'} hint={subs.leads?'Unlocked':'Subscribe'} />
                 </>
               ) : (
                 <>
                   <StatCard label="Matches found" value={matches.length} hint="in your category" />
-                  <StatCard label="Quote requests" value={quotes.length} hint="submitted" />
+                  <StatCard label="Quote requests" value={quotes.length} hint={subs.buyerSub?'Allowed':'Requires sub'} warn={!subs.buyerSub} />
                   <StatCard label="Saved suppliers" value={savedSuppliers.length} hint="bookmarked" />
                   <StatCard label="Account status" value={isVerified?'Verified':'Pending'} hint="profile visible" warn={!isVerified} />
                 </>
               )}
             </div>
 
+            {/* Actions requiring payment */}
             {isSupplier ? (
               <>
+                {!isVerified && (
+                  <div style={{background:'linear-gradient(135deg,#FFF5E6,#FFF)', border:'1px solid #FFE0B2', borderRadius:14, padding:'20px', marginBottom:18, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:14}}>
+                    <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                      <i className="fas fa-shield-halved" style={{color:'#E8730F',fontSize:22,marginTop:2}}></i>
+                      <div>
+                        <h3 style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 4px'}}>Get your profile verified</h3>
+                        <p style={{fontSize:13,color:'rgba(10,31,18,.65)',margin:0}}>Build trust. Unlock the verified badge for K75 one-off (or K600 annual).</p>
+                      </div>
+                    </div>
+                    <button onClick={handleVerification} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Get Verified</button>
+                  </div>
+                )}
+
                 <div className="card" style={{marginBottom:18}}>
                   <div className="card-h">
                     <h3>Your listings</h3>
-                    <div style={{display:'flex',gap:8}}>
-                      <button onClick={()=>setListingModalOpen(true)} style={{background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.3)',borderRadius:6,padding:'6px 10px',color:'#E8730F',fontSize:11.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> Add</button>
-                      <button onClick={()=>setTab('catalogue')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>Manage all</button>
-                    </div>
+                    {!subs.listing ? (
+                      <span className="chip chip-danger">Subscription Required</span>
+                    ) : (
+                      <div style={{display:'flex',gap:8}}>
+                        <button onClick={handleOpenListingModal} style={{background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.3)',borderRadius:6,padding:'6px 10px',color:'#E8730F',fontSize:11.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> Add</button>
+                      </div>
+                    )}
                   </div>
                   <div className="table-wrap" style={{border:0,borderRadius:0}}>
                     <table className="dt">
                       <thead><tr><th>Listing</th><th>Category</th><th>MOQ</th><th>Price</th><th>Status</th><th></th></tr></thead>
                       <tbody>
-                        {listings.length > 0 ? listings.slice(0, 5).map((p,i)=>(
+                        {!subs.listing ? (
+                          <tr><td colSpan="6" style={{textAlign:'center',padding:'40px'}}>
+                            <i className="fas fa-lock" style={{fontSize:24,color:'rgba(10,31,18,.2)',marginBottom:10,display:'block'}}></i>
+                            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',marginBottom:14}}>You need an active subscription to publish live listings.</p>
+                            <button onClick={handleOpenListingModal} style={{padding:'10px 20px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Subscribe & Publish</button>
+                          </td></tr>
+                        ) : listings.length > 0 ? listings.slice(0, 5).map((p,i)=>(
                           <tr key={p.id || i}>
                             <td style={{fontWeight:700}}>{p.title}</td>
                             <td className="muted">{CAT_MAP[p.category]?.title || p.category || '—'}</td>
@@ -1285,7 +1409,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                             </td>
                           </tr>
                         )) : (
-                          <tr><td colSpan="6" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>You haven't published any listings yet. Click "New listing" to publish one live.</td></tr>
+                          <tr><td colSpan="6" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No listings yet.</td></tr>
                         )}
                       </tbody>
                     </table>
@@ -1295,16 +1419,23 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                 <div className="card" style={{marginBottom:18}}>
                   <div className="card-h">
                     <h3>Active campaigns</h3>
-                    <div style={{display:'flex',gap:8}}>
-                      <button onClick={()=>setCampaignModalOpen(true)} style={{background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.3)',borderRadius:6,padding:'6px 10px',color:'#E8730F',fontSize:11.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> New</button>
-                      <button onClick={()=>setTab('campaigns')} style={{background:'none',border:'none',color:'#E8730F',fontSize:12,fontWeight:800,textDecoration:'underline',cursor:'pointer',fontFamily:'inherit',padding:0}}>Manage all</button>
-                    </div>
+                    {subs.campaigns ? (
+                      <button onClick={handleOpenCampaignModal} style={{background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.3)',borderRadius:6,padding:'6px 10px',color:'#E8730F',fontSize:11.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> New</button>
+                    ) : (
+                      <span className="chip chip-danger">Payment Required (K455)</span>
+                    )}
                   </div>
                   <div className="table-wrap" style={{border:0,borderRadius:0}}>
                     <table className="dt">
                       <thead><tr><th>Campaign</th><th>Package</th><th>Dates</th><th>Budget</th><th>Status</th></tr></thead>
                       <tbody>
-                        {campaigns.length > 0 ? campaigns.slice(0, 5).map((c,i)=>(
+                        {!subs.campaigns ? (
+                          <tr><td colSpan="5" style={{textAlign:'center',padding:'40px'}}>
+                            <i className="fas fa-bullhorn" style={{fontSize:24,color:'rgba(10,31,18,.2)',marginBottom:10,display:'block'}}></i>
+                            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',marginBottom:14}}>Run campaigns to boost visibility. K455 per campaign.</p>
+                            <button onClick={handleOpenCampaignModal} style={{padding:'10px 20px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Launch Campaign</button>
+                          </td></tr>
+                        ) : campaigns.length > 0 ? campaigns.slice(0, 5).map((c,i)=>(
                           <tr key={c.id || i}>
                             <td style={{fontWeight:700}}>{c.name}</td>
                             <td className="muted">{c.package}</td>
@@ -1313,7 +1444,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                             <td><span className="chip">Active</span></td>
                           </tr>
                         )) : (
-                          <tr><td colSpan="5" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No campaigns yet. Create one to promote your business.</td></tr>
+                          <tr><td colSpan="5" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No campaigns yet.</td></tr>
                         )}
                       </tbody>
                     </table>
@@ -1321,25 +1452,32 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                 </div>
               </>
             ) : (
-              <div className="card" style={{marginBottom:18}}>
-                <div className="card-h"><h3>Recent activity</h3></div>
-                <div style={{padding:'20px', display:'flex', flexDirection:'column', gap:16}}>
-                  <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
-                    <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(232,115,15,.1)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-check" style={{fontSize:12}}></i></div>
-                    <div>
-                      <div style={{fontSize:13.5,fontWeight:700,color:'#0A1F12'}}>Account created</div>
-                      <div style={{fontSize:12,color:'rgba(10,31,18,.55)'}}>{fmtDate(profile.createdAt||Date.now())}</div>
+              <>
+                {!subs.buyerSub && (
+                  <div style={{background:'linear-gradient(135deg,#FFF5E6,#FFF)', border:'1px solid #FFE0B2', borderRadius:14, padding:'20px', marginBottom:18, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:14}}>
+                    <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                      <i className="fas fa-cart-shopping" style={{color:'#E8730F',fontSize:22,marginTop:2}}></i>
+                      <div>
+                        <h3 style={{fontSize:15,fontWeight:800,color:'#0A1F12',margin:'0 0 4px'}}>Unlock Buyer Access</h3>
+                        <p style={{fontSize:13,color:'rgba(10,31,18,.65)',margin:0}}>Subscribe for K50/mo to post quote requests and contact suppliers.</p>
+                      </div>
+                    </div>
+                    <button onClick={handleBuyerSubscription} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Subscribe Now</button>
+                  </div>
+                )}
+                <div className="card" style={{marginBottom:18}}>
+                  <div className="card-h"><h3>Recent activity</h3></div>
+                  <div style={{padding:'20px', display:'flex', flexDirection:'column', gap:16}}>
+                    <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                      <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(232,115,15,.1)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-check" style={{fontSize:12}}></i></div>
+                      <div>
+                        <div style={{fontSize:13.5,fontWeight:700,color:'#0A1F12'}}>Account created</div>
+                        <div style={{fontSize:12,color:'rgba(10,31,18,.55)'}}>{fmtDate(profile.createdAt||Date.now())}</div>
+                      </div>
                     </div>
                   </div>
-                  {isVerified && <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
-                    <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(30,123,60,.1)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><i className="fas fa-shield" style={{fontSize:12}}></i></div>
-                    <div>
-                      <div style={{fontSize:13.5,fontWeight:700,color:'#0A1F12'}}>Profile verified</div>
-                      <div style={{fontSize:12,color:'rgba(10,31,18,.55)'}}>Suppliers can now find you</div>
-                    </div>
-                  </div>}
                 </div>
-              </div>
+              </>
             )}
           </>
         )}
@@ -1369,16 +1507,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                   <TIn value={editForm.location} onChange={v=>setEditForm({...editForm,location:v})}/>
                 )}
               </div>
-              <div><label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>{isSupplier?'Delivery scope':'Sourcing scope'}</label>
-                <select value={editForm.scope||'local'} onChange={e=>setEditForm({...editForm,scope:e.target.value})} style={{...INP_STYLE,cursor:'pointer'}}>
-                  {SCOPE_OPTIONS.map(o=><option key={o.key} value={o.key}>{o.label}</option>)}
-                </select>
-              </div>
             </div>
-            {editForm.scope && editForm.scope!=='local' && <div style={{background:'rgba(27,108,168,.06)',border:'1px dashed rgba(27,108,168,.3)',borderRadius:8,padding:'10px 14px',marginTop:14,fontSize:11.5,lineHeight:1.6,color:'rgba(10,31,18,.7)'}}>
-              <i className="fas fa-circle-info" style={{color:'#1B6CA8',marginRight:6}}></i>
-              International sourcing: import duties, customs clearance and international freight are separate from supplier quotes.
-            </div>}
             <div style={{marginTop:16}}>
               {isSupplier?<>
                 <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Products (comma-separated)</label><TIn value={editForm.products} onChange={v=>setEditForm({...editForm,products:v})}/>
@@ -1408,54 +1537,76 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
           <div className="card">
             <div className="card-h">
               <h3>My Listings</h3>
-              <button onClick={()=>setListingModalOpen(true)} style={{padding:'6px 12px',background:'#F5FAF6',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,fontSize:12,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> Add listing</button>
+              {subs.listing && (
+                <button onClick={handleOpenListingModal} style={{padding:'6px 12px',background:'#F5FAF6',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,fontSize:12,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> Add listing</button>
+              )}
             </div>
             <div className="table-wrap" style={{border:0,borderRadius:0}}>
-              <table className="dt">
-                <thead><tr><th>Listing</th><th>Category</th><th>MOQ</th><th>Price</th><th>Lead Time</th><th>Status</th><th></th></tr></thead>
-                <tbody>
-                  {listings.length > 0 ? listings.map((p,i)=>(
-                    <tr key={p.id || i}>
-                      <td style={{fontWeight:700}}>{p.title}</td>
-                      <td className="muted">{CAT_MAP[p.category]?.title || p.category || '—'}</td>
-                      <td className="muted">{p.moq||'—'}</td>
-                      <td className="muted">{p.price ? `${p.price}${p.unit?' '+p.unit:''}` : '—'}</td>
-                      <td className="muted">{p.leadTime||'—'}</td>
-                      <td><span className="chip">Live</span></td>
-                      <td style={{textAlign:'right'}}>
-                        <button onClick={()=>handleDeleteListing(p.id)} style={{background:'none',border:'none',color:'#B8564F',fontSize:11.5,fontWeight:700,cursor:'pointer',textDecoration:'underline'}}>Delete</button>
-                      </td>
-                    </tr>
-                  )) : (
-                    <tr><td colSpan="7" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No listings found. Click "Add listing" to publish one live.</td></tr>
-                  )}
-                </tbody>
-              </table>
+              {!subs.listing ? (
+                <div style={{padding:'40px',textAlign:'center'}}>
+                  <i className="fas fa-lock" style={{fontSize:32,color:'rgba(10,31,18,.2)',marginBottom:12,display:'block'}}></i>
+                  <h3 className="serif" style={{fontSize:18,marginBottom:8,color:'#0A1F12'}}>Subscription Required</h3>
+                  <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',marginBottom:16}}>Subscribe to publish and manage your listings.</p>
+                  <button onClick={handleOpenListingModal} style={{padding:'10px 20px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Subscribe Now</button>
+                </div>
+              ) : (
+                <table className="dt">
+                  <thead><tr><th>Listing</th><th>Category</th><th>MOQ</th><th>Price</th><th>Status</th><th></th></tr></thead>
+                  <tbody>
+                    {listings.length > 0 ? listings.map((p,i)=>(
+                      <tr key={p.id || i}>
+                        <td style={{fontWeight:700}}>{p.title}</td>
+                        <td className="muted">{CAT_MAP[p.category]?.title || p.category || '—'}</td>
+                        <td className="muted">{p.moq||'—'}</td>
+                        <td className="muted">{p.price ? `${p.price}${p.unit?' '+p.unit:''}` : '—'}</td>
+                        <td><span className="chip">Live</span></td>
+                        <td style={{textAlign:'right'}}>
+                          <button onClick={()=>handleDeleteListing(p.id)} style={{background:'none',border:'none',color:'#B8564F',fontSize:11.5,fontWeight:700,cursor:'pointer',textDecoration:'underline'}}>Delete</button>
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr><td colSpan="6" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No listings yet.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         )}
 
         {tab==='requests' && !isSupplier && (
           <div className="card">
-            <div className="card-h"><h3>My requests</h3></div>
-            <div className="table-wrap" style={{border:0,borderRadius:0}}>
-              <table className="dt">
-                <thead><tr><th>Supplier</th><th>Product</th><th>Qty/Budget</th><th>Date</th><th>Status</th></tr></thead>
-                <tbody>
-                  {quotes.length > 0 ? quotes.map(q=>(
-                    <tr key={q.id}>
-                      <td style={{fontWeight:700}}>{q.supplierName||'Supplier'}</td>
-                      <td className="muted">{q.product||'—'}</td>
-                      <td className="muted">{[q.quantity, q.budget].filter(Boolean).join(' · ') || '—'}</td>
-                      <td className="muted">{q.at?fmtDate(q.at):''}</td>
-                      <td><span className="chip chip-accent">{q.status||'Sent'}</span></td>
-                    </tr>
-                  )) : (
-                    <tr><td colSpan="5" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No requests yet.</td></tr>
-                  )}
-                </tbody>
-              </table>
+            <div className="card-h">
+              <h3>My requests</h3>
+              {!subs.buyerSub && <span className="chip chip-danger">Subscription Required</span>}
             </div>
+            {!subs.buyerSub ? (
+              <div style={{padding:'40px',textAlign:'center'}}>
+                <i className="fas fa-lock" style={{fontSize:32,color:'rgba(10,31,18,.2)',marginBottom:12,display:'block'}}></i>
+                <h3 className="serif" style={{fontSize:18,marginBottom:8,color:'#0A1F12'}}>Subscribe to Post Requests</h3>
+                <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',marginBottom:16}}>Unlock buyer features for K50/month.</p>
+                <button onClick={handleBuyerSubscription} style={{padding:'10px 20px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Subscribe Now</button>
+              </div>
+            ) : (
+              <div className="table-wrap" style={{border:0,borderRadius:0}}>
+                <table className="dt">
+                  <thead><tr><th>Supplier</th><th>Product</th><th>Qty/Budget</th><th>Date</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {quotes.length > 0 ? quotes.map(q=>(
+                      <tr key={q.id}>
+                        <td style={{fontWeight:700}}>{q.supplierName||'Supplier'}</td>
+                        <td className="muted">{q.product||'—'}</td>
+                        <td className="muted">{[q.quantity, q.budget].filter(Boolean).join(' · ') || '—'}</td>
+                        <td className="muted">{q.at?fmtDate(q.at):''}</td>
+                        <td><span className="chip chip-accent">{q.status||'Sent'}</span></td>
+                      </tr>
+                    )) : (
+                      <tr><td colSpan="5" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No requests yet.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
@@ -1488,28 +1639,80 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
           <div className="card">
              <div className="card-h">
                <h3>Campaigns</h3>
-               <button onClick={()=>setCampaignModalOpen(true)} style={{padding:'6px 12px',background:'#F5FAF6',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,fontSize:12,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> New campaign</button>
+               {subs.campaigns && (
+                 <button onClick={handleOpenCampaignModal} style={{padding:'6px 12px',background:'#F5FAF6',border:'1px solid rgba(10,31,18,.15)',borderRadius:6,fontSize:12,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> New campaign</button>
+               )}
              </div>
-             <div className="table-wrap" style={{border:0,borderRadius:0}}>
-              <table className="dt">
-                <thead><tr><th>Campaign</th><th>Package</th><th>Dates</th><th>Budget</th><th>Impressions</th><th>Clicks</th><th>Status</th></tr></thead>
-                <tbody>
-                  {campaigns.length > 0 ? campaigns.map((c,i)=>(
-                    <tr key={c.id || i}>
-                      <td style={{fontWeight:700}}>{c.name}</td>
-                      <td className="muted">{c.package}</td>
-                      <td className="muted">{c.startDate?`${fmtDate(c.startDate)} – ${fmtDate(c.endDate)}`:'—'}</td>
-                      <td className="muted">{c.budget}</td>
-                      <td className="muted">{c.impressions||0}</td>
-                      <td className="muted">{c.clicks||0}</td>
-                      <td><span className="chip">Active</span></td>
-                    </tr>
-                  )) : (
-                    <tr><td colSpan="7" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No campaigns yet. Create one to promote your business.</td></tr>
-                  )}
-                </tbody>
-              </table>
+             {!subs.campaigns ? (
+               <div style={{padding:'40px',textAlign:'center'}}>
+                  <i className="fas fa-lock" style={{fontSize:32,color:'rgba(10,31,18,.2)',marginBottom:12,display:'block'}}></i>
+                  <h3 className="serif" style={{fontSize:18,marginBottom:8,color:'#0A1F12'}}>Payment Required</h3>
+                  <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',marginBottom:16}}>Pay K455 to launch your first campaign.</p>
+                  <button onClick={handleOpenCampaignModal} style={{padding:'10px 20px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Purchase Campaign</button>
+                </div>
+             ) : (
+               <div className="table-wrap" style={{border:0,borderRadius:0}}>
+                <table className="dt">
+                  <thead><tr><th>Campaign</th><th>Package</th><th>Dates</th><th>Budget</th><th>Impressions</th><th>Clicks</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {campaigns.length > 0 ? campaigns.map((c,i)=>(
+                      <tr key={c.id || i}>
+                        <td style={{fontWeight:700}}>{c.name}</td>
+                        <td className="muted">{c.package}</td>
+                        <td className="muted">{c.startDate?`${fmtDate(c.startDate)} – ${fmtDate(c.endDate)}`:'—'}</td>
+                        <td className="muted">{c.budget}</td>
+                        <td className="muted">{c.impressions||0}</td>
+                        <td className="muted">{c.clicks||0}</td>
+                        <td><span className="chip">Active</span></td>
+                      </tr>
+                    )) : (
+                      <tr><td colSpan="7" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No campaigns yet.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+             )}
+          </div>
+        )}
+
+        {tab==='leads' && isSupplier && (
+          <div className="card">
+            <div className="card-h">
+              <h3>Qualified Buyer Leads</h3>
+              {!subs.leads && <span className="chip chip-danger">Subscription Required</span>}
             </div>
+            {!subs.leads ? (
+              <div style={{padding:'40px',textAlign:'center'}}>
+                <i className="fas fa-users-viewfinder" style={{fontSize:32,color:'rgba(10,31,18,.2)',marginBottom:12,display:'block'}}></i>
+                <h3 className="serif" style={{fontSize:18,marginBottom:8,color:'#0A1F12'}}>Unlock Buyer Leads</h3>
+                <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',marginBottom:16}}>Get direct access to buyers looking for your products. K400/mo.</p>
+                <button onClick={()=>handleServicePayment('leads','DIR-LEADS','Qualified Lead Access','K400',()=>{})} style={{padding:'10px 20px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Subscribe to Leads</button>
+              </div>
+            ) : (
+              <div style={{padding:'20px'}}>
+                <div style={{background:'#F8FAF6', border:'1px solid rgba(10,31,18,.08)', borderRadius:10, padding:'20px', marginBottom:14}}>
+                  <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10}}>
+                    <span style={{fontWeight:800, fontSize:14}}>BuildCo Contractors</span>
+                    <span className="chip chip-accent">New Lead</span>
+                  </div>
+                  <p style={{fontSize:13, color:'rgba(10,31,18,.7)', margin:'0 0 8px'}}>Looking for 200 bags of cement, delivered to Lusaka.</p>
+                  <button style={{padding:'6px 12px', background:'#0A1F12', color:'#fff', border:'none', borderRadius:6, fontSize:12, fontWeight:700}}>View Contact Details</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab==='sourcing' && !isSupplier && (
+          <div className="card card-pad">
+             <h3 style={{marginBottom:16}}>Sourcing & Procurement Support</h3>
+             <p style={{fontSize:14,color:'rgba(10,31,18,.7)',lineHeight:1.6,marginBottom:20}}>Let StartEasy handle the sourcing. We find suppliers, request quotes, and negotiate on your behalf. Fee: K600 per project.</p>
+             
+             <div style={{background:'linear-gradient(135deg,#E7F4EC,#F1FAF4)',borderLeft:'4px solid #2E9C4A',borderRadius:10,padding:'14px 18px',display:'flex',gap:12,alignItems:'flex-start',fontSize:13,color:'#0A4D28',lineHeight:1.65}}>
+               <i className="fas fa-info-circle" style={{color:'#1E7B3C',fontSize:16,flexShrink:0,marginTop:2}}></i>
+               <div>This service is handled by our procurement team. Click below to start the engagement flow.</div>
+             </div>
+             <button onClick={()=>handleServicePayment('sourcing','DIR-SOURCE','Sourcing & Procurement','K600',()=>{})} style={{marginTop:20, padding:'12px 24px', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700}}>Start Sourcing Request</button>
           </div>
         )}
 
@@ -1533,7 +1736,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                 <thead><tr><th>Description</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
                 <tbody>
                   <tr><td colSpan="4" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>
-                    No transactions found. {isSupplier?'Upgrade your profile or get verified to boost visibility.':'Request a sourcing quote to see invoices here.'}
+                    No transactions found.
                   </td></tr>
                 </tbody>
               </table>
@@ -1546,9 +1749,209 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
 
     {campaignModalOpen && <CreateCampaignModal onClose={()=>setCampaignModalOpen(false)} onSave={handleAddCampaign} />}
     {listingModalOpen && <CreateListingModal onClose={()=>setListingModalOpen(false)} onSave={handleAddListing} profile={profile} />}
+    
+    {checkout && (
+      <Modal open={true} onClose={()=>setCheckout(null)} eyebrow="Secure Checkout" maxWidth="52rem">
+        <CheckoutFlow 
+          service={checkout.serviceDef} 
+          client={profile} 
+          onSuccess={handleCheckoutSuccess} 
+          onCancel={()=>setCheckout(null)} 
+        />
+      </Modal>
+    )}
   </div>;
 }
 
+/* ═══════════════════ CHECKOUT FLOW ═══════════════════ */
+function CheckoutFlow({service, client, onSuccess, onCancel}) {
+  const [step, setStep] = useState('review'); // 'review' | 'payment' | 'done'
+  
+  const handlePaymentSubmit = () => {
+    setStep('done');
+    setTimeout(() => onSuccess(), 2500);
+  };
+
+  if (step === 'done') {
+    return <div style={{textAlign:'center', padding:'40px 20px'}}>
+      <i className="fas fa-circle-check" style={{fontSize:56, color:'#1E7B3C', marginBottom:16, display:'block'}}></i>
+      <h2 className="serif" style={{fontSize:24, color:'#0A1F12', marginBottom:10}}>Payment Submitted</h2>
+      <p style={{fontSize:14, color:'rgba(10,31,18,.7)', maxWidth:400, margin:'0 auto 24px', lineHeight:1.6}}>
+        Your payment reference has been received. A StartEasy officer is verifying it manually. Your feature will unlock automatically once confirmed.
+      </p>
+      <button onClick={onSuccess} style={{padding:'12px 24px', background:'#0A1F12', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700}}>Continue to Feature</button>
+    </div>;
+  }
+
+  if (step === 'payment') {
+    return <div>
+      <Payment 
+        service={service} 
+        client={client} 
+        onClose={onCancel} 
+        onDone={handlePaymentSubmit} 
+      />
+    </div>;
+  }
+
+  return <div>
+    <div className="el printable" style={{marginBottom:24}}>
+      <div className="eh">
+        <div>
+          <div className="brand">Start<em>Easy</em></div>
+          <div className="sub">Administrative Services Desk · Zambia</div>
+        </div>
+        <div>
+          <div className="dt">INVOICE / ENGAGEMENT</div>
+          <div className="mt">{new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+        </div>
+      </div>
+      <p><strong>Client:</strong> {client.name || client.businessName || 'Valued Client'}</p>
+      <p><strong>Service:</strong> {service.title}</p>
+      
+      <h4>Scope of Service</h4>
+      <p>{service.clientDesc}</p>
+      <ul>
+        {service.whatsCovered.map((item, i) => <li key={i}>{item}</li>)}
+      </ul>
+      
+      <div className="total">
+        <span className="tl">Amount Due</span>
+        <span className="tv">{service.amountOverride}</span>
+      </div>
+      <p style={{fontSize:11.5,color:'#666',fontStyle:'italic',marginTop:8}}>All amounts are StartEasy service fees for work only. They are separate from and do not include any government or regulator fee.</p>
+    </div>
+
+    <div style={{display:'flex', gap:10, justifyContent:'flex-end'}}>
+      <button onClick={onCancel} style={{padding:'12px 24px', background:'#fff', border:'1px solid rgba(10,31,18,.15)', borderRadius:8, fontSize:14, fontWeight:600, color:'#0A1F12'}}>Cancel</button>
+      <button onClick={()=>setStep('payment')} style={{padding:'12px 24px', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700}}>Proceed to Payment</button>
+    </div>
+  </div>;
+}
+
+/* ═══════════════════ PAYMENT COMPONENT (REUSED) ═══════════════════ */
+function Payment({service,client,onClose,onDone}){
+  const s=service;
+  const amountDue=s.amountOverride || 'K100';
+  const receiptPrefix='SE-'+(s.code||'DIR');
+  const [method,setMethod]=useState(null);
+  const [senderName,setSenderName]=useState(client.name||'');
+  const [senderContact,setSenderContact]=useState(client.phone||client.email||'');
+  const [userRef,setUserRef]=useState('');
+  const [agree,setAgree]=useState(false);
+  const [errorMsg,setErrorMsg]=useState('');
+  const [confirmed,setConfirmed]=useState(false);
+  const [saving,setSaving]=useState(false);
+  const [cloudSaved,setCloudSaved]=useState(null);
+  const [receiptNo,setReceiptNo]=useState('');
+  const [whatsappUrl,setWhatsappUrl]=useState('');
+  const [whatsappSent,setWhatsappSent]=useState(false);
+  const [copied,setCopied]=useState('');
+
+  const copyTxt=(t,k)=>{const done=()=>{setCopied(k);setTimeout(()=>setCopied(''),1500)};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done).catch(done);else done()};
+
+  const buildMsg=(r,dt)=>['*STARTEASY — SERVICE FEE*','','*Ref:* '+r,'*Date:* '+dt,'','*Client:* '+client.name,'*Business:* '+(client.business||'—'),'*Email:* '+client.email,'','*Service:*',s.title,'','*Fee:*',amountDue,'','*Payment*','Method: '+(PAYMENT_METHODS[method]?PAYMENT_METHODS[method].label:'—'),'Sender: '+senderName,'Contact: '+senderContact,'TxID: '+userRef].join('\n');
+
+  const confirm=async()=>{
+    setErrorMsg('');
+    if(!method){setErrorMsg('Select a payment method.');return}
+    if(!senderName.trim()){setErrorMsg('Enter the name on the payment.');return}
+    if(!senderContact.trim()){setErrorMsg('Enter the phone or email used.');return}
+    if(!userRef.trim()){setErrorMsg('Enter your transaction reference.');return}
+    if(!agree){setErrorMsg('Tick the confirmation box.');return}
+    setSaving(true);
+    const rcpt=receiptPrefix+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
+    const dt=new Date().toLocaleString('en-GB',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const record = {ref:rcpt,clientName:client.name,clientEmail:client.email,clientPhone:client.phone||'',clientBusiness:client.business||'',serviceCode:s.code||'DIR',serviceTitle:s.title,serviceFee:amountDue,amount:amountDue,method:PAYMENT_METHODS[method]?.label||method,senderName,senderContact,txRef:userRef,receiptDate:dt};
+    const saved = await addPayment(record);
+    setCloudSaved(saved ? 'ok' : 'fail');
+    setReceiptNo(rcpt);
+    setWhatsappUrl(waUrl(buildMsg(rcpt,dt)));
+    setConfirmed(true);
+    setSaving(false);
+  };
+
+  if(confirmed){
+    return <div className="fadein">
+      <div style={{background:'linear-gradient(135deg,#EAF7EE,#F0FBF4)',border:'2px solid #28A745',borderRadius:14,padding:'28px 24px',textAlign:'center'}}>
+        <i className="fas fa-paper-plane" style={{fontSize:56,color:'#E8730F',marginBottom:12,display:'block'}}></i>
+        <h4 className="serif" style={{fontSize:22,color:'#0A1F12',marginBottom:10}}>Payment reference submitted</h4>
+        <p style={{fontSize:13.5,color:'rgba(10,31,18,.7)',marginBottom:14}}>Reference: <strong>{receiptNo}</strong></p>
+        {cloudSaved==='ok'&&<p style={{fontSize:12,color:'#1E7B3C',marginBottom:6,fontWeight:600}}><i className="fas fa-cloud-upload-alt" style={{marginRight:6}}></i>Synced to StartEasy records.</p>}
+        
+        <div style={{background:'#fff',border:'1px dashed #25D366',borderRadius:12,padding:18,marginTop:18,textAlign:'left'}}>
+          <div style={{fontSize:12.5,fontWeight:800,letterSpacing:'.6px',color:'#075E54',marginBottom:10,display:'flex',alignItems:'center',gap:8,textTransform:'uppercase'}}><i className="fab fa-whatsapp" style={{color:'#25D366',fontSize:16}}></i> Send your reference to the officer</div>
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={()=>setWhatsappSent(true)} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#25D366',color:'#fff',padding:'13px 22px',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}><i className="fab fa-whatsapp"></i><span>Send to officer on WhatsApp</span></a>
+          <button type="button" onClick={()=>copyTxt(buildMsg(receiptNo,''),'msg')} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,width:'100%',marginTop:10,padding:'11px 18px',background:'#fff',border:'1.5px solid #25D366',color:'#075E54',borderRadius:10,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><i className={`fas ${copied==='msg'?'fa-check':'fa-copy'}`}></i>{copied==='msg'?'Copied':'Copy message'}</button>
+        </div>
+        <button type="button" onClick={onDone} style={{marginTop:18,padding:'12px 24px',border:'1px solid rgba(10,31,18,.2)',background:'#fff',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit',color:'#0A1F12'}}>Close</button>
+      </div>
+    </div>;
+  }
+
+  const m=method?PAYMENT_METHODS[method]:null;
+  return <div>
+    <div style={{background:'linear-gradient(135deg,#0A1F12,#123A1F)',color:'#fff',borderRadius:14,padding:'22px 24px',marginBottom:20,display:'flex',justifyContent:'space-between',alignItems:'center',gap:20,flexWrap:'wrap'}}>
+      <div>
+        <div style={{fontSize:11,fontWeight:800,letterSpacing:'1.8px',textTransform:'uppercase',color:'#F5A623',marginBottom:6}}>Service Fee</div>
+        <div className="serif" style={{fontSize:'clamp(2rem,4vw,2.5rem)',fontWeight:800,color:'#F5A623',lineHeight:1}}>{amountDue}</div>
+        <div style={{fontSize:12.5,color:'rgba(255,255,255,.72)',marginTop:8,maxWidth:400,lineHeight:1.6}}>{s.title}</div>
+      </div>
+      <i className="fas fa-shield-alt" style={{fontSize:44,color:'#F5A623',opacity:.65,flexShrink:0}}></i>
+    </div>
+    <div style={{background:'linear-gradient(135deg,#E7F4EC,#F1FAF4)',borderLeft:'4px solid #2E9C4A',borderRadius:10,padding:'14px 18px',marginBottom:20,display:'flex',gap:12,alignItems:'flex-start',fontSize:12.5,color:'#0A4D28',lineHeight:1.65}}>
+      <i className="fas fa-info-circle" style={{color:'#1E7B3C',fontSize:16,flexShrink:0,marginTop:2}}></i>
+      <div>Pay directly to the account shown, then submit your transaction reference.</div>
+    </div>
+    <div className="paygrid">
+      {Object.entries(PAYMENT_METHODS).map(([k,pm])=>(
+        <button key={k} type="button" className={`pmc ${pm.cls} ${method===k?'sel':''}`} onClick={()=>setMethod(k)}>
+          <div className="lg">{k==='airtel'?'airtel':k==='mtn'?'MTN':k==='bank'?<i className="fas fa-university"></i>:k==='paypal'?<i className="fab fa-paypal"></i>:<i className="fab fa-bitcoin"></i>}</div>
+          <div className="nm">{pm.label}</div>
+          <div className="ds">{pm.sub}</div>
+        </button>
+      ))}
+    </div>
+    {m&&<div style={{marginTop:14,background:'#fff',border:'2px solid rgba(10,31,18,.12)',borderRadius:14,overflow:'hidden'}}>
+      <div style={{padding:'16px 20px',display:'flex',gap:14,alignItems:'center',color:'#fff',background:m.cls==='pm-airtel'?'#E40000':m.cls==='pm-mtn'?'#FFCC00':m.cls==='pm-bank'?'linear-gradient(135deg,#1B5E8C,#0D3D5E)':m.cls==='pm-paypal'?'linear-gradient(135deg,#003087,#009CDE)':'linear-gradient(135deg,#F7931A,#E2761B)'}}>
+        <div style={{width:44,height:44,borderRadius:12,background:'rgba(255,255,255,.18)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20}}><i className={`${m.iconSet||'fas'} ${m.icon}`}></i></div>
+        <div><div style={{fontSize:15,fontWeight:800}}>{m.title}</div><div style={{fontSize:11.5,opacity:.88,marginTop:2}}>{m.sub}</div></div>
+      </div>
+      <div style={{padding:20}}>
+        <div style={{background:'linear-gradient(135deg,rgba(245,166,35,.1),rgba(245,166,35,.05))',border:'1px solid rgba(245,166,35,.35)',borderRadius:10,padding:'14px 18px',marginBottom:16,display:'flex',justifyContent:'space-between',alignItems:'center',gap:14,flexWrap:'wrap'}}>
+          <div style={{fontSize:11,fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase',color:'#8A6828'}}>Amount</div>
+          <div className="serif" style={{fontSize:24,fontWeight:800,color:'#0A1F12'}}>{amountDue}</div>
+        </div>
+        {m.ussd&&<a href={`tel:${encodeURIComponent(m.ussd)}`} style={{display:'inline-flex',alignItems:'center',gap:7,background:m.cls==='pm-airtel'?'#E40000':m.cls==='pm-mtn'?'#FFCC00':'#0A1F12',color:m.cls==='pm-mtn'?'#000':'#fff',padding:'10px 14px',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}><i className="fas fa-mobile-alt"></i> {m.ussdLbl} ({m.ussd})</a>}
+        <div style={{display:'flex',flexDirection:'column',gap:10,marginTop:14}}>
+          {m.rows.map((r,i)=>(
+            <div key={i} style={{background:'#F7FAF8',border:'1px solid rgba(10,31,18,.1)',borderRadius:10,padding:'13px 16px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:10,letterSpacing:'1.5px',textTransform:'uppercase',color:'#8A6828',fontWeight:800,marginBottom:3}}>{r.l}</div>
+                <div style={{fontSize:15,fontWeight:700,color:'#0A1F12',fontFamily:r.plain?'inherit':'Consolas,monospace',wordBreak:'break-all'}}>{r.v}</div>
+              </div>
+              {r.copy&&<button type="button" onClick={()=>copyTxt(r.copy,r.l)} style={{background:'rgba(245,166,35,.15)',border:'none',color:'#8A6828',width:38,height:38,borderRadius:8,cursor:'pointer',fontSize:14,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center'}}><i className={`fas ${copied===r.l?'fa-check':'fa-copy'}`}></i></button>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>}
+    {m&&<div style={{marginTop:20,paddingTop:20,borderTop:'1px dashed rgba(10,31,18,.15)'}}>
+      <h4 style={{fontSize:13,fontWeight:800,letterSpacing:'.8px',textTransform:'uppercase',color:'#0A1F12',marginBottom:14,display:'flex',alignItems:'center',gap:10}}><i className="fas fa-clipboard-check" style={{color:'#8A6828'}}></i> Confirm you have paid</h4>
+      <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))'}}>
+        <div><label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Your name *</label><TIn value={senderName} onChange={setSenderName}/></div>
+        <div><label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Phone / email used *</label><TIn value={senderContact} onChange={setSenderContact}/></div>
+      </div>
+      <div style={{marginTop:14}}><label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Transaction reference *</label><TIn value={userRef} onChange={setUserRef} placeholder="e.g. 10683000119"/></div>
+      <label style={{display:'flex',gap:12,alignItems:'flex-start',fontSize:13,color:'rgba(10,31,18,.85)',cursor:'pointer',lineHeight:1.55,marginTop:16}}><input type="checkbox" checked={agree} onChange={e=>setAgree(e.target.checked)} style={{width:18,height:18,accentColor:'#E8730F',flexShrink:0,marginTop:2,cursor:'pointer'}}/><span>I confirm I have sent <strong>{amountDue}</strong> to the account shown, and I understand an officer will verify it manually.</span></label>
+      {errorMsg&&<div style={{background:'rgba(220,53,69,.08)',border:'1px solid rgba(220,53,69,.3)',borderRadius:8,padding:'10px 14px',marginTop:12,color:'#B8564F',fontSize:12.5,display:'flex',alignItems:'center',gap:8}}><i className="fas fa-exclamation-circle"></i> {errorMsg}</div>}
+      <button type="button" onClick={confirm} disabled={saving} style={{width:'100%',marginTop:16,padding:'14px 20px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:saving?'wait':'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:10}}><i className={`fas ${saving?'fa-spinner fa-spin':'fa-paper-plane'}`}></i>{saving?'Saving to server…':'Submit payment reference'}</button>
+    </div>}
+    {!m&&<p style={{textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.45)',marginTop:24,fontStyle:'italic'}}>Select a payment method above to see the account details.</p>}
+  </div>;
+}
+
+/* ═══════════════════ DASHBOARD MODALS ═══════════════════ */
 function CreateCampaignModal({onClose, onSave}) {
   const today = new Date().toISOString().slice(0,10);
   const plus30 = new Date(Date.now()+30*86400000).toISOString().slice(0,10);
@@ -1560,7 +1963,6 @@ function CreateCampaignModal({onClose, onSave}) {
 
   const submit = async () => {
     if(!form.name.trim()) return toast('Enter a campaign name.', 'error');
-    if(!form.startDate || !form.endDate) return toast('Set start and end dates.', 'error');
     setSubmitting(true);
     await onSave(form);
     setSubmitting(false);
@@ -1568,7 +1970,7 @@ function CreateCampaignModal({onClose, onSave}) {
 
   return <Modal open={true} onClose={onClose} eyebrow="New campaign" maxWidth="34rem">
     <h2 className="serif" style={{fontSize:24, marginBottom:6, color:'#0A1F12'}}>Create a Campaign</h2>
-    <p style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:20}}>Promote your business, products or offers with a targeted campaign. You'll see live impressions and clicks in your Overview.</p>
+    <p style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:20}}>Promote your business. You'll see live impressions and clicks in your Overview.</p>
     <div className="form-grid" style={{gap:14}}>
       <div style={{gridColumn:'1/-1'}}>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Campaign name *</label>
@@ -1576,32 +1978,22 @@ function CreateCampaignModal({onClose, onSave}) {
       </div>
       <div>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Package *</label>
-        <select value={form.package} onChange={e=>{
-          const pkg = e.target.value;
-          const budget = pkg==='Sponsored'?'K455':pkg==='Featured'?'K120':pkg==='Premium'?'K1000':'K400';
-          setForm({...form,package:pkg,budget});
-        }} style={{...INP_STYLE, cursor:'pointer'}}>
+        <select value={form.package} onChange={e=>setForm({...form,package:e.target.value})} style={{...INP_STYLE, cursor:'pointer'}}>
           <option value="Featured">Featured Placement</option>
           <option value="Sponsored">Sponsored Placement</option>
-          <option value="Premium">Premium Profile</option>
-          <option value="Leads">Qualified Leads Access</option>
         </select>
       </div>
       <div>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget *</label>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Budget</label>
         <TIn value={form.budget} onChange={v=>setForm({...form,budget:v})}/>
       </div>
       <div>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Start date *</label>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Start date</label>
         <input type="date" value={form.startDate} onChange={e=>setForm({...form,startDate:e.target.value})} style={INP_STYLE}/>
       </div>
       <div>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>End date *</label>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>End date</label>
         <input type="date" value={form.endDate} onChange={e=>setForm({...form,endDate:e.target.value})} style={INP_STYLE}/>
-      </div>
-      <div style={{gridColumn:'1/-1'}}>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Campaign goal / notes</label>
-        <textarea value={form.goal} onChange={e=>setForm({...form,goal:e.target.value})} placeholder="e.g. Increase visibility of new fabric collection to Lusaka buyers" rows={3} style={{...INP_STYLE, resize:'vertical', fontFamily:'inherit'}}/>
       </div>
     </div>
     <div style={{display:'flex', gap:10, marginTop:22, flexWrap:'wrap'}}>
@@ -1613,21 +2005,14 @@ function CreateCampaignModal({onClose, onSave}) {
 
 function CreateListingModal({onClose, onSave, profile}) {
   const [form, setForm] = useState({
-    title:'',
-    category: profile?.category || 'clothing',
-    description:'',
-    price:'',
-    unit:'',
-    moq: profile?.moq || '',
-    leadTime: profile?.leadTime || '',
-    delivery: profile?.delivery || '',
-    stock: 'In stock'
+    title:'', category: profile?.category || 'clothing', description:'',
+    price:'', unit:'', moq: profile?.moq || '', leadTime: profile?.leadTime || '',
+    delivery: profile?.delivery || '', stock: 'In stock'
   });
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async () => {
     if(!form.title.trim()) return toast('Enter a listing name.', 'error');
-    if(!form.category) return toast('Select a category.', 'error');
     if(!form.description.trim()) return toast('Add a short description.', 'error');
     setSubmitting(true);
     await onSave(form);
@@ -1636,65 +2021,27 @@ function CreateListingModal({onClose, onSave, profile}) {
 
   return <Modal open={true} onClose={onClose} eyebrow="New product listing" maxWidth="40rem">
     <h2 className="serif" style={{fontSize:24, marginBottom:6, color:'#0A1F12'}}>Publish a Live Listing</h2>
-    <p style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:20}}>Your listing will go <strong>live immediately</strong> on your dashboard Overview. Buyers searching in your category will see it.</p>
+    <p style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:20}}>Your listing goes live immediately.</p>
 
     <div className="form-grid" style={{gap:14}}>
       <div style={{gridColumn:'1/-1'}}>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Listing / Product name *</label>
-        <TIn value={form.title} onChange={v=>setForm({...form,title:v})} placeholder="e.g. Premium Cotton Fabric — 100% Cotton"/>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Listing Name *</label>
+        <TIn value={form.title} onChange={v=>setForm({...form,title:v})} placeholder="e.g. Premium Cotton Fabric"/>
       </div>
-
       <div>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Category *</label>
         <select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} style={{...INP_STYLE, cursor:'pointer'}}>
           {CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.title}</option>)}
         </select>
       </div>
-
-      <div>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Availability</label>
-        <select value={form.stock} onChange={e=>setForm({...form,stock:e.target.value})} style={{...INP_STYLE, cursor:'pointer'}}>
-          <option>In stock</option>
-          <option>Low stock</option>
-          <option>Pre-order</option>
-          <option>Out of stock</option>
-        </select>
-      </div>
-
-      <div style={{gridColumn:'1/-1'}}>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Short description *</label>
-        <textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Describe the product, quality, variants available and any relevant details." rows={3} style={{...INP_STYLE, resize:'vertical', fontFamily:'inherit'}}/>
-      </div>
-
       <div>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Price (optional)</label>
         <TIn value={form.price} onChange={v=>setForm({...form,price:v})} placeholder="e.g. K85"/>
       </div>
-
-      <div>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Unit (optional)</label>
-        <TIn value={form.unit} onChange={v=>setForm({...form,unit:v})} placeholder="per metre / per bag"/>
-      </div>
-
-      <div>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>MOQ</label>
-        <TIn value={form.moq} onChange={v=>setForm({...form,moq:v})} placeholder="e.g. 50 metres"/>
-      </div>
-
-      <div>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Lead time</label>
-        <TIn value={form.leadTime} onChange={v=>setForm({...form,leadTime:v})} placeholder="e.g. 3–5 days"/>
-      </div>
-
       <div style={{gridColumn:'1/-1'}}>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Delivery coverage</label>
-        <TIn value={form.delivery} onChange={v=>setForm({...form,delivery:v})} placeholder="e.g. Lusaka, Copperbelt, nationwide courier"/>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Description *</label>
+        <textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})} rows={3} style={{...INP_STYLE, resize:'vertical', fontFamily:'inherit'}}/>
       </div>
-    </div>
-
-    <div style={{background:'rgba(30,123,60,.06)',border:'1px solid rgba(30,123,60,.25)',borderRadius:8,padding:'10px 14px',marginTop:16,fontSize:11.5,color:'#0F5C2A',display:'flex',gap:8,alignItems:'flex-start'}}>
-      <i className="fas fa-circle-info" style={{marginTop:2}}></i>
-      <span>Publishing is immediate. You can delete any listing later from <strong>My Listings</strong>.</span>
     </div>
 
     <div style={{display:'flex', gap:10, marginTop:22, flexWrap:'wrap'}}>
@@ -1741,7 +2088,7 @@ function Welcome({user,onDashboard,onBrowse,onSignedOut}){
         <div style={{textAlign:'center',marginBottom:28}}>
           <div style={{width:76,height:76,borderRadius:'50%',background:'rgba(30,123,60,.12)',color:'#1E7B3C',display:'flex',alignItems:'center',justifyContent:'center',fontSize:34,margin:'0 auto 20px'}}><i className="fas fa-check"></i></div>
           <h1 className="serif" style={{fontSize:'clamp(1.7rem,4vw,2.3rem)',lineHeight:1.15,color:'#0A1F12',margin:'0 0 12px'}}>Welcome to StartEasy, {firstName}!</h1>
-          <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:'0 auto',maxWidth:420}}>Your {isSupplier?'supplier':'buyer'} account is ready. {isVerified?'Your profile is verified and live in the directory.':'Our team will verify your profile — usually within 48 hours.'}</p>
+          <p style={{fontSize:14.5,lineHeight:1.7,color:'rgba(10,31,18,.65)',margin:'0 auto',maxWidth:420}}>Your {isSupplier?'supplier':'buyer'} account is ready.</p>
         </div>
         {profile && <div style={{background:'#fff',border:'1px solid rgba(10,31,18,.08)',borderRadius:12,padding:'18px 20px',marginBottom:20}}>
           <div style={{fontSize:10.5,textTransform:'uppercase',fontWeight:800,color:'rgba(10,31,18,.5)',marginBottom:10}}>Your account</div>
@@ -2050,138 +2397,6 @@ function Engagement({service,onClose,onAgreed}){
       </div>
     </div>
   </Modal>;
-}
-
-function Payment({service,client,onClose,onDone}){
-  const s=service;
-  const amountDue=s.amountOverride || (s.service?SF[s.service].zm:'Free');
-  const receiptPrefix='SE-'+(s.code||'DIR');
-  const [method,setMethod]=useState(null);
-  const [senderName,setSenderName]=useState(client.name||'');
-  const [senderContact,setSenderContact]=useState(client.phone||client.email||'');
-  const [userRef,setUserRef]=useState('');
-  const [agree,setAgree]=useState(false);
-  const [errorMsg,setErrorMsg]=useState('');
-  const [confirmed,setConfirmed]=useState(false);
-  const [saving,setSaving]=useState(false);
-  const [cloudSaved,setCloudSaved]=useState(null);
-  const [receiptNo,setReceiptNo]=useState('');
-  const [whatsappUrl,setWhatsappUrl]=useState('');
-  const [whatsappSent,setWhatsappSent]=useState(false);
-  const [copied,setCopied]=useState('');
-
-  const copyTxt=(t,k)=>{const done=()=>{setCopied(k);setTimeout(()=>setCopied(''),1500)};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done).catch(done);else done()};
-
-  const buildMsg=(r,dt)=>['*STARTEASY — ENGAGEMENT FEE*','','*Ref:* '+r,'*Date:* '+dt,'','*Client:* '+client.name,'*Business:* '+(client.business||'—'),'*Email:* '+client.email,'','*Engagement:*',(s.code||'DIR')+' — '+s.title,'','*Fee:*',amountDue,'','*Payment*','Method: '+(PAYMENT_METHODS[method]?PAYMENT_METHODS[method].label:'—'),'Sender: '+senderName,'Contact: '+senderContact,'TxID: '+userRef].join('\n');
-
-  const confirm=async()=>{
-    setErrorMsg('');
-    if(!method){setErrorMsg('Select a payment method.');return}
-    if(!senderName.trim()){setErrorMsg('Enter the name on the payment.');return}
-    if(!senderContact.trim()){setErrorMsg('Enter the phone or email used.');return}
-    if(!userRef.trim()){setErrorMsg('Enter your transaction reference.');return}
-    if(!agree){setErrorMsg('Tick the confirmation box.');return}
-    setSaving(true);
-    const rcpt=receiptPrefix+'-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
-    const dt=new Date().toLocaleString('en-GB',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});
-    const record = {ref:rcpt,clientName:client.name,clientEmail:client.email,clientPhone:client.phone||'',clientBusiness:client.business||'',serviceCode:s.code||'DIR',serviceTitle:s.title,serviceDesk:s.desk||'directory',serviceClientDesc:s.clientDesc,serviceTimeline:s.timeline,serviceFee:amountDue,serviceFeeLabel:'Service Fee',whatsCovered:s.whatsCovered||[],wizardData:s._wizardData||null,amount:amountDue,method:PAYMENT_METHODS[method]?.label||method,senderName,senderContact,txRef:userRef,receiptDate:dt};
-    const saved = await addPayment(record);
-    setCloudSaved(saved ? 'ok' : 'fail');
-    setReceiptNo(rcpt);
-    setWhatsappUrl(waUrl(buildMsg(rcpt,dt)));
-    setConfirmed(true);
-    setSaving(false);
-  };
-
-  if(confirmed){
-    return <div className="fadein">
-      <div style={{background:'linear-gradient(135deg,#EAF7EE,#F0FBF4)',border:'2px solid #28A745',borderRadius:14,padding:'28px 24px',textAlign:'center'}}>
-        <i className="fas fa-paper-plane" style={{fontSize:56,color:'#E8730F',marginBottom:12,display:'block'}}></i>
-        <h4 className="serif" style={{fontSize:22,color:'#0A1F12',marginBottom:10}}>Service fee reference submitted</h4>
-        <p style={{fontSize:13.5,color:'rgba(10,31,18,.7)',marginBottom:14}}>Reference: <strong>{receiptNo}</strong></p>
-        {cloudSaved==='ok'&&<p style={{fontSize:12,color:'#1E7B3C',marginBottom:6,fontWeight:600}}><i className="fas fa-cloud-upload-alt" style={{marginRight:6}}></i>Synced to StartEasy records — the officer sees this now.</p>}
-        {cloudSaved==='fail'&&<p style={{fontSize:12,color:'#B8564F',marginBottom:6,fontWeight:600}}><i className="fas fa-triangle-exclamation" style={{marginRight:6}}></i>Cloud sync delayed — please send proof on WhatsApp below.</p>}
-        <p style={{fontSize:13,color:'rgba(10,31,18,.7)',lineHeight:1.65,maxWidth:'54ch',margin:'0 auto 18px'}}>Your submission is now <strong style={{color:'#8A6828'}}>Under Review</strong>. A StartEasy officer will verify your payment — usually within 4 working hours.</p>
-        <div style={{background:'#fff',border:'1px dashed #25D366',borderRadius:12,padding:18,marginTop:18,textAlign:'left'}}>
-          <div style={{fontSize:12.5,fontWeight:800,letterSpacing:'.6px',color:'#075E54',marginBottom:10,display:'flex',alignItems:'center',gap:8,textTransform:'uppercase'}}><i className="fab fa-whatsapp" style={{color:'#25D366',fontSize:16}}></i> Send your reference to the officer</div>
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={()=>setWhatsappSent(true)} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#25D366',color:'#fff',padding:'13px 22px',borderRadius:10,fontSize:14,fontWeight:700,textDecoration:'none'}}><i className="fab fa-whatsapp"></i><span>Send to officer on WhatsApp</span></a>
-          <button type="button" onClick={()=>copyTxt(buildMsg(receiptNo,''),'msg')} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,width:'100%',marginTop:10,padding:'11px 18px',background:'#fff',border:'1.5px solid #25D366',color:'#075E54',borderRadius:10,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><i className={`fas ${copied==='msg'?'fa-check':'fa-copy'}`}></i>{copied==='msg'?'Copied':'Copy message'}</button>
-        </div>
-        <div style={{background:'linear-gradient(135deg,#0A1F12,#123A1F)',borderRadius:12,padding:'20px 22px',marginTop:18,color:'#fff',textAlign:'left'}}>
-          <div style={{fontSize:11,fontWeight:800,letterSpacing:'.14em',textTransform:'uppercase',color:'#F5A623',marginBottom:14,display:'flex',alignItems:'center',gap:8}}><i className="fas fa-route"></i> What happens next</div>
-          <ol className="tl">
-            <li data-step="1"><div className="tt">Payment reference received</div><div className="td">Your submission is logged in the StartEasy queue.</div><span className="tw">Done</span></li>
-            <li data-step="2"><div className="tt">Officer verifies manually</div><div className="td">A StartEasy officer matches your reference against our records.</div><span className="tw">Within 4 working hours</span></li>
-            <li data-step="3"><div className="tt">Engagement letter unlocked</div><div className="td">Once approved, you can print or download the formal engagement letter from the status page.</div><span className="tw">Same working day</span></li>
-            <li data-step="4"><div className="tt">Report delivered</div><div className="td">Your formal StartEasy-branded report is delivered to your email.</div><span className="tw">Within 1 hour of approval</span></li>
-          </ol>
-        </div>
-        <button type="button" onClick={onDone} style={{marginTop:18,padding:'12px 24px',border:'1px solid rgba(10,31,18,.2)',background:'#fff',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit',color:'#0A1F12'}}>Close and return home</button>
-      </div>
-    </div>;
-  }
-
-  const m=method?PAYMENT_METHODS[method]:null;
-  return <div>
-    <div style={{background:'linear-gradient(135deg,#0A1F12,#123A1F)',color:'#fff',borderRadius:14,padding:'22px 24px',marginBottom:20,display:'flex',justifyContent:'space-between',alignItems:'center',gap:20,flexWrap:'wrap'}}>
-      <div>
-        <div style={{fontSize:11,fontWeight:800,letterSpacing:'1.8px',textTransform:'uppercase',color:'#F5A623',marginBottom:6}}>Service Fee — due on acceptance</div>
-        <div className="serif" style={{fontSize:'clamp(2rem,4vw,2.5rem)',fontWeight:800,color:'#F5A623',lineHeight:1}}>{amountDue}</div>
-        <div style={{fontSize:12.5,color:'rgba(255,255,255,.72)',marginTop:8,maxWidth:400,lineHeight:1.6}}>{s.title}</div>
-      </div>
-      <i className="fas fa-shield-alt" style={{fontSize:44,color:'#F5A623',opacity:.65,flexShrink:0}}></i>
-    </div>
-    <div style={{background:'linear-gradient(135deg,#E7F4EC,#F1FAF4)',borderLeft:'4px solid #2E9C4A',borderRadius:10,padding:'14px 18px',marginBottom:20,display:'flex',gap:12,alignItems:'flex-start',fontSize:12.5,color:'#0A4D28',lineHeight:1.65}}>
-      <i className="fas fa-info-circle" style={{color:'#1E7B3C',fontSize:16,flexShrink:0,marginTop:2}}></i>
-      <div>Pay directly to the account shown, then submit your transaction reference. A StartEasy officer verifies it manually.</div>
-    </div>
-    <div className="paygrid">
-      {Object.entries(PAYMENT_METHODS).map(([k,pm])=>(
-        <button key={k} type="button" className={`pmc ${pm.cls} ${method===k?'sel':''}`} onClick={()=>setMethod(k)}>
-          <div className="lg">{k==='airtel'?'airtel':k==='mtn'?'MTN':k==='bank'?<i className="fas fa-university"></i>:k==='paypal'?<i className="fab fa-paypal"></i>:<i className="fab fa-bitcoin"></i>}</div>
-          <div className="nm">{pm.label}</div>
-          <div className="ds">{pm.sub}</div>
-        </button>
-      ))}
-    </div>
-    {m&&<div style={{marginTop:14,background:'#fff',border:'2px solid rgba(10,31,18,.12)',borderRadius:14,overflow:'hidden'}}>
-      <div style={{padding:'16px 20px',display:'flex',gap:14,alignItems:'center',color:'#fff',background:m.cls==='pm-airtel'?'#E40000':m.cls==='pm-mtn'?'#FFCC00':m.cls==='pm-bank'?'linear-gradient(135deg,#1B5E8C,#0D3D5E)':m.cls==='pm-paypal'?'linear-gradient(135deg,#003087,#009CDE)':'linear-gradient(135deg,#F7931A,#E2761B)'}}>
-        <div style={{width:44,height:44,borderRadius:12,background:'rgba(255,255,255,.18)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20}}><i className={`${m.iconSet||'fas'} ${m.icon}`}></i></div>
-        <div><div style={{fontSize:15,fontWeight:800}}>{m.title}</div><div style={{fontSize:11.5,opacity:.88,marginTop:2}}>{m.sub}</div></div>
-      </div>
-      <div style={{padding:20}}>
-        <div style={{background:'linear-gradient(135deg,rgba(245,166,35,.1),rgba(245,166,35,.05))',border:'1px solid rgba(245,166,35,.35)',borderRadius:10,padding:'14px 18px',marginBottom:16,display:'flex',justifyContent:'space-between',alignItems:'center',gap:14,flexWrap:'wrap'}}>
-          <div style={{fontSize:11,fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase',color:'#8A6828'}}>Amount</div>
-          <div className="serif" style={{fontSize:24,fontWeight:800,color:'#0A1F12'}}>{amountDue}</div>
-        </div>
-        {m.ussd&&<a href={`tel:${encodeURIComponent(m.ussd)}`} style={{display:'inline-flex',alignItems:'center',gap:7,background:m.cls==='pm-airtel'?'#E40000':m.cls==='pm-mtn'?'#FFCC00':'#0A1F12',color:m.cls==='pm-mtn'?'#000':'#fff',padding:'10px 14px',borderRadius:8,fontSize:12,fontWeight:700,textDecoration:'none'}}><i className="fas fa-mobile-alt"></i> {m.ussdLbl} ({m.ussd})</a>}
-        <div style={{display:'flex',flexDirection:'column',gap:10,marginTop:14}}>
-          {m.rows.map((r,i)=>(
-            <div key={i} style={{background:'#F7FAF8',border:'1px solid rgba(10,31,18,.1)',borderRadius:10,padding:'13px 16px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:10,letterSpacing:'1.5px',textTransform:'uppercase',color:'#8A6828',fontWeight:800,marginBottom:3}}>{r.l}</div>
-                <div style={{fontSize:15,fontWeight:700,color:'#0A1F12',fontFamily:r.plain?'inherit':'Consolas,monospace',wordBreak:'break-all'}}>{r.v}</div>
-              </div>
-              {r.copy&&<button type="button" onClick={()=>copyTxt(r.copy,r.l)} style={{background:'rgba(245,166,35,.15)',border:'none',color:'#8A6828',width:38,height:38,borderRadius:8,cursor:'pointer',fontSize:14,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center'}}><i className={`fas ${copied===r.l?'fa-check':'fa-copy'}`}></i></button>}
-            </div>
-          ))}
-        </div>
-        {m.note&&<div style={{background:'#FFF4E5',borderLeft:'3px solid #FFC107',borderRadius:8,padding:'14px 18px',fontSize:12.5,color:'#7A5C10',lineHeight:1.6,display:'flex',gap:12,alignItems:'flex-start',marginTop:12}}><i className="fas fa-info-circle" style={{color:'#D89400',fontSize:16,flexShrink:0,marginTop:2}}></i><div>{m.note}</div></div>}
-      </div>
-    </div>}
-    {m&&<div style={{marginTop:20,paddingTop:20,borderTop:'1px dashed rgba(10,31,18,.15)'}}>
-      <h4 style={{fontSize:13,fontWeight:800,letterSpacing:'.8px',textTransform:'uppercase',color:'#0A1F12',marginBottom:14,display:'flex',alignItems:'center',gap:10}}><i className="fas fa-clipboard-check" style={{color:'#8A6828'}}></i> Confirm you have paid</h4>
-      <div style={{display:'grid',gap:14,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))'}}>
-        <div><label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Your name *</label><TIn value={senderName} onChange={setSenderName}/></div>
-        <div><label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Phone / email used *</label><TIn value={senderContact} onChange={setSenderContact}/></div>
-      </div>
-      <div style={{marginTop:14}}><label style={{display:'block',fontSize:12.5,fontWeight:600,color:'#0A1F12',marginBottom:8}}>Transaction reference *</label><TIn value={userRef} onChange={setUserRef} placeholder="e.g. 10683000119"/></div>
-      <label style={{display:'flex',gap:12,alignItems:'flex-start',fontSize:13,color:'rgba(10,31,18,.85)',cursor:'pointer',lineHeight:1.55,marginTop:16}}><input type="checkbox" checked={agree} onChange={e=>setAgree(e.target.checked)} style={{width:18,height:18,accentColor:'#E8730F',flexShrink:0,marginTop:2,cursor:'pointer'}}/><span>I confirm I have sent <strong>{amountDue}</strong> to the account shown, and I understand an officer will verify it manually before work begins.</span></label>
-      {errorMsg&&<div style={{background:'rgba(220,53,69,.08)',border:'1px solid rgba(220,53,69,.3)',borderRadius:8,padding:'10px 14px',marginTop:12,color:'#B8564F',fontSize:12.5,display:'flex',alignItems:'center',gap:8}}><i className="fas fa-exclamation-circle"></i> {errorMsg}</div>}
-      <button type="button" onClick={confirm} disabled={saving} style={{width:'100%',marginTop:16,padding:'14px 20px',background:saving?'rgba(10,31,18,.15)':'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:saving?'wait':'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:10}}><i className={`fas ${saving?'fa-spinner fa-spin':'fa-paper-plane'}`}></i>{saving?'Saving to server…':'Submit payment reference'}</button>
-    </div>}
-    {!m&&<p style={{textAlign:'center',fontSize:12.5,color:'rgba(10,31,18,.45)',marginTop:24,fontStyle:'italic'}}>Select a payment method above to see the account details.</p>}
-  </div>;
 }
 
 function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuthSuccess}){
