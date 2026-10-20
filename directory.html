@@ -1372,11 +1372,11 @@ function CreateSpotlightModal({ onClose, onSave, profile }) {
       try {
         const fileRef = storage.ref(`spotlights/${Date.now()}_${file.name}`);
         
-        // Add a 15-second timeout for the upload to prevent hanging
+        // Add a 10-second timeout for the upload to prevent hanging
         const uploadTask = fileRef.put(file);
         await Promise.race([
           uploadTask,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timed out')), 15000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timed out')), 10000))
         ]);
         
         mediaUrl = await fileRef.getDownloadURL();
@@ -1384,7 +1384,7 @@ function CreateSpotlightModal({ onClose, onSave, profile }) {
       } catch (error) {
         console.error("Upload failed or timed out", error);
         toast('Media upload failed or timed out. Posting text only.', 'error');
-        mediaUrl = null; // Ensure we don't try to save a broken URL
+        mediaUrl = null;
       }
     }
 
@@ -3270,24 +3270,34 @@ function App(){
   };
 
   const handleSaveSpotlight = async (form) => {
-    if (!firebaseReady || !user || !profile) return;
+    if (!firebaseReady || !user || !profile) {
+      toast('Session expired. Please log in again.', 'error');
+      throw new Error("Session expired");
+    }
+    
     const payload = { 
       ...form, 
       userId: user.uid, 
-      authorName: profile.name, 
-      businessName: profile.businessName || profile.name,
-      category: profile.category,
-      role: profile.role,
+      authorName: profile.name || 'Unknown', 
+      businessName: profile.businessName || profile.name || 'Unknown',
+      category: profile.category || 'General',
+      role: profile.role || 'buyer',
       createdAt: Date.now(),
       comments: []
     };
+    
+    // Remove undefined values because Firestore throws an error on them
+    Object.keys(payload).forEach(key => payload[key] === undefined ? delete payload[key] : {});
+
     try {
       await db.collection('se_spotlights').add(payload);
       setSpotlightModalOpen(false);
       toast('Spotlight published!', 'success');
       goSpotlights();
     } catch (e) {
-      toast('Failed to publish spotlight.', 'error');
+      console.error("Firestore error:", e);
+      toast('Failed to publish to database. Check connection.', 'error');
+      throw e; // Re-throw so the modal catches it
     }
   };
 
