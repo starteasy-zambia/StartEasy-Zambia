@@ -212,7 +212,7 @@ td .row{gap:.4rem}
 </head>
 <body>
 <div id="root"></div>
-<div class="toast-root" id="toastRoot" aria-live="polite" style="position:fixed;bottom:1.4rem;right:1.4rem;z-index:300;display:grid;gap:.6rem;max-width:min(380px,calc(100vw - 2rem))"></div>
+<div class="toast-root" id="toastRoot" aria-live="polite" style="position:fixed;bottom:1.4rem;right:1.4rem;z-index:9999;display:grid;gap:.6rem;max-width:min(380px,calc(100vw - 2rem))"></div>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
@@ -533,8 +533,8 @@ function Modal({open,onClose,eyebrow,title,children,maxWidth='46rem'}){
   },[open,onClose]);
   if(!open) return null;
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 mf"
-      style={{background:'rgba(10,31,18,0.85)',position:'fixed',inset:0,zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'12px'}}
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-3 mf"
+      style={{background:'rgba(10,31,18,0.85)',position:'fixed',inset:0,zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center',padding:'12px'}}
       onClick={onClose}>
       <div className="mc" onClick={e=>e.stopPropagation()}
         style={{background:'#F5FAF6',borderRadius:12,width:'100%',maxWidth:maxWidth,maxHeight:'92vh',overflowY:'auto',boxShadow:'0 30px 80px rgba(0,0,0,.35)'}}>
@@ -545,7 +545,7 @@ function Modal({open,onClose,eyebrow,title,children,maxWidth='46rem'}){
           </div>
           <button onClick={onClose} style={{background:'none',border:'none',color:'rgba(255,255,255,.6)',cursor:'pointer',padding:6,fontSize:16}} aria-label="Close"><i className="fas fa-times"></i></button>
         </div>
-        <div style={{padding:'24px 28px'}}>{children}</div>
+        <div style={{padding:'24px 28px', paddingBottom: '80px'}}>{children}</div>
       </div>
     </div>,
     document.body
@@ -585,6 +585,10 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSpotlights,o
 
   const closeMenu=()=>setMenuOpen(false);
   const roleLabel = profile ? (profile.role==='supplier'?'Supplier':'Buyer') : 'Member';
+  
+  // FIX: Check local storage subscription status in case Firestore is delayed
+  const subs = user ? getSubs(user.uid) : {};
+  const isVerified = profile?.status === 'verified' || subs.verified;
 
   const navigateTab = (tab) => {
     setAcctOpen(false);
@@ -630,7 +634,7 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSpotlights,o
                 <div style={{padding:'.55rem .7rem .3rem'}}>
                   <div style={{fontWeight:800,fontSize:'.86rem',color:'#0A1F12', display:'flex', alignItems:'center'}}>
                     {profile?.name || user.email}
-                    {profile?.status === 'verified' && <VerifiedBadge size={14} />}
+                    {isVerified && <VerifiedBadge size={14} />}
                   </div>
                   <div className="tiny muted" style={{color:'rgba(10,31,18,.5)',fontSize:11}}>{roleLabel}</div>
                 </div>
@@ -1502,7 +1506,11 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
       else if (checkout.type === 'verification') {
         updatedSubs.verified = true;
         setProfile(prev => ({ ...prev, status: 'verified' }));
-        if (firebaseReady) db.collection('se_users').doc(user.uid).update({ status: 'verified' }).catch(()=>{});
+        if (firebaseReady) {
+          db.collection('se_users').doc(user.uid).update({ status: 'verified' }).catch(e => {
+            console.warn("Firestore verify failed, relying on local state", e);
+          });
+        }
       }
       else if (checkout.type === 'campaign') updatedSubs.campaigns = true;
       else if (checkout.type === 'leads') updatedSubs.leads = true;
@@ -1585,7 +1593,9 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
 
   const isSupplier=profile.role==='supplier';
   const cat=CAT_MAP[profile.category]||{title:'General',color:'#E8730F',icon:'fa-building'};
-  const isVerified=profile.status==='verified';
+  
+  // FIX: Verify state based on local subscription OR firestore profile
+  const isVerified = profile.status === 'verified' || subs.verified;
 
   const navItems = isSupplier ? [
     {key:'overview', label:'Overview', icon:'fa-border-all'},
