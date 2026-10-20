@@ -128,14 +128,22 @@ td .row{gap:.4rem}
 .tl .tw{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#F5A623;background:rgba(245,166,35,.2);padding:4px 12px;border-radius:99px;border:1px solid rgba(245,166,35,.35)}
 
 /* Spotlight Feed Styles */
-.spotlight-card { background:#fff; border:1px solid rgba(10,31,18,.08); border-radius:14px; padding:20px; margin-bottom:16px; box-shadow:0 2px 8px rgba(10,31,18,.04); }
+.spotlight-card { background:#fff; border:1px solid rgba(10,31,18,.08); border-radius:12px; padding:20px; margin-bottom:16px; box-shadow:0 2px 8px rgba(10,31,18,.04); }
 .spotlight-header { display:flex; gap:12px; align-items:center; margin-bottom:14px; }
-.spotlight-avatar { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; flex-shrink:0; }
-.spotlight-body { font-size:14.5px; line-height:1.65; color:rgba(10,31,18,.85); white-space:pre-wrap; }
-.spotlight-footer { display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:16px; border-top:1px solid rgba(10,31,18,.06); }
-.spotlight-actions { display:flex; gap:12px; }
-.spotlight-action { background:none; border:none; color:rgba(10,31,18,.5); font-size:12.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; transition:.2s; }
-.spotlight-action:hover { color:#E8730F; }
+.spotlight-avatar { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; flex-shrink:0; }
+.spotlight-body { font-size:14.5px; line-height:1.65; color:rgba(10,31,18,.85); white-space:pre-wrap; margin-bottom:12px; }
+.spotlight-footer { border-top:1px solid rgba(10,31,18,.08); padding-top:8px; margin-top:8px; display:flex; justify-content:space-between; }
+.sa-btn { display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 16px; border-radius:6px; font-size:13px; font-weight:700; color:rgba(10,31,18,.6); background:transparent; border:none; cursor:pointer; transition:all .2s; flex:1; }
+.sa-btn:hover { background:rgba(10,31,18,.04); color:#0A1F12; }
+.comment-box { background:#F8FAF6; border-radius:8px; padding:12px; margin-top:10px; display:flex; gap:10px; }
+.comment-input { flex:1; border:1px solid rgba(10,31,18,.15); border-radius:20px; padding:8px 16px; font-size:13px; outline:none; }
+.comment-input:focus { border-color:#E8730F; }
+.comments-list { margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+.comment-item { display:flex; gap:10px; align-items:flex-start; }
+.comment-avatar { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; }
+.comment-content { background:#F8FAF6; padding:8px 12px; border-radius:0 12px 12px 12px; flex:1; }
+.comment-author { font-size:12px; font-weight:800; color:#0A1F12; margin-bottom:2px; }
+.comment-text { font-size:13px; color:rgba(10,31,18,.75); line-height:1.4; }
 
 @media (max-width:1040px){
   .dash-layout{display: flex;flex-direction: column;padding: 0;gap: 0;max-width: 100vw;}
@@ -153,26 +161,6 @@ td .row{gap:.4rem}
   .dash-head h1 { font-size: 1.4rem; }
   .hide-sm{display:none!important;}
 }
-
-.static-page{max-width:820px;margin:0 auto;padding:60px 24px 80px}
-.static-page h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.15;color:#0A1F12;margin:0 0 18px;letter-spacing:-.02em}
-.static-page h2{font-family:'Playfair Display',Georgia,serif;font-size:1.3rem;color:#0A1F12;margin:32px 0 12px;font-weight:700}
-.static-page p{font-size:15px;line-height:1.75;color:rgba(10,31,18,.75);margin:0 0 14px}
-.static-page ul{font-size:15px;line-height:1.75;color:rgba(10,31,18,.75);padding-left:22px;margin:0 0 16px}
-.static-page li{margin-bottom:6px}
-.static-page .lead{font-size:17px;color:rgba(10,31,18,.8);margin-bottom:24px}
-.static-page .eyebrow{color:#E8730F;margin-bottom:12px;display:block}
-.contact-card{background:#fff;border:1px solid rgba(10,31,18,.08);border-radius:14px;padding:24px;margin-bottom:16px;display:flex;gap:16px;align-items:flex-start}
-.contact-card .ico{width:44px;height:44px;border-radius:12px;background:rgba(232,115,15,.1);color:#E8730F;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
-.contact-card h3{font-size:15px;font-weight:800;color:#0A1F12;margin:0 0 4px}
-.contact-card p{font-size:13.5px;color:rgba(10,31,18,.65);margin:0 0 6px}
-.contact-card a{font-size:13.5px;color:#E8730F;font-weight:700;text-decoration:none}
-.faq-item{background:#fff;border:1px solid rgba(10,31,18,.08);border-radius:12px;margin-bottom:12px;overflow:hidden}
-.faq-item summary{padding:16px 20px;font-weight:700;font-size:14.5px;color:#0A1F12;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.faq-item summary::-webkit-details-marker{display:none}
-.faq-item summary::after{content:'\f078';font-family:'Font Awesome 6 Free';font-weight:900;font-size:11px;color:rgba(10,31,18,.4);transition:transform .2s}
-.faq-item[open] summary::after{transform:rotate(180deg)}
-.faq-item .faq-body{padding:0 20px 16px;font-size:14px;line-height:1.7;color:rgba(10,31,18,.7)}
 </style>
 </head>
 <body>
@@ -248,8 +236,6 @@ function getListings(uid){ return lsGet('se_listings_'+uid, []); }
 function saveListings(uid, arr){ lsSet('se_listings_'+uid, arr); }
 function getSubs(uid){ return lsGet('se_subs_'+uid, {}); }
 function saveSubs(uid, data){ lsSet('se_subs_'+uid, data); }
-function getSpotlights(){ return lsGet('se_spotlights', []); }
-function saveSpotlights(arr){ lsSet('se_spotlights', arr); }
 
 async function fsLoadDirectory(){
   if(!firebaseReady) return null;
@@ -312,23 +298,6 @@ async function saveCampaignToCloud(camp){
     const ref = await db.collection('se_campaigns').add(payload);
     return { id: ref.id, ...payload };
   }catch(e){console.warn('[SE] save campaign:',e&&e.message);return null;}
-}
-
-async function loadSpotlightsFromCloud(){
-  if(!firebaseReady) return [];
-  try {
-    const snap = await db.collection('se_spotlights').orderBy('createdAt', 'desc').limit(50).get();
-    return snap.docs.map(d=>({id:d.id, ...d.data()}));
-  } catch(e) {
-    return getSpotlights();
-  }
-}
-async function saveSpotlightToCloud(spotlight){
-  if(!firebaseReady) return null;
-  try {
-    const ref = await db.collection('se_spotlights').add(spotlight);
-    return { id: ref.id, ...spotlight };
-  } catch(e) { return null; }
 }
 
 async function authSignUp(form){
@@ -1094,16 +1063,147 @@ function Landing({onSignup,onSignin}){
 }
 
 /* ═══════════════════ SPOTLIGHT FEED COMPONENTS ═══════════════════ */
+
+function SpotlightCard({ post, user, onComment }) {
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleComment = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim() || !user) return;
+    setSending(true);
+    await onComment(post.id, commentText);
+    setCommentText('');
+    setSending(false);
+  };
+
+  const handleShare = () => {
+    const text = `*Business Spotlight from ${post.businessName}*\n\n${post.title ? post.title + '\n' : ''}${post.content}\n\nView more on StartEasy Zambia: https://directory.starteasyzambia.com/#spotlights`;
+    window.open(waUrl(text), '_blank');
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(`https://directory.starteasyzambia.com/#spotlights`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="spotlight-card">
+      <div className="spotlight-header">
+        <div className="spotlight-avatar" style={{ background: 'rgba(232,115,15,.1)', color: '#E8730F' }}>
+          {initials(post.businessName)}
+        </div>
+        <div style={{flex:1, minWidth:0}}>
+          <div style={{display:'flex', alignItems:'center', gap:6}}>
+            <span style={{fontSize:15, fontWeight:800, color:'#0A1F12'}}>{post.businessName}</span>
+            <i className="fas fa-circle-check" style={{color:'#1E7B3C', fontSize:12}} title="Verified Business"></i>
+          </div>
+          <div style={{fontSize:12, color:'rgba(10,31,18,.5)', marginTop:2}}>
+            {post.authorName} · {new Date(post.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short', hour:'2-digit', minute:'2-digit'})}
+          </div>
+        </div>
+      </div>
+      
+      {post.title && <h3 style={{fontSize:16, fontWeight:800, color:'#0A1F12', marginBottom:10}}>{post.title}</h3>}
+      <div className="spotlight-body">{post.content}</div>
+
+      {/* No Like button. Only Comment and Share */}
+      <div className="spotlight-footer">
+        <button className="sa-btn" onClick={() => setShowComments(!showComments)}>
+          <i className="far fa-comment"></i> {post.comments && post.comments.length > 0 ? `${post.comments.length} Enquiries` : 'Comment'}
+        </button>
+        <button className="sa-btn" onClick={handleShare} title="Send via WhatsApp">
+          <i className="fab fa-whatsapp"></i> Send
+        </button>
+        <button className="sa-btn" onClick={copyLink} title="Copy Link">
+          <i className={`fas ${copied ? 'fa-check' : 'fa-link'}`}></i> {copied ? 'Copied' : 'Share'}
+        </button>
+      </div>
+
+      {showComments && (
+        <div className="comments-list">
+          {post.comments && post.comments.map(c => (
+            <div key={c.id} className="comment-item">
+              <div className="comment-avatar" style={{ background: 'rgba(27,108,168,.1)', color: '#1B6CA8' }}>
+                {initials(c.authorName)}
+              </div>
+              <div className="comment-content">
+                <div className="comment-author">{c.authorName}</div>
+                <div className="comment-text">{c.text}</div>
+              </div>
+            </div>
+          ))}
+          
+          {user ? (
+            <form onSubmit={handleComment} className="comment-box">
+              <input 
+                type="text" 
+                className="comment-input" 
+                placeholder="Ask a question or enquire about this service..." 
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+              />
+              <button type="submit" disabled={sending} style={{background:'#E8730F', color:'#fff', border:'none', borderRadius:'50%', width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center', cursor: sending ? 'wait' : 'pointer'}}>
+                <i className={`fas ${sending ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`}></i>
+              </button>
+            </form>
+          ) : (
+            <p style={{fontSize:12, color:'rgba(10,31,18,.5)', textAlign:'center', padding:10}}>Sign in to leave a comment.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PublicSpotlightsPage({ user, onDashboard }) {
   const [spotlights, setSpotlights] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadSpotlightsFromCloud().then(data => {
-      setSpotlights(data);
+    if (!firebaseReady) {
       setLoading(false);
-    });
+      return;
+    }
+    
+    // REAL-TIME LIVE FEED (24/7)
+    const unsub = db.collection('se_spotlights').orderBy('createdAt', 'desc').limit(50)
+      .onSnapshot(snap => {
+        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setSpotlights(data);
+        setLoading(false);
+      }, err => {
+        console.error("Snapshot error:", err);
+        setLoading(false);
+      });
+
+    return () => unsub();
   }, []);
+
+  const addComment = async (postId, text) => {
+    if (!user || !firebaseReady) return;
+    try {
+      const postRef = db.collection('se_spotlights').doc(postId);
+      const postDoc = await postRef.get();
+      if (postDoc.exists) {
+        const currentComments = postDoc.data().comments || [];
+        const newComment = {
+          id: Date.now().toString(),
+          userId: user.uid,
+          authorName: user.displayName || user.email.split('@')[0],
+          text: text,
+          createdAt: Date.now()
+        };
+        await postRef.update({ comments: [...currentComments, newComment] });
+      }
+    } catch (e) {
+      console.error("Comment error:", e);
+      toast('Failed to post comment.', 'error');
+    }
+  };
 
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
     <main style={{flex:1, maxWidth:800, margin:'0 auto', padding:'40px 24px 60px', width:'100%'}}>
@@ -1120,33 +1220,7 @@ function PublicSpotlightsPage({ user, onDashboard }) {
       ) : (
         <div>
           {spotlights.map((post) => (
-            <div key={post.id} className="spotlight-card">
-              <div className="spotlight-header">
-                <div className="spotlight-avatar" style={{ background: '#E8730F15', color: '#E8730F' }}>
-                  {initials(post.businessName)}
-                </div>
-                <div style={{flex:1, minWidth:0}}>
-                  <div style={{display:'flex', alignItems:'center', gap:6}}>
-                    <span style={{fontSize:15, fontWeight:800, color:'#0A1F12'}}>{post.businessName}</span>
-                    <i className="fas fa-circle-check" style={{color:'#1E7B3C', fontSize:12}} title="Verified Business"></i>
-                  </div>
-                  <div style={{fontSize:12, color:'rgba(10,31,18,.5)', marginTop:2}}>
-                    {post.authorName} · {new Date(post.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
-                  </div>
-                </div>
-              </div>
-              {post.title && <h3 style={{fontSize:16, fontWeight:800, color:'#0A1F12', marginBottom:10}}>{post.title}</h3>}
-              <div className="spotlight-body">{post.content}</div>
-              <div className="spotlight-footer">
-                <div className="spotlight-actions">
-                  <button className="spotlight-action"><i className="far fa-thumbs-up"></i> Like</button>
-                  <button className="spotlight-action"><i className="far fa-comment"></i> Comment</button>
-                </div>
-                <button onClick={() => window.location.hash = '#browse'} style={{background:'rgba(232,115,15,.1)', border:'1px solid rgba(232,115,15,.3)', color:'#E8730F', padding:'6px 14px', borderRadius:6, fontSize:12, fontWeight:700}}>
-                  View Profile
-                </button>
-              </div>
-            </div>
+            <SpotlightCard key={post.id} post={post} user={user} onComment={addComment} />
           ))}
         </div>
       )}
@@ -1209,13 +1283,15 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const [subs, setSubs] = useState({});
   const [campaigns,setCampaignsState]=useState([]);
   const [listings,setListingsState]=useState([]);
-  const [spotlights,setSpotlightsState]=useState([]);
   
   // Modals
   const [campaignModalOpen,setCampaignModalOpen]=useState(false);
   const [listingModalOpen,setListingModalOpen]=useState(false);
   const [spotlightModalOpen,setSpotlightModalOpen]=useState(false);
   const [checkout, setCheckout] = useState(null);
+
+  // Dashboard Spotlight State (Real-time)
+  const [mySpotlights, setMySpotlights] = useState([]);
 
   useEffect(()=>{
     if(!user){setLoading(false);return;}
@@ -1233,24 +1309,32 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
       const storedSubs = getSubs(user.uid);
       setSubs(storedSubs);
 
-      const [cloudListings, cloudCampaigns, cloudSpotlights] = await Promise.all([
+      const [cloudListings, cloudCampaigns] = await Promise.all([
         loadUserListings(user.uid),
-        loadUserCampaigns(user.uid),
-        loadSpotlightsFromCloud()
+        loadUserCampaigns(user.uid)
       ]);
       
       setListingsState(cloudListings.length ? cloudListings : getListings(user.uid));
       setCampaignsState(cloudCampaigns.length ? cloudCampaigns : getCampaigns(user.uid));
-      setSpotlightsState(cloudSpotlights);
       
       saveListings(user.uid, cloudListings);
       saveCampaigns(user.uid, cloudCampaigns);
-      saveSpotlights(cloudSpotlights);
       
       setSavedSuppliersState(getSavedSuppliers(user.uid));
       setLoading(false);
     });
   },[user]);
+
+  // Listener for dashboard spotlight real-time updates
+  useEffect(() => {
+    if (!firebaseReady || !user) return;
+    const unsub = db.collection('se_spotlights').orderBy('createdAt', 'desc')
+      .onSnapshot(snap => {
+        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setMySpotlights(data);
+      });
+    return () => unsub();
+  }, [user]);
 
   useEffect(()=>{
     if(!profile) return;
@@ -1389,21 +1473,24 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   };
 
   const handleAddSpotlight = async (newSpot) => {
+    if (!firebaseReady) return toast('Database not connected.', 'error');
     const payload = { 
       ...newSpot, 
       userId: user.uid, 
       authorName: profile.name, 
       businessName: profile.businessName || profile.name,
       category: profile.category,
-      createdAt: Date.now() 
+      role: profile.role,
+      createdAt: Date.now(),
+      comments: []
     };
-    const saved = await saveSpotlightToCloud(payload);
-    const record = saved || { ...payload, id: 'local-'+Date.now() };
-    const next = [record, ...spotlights];
-    setSpotlightsState(next);
-    saveSpotlights(next);
-    setSpotlightModalOpen(false);
-    toast('Spotlight published!', 'success');
+    try {
+      await db.collection('se_spotlights').add(payload);
+      setSpotlightModalOpen(false);
+      toast('Spotlight published!', 'success');
+    } catch (e) {
+      toast('Failed to publish spotlight.', 'error');
+    }
   };
 
   const handleDeleteListing = async (id) => {
@@ -1413,6 +1500,29 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     setListingsState(next);
     saveListings(user.uid, next);
     toast('Listing removed.', 'success');
+  };
+
+  // Add Comment logic (for dashboard)
+  const addComment = async (postId, text) => {
+    if (!user || !firebaseReady) return;
+    try {
+      const postRef = db.collection('se_spotlights').doc(postId);
+      const postDoc = await postRef.get();
+      if (postDoc.exists) {
+        const currentComments = postDoc.data().comments || [];
+        const newComment = {
+          id: Date.now().toString(),
+          userId: user.uid,
+          authorName: user.displayName || profile.name || user.email.split('@')[0],
+          text: text,
+          createdAt: Date.now()
+        };
+        await postRef.update({ comments: [...currentComments, newComment] });
+      }
+    } catch (e) {
+      console.error("Comment error:", e);
+      toast('Failed to post comment.', 'error');
+    }
   };
 
   if(loading) return <div style={{minHeight:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#F5FAF6'}}><i className="fas fa-spinner fa-spin" style={{fontSize:28,color:'#E8730F'}}></i></div>;
@@ -1479,7 +1589,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                 <>
                   <StatCard label="Live listings" value={listings.length} hint={subs.listing?'Active':'Unpaid'} warn={!subs.listing} />
                   <StatCard label="Campaigns" value={campaigns.length} hint={subs.campaigns?'Running':'None'} />
-                  <StatCard label="Spotlights" value={spotlights.filter(s=>s.userId===user.uid).length} hint="posts published" />
+                  <StatCard label="Spotlights" value={mySpotlights.filter(s=>s.userId===user.uid).length} hint="posts published" />
                   <StatCard label="Profile Status" value={isVerified?'Verified':'Unverified'} hint={isVerified?'Badge active':'Get verified'} warn={!isVerified} />
                 </>
               ) : (
@@ -1804,26 +1914,9 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
               </div>
             ) : (
               <div>
-                {spotlights.length > 0 ? (
-                  spotlights.map(post => (
-                    <div key={post.id} className="spotlight-card">
-                      <div className="spotlight-header">
-                        <div className="spotlight-avatar" style={{ background: '#E8730F15', color: '#E8730F' }}>
-                          {initials(post.businessName)}
-                        </div>
-                        <div style={{flex:1, minWidth:0}}>
-                          <div style={{display:'flex', alignItems:'center', gap:6}}>
-                            <span style={{fontSize:15, fontWeight:800, color:'#0A1F12'}}>{post.businessName}</span>
-                            <i className="fas fa-circle-check" style={{color:'#1E7B3C', fontSize:12}} title="Verified Business"></i>
-                          </div>
-                          <div style={{fontSize:12, color:'rgba(10,31,18,.5)', marginTop:2}}>
-                            {post.authorName} · {new Date(post.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
-                          </div>
-                        </div>
-                      </div>
-                      {post.title && <h3 style={{fontSize:16, fontWeight:800, color:'#0A1F12', marginBottom:10}}>{post.title}</h3>}
-                      <div className="spotlight-body">{post.content}</div>
-                    </div>
+                {mySpotlights.length > 0 ? (
+                  mySpotlights.map(post => (
+                    <SpotlightCard key={post.id} post={post} user={user} onComment={addComment} />
                   ))
                 ) : (
                   <EmptyState icon="fa-newspaper" title="No spotlights yet" text="Be the first to share your business story with the community." cta={<button onClick={handleOpenSpotlightModal} style={{padding:'10px 20px', background:'#E8730F', color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:700}}>Create Post</button>} />
