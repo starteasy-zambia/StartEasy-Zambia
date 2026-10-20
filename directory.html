@@ -127,6 +127,16 @@ td .row{gap:.4rem}
 .tl .td{font-size:12.5px;color:rgba(255,255,255,.78);line-height:1.6;margin-bottom:8px}
 .tl .tw{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#F5A623;background:rgba(245,166,35,.2);padding:4px 12px;border-radius:99px;border:1px solid rgba(245,166,35,.35)}
 
+/* Spotlight Feed Styles */
+.spotlight-card { background:#fff; border:1px solid rgba(10,31,18,.08); border-radius:14px; padding:20px; margin-bottom:16px; box-shadow:0 2px 8px rgba(10,31,18,.04); }
+.spotlight-header { display:flex; gap:12px; align-items:center; margin-bottom:14px; }
+.spotlight-avatar { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; flex-shrink:0; }
+.spotlight-body { font-size:14.5px; line-height:1.65; color:rgba(10,31,18,.85); white-space:pre-wrap; }
+.spotlight-footer { display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:16px; border-top:1px solid rgba(10,31,18,.06); }
+.spotlight-actions { display:flex; gap:12px; }
+.spotlight-action { background:none; border:none; color:rgba(10,31,18,.5); font-size:12.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; transition:.2s; }
+.spotlight-action:hover { color:#E8730F; }
+
 @media (max-width:1040px){
   .dash-layout{display: flex;flex-direction: column;padding: 0;gap: 0;max-width: 100vw;}
   .dash-side{position: sticky;top: 72px;z-index: 40;display: flex;flex-direction: row;overflow-x: auto;background: #fff;padding: 12px 16px;border-bottom: 1px solid rgba(10,31,18,.08);border-radius: 0;margin: 0;width: 100%;white-space: nowrap;-webkit-overflow-scrolling: touch;scrollbar-width: none;gap: 8px;}
@@ -238,6 +248,8 @@ function getListings(uid){ return lsGet('se_listings_'+uid, []); }
 function saveListings(uid, arr){ lsSet('se_listings_'+uid, arr); }
 function getSubs(uid){ return lsGet('se_subs_'+uid, {}); }
 function saveSubs(uid, data){ lsSet('se_subs_'+uid, data); }
+function getSpotlights(){ return lsGet('se_spotlights', []); }
+function saveSpotlights(arr){ lsSet('se_spotlights', arr); }
 
 async function fsLoadDirectory(){
   if(!firebaseReady) return null;
@@ -302,6 +314,23 @@ async function saveCampaignToCloud(camp){
   }catch(e){console.warn('[SE] save campaign:',e&&e.message);return null;}
 }
 
+async function loadSpotlightsFromCloud(){
+  if(!firebaseReady) return [];
+  try {
+    const snap = await db.collection('se_spotlights').orderBy('createdAt', 'desc').limit(50).get();
+    return snap.docs.map(d=>({id:d.id, ...d.data()}));
+  } catch(e) {
+    return getSpotlights();
+  }
+}
+async function saveSpotlightToCloud(spotlight){
+  if(!firebaseReady) return null;
+  try {
+    const ref = await db.collection('se_spotlights').add(spotlight);
+    return { id: ref.id, ...spotlight };
+  } catch(e) { return null; }
+}
+
 async function authSignUp(form){
   if(!firebaseReady) throw new Error('Firebase not ready');
   let cred=null;
@@ -359,7 +388,6 @@ const SCOPE_OPTIONS = [
   {key:'both',label:'Both local & international'}
 ];
 
-// Updated SF (Service Fees) for new Commercial Model
 const SF = {
   listing_monthly_local: { zm:'K100', usd:'$10', label:'Listing Subscription · Monthly Local' },
   listing_monthly_intl: { zm:'K140', usd:'$14', label:'Listing Subscription · Monthly Intl' },
@@ -505,7 +533,7 @@ function PasswordInput({value,onChange,placeholder='••••••••',au
   </div>;
 }
 
-function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
+function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSpotlights,onSignOut}){
   const [menuOpen,setMenuOpen]=useState(false);
   const [acctOpen,setAcctOpen]=useState(false);
   const acctRef = useRef(null);
@@ -575,7 +603,8 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('profile');}}><i className="fas fa-building" style={{width:14}}></i> Organisation profile</a>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('catalogue');}}><i className="fas fa-list" style={{width:14}}></i> My listings</a>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('campaigns');}}><i className="fas fa-bullhorn" style={{width:14}}></i> Campaigns</a>
-                  <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('analytics');}}><i className="fas fa-chart-simple" style={{width:14}}></i> Analytics</a>
+                  <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('spotlights');}}><i className="fas fa-newspaper" style={{width:14}}></i> Business Spotlight</a>
+                  <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('leads');}}><i className="fas fa-users-viewfinder" style={{width:14}}></i> Qualified Leads</a>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('billing');}}><i className="fas fa-credit-card" style={{width:14}}></i> Billing</a>
                 </>}
 
@@ -583,6 +612,8 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('profile');}}><i className="fas fa-user" style={{width:14}}></i> My profile</a>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('requests');}}><i className="fas fa-file-invoice" style={{width:14}}></i> My requests</a>
                   <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('saved');}}><i className="fas fa-bookmark" style={{width:14}}></i> Saved suppliers</a>
+                  <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('spotlights');}}><i className="fas fa-newspaper" style={{width:14}}></i> Business Spotlight</a>
+                  <a href="#dashboard" onClick={(e)=>{e.preventDefault(); navigateTab('sourcing');}}><i className="fas fa-truck-fast" style={{width:14}}></i> Sourcing Support</a>
                 </>}
                 
                 <div className="sep-line"></div>
@@ -605,9 +636,10 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
               
               {user && <>
                 <MenuLink href="#dashboard" onClick={()=>navigateTab('overview')} icon="fa-border-all">Dashboard</MenuLink>
-                <MenuLink href="#browse" onClick={onBrowse} icon="fa-magnifying-glass">Browse Directory</MenuLink>
               </>}
 
+              <MenuLink href="#spotlights" onClick={onSpotlights} icon="fa-newspaper">Business Spotlight</MenuLink>
+              <MenuLink href="#browse" onClick={onBrowse} icon="fa-magnifying-glass">Browse Directory</MenuLink>
               <MenuLink href="#pricing" icon="fa-tags">Pricing & Packages</MenuLink>
               <MenuLink href="#about" icon="fa-circle-info">About Us</MenuLink>
               <MenuLink href="#contact" icon="fa-envelope">Contact Us</MenuLink>
@@ -1061,6 +1093,105 @@ function Landing({onSignup,onSignin}){
   </div>;
 }
 
+/* ═══════════════════ SPOTLIGHT FEED COMPONENTS ═══════════════════ */
+function PublicSpotlightsPage({ user, onDashboard }) {
+  const [spotlights, setSpotlights] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSpotlightsFromCloud().then(data => {
+      setSpotlights(data);
+      setLoading(false);
+    });
+  }, []);
+
+  return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
+    <main style={{flex:1, maxWidth:800, margin:'0 auto', padding:'40px 24px 60px', width:'100%'}}>
+      <div style={{textAlign:'center', marginBottom:40}}>
+        <span className="micro" style={{color:'#E8730F', display:'block', marginBottom:12}}>Community Highlights</span>
+        <h1 className="serif" style={{fontSize:'clamp(2rem,4vw,2.8rem)', lineHeight:1.15, color:'#0A1F12', margin:'0 0 16px'}}>Business Spotlights</h1>
+        <p style={{fontSize:15, color:'rgba(10,31,18,.65)', maxWidth:500, margin:'0 auto'}}>Discover what verified businesses and suppliers are building, launching, and offering across Zambia and beyond.</p>
+      </div>
+
+      {loading ? (
+        <div style={{textAlign:'center', padding:'60px 0'}}><i className="fas fa-spinner fa-spin" style={{fontSize:24, color:'#E8730F'}}></i></div>
+      ) : spotlights.length === 0 ? (
+        <EmptyState icon="fa-newspaper" title="No spotlights yet" text="Be the first to share your business story with the community." cta={<button onClick={onDashboard} style={{padding:'10px 20px', background:'#E8730F', color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:700}}>Go to Dashboard</button>} />
+      ) : (
+        <div>
+          {spotlights.map((post) => (
+            <div key={post.id} className="spotlight-card">
+              <div className="spotlight-header">
+                <div className="spotlight-avatar" style={{ background: '#E8730F15', color: '#E8730F' }}>
+                  {initials(post.businessName)}
+                </div>
+                <div style={{flex:1, minWidth:0}}>
+                  <div style={{display:'flex', alignItems:'center', gap:6}}>
+                    <span style={{fontSize:15, fontWeight:800, color:'#0A1F12'}}>{post.businessName}</span>
+                    <i className="fas fa-circle-check" style={{color:'#1E7B3C', fontSize:12}} title="Verified Business"></i>
+                  </div>
+                  <div style={{fontSize:12, color:'rgba(10,31,18,.5)', marginTop:2}}>
+                    {post.authorName} · {new Date(post.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+                  </div>
+                </div>
+              </div>
+              {post.title && <h3 style={{fontSize:16, fontWeight:800, color:'#0A1F12', marginBottom:10}}>{post.title}</h3>}
+              <div className="spotlight-body">{post.content}</div>
+              <div className="spotlight-footer">
+                <div className="spotlight-actions">
+                  <button className="spotlight-action"><i className="far fa-thumbs-up"></i> Like</button>
+                  <button className="spotlight-action"><i className="far fa-comment"></i> Comment</button>
+                </div>
+                <button onClick={() => window.location.hash = '#browse'} style={{background:'rgba(232,115,15,.1)', border:'1px solid rgba(232,115,15,.3)', color:'#E8730F', padding:'6px 14px', borderRadius:6, fontSize:12, fontWeight:700}}>
+                  View Profile
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+    <Footer/>
+  </div>;
+}
+
+function CreateSpotlightModal({ onClose, onSave, profile }) {
+  const [form, setForm] = useState({ title: '', content: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = async () => {
+    if(!form.title.trim()) return toast('Enter a headline for your spotlight.', 'error');
+    if(!form.content.trim()) return toast('Write something about your business.', 'error');
+    
+    setSubmitting(true);
+    await onSave(form);
+    setSubmitting(false);
+  };
+
+  return <Modal open={true} onClose={onClose} eyebrow="Business Spotlight" maxWidth="36rem">
+    <h2 className="serif" style={{fontSize:24, marginBottom:6, color:'#0A1F12'}}>Share an Update</h2>
+    <p style={{fontSize:13,color:'rgba(10,31,18,.6)',marginBottom:20}}>Post about new products, services, or business milestones. Visible to the public.</p>
+    
+    <div className="form-grid" style={{gap:14}}>
+      <div>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Headline *</label>
+        <TIn value={form.title} onChange={v=>setForm({...form,title:v})} placeholder="e.g. We just launched a new fabric line!"/>
+      </div>
+      <div>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Details *</label>
+        <textarea value={form.content} onChange={e=>setForm({...form,content:e.target.value})} rows={5} placeholder="Tell the community what you're building, offering, or looking for..." style={{...INP_STYLE, resize:'vertical', fontFamily:'inherit'}}/>
+      </div>
+    </div>
+
+    <div style={{display:'flex', gap:10, marginTop:22, flexWrap:'wrap'}}>
+      <button onClick={submit} disabled={submitting} style={{flex:'1 1 200px', padding:'14px', background:submitting?'#ccc':'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:submitting?'wait':'pointer', display:'inline-flex', alignItems:'center', justifyContent:'center', gap:8}}>
+        <i className={`fas ${submitting?'fa-spinner fa-spin':'fa-paper-plane'}`}></i>{submitting?'Posting…':'Post to Spotlight'}
+      </button>
+      <button onClick={onClose} style={{padding:'14px 22px', background:'#fff', border:'1px solid rgba(10,31,18,.15)', borderRadius:8, fontSize:14, fontWeight:600, color:'#0A1F12'}}>Cancel</button>
+    </div>
+  </Modal>;
+}
+
 /* ═══════════════════ DASHBOARD (MONETIZED) ═══════════════════ */
 function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const [profile,setProfile]=useState(null);
@@ -1078,11 +1209,13 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const [subs, setSubs] = useState({});
   const [campaigns,setCampaignsState]=useState([]);
   const [listings,setListingsState]=useState([]);
+  const [spotlights,setSpotlightsState]=useState([]);
   
   // Modals
   const [campaignModalOpen,setCampaignModalOpen]=useState(false);
   const [listingModalOpen,setListingModalOpen]=useState(false);
-  const [checkout, setCheckout] = useState(null); // { type, title, amount, service, onSuccess }
+  const [spotlightModalOpen,setSpotlightModalOpen]=useState(false);
+  const [checkout, setCheckout] = useState(null);
 
   useEffect(()=>{
     if(!user){setLoading(false);return;}
@@ -1097,22 +1230,23 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
         frequency:p.frequency||'Monthly',orderValue:p.orderValue||''
       });
       
-      // Load Subscriptions
       const storedSubs = getSubs(user.uid);
       setSubs(storedSubs);
 
-      const [cloudListings, cloudCampaigns] = await Promise.all([
+      const [cloudListings, cloudCampaigns, cloudSpotlights] = await Promise.all([
         loadUserListings(user.uid),
-        loadUserCampaigns(user.uid)
+        loadUserCampaigns(user.uid),
+        loadSpotlightsFromCloud()
       ]);
-      const localListings = getListings(user.uid);
-      const localCampaigns = getCampaigns(user.uid);
-      const mergedListings = cloudListings.length ? cloudListings : localListings;
-      const mergedCampaigns = cloudCampaigns.length ? cloudCampaigns : localCampaigns;
-      setListingsState(mergedListings);
-      setCampaignsState(mergedCampaigns);
-      saveListings(user.uid, mergedListings);
-      saveCampaigns(user.uid, mergedCampaigns);
+      
+      setListingsState(cloudListings.length ? cloudListings : getListings(user.uid));
+      setCampaignsState(cloudCampaigns.length ? cloudCampaigns : getCampaigns(user.uid));
+      setSpotlightsState(cloudSpotlights);
+      
+      saveListings(user.uid, cloudListings);
+      saveCampaigns(user.uid, cloudCampaigns);
+      saveSpotlights(cloudSpotlights);
+      
       setSavedSuppliersState(getSavedSuppliers(user.uid));
       setLoading(false);
     });
@@ -1160,7 +1294,6 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     toast('Removed from saved suppliers.', 'success');
   };
 
-  // --- Payment Gate Logic ---
   const handleServicePayment = async (type, code, title, amount, onSuccess) => {
     setCheckout({
       type, code, title, amount,
@@ -1181,20 +1314,15 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const handleCheckoutSuccess = () => {
     if(checkout) {
       const updatedSubs = { ...subs };
-      
-      if (checkout.type === 'listing') {
-        updatedSubs.listing = true; // Simplified for demo
-      } else if (checkout.type === 'verification') {
+      if (checkout.type === 'listing') updatedSubs.listing = true;
+      else if (checkout.type === 'verification') {
         updatedSubs.verified = true;
         setProfile(prev => ({ ...prev, status: 'verified' }));
         if (firebaseReady) db.collection('se_users').doc(user.uid).update({ status: 'verified' }).catch(()=>{});
-      } else if (checkout.type === 'campaign') {
-        updatedSubs.campaigns = true;
-      } else if (checkout.type === 'leads') {
-        updatedSubs.leads = true;
-      } else if (checkout.type === 'buyer') {
-        updatedSubs.buyerSub = true;
       }
+      else if (checkout.type === 'campaign') updatedSubs.campaigns = true;
+      else if (checkout.type === 'leads') updatedSubs.leads = true;
+      else if (checkout.type === 'buyer') updatedSubs.buyerSub = true;
       
       setSubs(updatedSubs);
       saveSubs(user.uid, updatedSubs);
@@ -1207,13 +1335,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
 
   const handleOpenListingModal = () => {
     if (!subs.listing) {
-      handleServicePayment(
-        'listing', 
-        'DIR-LIST', 
-        'Supplier Listing Subscription', 
-        profile.scope === 'international' ? 'K140' : 'K100', 
-        () => setListingModalOpen(true)
-      );
+      handleServicePayment('listing', 'DIR-LIST', 'Supplier Listing Subscription', profile.scope === 'international' ? 'K140' : 'K100', () => setListingModalOpen(true));
     } else {
       setListingModalOpen(true);
     }
@@ -1221,36 +1343,26 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
 
   const handleOpenCampaignModal = () => {
     if (!subs.campaigns) {
-      handleServicePayment(
-        'campaign', 
-        'DIR-CAMP', 
-        'Campaign Placement', 
-        'K455', 
-        () => setCampaignModalOpen(true)
-      );
+      handleServicePayment('campaign', 'DIR-CAMP', 'Campaign Placement', 'K455', () => setCampaignModalOpen(true));
     } else {
       setCampaignModalOpen(true);
     }
   };
 
   const handleVerification = () => {
-    handleServicePayment(
-      'verification', 
-      'DIR-VERIFY', 
-      'Profile Verification', 
-      'K75', 
-      () => {}
-    );
+    handleServicePayment('verification', 'DIR-VERIFY', 'Profile Verification', 'K75', () => {});
   };
 
   const handleBuyerSubscription = () => {
-    handleServicePayment(
-      'buyer', 
-      'DIR-BUYER', 
-      'Buyer Access Subscription', 
-      'K50', 
-      () => {}
-    );
+    handleServicePayment('buyer', 'DIR-BUYER', 'Buyer Access Subscription', 'K50', () => {});
+  };
+
+  const handleOpenSpotlightModal = () => {
+    if (!isVerified && !subs.verified) {
+      handleServicePayment('verification', 'DIR-VERIFY', 'Profile Verification (Required for Spotlights)', 'K75', () => setSpotlightModalOpen(true));
+    } else {
+      setSpotlightModalOpen(true);
+    }
   };
 
   const handleAddListing = async (newList) => {
@@ -1276,9 +1388,27 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     toast('Campaign launched.', 'success');
   };
 
+  const handleAddSpotlight = async (newSpot) => {
+    const payload = { 
+      ...newSpot, 
+      userId: user.uid, 
+      authorName: profile.name, 
+      businessName: profile.businessName || profile.name,
+      category: profile.category,
+      createdAt: Date.now() 
+    };
+    const saved = await saveSpotlightToCloud(payload);
+    const record = saved || { ...payload, id: 'local-'+Date.now() };
+    const next = [record, ...spotlights];
+    setSpotlightsState(next);
+    saveSpotlights(next);
+    setSpotlightModalOpen(false);
+    toast('Spotlight published!', 'success');
+  };
+
   const handleDeleteListing = async (id) => {
     if(!window.confirm('Delete this listing?')) return;
-    const ok = await deleteListingFromCloud(id);
+    await deleteListingFromCloud(id);
     const next = listings.filter(l => l.id !== id);
     setListingsState(next);
     saveListings(user.uid, next);
@@ -1304,6 +1434,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     {key:'profile', label:'Organisation profile', icon:'fa-building'},
     {key:'catalogue', label:'My Listings', icon:'fa-list'},
     {key:'campaigns', label:'Campaigns', icon:'fa-bullhorn'},
+    {key:'spotlights', label:'Business Spotlight', icon:'fa-newspaper'},
     {key:'leads', label:'Qualified Leads', icon:'fa-users-viewfinder'},
     {key:'analytics', label:'Analytics', icon:'fa-chart-simple'},
     {key:'billing', label:'Billing', icon:'fa-credit-card'},
@@ -1312,6 +1443,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     {key:'profile', label:'My profile', icon:'fa-user'},
     {key:'requests', label:'My requests', icon:'fa-file-invoice'},
     {key:'saved', label:'Saved suppliers', icon:'fa-bookmark'},
+    {key:'spotlights', label:'Business Spotlight', icon:'fa-newspaper'},
     {key:'sourcing', label:'Sourcing Support', icon:'fa-truck-fast'},
     {key:'analytics', label:'Analytics', icon:'fa-chart-simple'},
     {key:'billing', label:'Purchases', icon:'fa-credit-card'},
@@ -1347,8 +1479,8 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                 <>
                   <StatCard label="Live listings" value={listings.length} hint={subs.listing?'Active':'Unpaid'} warn={!subs.listing} />
                   <StatCard label="Campaigns" value={campaigns.length} hint={subs.campaigns?'Running':'None'} />
+                  <StatCard label="Spotlights" value={spotlights.filter(s=>s.userId===user.uid).length} hint="posts published" />
                   <StatCard label="Profile Status" value={isVerified?'Verified':'Unverified'} hint={isVerified?'Badge active':'Get verified'} warn={!isVerified} />
-                  <StatCard label="Leads Package" value={subs.leads?'Active':'None'} hint={subs.leads?'Unlocked':'Subscribe'} />
                 </>
               ) : (
                 <>
@@ -1375,6 +1507,15 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                     <button onClick={handleVerification} style={{padding:'10px 18px',background:'#0A1F12',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Get Verified</button>
                   </div>
                 )}
+                
+                {/* Spotlight CTA */}
+                <div style={{background:'linear-gradient(135deg,#0A1F12,#123A1F)', borderRadius:14, padding:'24px', marginBottom:18, color:'#fff', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:14}}>
+                  <div>
+                    <h3 style={{fontSize:16,fontWeight:800, color:'#F5A623', margin:'0 0 6px'}}><i className="fas fa-newspaper" style={{marginRight:8}}></i> Business Spotlight</h3>
+                    <p style={{fontSize:13, color:'rgba(255,255,255,.75)', margin:0, maxWidth:500}}>Share your latest products, services, or business milestones with the community.</p>
+                  </div>
+                  <button onClick={handleOpenSpotlightModal} style={{padding:'10px 20px', background:'#E8730F', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700}}>Create Post</button>
+                </div>
 
                 <div className="card" style={{marginBottom:18}}>
                   <div className="card-h">
@@ -1410,41 +1551,6 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
                           </tr>
                         )) : (
                           <tr><td colSpan="6" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No listings yet.</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="card" style={{marginBottom:18}}>
-                  <div className="card-h">
-                    <h3>Active campaigns</h3>
-                    {subs.campaigns ? (
-                      <button onClick={handleOpenCampaignModal} style={{background:'rgba(232,115,15,.1)',border:'1px solid rgba(232,115,15,.3)',borderRadius:6,padding:'6px 10px',color:'#E8730F',fontSize:11.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:5}}><i className="fas fa-plus"></i> New</button>
-                    ) : (
-                      <span className="chip chip-danger">Payment Required (K455)</span>
-                    )}
-                  </div>
-                  <div className="table-wrap" style={{border:0,borderRadius:0}}>
-                    <table className="dt">
-                      <thead><tr><th>Campaign</th><th>Package</th><th>Dates</th><th>Budget</th><th>Status</th></tr></thead>
-                      <tbody>
-                        {!subs.campaigns ? (
-                          <tr><td colSpan="5" style={{textAlign:'center',padding:'40px'}}>
-                            <i className="fas fa-bullhorn" style={{fontSize:24,color:'rgba(10,31,18,.2)',marginBottom:10,display:'block'}}></i>
-                            <p style={{fontSize:13.5,color:'rgba(10,31,18,.6)',marginBottom:14}}>Run campaigns to boost visibility. K455 per campaign.</p>
-                            <button onClick={handleOpenCampaignModal} style={{padding:'10px 20px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700}}>Launch Campaign</button>
-                          </td></tr>
-                        ) : campaigns.length > 0 ? campaigns.slice(0, 5).map((c,i)=>(
-                          <tr key={c.id || i}>
-                            <td style={{fontWeight:700}}>{c.name}</td>
-                            <td className="muted">{c.package}</td>
-                            <td className="muted">{c.startDate?`${fmtDate(c.startDate)} – ${fmtDate(c.endDate)}`:'—'}</td>
-                            <td className="muted">{c.budget}</td>
-                            <td><span className="chip">Active</span></td>
-                          </tr>
-                        )) : (
-                          <tr><td colSpan="5" style={{textAlign:'center',padding:'30px',color:'rgba(10,31,18,.5)'}}>No campaigns yet.</td></tr>
                         )}
                       </tbody>
                     </table>
@@ -1675,6 +1781,58 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
           </div>
         )}
 
+        {tab==='spotlights' && (
+          <div>
+            <div className="dash-head" style={{marginBottom:16}}>
+              <div>
+                <h1>Business Spotlight</h1>
+                <p>Share your latest updates with the community. Visible to all directory users.</p>
+              </div>
+              {isVerified ? (
+                <button onClick={handleOpenSpotlightModal} style={{padding:'10px 18px',background:'#E8730F',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}><i className="fas fa-plus"></i> New Spotlight</button>
+              ) : (
+                <span className="chip chip-danger">Verification Required</span>
+              )}
+            </div>
+
+            {!isVerified ? (
+              <div className="card" style={{padding:'60px 20px', textAlign:'center'}}>
+                <i className="fas fa-shield-halved" style={{fontSize:40,color:'#E8730F',marginBottom:16,display:'block'}}></i>
+                <h3 className="serif" style={{fontSize:22,marginBottom:10,color:'#0A1F12'}}>Unlock Business Spotlights</h3>
+                <p style={{fontSize:14,color:'rgba(10,31,18,.65)',marginBottom:24,maxWidth:400,margin:'0 auto 24px',lineHeight:1.6}}>Only verified users can post to the Business Spotlight feed. Build trust and start sharing your story for K75.</p>
+                <button onClick={handleVerification} style={{padding:'12px 24px',background:'linear-gradient(135deg,#E8730F,#F5A623)',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700}}>Get Verified Now</button>
+              </div>
+            ) : (
+              <div>
+                {spotlights.length > 0 ? (
+                  spotlights.map(post => (
+                    <div key={post.id} className="spotlight-card">
+                      <div className="spotlight-header">
+                        <div className="spotlight-avatar" style={{ background: '#E8730F15', color: '#E8730F' }}>
+                          {initials(post.businessName)}
+                        </div>
+                        <div style={{flex:1, minWidth:0}}>
+                          <div style={{display:'flex', alignItems:'center', gap:6}}>
+                            <span style={{fontSize:15, fontWeight:800, color:'#0A1F12'}}>{post.businessName}</span>
+                            <i className="fas fa-circle-check" style={{color:'#1E7B3C', fontSize:12}} title="Verified Business"></i>
+                          </div>
+                          <div style={{fontSize:12, color:'rgba(10,31,18,.5)', marginTop:2}}>
+                            {post.authorName} · {new Date(post.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+                          </div>
+                        </div>
+                      </div>
+                      {post.title && <h3 style={{fontSize:16, fontWeight:800, color:'#0A1F12', marginBottom:10}}>{post.title}</h3>}
+                      <div className="spotlight-body">{post.content}</div>
+                    </div>
+                  ))
+                ) : (
+                  <EmptyState icon="fa-newspaper" title="No spotlights yet" text="Be the first to share your business story with the community." cta={<button onClick={handleOpenSpotlightModal} style={{padding:'10px 20px', background:'#E8730F', color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:700}}>Create Post</button>} />
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {tab==='leads' && isSupplier && (
           <div className="card">
             <div className="card-h">
@@ -1749,6 +1907,7 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
 
     {campaignModalOpen && <CreateCampaignModal onClose={()=>setCampaignModalOpen(false)} onSave={handleAddCampaign} />}
     {listingModalOpen && <CreateListingModal onClose={()=>setListingModalOpen(false)} onSave={handleAddListing} profile={profile} />}
+    {spotlightModalOpen && <CreateSpotlightModal onClose={()=>setSpotlightModalOpen(false)} onSave={handleAddSpotlight} profile={profile} />}
     
     {checkout && (
       <Modal open={true} onClose={()=>setCheckout(null)} eyebrow="Secure Checkout" maxWidth="52rem">
@@ -2876,6 +3035,7 @@ function App(){
   const goHome=()=>{window.location.hash='';};
   const goDashboard=()=>{window.location.hash='#dashboard';};
   const goBrowse=()=>{window.location.hash='#browse';};
+  const goSpotlights=()=>{window.location.hash='#spotlights';};
   const openRFQ=(supplier)=>{setRfqPreselected(supplier||null);setRfqType('quote');setRfqOpen(true);};
   const openIntro=(buyer)=>{setRfqPreselected(buyer||null);setRfqType('intro');setRfqOpen(true);};
   const closeRFQ=()=>{setRfqOpen(false);setRfqPreselected(null);};
@@ -2897,6 +3057,8 @@ function App(){
     } else {
       mainView = <><Browse user={user} onRequestQuote={openRFQ} onRequestIntro={openIntro} onDashboard={goDashboard} onSignedOut={signedOut}/><RFQModal open={rfqOpen} onClose={closeRFQ} preselected={rfqPreselected} type={rfqType} user={user} onSaved={()=>{}}/></>;
     }
+  } else if(hash==='#spotlights'){
+    mainView = <PublicSpotlightsPage user={user} onDashboard={goDashboard}/>;
   } else if(hash==='#pricing'){
     mainView = <PricingPage onSignup={(role)=>openAuth('signup',role||'buyer')}/>;
   } else if(hash==='#about'){
@@ -2918,7 +3080,7 @@ function App(){
   return (
     <div style={{ minHeight: '100vh', background: '#F5FAF6', paddingTop: 72 }}>
       {!authLoading && (
-        <Nav user={user} profile={profile} onSignIn={()=>openAuth('signin','buyer')} onSignUp={(role)=>openAuth('signup',role||'buyer')} onDashboard={goDashboard} onBrowse={goBrowse} onSignOut={signedOut}/>
+        <Nav user={user} profile={profile} onSignIn={()=>openAuth('signin','buyer')} onSignUp={(role)=>openAuth('signup',role||'buyer')} onDashboard={goDashboard} onBrowse={goBrowse} onSpotlights={goSpotlights} onSignOut={signedOut}/>
       )}
       {mainView}
       <AuthModal open={authOpen} initialMode={authMode} initialRole={authRole} onClose={closeAuth} onAuthSuccess={handleAuthSuccess}/>
