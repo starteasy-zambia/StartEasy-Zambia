@@ -486,16 +486,10 @@ function locLabel(e){
 
 function VerifiedBadge({ size = 18 }) {
   return (
-    <span title="Verified Business" style={{ display: 'inline-flex', width: size, height: size, flexShrink: 0 }}>
+    <span title="Verified Business" style={{ display: 'inline-flex', width: size, height: size, flexShrink: 0, marginLeft: 4 }}>
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L15 5.5L19.5 5L20 9.5L23 12L20 14.5L19.5 19L15 18.5L12 22L9 18.5L4.5 19L4 14.5L1 12L4 9.5L4.5 5L9 5.5L12 2Z" fill="url(#badge-grad)"/>
+        <path d="M12 2L15 5.5L19.5 5L20 9.5L23 12L20 14.5L19.5 19L15 18.5L12 22L9 18.5L4.5 19L4 14.5L1 12L4 9.5L4.5 5L9 5.5L12 2Z" fill="#E8730F"/>
         <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <defs>
-          <linearGradient id="badge-grad" x1="1" y1="2" x2="23" y2="22" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#E8730F"/>
-            <stop offset="1" stopColor="#F5A623"/>
-          </linearGradient>
-        </defs>
       </svg>
     </span>
   );
@@ -589,7 +583,6 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSpotlights,o
   const closeMenu=()=>setMenuOpen(false);
   const roleLabel = profile ? (profile.role==='supplier'?'Supplier':'Buyer') : 'Member';
   
-  // FIX: Check local storage subscription status in case Firestore is delayed
   const subs = user ? getSubs(user.uid) : {};
   const isVerified = profile?.status === 'verified' || subs.verified;
 
@@ -1355,6 +1348,11 @@ function CreateSpotlightModal({ onClose, onSave, profile }) {
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
     if (selected) {
+      if (selected.size > 5 * 1024 * 1024) {
+        toast('Image is too large. Please select a file under 5MB.', 'error');
+        e.target.value = null; // clear input
+        return;
+      }
       setFile(selected);
       setPreview(URL.createObjectURL(selected));
     }
@@ -1373,17 +1371,30 @@ function CreateSpotlightModal({ onClose, onSave, profile }) {
     if (file && storage) {
       try {
         const fileRef = storage.ref(`spotlights/${Date.now()}_${file.name}`);
-        await fileRef.put(file);
+        
+        // Add a 15-second timeout for the upload to prevent hanging
+        const uploadTask = fileRef.put(file);
+        await Promise.race([
+          uploadTask,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timed out')), 15000))
+        ]);
+        
         mediaUrl = await fileRef.getDownloadURL();
         mediaType = file.type.startsWith('video') ? 'video' : 'image';
       } catch (error) {
-        console.error("Upload failed", error);
-        toast('Media upload failed. Posting text only.', 'error');
+        console.error("Upload failed or timed out", error);
+        toast('Media upload failed or timed out. Posting text only.', 'error');
+        mediaUrl = null; // Ensure we don't try to save a broken URL
       }
     }
 
-    await onSave({ ...form, mediaUrl, mediaType });
-    setSubmitting(false);
+    try {
+      await onSave({ ...form, mediaUrl, mediaType });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return <Modal open={true} onClose={onClose} eyebrow="Business Spotlight" maxWidth="36rem">
@@ -1401,7 +1412,7 @@ function CreateSpotlightModal({ onClose, onSave, profile }) {
       </div>
       
       <div>
-        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Attach Media (Optional)</label>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Attach Media (Max 5MB)</label>
         <input type="file" accept="image/*,video/*" onChange={handleFileChange} style={{display:'block', width:'100%', padding:'10px', background:'#fff', border:'1px dashed rgba(10,31,18,.3)', borderRadius:'8px', fontSize:'13px'}} />
         {preview && (
           <div style={{marginTop:12, position:'relative'}}>
