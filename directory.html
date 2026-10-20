@@ -12,6 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
 :root{--forest:#0A1F12;--forest-2:#123A1F;--green:#1E7B3C;--orange:#E8730F;--orange-2:#F5A623;--light:#F5FAF6;--red:#B8564F;--purple:#7A4FA3;--blue:#1B6CA8;--teal:#0E7C7B}
 html{overflow-x:hidden !important;width:100%;-webkit-text-size-adjust:100%}
@@ -42,7 +43,7 @@ input:focus,select:focus,textarea:focus{outline:none}
 .dash-side .side-label{font-size:.68rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:rgba(10,31,18,.4);padding:.9rem .75rem .3rem}
 
 .dash-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.4rem;flex-wrap:wrap}
-.dash-head h1{font-size:1.6rem;letter-spacing:-.03em;margin:0;color:#0A1F12}
+.dash-head h1{font-size:1.6rem;letter-spacing:-.03em;margin:0;color:#0A1F12;display:flex;align-items:center;gap:8px}
 .dash-head p{color:rgba(10,31,18,.6);font-size:.9rem;margin:.3rem 0 0 0; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
 
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
@@ -132,6 +133,7 @@ td .row{gap:.4rem}
 .spotlight-header { display:flex; gap:12px; align-items:center; margin-bottom:14px; }
 .spotlight-avatar { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; flex-shrink:0; }
 .spotlight-body { font-size:14.5px; line-height:1.65; color:rgba(10,31,18,.85); white-space:pre-wrap; margin-bottom:12px; }
+.spotlight-media { width:100%; max-height:400px; object-fit:cover; border-radius:8px; margin-bottom:12px; border:1px solid rgba(10,31,18,.05); }
 .spotlight-footer { border-top:1px solid rgba(10,31,18,.08); padding-top:8px; margin-top:8px; display:flex; justify-content:space-between; }
 .sa-btn { display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 16px; border-radius:6px; font-size:13px; font-weight:700; color:rgba(10,31,18,.6); background:transparent; border:none; cursor:pointer; transition:all .2s; flex:1; }
 .sa-btn:hover { background:rgba(10,31,18,.04); color:#0A1F12; }
@@ -233,11 +235,12 @@ const FIREBASE_CONFIG = {
   appId: "1:54136399237:web:2f9f2d7f86bfdfb4be50ec",
   measurementId: "G-R622H7H5LJ"
 };
-let db = null, auth = null, firebaseReady = false;
+let db = null, auth = null, storage = null, firebaseReady = false;
 try {
   if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
   db = firebase.firestore();
   auth = firebase.auth();
+  storage = firebase.storage();
   firebaseReady = true;
   auth.signInAnonymously().catch(e => console.warn('[SE] anon auth:', e && e.message));
 } catch (e) { console.error('[SE] Firebase init failed:', e); }
@@ -481,9 +484,9 @@ function locLabel(e){
 
 /* ═══════════════════ SHARED UI COMPONENTS ═══════════════════ */
 
-function VerifiedBadge({ size = 16 }) {
+function VerifiedBadge({ size = 18 }) {
   return (
-    <span title="Verified Business" style={{ display: 'inline-flex', width: size, height: size, flexShrink: 0, marginLeft: 4 }}>
+    <span title="Verified Business" style={{ display: 'inline-flex', width: size, height: size, flexShrink: 0 }}>
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 2L15 5.5L19.5 5L20 9.5L23 12L20 14.5L19.5 19L15 18.5L12 22L9 18.5L4.5 19L4 14.5L1 12L4 9.5L4.5 5L9 5.5L12 2Z" fill="url(#badge-grad)"/>
         <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -632,9 +635,9 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSpotlights,o
               </button>
               <div className={`acct-menu ${acctOpen?'open':''}`}>
                 <div style={{padding:'.55rem .7rem .3rem'}}>
-                  <div style={{fontWeight:800,fontSize:'.86rem',color:'#0A1F12', display:'flex', alignItems:'center'}}>
+                  <div style={{fontWeight:800,fontSize:'.86rem',color:'#0A1F12', display:'flex', alignItems:'center', gap:6}}>
                     {profile?.name || user.email}
-                    {isVerified && <VerifiedBadge size={14} />}
+                    {isVerified && <VerifiedBadge size={16} />}
                   </div>
                   <div className="tiny muted" style={{color:'rgba(10,31,18,.5)',fontSize:11}}>{roleLabel}</div>
                 </div>
@@ -1207,6 +1210,15 @@ function SpotlightCard({ post, user, onComment }) {
       </div>
       
       {post.title && <h3 style={{fontSize:16, fontWeight:800, color:'#0A1F12', marginBottom:10}}>{post.title}</h3>}
+      
+      {/* Display Media if present */}
+      {post.mediaUrl && post.mediaType === 'image' && (
+        <img src={post.mediaUrl} alt="Spotlight media" className="spotlight-media" />
+      )}
+      {post.mediaUrl && post.mediaType === 'video' && (
+        <video src={post.mediaUrl} controls className="spotlight-media" />
+      )}
+
       <div className="spotlight-body">{post.content}</div>
 
       <div className="spotlight-footer">
@@ -1336,14 +1348,41 @@ function PublicSpotlightsPage({ user, onDashboard, onPostClick }) {
 
 function CreateSpotlightModal({ onClose, onSave, profile }) {
   const [form, setForm] = useState({ title: '', content: '' });
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const handleFileChange = (e) => {
+    const selected = e.target.files[0];
+    if (selected) {
+      setFile(selected);
+      setPreview(URL.createObjectURL(selected));
+    }
+  };
 
   const submit = async () => {
     if(!form.title.trim()) return toast('Enter a headline for your spotlight.', 'error');
     if(!form.content.trim()) return toast('Write something about your business.', 'error');
     
     setSubmitting(true);
-    await onSave(form);
+    
+    let mediaUrl = null;
+    let mediaType = null;
+
+    // Upload to Firebase Storage if there is a file
+    if (file && storage) {
+      try {
+        const fileRef = storage.ref(`spotlights/${Date.now()}_${file.name}`);
+        await fileRef.put(file);
+        mediaUrl = await fileRef.getDownloadURL();
+        mediaType = file.type.startsWith('video') ? 'video' : 'image';
+      } catch (error) {
+        console.error("Upload failed", error);
+        toast('Media upload failed. Posting text only.', 'error');
+      }
+    }
+
+    await onSave({ ...form, mediaUrl, mediaType });
     setSubmitting(false);
   };
 
@@ -1358,7 +1397,22 @@ function CreateSpotlightModal({ onClose, onSave, profile }) {
       </div>
       <div>
         <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Details *</label>
-        <textarea value={form.content} onChange={e=>setForm({...form,content:e.target.value})} rows={5} placeholder="Tell the community what you're building, offering, or looking for..." style={{...INP_STYLE, resize:'vertical', fontFamily:'inherit'}}/>
+        <textarea value={form.content} onChange={e=>setForm({...form,content:e.target.value})} rows={4} placeholder="Tell the community what you're building, offering, or looking for..." style={{...INP_STYLE, resize:'vertical', fontFamily:'inherit'}}/>
+      </div>
+      
+      <div>
+        <label style={{display:'block',fontSize:11.5,fontWeight:700,color:'#0A1F12',marginBottom:6}}>Attach Media (Optional)</label>
+        <input type="file" accept="image/*,video/*" onChange={handleFileChange} style={{display:'block', width:'100%', padding:'10px', background:'#fff', border:'1px dashed rgba(10,31,18,.3)', borderRadius:'8px', fontSize:'13px'}} />
+        {preview && (
+          <div style={{marginTop:12, position:'relative'}}>
+            {file.type.startsWith('video') ? (
+              <video src={preview} controls style={{width:'100%', borderRadius:'8px', maxHeight:'200px', objectFit:'cover'}} />
+            ) : (
+              <img src={preview} alt="Preview" style={{width:'100%', borderRadius:'8px', maxHeight:'200px', objectFit:'cover'}} />
+            )}
+            <button onClick={()=>{setFile(null);setPreview(null);}} style={{position:'absolute', top:8, right:8, background:'rgba(0,0,0,0.6)', color:'#fff', border:'none', borderRadius:'50%', width:24, height:24, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer'}}><i className="fas fa-times"></i></button>
+          </div>
+        )}
       </div>
     </div>
 
@@ -1628,9 +1682,9 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
       <div className="dash-main">
         <div className="dash-head">
           <div>
-            <h1 style={{display:'flex', alignItems:'center'}}>
+            <h1>
               {isSupplier ? profile.businessName : profile.name}
-              {isVerified && <VerifiedBadge size={22} />}
+              {isVerified && <VerifiedBadge size={24} />}
             </h1>
             <p>{isSupplier ? 'Supplier dashboard' : 'Buyer dashboard'} · <span className={`chip ${isVerified?'':'chip-danger'}`}>{isVerified?'Verified':'Unverified'}</span></p>
           </div>
