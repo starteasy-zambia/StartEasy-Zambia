@@ -150,7 +150,6 @@ td .row{gap:.4rem}
   .hide-sm{display:none!important;}
 }
 
-/* Static content page helpers */
 .static-page{max-width:820px;margin:0 auto;padding:60px 24px 80px}
 .static-page h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.15;color:#0A1F12;margin:0 0 18px;letter-spacing:-.02em}
 .static-page h2{font-family:'Playfair Display',Georgia,serif;font-size:1.3rem;color:#0A1F12;margin:32px 0 12px;font-weight:700}
@@ -238,11 +237,11 @@ function authErrorMessage(e){
 function lsGet(key, fallback=[]){ try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;} }
 function lsSet(key, val){ try{localStorage.setItem(key, JSON.stringify(val));}catch(e){} }
 function getSavedSuppliers(uid){ return lsGet('se_saved_'+uid, []); }
-function setSavedSuppliers(uid, arr){ lsSet('se_saved_'+uid, arr); }
+function saveSavedSuppliers(uid, arr){ lsSet('se_saved_'+uid, arr); }
 function getCampaigns(uid){ return lsGet('se_campaigns_'+uid, []); }
-function setCampaigns(uid, arr){ lsSet('se_campaigns_'+uid, arr); }
+function saveCampaigns(uid, arr){ lsSet('se_campaigns_'+uid, arr); }
 function getListings(uid){ return lsGet('se_listings_'+uid, []); }
-function setListings(uid, arr){ lsSet('se_listings_'+uid, arr); }
+function saveListings(uid, arr){ lsSet('se_listings_'+uid, arr); }
 
 async function fsLoadDirectory(){
   if(!firebaseReady) return null;
@@ -281,7 +280,6 @@ async function addPayment(rec){
   catch(e) { console.error('[SE] addPayment failed:', e && e.code, e && e.message); return null; }
 }
 
-/* ===== NEW: Live Listings cloud helpers ===== */
 async function loadUserListings(uid){
   if(!firebaseReady) return [];
   try{
@@ -302,7 +300,6 @@ async function deleteListingFromCloud(id){
   try{ await db.collection('se_listings').doc(id).delete(); return true; }
   catch(e){console.warn('[SE] delete listing:',e&&e.message);return false;}
 }
-/* ===== NEW: Campaigns cloud helpers ===== */
 async function loadUserCampaigns(uid){
   if(!firebaseReady) return [];
   try{
@@ -353,7 +350,6 @@ async function authSignIn(email,password){
 }
 async function authSignOutFn(){try{await auth.signOut();}catch(e){}}
 
-/* ═══════════════════ DATA ═══════════════════ */
 const CATEGORIES = [
   { key:'clothing', icon:'fa-shirt', color:'#E8730F', title:'Clothing, Fashion & Accessories' },
   { key:'grocery', icon:'fa-basket-shopping', color:'#2E9C4A', title:'Grocery & Supermarkets' },
@@ -440,7 +436,6 @@ function locLabel(e){
   return parts.filter(Boolean).join(', ');
 }
 
-/* ═══════════════════ SHARED UI ═══════════════════ */
 function Mark({size=38}){
   return <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:size,height:size,borderRadius:'50%',background:'#fff',boxShadow:'0 4px 12px -4px rgba(10,31,18,.5)',flexShrink:0}}>
     <span className="serif" style={{fontSize:size*0.5,fontWeight:800,color:'#0A1F12',lineHeight:1}}>S<span style={{color:'#E8730F'}}>E</span></span>
@@ -511,7 +506,6 @@ function PasswordInput({value,onChange,placeholder='••••••••',au
   </div>;
 }
 
-/* ═══════════════════ NAVBAR ═══════════════════ */
 function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   const [menuOpen,setMenuOpen]=useState(false);
   const [acctOpen,setAcctOpen]=useState(false);
@@ -598,7 +592,6 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
             </div>
           )}
 
-          {/* Hamburger Menu Button */}
           <div ref={menuRef} style={{position:'relative'}}>
             <button className="nav-hamburger" onClick={()=>setMenuOpen(o=>!o)} style={{display:'flex', alignItems:'center', justifyContent:'center', width:40, height:40, borderRadius:9, background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.18)', color:'#fff', fontSize:15, cursor:'pointer', flexShrink:0}}>
               <i className={`fas ${menuOpen?'fa-times':'fa-bars'}`}></i>
@@ -634,7 +627,6 @@ function Nav({user,profile,onSignIn,onSignUp,onDashboard,onBrowse,onSignOut}){
   </header>;
 }
 
-/* ═══════════════════ HERO, LANDING, PRICING, TRUST, FOOTER ═══════════════════ */
 function Hero({stats}){
   return <section style={{background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)',color:'#fff',position:'relative',overflow:'hidden',padding:'clamp(64px,9vw,120px) 24px clamp(56px,8vw,100px)'}}>
     <div style={{position:'absolute',top:-160,right:-120,width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.18), transparent 65%)',pointerEvents:'none'}}/>
@@ -760,7 +752,6 @@ function Footer(){
   </footer>;
 }
 
-/* ═══════════════════ PRICING PAGE ═══════════════════ */
 function PricingPage({onSignup}){
   const [activeTab, setActiveTab] = useState('suppliers');
 
@@ -851,7 +842,6 @@ function PricingPage({onSignup}){
   </div>;
 }
 
-/* ═══════════════════ STATIC CONTENT PAGES ═══════════════════ */
 function AboutPage(){
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', flexDirection:'column'}}>
     <main style={{flex:1}}>
@@ -1073,7 +1063,6 @@ function Landing({onSignup,onSignin}){
   </div>;
 }
 
-/* ═══════════════════ DASHBOARD ═══════════════════ */
 function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const [profile,setProfile]=useState(null);
   const [loading,setLoading]=useState(true);
@@ -1086,8 +1075,8 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   const [saveMsg,setSaveMsg]=useState(null);
   const [allSuppliers,setAllSuppliers]=useState([]);
 
-  const [campaigns,setCampaigns]=useState([]);
-  const [listings,setListings]=useState([]);
+  const [campaigns,setCampaignsState]=useState([]);
+  const [listings,setListingsState]=useState([]);
   const [campaignModalOpen,setCampaignModalOpen]=useState(false);
   const [listingModalOpen,setListingModalOpen]=useState(false);
 
@@ -1103,7 +1092,6 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
         sources:Array.isArray(p.sources)?p.sources.join(', '):(p.sources||''),
         frequency:p.frequency||'Monthly',orderValue:p.orderValue||''
       });
-      // Load listings & campaigns (cloud first, fallback to localStorage)
       const [cloudListings, cloudCampaigns] = await Promise.all([
         loadUserListings(user.uid),
         loadUserCampaigns(user.uid)
@@ -1112,10 +1100,10 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
       const localCampaigns = getCampaigns(user.uid);
       const mergedListings = cloudListings.length ? cloudListings : localListings;
       const mergedCampaigns = cloudCampaigns.length ? cloudCampaigns : localCampaigns;
-      setListings(mergedListings);
-      setCampaigns(mergedCampaigns);
-      setListings(user.uid, mergedListings);
-      setCampaigns(user.uid, mergedCampaigns);
+      setListingsState(mergedListings);
+      setCampaignsState(mergedCampaigns);
+      saveListings(user.uid, mergedListings);
+      saveCampaigns(user.uid, mergedCampaigns);
       setSavedSuppliersState(getSavedSuppliers(user.uid));
       setLoading(false);
     });
@@ -1158,31 +1146,29 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
 
   const removeSaved = (id) => {
     const next = savedSuppliers.filter(x=>x!==id);
-    setSavedSuppliers(user.uid, next);
+    saveSavedSuppliers(user.uid, next);
     setSavedSuppliersState(next);
     toast('Removed from saved suppliers.', 'success');
   };
 
-  /* ===== NEW: Enhanced campaign save (cloud + local) ===== */
   const handleAddCampaign = async (newCamp) => {
     const payload = { ...newCamp, userId: user.uid };
     const saved = await saveCampaignToCloud(payload);
     const record = saved || { ...payload, id: 'local-'+Date.now(), createdAt: Date.now(), status:'active', impressions:0, clicks:0, leads:0 };
     const next = [record, ...campaigns];
-    setCampaigns(next);
-    setCampaigns(user.uid, next);
+    setCampaignsState(next);
+    saveCampaigns(user.uid, next);
     setCampaignModalOpen(false);
     toast('Campaign created successfully.', 'success');
   };
 
-  /* ===== NEW: Enhanced listing save (cloud + local) — LIVE ===== */
   const handleAddListing = async (newList) => {
     const payload = { ...newList, userId: user.uid, status:'live' };
     const saved = await saveListingToCloud(payload);
     const record = saved || { ...payload, id: 'local-'+Date.now(), createdAt: Date.now() };
     const next = [record, ...listings];
-    setListings(next);
-    setListings(user.uid, next);
+    setListingsState(next);
+    saveListings(user.uid, next);
     setListingModalOpen(false);
     toast('Listing published live.', 'success');
     setTab('overview');
@@ -1192,8 +1178,8 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
     if(!window.confirm('Delete this listing?')) return;
     const ok = await deleteListingFromCloud(id);
     const next = listings.filter(l => l.id !== id);
-    setListings(next);
-    setListings(user.uid, next);
+    setListingsState(next);
+    saveListings(user.uid, next);
     if(ok || !firebaseReady) toast('Listing deleted.', 'success');
     else toast('Listing removed from your view.', 'success');
   };
@@ -1563,7 +1549,6 @@ function Dashboard({user,onBrowse,onSignedOut,goHome}){
   </div>;
 }
 
-/* ═══════════════════ DASHBOARD MODALS ═══════════════════ */
 function CreateCampaignModal({onClose, onSave}) {
   const today = new Date().toISOString().slice(0,10);
   const plus30 = new Date(Date.now()+30*86400000).toISOString().slice(0,10);
@@ -1626,7 +1611,6 @@ function CreateCampaignModal({onClose, onSave}) {
   </Modal>;
 }
 
-/* ═══════════════════ ENHANCED LIVE LISTING MODAL ═══════════════════ */
 function CreateListingModal({onClose, onSave, profile}) {
   const [form, setForm] = useState({
     title:'',
@@ -1722,7 +1706,6 @@ function CreateListingModal({onClose, onSave, profile}) {
   </Modal>;
 }
 
-/* ═══════════════════ SIGN-IN PROMPT ═══════════════════ */
 function SignInPrompt({onSignIn,onSignUp,onHome}){
   return <div className="fadein" style={{minHeight:'100%', background:'#F5FAF6', display:'flex', alignItems:'center', justifyContent:'center', padding:'32px 20px'}}>
     <div style={{maxWidth:440,textAlign:'center',background:'#fff',border:'1px solid rgba(10,31,18,.1)',borderRadius:16,padding:'36px 30px',boxShadow:'0 20px 50px -20px rgba(10,31,18,.15)'}}>
@@ -1736,7 +1719,6 @@ function SignInPrompt({onSignIn,onSignUp,onHome}){
   </div>;
 }
 
-/* ═══════════════════ WELCOME ═══════════════════ */
 function Welcome({user,onDashboard,onBrowse,onSignedOut}){
   const [profile,setProfile]=useState(null);
   const [loading,setLoading]=useState(true);
@@ -1795,7 +1777,6 @@ function WelcomeRow({k,v}){
   </div>;
 }
 
-/* ═══════════════════ BROWSE ═══════════════════ */
 function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
   const [suppliers,setSuppliers]=useState([]);
   const [buyers,setBuyers]=useState([]);
@@ -1825,7 +1806,7 @@ function Browse({user,onRequestQuote,onRequestIntro,onDashboard,onSignedOut}){
     if(!user){ toast('Sign in to save suppliers.', 'error'); return; }
     const next = saved.includes(supplierId) ? saved.filter(x=>x!==supplierId) : [...saved, supplierId];
     setSaved(next);
-    setSavedSuppliers(user.uid, next);
+    saveSavedSuppliers(user.uid, next);
     toast(saved.includes(supplierId)?'Removed from saved.':'Saved to your dashboard.', 'success');
   };
 
@@ -1932,7 +1913,7 @@ function SupplierProfileModal({supplier,user,onClose,onRequestQuote}){
     if(!user){ toast('Sign in to save suppliers.', 'error'); return; }
     const cur = getSavedSuppliers(user.uid);
     const next = cur.includes(supplier.id) ? cur.filter(x=>x!==supplier.id) : [...cur, supplier.id];
-    setSavedSuppliers(user.uid, next);
+    saveSavedSuppliers(user.uid, next);
     setIsSaved(next.includes(supplier.id));
     toast(next.includes(supplier.id)?'Saved to your dashboard.':'Removed from saved.', 'success');
   };
@@ -1980,7 +1961,6 @@ function BuyerProfileModal({buyer,onClose,onRequestIntro}){
   </Modal>;
 }
 
-/* ═══════════════════ ENGAGEMENT & PAYMENT ═══════════════════ */
 function EngagementLetterBody({service,clientName,clientBusiness,clientEmail,wizardData,readOnly}){
   const s=service;
   const sf=s.service?SF[s.service]:null;
@@ -2204,7 +2184,6 @@ function Payment({service,client,onClose,onDone}){
   </div>;
 }
 
-/* ═══════════════════ AUTH MODAL ═══════════════════ */
 function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuthSuccess}){
   const [mode,setMode]=useState(initialMode);
   const [role,setRole]=useState(initialRole);
@@ -2448,7 +2427,6 @@ function AuthModal({open,initialMode='signup',initialRole='buyer',onClose,onAuth
   </Modal>;
 }
 
-/* ═══════════════════ RFQ & INTRO MODAL ═══════════════════ */
 function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
   const [form,setForm]=useState({name:'',business:'',phone:'',email:'',category:'',product:'',quantity:'',deliveryCity:'',deliveryCountry:'Zambia',deadline:'',budget:'',notes:''});
   const [err,setErr]=useState('');
@@ -2554,7 +2532,6 @@ function RFQModal({open,onClose,preselected,type='quote',user,onSaved}){
   );
 }
 
-/* ═══════════════════ SEED VIEW ═══════════════════ */
 function SeedView(){
   const [user,setUser]=useState(null);
   const [isAdmin,setIsAdmin]=useState(false);
@@ -2642,7 +2619,6 @@ function SeedView(){
   </div>;
 }
 
-/* ═══════════════════ APP ═══════════════════ */
 function App(){
   const [hash,setHash]=useState(()=>window.location.hash);
   const [user,setUser]=useState(null);
