@@ -228,7 +228,7 @@ input:focus,select:focus,textarea:focus{outline:none}
 @media (prefers-reduced-motion:reduce){.hero-slides__video{transition:opacity 350ms ease}.hero-slide.is-active .hero-anim{animation:heroFadeIn 400ms ease both}}
 @keyframes heroFadeIn{from{opacity:0}to{opacity:1}}
 
-/* ============ SUPPLIER DIRECTORY SLIDES ============ */
+/* ============ SUPPLIER DIRECTORY SLIDES (WITH TEXT — before Who We Serve) ============ */
 .sd-slides{position:relative;overflow:hidden;background:#0A1F12;isolation:isolate}
 .sd-slides__frame{position:relative;height:clamp(400px,44vw,520px)}
 .sd-slide{position:absolute;inset:0;display:block;text-decoration:none;opacity:0;pointer-events:none;transition:opacity 900ms cubic-bezier(.4,0,.2,1)}
@@ -292,6 +292,47 @@ input:focus,select:focus,textarea:focus{outline:none}
   .sd-slide,.sd-slide__img{transition:opacity 300ms ease;transform:none!important}
   .sd-slide.is-active .sd-anim{animation:heroFadeIn 400ms ease both}
   .sd-slides__bar.is-active .sd-slides__bar-fill{animation:none;transform:scaleX(1)}
+}
+
+/* ============ SUPPLIER DIRECTORY IMAGE SLIDES (PURE IMAGES + CTA — before Four Support Areas) ============ */
+.sdi-slides{position:relative;overflow:hidden;background:#0A1F12;isolation:isolate}
+.sdi-slides__frame{position:relative;height:clamp(360px,50vw,600px);display:flex;align-items:center;justify-content:center}
+.sdi-slide{position:absolute;inset:0;z-index:1;display:block;text-decoration:none;opacity:0;pointer-events:none;transition:opacity 900ms cubic-bezier(.4,0,.2,1)}
+.sdi-slide.is-active{opacity:1;pointer-events:auto}
+.sdi-slide__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform 7s ease}
+.sdi-slide.is-active .sdi-slide__img{transform:scale(1.05)}
+.sdi-slide__vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,rgba(10,31,18,0) 35%,rgba(10,31,18,.42) 100%)}
+.sdi-slide__fade{position:absolute;left:0;right:0;bottom:0;height:40%;pointer-events:none;background:linear-gradient(to top,rgba(10,31,18,.72) 0%,rgba(10,31,18,0) 100%)}
+.sdi-slides__cta{position:relative;z-index:5;display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:linear-gradient(135deg,#E8730F,#F5A623);color:#fff;border-radius:99px;font-size:14.5px;font-weight:800;text-decoration:none;box-shadow:0 16px 44px rgba(232,115,15,.55),0 0 0 1px rgba(255,255,255,.18) inset;transition:transform .25s cubic-bezier(.22,.61,.36,1),box-shadow .25s;font-family:inherit;letter-spacing:.02em;text-align:center;max-width:calc(100vw - 48px)}
+.sdi-slides__cta:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 24px 56px rgba(232,115,15,.7),0 0 0 1px rgba(255,255,255,.25) inset}
+.sdi-slides__cta i{font-size:12px}
+.sdi-slides__dots{position:absolute;bottom:clamp(18px,2.4vw,26px);left:clamp(18px,2.4vw,26px);z-index:6;display:flex;gap:8px;align-items:center}
+.sdi-slides__dot{width:26px;height:5px;border-radius:99px;background:rgba(255,255,255,.45);border:none;padding:0;cursor:pointer;transition:width .4s cubic-bezier(.22,.61,.36,1),background .3s;overflow:hidden;position:relative}
+.sdi-slides__dot:hover{background:rgba(255,255,255,.75)}
+.sdi-slides__dot.is-active{width:54px;background:rgba(255,255,255,.2)}
+.sdi-slides__dot-fill{position:absolute;inset:0;background:linear-gradient(90deg,#E8730F,#F5A623);transform-origin:left center;transform:scaleX(0);box-shadow:0 0 12px rgba(232,115,15,.6)}
+.sdi-slides__dot.is-active .sdi-slides__dot-fill{animation:sdiFill var(--sdi-duration,5500ms) linear forwards}
+.sdi-slides.is-paused .sdi-slides__dot.is-active .sdi-slides__dot-fill{animation-play-state:paused}
+@keyframes sdiFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.sdi-slides__arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:46px;height:46px;border-radius:50%;background:rgba(10,31,18,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .22s;opacity:.65}
+.sdi-slides:hover .sdi-slides__arrow{opacity:1}
+.sdi-slides__arrow:hover{background:#E8730F;border-color:#E8730F;transform:translateY(-50%) scale(1.06)}
+.sdi-slides__arrow--prev{left:clamp(14px,2vw,22px)}
+.sdi-slides__arrow--next{right:clamp(14px,2vw,22px)}
+@media (max-width:768px){
+  .sdi-slides__frame{height:clamp(300px,72vw,440px)}
+  .sdi-slides__cta{padding:13px 26px;font-size:13px}
+  .sdi-slides__arrow{width:38px;height:38px;font-size:11px}
+  .sdi-slides__dot{width:20px}
+  .sdi-slides__dot.is-active{width:40px}
+}
+@media (max-width:520px){
+  .sdi-slides__arrow{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .sdi-slide{transition:opacity 300ms ease}
+  .sdi-slide__img{transform:none!important;transition:none!important}
+  .sdi-slides__dot.is-active .sdi-slides__dot-fill{animation:none;transform:scaleX(1)}
 }
 </style>
 </head>
@@ -1074,7 +1115,7 @@ return <div><div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppe
                 <div key={e.id||i} style={{display:'flex',gap:14,alignItems:'flex-start',padding:'12px 0',borderBottom:i<recentActivity.length-1?'1px dashed rgba(10,31,18,.08)':'none'}}>
                   <span style={{width:32,height:32,borderRadius:8,background:'rgba(232,115,15,.1)',color:'#E8730F',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                     <i className={`fas ${{
-                      visit:'fa-eye',page_view:'fa-compass',wizard_start:'fa-wand-magic-sparkles',wizard_step:'fa-shoe-prints',wizard_complete:'fa-circle-check',service_view:'fa-file',payment_submit:'fa-receipt',payment_reviewed:'fa-gavel',survey_submit:'fa-poll',service_click:'fa-arrow-pointer',engagement_start:'fa-file-signature'
+                      visit:'fa-eye',page_view:'fa-compass',wizard_start:'fa-wand-magic-sparkles',wizard_step:'fa-shoe-prints',wizard_complete:'fa-circle-check',service_view:'fa-file',payment_submit:'fa-receipt',payment_reviewed:'fa-gavel',survey_submit:'fa-poll',service_click:'fa-arrow-pointer',engagement_start:'fa-file-signature',directory_click:'fa-arrow-up-right-from-square'
                     }[e.type]||'fa-circle'}`} style={{fontSize:11}}></i>
                   </span>
                   <div style={{flex:1,minWidth:0}}>
@@ -1089,6 +1130,7 @@ return <div><div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppe
                       {e.filled!==undefined&&<>answers: <strong>{e.filled}</strong> · </>}
                       {e.serviceCode&&<>service: <strong>{e.serviceCode}</strong></>}
                       {e.serviceKey&&<>service: <strong>{e.serviceKey}</strong></>}
+                      {e.from&&<>from: <strong>{e.from}</strong> · </>}
                       {e.visitorId&&<span style={{color:'rgba(10,31,18,.35)',fontFamily:'Consolas,monospace'}}> · {e.visitorId}</span>}
                     </div>
                   </div>
@@ -2363,7 +2405,7 @@ function HeroVideoSlides({go}){
 }
 
 /* ============================================================
-   SUPPLIERS DIRECTORY IMAGE SLIDES — at the top of "Who We Serve"
+   SUPPLIER DIRECTORY SLIDES (WITH TEXT — before "Who We Serve")
    Every slide and CTA links to https://suppliersdirectory.starteasyzambia.com/
    ============================================================ */
 function SupplierDirectorySlides(){
@@ -2533,6 +2575,115 @@ function SupplierDirectorySlides(){
   </section>;
 }
 
+/* ============================================================
+   SUPPLIER DIRECTORY IMAGE SLIDES (PURE IMAGES + CTA — top of Four Support Areas)
+   Only images + one CTA button. No text overlays on the images themselves.
+   Every image and the CTA link to https://suppliersdirectory.starteasyzambia.com/
+   ============================================================ */
+function SupplierDirectoryImageSlides(){
+  const DIRECTORY_URL = 'https://suppliersdirectory.starteasyzambia.com/';
+  const SLIDE_MS = 5500;
+
+  const images = [
+    '251c1b9c-31cf-4cc8-80ef-f54e54780bc6.png',
+    'af44b8eb-11c4-4c9f-b7c4-38bd81a994cd.png',
+    '7680b070-6cec-46ca-b77c-450334bfad52.png',
+    '53bee5ac-ecc8-4dd2-8e6d-196314e6f908.png',
+    '840b0d13-f0ae-4a99-8a65-62de094bb481.png'
+  ];
+
+  const [idx,setIdx] = useState(0);
+  const [paused,setPaused] = useState(false);
+  const startRef = useRef(Date.now());
+  const pauseAtRef = useRef(0);
+  const touchStartX = useRef(0);
+
+  useEffect(()=>{
+    if(paused){ pauseAtRef.current = Date.now(); return; }
+    if(pauseAtRef.current > 0){
+      startRef.current += (Date.now() - pauseAtRef.current);
+      pauseAtRef.current = 0;
+    }
+    const remain = Math.max(300, SLIDE_MS - (Date.now() - startRef.current));
+    const t = setTimeout(()=>{
+      setIdx(i => (i + 1) % images.length);
+      startRef.current = Date.now();
+    }, remain);
+    return ()=>clearTimeout(t);
+  },[idx, paused, images.length]);
+
+  useEffect(()=>{
+    const onKey = e => {
+      if(e.key==='ArrowLeft'){ setIdx(i => (i - 1 + images.length) % images.length); startRef.current = Date.now(); }
+      else if(e.key==='ArrowRight'){ setIdx(i => (i + 1) % images.length); startRef.current = Date.now(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return ()=>window.removeEventListener('keydown', onKey);
+  },[images.length]);
+
+  const goTo   = i => { setIdx(i); startRef.current = Date.now(); };
+  const goPrev = () => { setIdx(i => (i - 1 + images.length) % images.length); startRef.current = Date.now(); };
+  const goNext = () => { setIdx(i => (i + 1) % images.length); startRef.current = Date.now(); };
+
+  const onTouchStart = e => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd   = e => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if(Math.abs(dx) > 55){ dx > 0 ? goPrev() : goNext(); }
+  };
+
+  return <section
+      className={`sdi-slides${paused?' is-paused':''}`}
+      aria-label="Suppliers Directory"
+      aria-roledescription="carousel"
+      onMouseEnter={()=>setPaused(true)}
+      onMouseLeave={()=>setPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}>
+    <div className="sdi-slides__frame">
+      {images.map((src,i)=>(
+        <a key={i}
+           href={DIRECTORY_URL}
+           target="_blank"
+           rel="noopener noreferrer"
+           onClick={()=>trackEvent('directory_click',{from:'pure_slide',slide_index:i})}
+           aria-hidden={i!==idx}
+           tabIndex={i===idx?0:-1}
+           className={`sdi-slide${i===idx?' is-active':''}`}>
+          <img className="sdi-slide__img" src={src} alt="" loading={i===0?'eager':'lazy'}/>
+          <div className="sdi-slide__vignette" aria-hidden="true"/>
+          <div className="sdi-slide__fade" aria-hidden="true"/>
+        </a>
+      ))}
+
+      <a className="sdi-slides__cta"
+         href={DIRECTORY_URL}
+         target="_blank"
+         rel="noopener noreferrer"
+         onClick={()=>trackEvent('directory_click',{from:'cta_center'})}>
+        <i className="fas fa-arrow-up-right-from-square"/>
+        Open the Suppliers Directory
+      </a>
+
+      <div className="sdi-slides__dots" role="tablist" aria-label="Slide selection">
+        {images.map((_,i)=>(
+          <button key={i}
+            type="button"
+            role="tab"
+            aria-selected={i===idx}
+            aria-label={`Slide ${i+1}`}
+            onClick={()=>goTo(i)}
+            className={`sdi-slides__dot${i===idx?' is-active':''}`}>
+            <span className="sdi-slides__dot-fill" style={{'--sdi-duration':`${SLIDE_MS}ms`}}/>
+          </button>
+        ))}
+      </div>
+
+      <button type="button" className="sdi-slides__arrow sdi-slides__arrow--prev" onClick={goPrev} aria-label="Previous slide"><i className="fas fa-chevron-left"/></button>
+      <button type="button" className="sdi-slides__arrow sdi-slides__arrow--next" onClick={goNext} aria-label="Next slide"><i className="fas fa-chevron-right"/></button>
+    </div>
+  </section>;
+}
+
 function VentureHome({go,onSwitchToAdmin}){
   const [myRefs] = useState(()=>readMyRefs());
   useEffect(()=>{trackEvent('page_view',{route:'venture-home'});},[]);
@@ -2648,6 +2799,9 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
+    {/* ⭐ Pure-image Suppliers Directory slides — right at the top of Four Support Areas */}
+    <SupplierDirectoryImageSlides />
+
     <section style={{background:'#0A1F12',padding:'clamp(64px,9vw,110px) 24px',position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.15)'}}>
       <div style={{position:'absolute',top:-140,left:'15%',width:520,height:520,background:'radial-gradient(circle, rgba(46,156,74,.10), transparent 65%)',pointerEvents:'none'}}/>
       <div style={{position:'absolute',bottom:-160,right:'-10%',width:560,height:560,background:'radial-gradient(circle, rgba(232,115,15,.10), transparent 65%)',pointerEvents:'none'}}/>
@@ -2721,7 +2875,7 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>
 
-    {/* ⭐ Suppliers Directory Slides — at the very top of "Who We Serve" */}
+    {/* ⭐ Suppliers Directory Slides — with text, before "Who We Serve" */}
     <SupplierDirectorySlides />
 
     <section style={{background:'#fff',color:'#0A1F12',padding:'clamp(64px,9vw,110px) 24px',position:'relative',overflow:'hidden'}}>
