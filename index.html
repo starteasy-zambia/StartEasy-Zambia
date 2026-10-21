@@ -294,44 +294,107 @@ input:focus,select:focus,textarea:focus{outline:none}
   .sd-slides__bar.is-active .sd-slides__bar-fill{animation:none;transform:scaleX(1)}
 }
 
-/* ============ SUPPLIER DIRECTORY IMAGE SLIDES (PURE IMAGES + CTA — before Four Support Areas) ============ */
-.sdi-slides{position:relative;overflow:hidden;background:#0A1F12;isolation:isolate}
-.sdi-slides__frame{position:relative;height:clamp(360px,50vw,600px);display:flex;align-items:center;justify-content:center}
-.sdi-slide{position:absolute;inset:0;z-index:1;display:block;text-decoration:none;opacity:0;pointer-events:none;transition:opacity 900ms cubic-bezier(.4,0,.2,1)}
+/* ============ SUPPLIER DIRECTORY IMAGE SLIDES (PURE IMAGES + CTA BELOW — original aspect ratio, no crop) ============ */
+.sdi-slides{position:relative;overflow:hidden;background:#0A1F12;isolation:isolate;display:flex;flex-direction:column}
+
+/* Frame: aspect ratio driven by active image so nothing is cut off */
+.sdi-slides__frame{
+  position:relative;
+  width:100%;
+  background:#0A1F12;
+  overflow:hidden;
+  transition: aspect-ratio 500ms cubic-bezier(.4,0,.2,1);
+}
+.sdi-slide{
+  position:absolute;inset:0;
+  display:block;text-decoration:none;
+  opacity:0;pointer-events:none;
+  transition:opacity 700ms ease;
+}
 .sdi-slide.is-active{opacity:1;pointer-events:auto}
-.sdi-slide__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform 7s ease}
-.sdi-slide.is-active .sdi-slide__img{transform:scale(1.05)}
-.sdi-slide__vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,rgba(10,31,18,0) 35%,rgba(10,31,18,.42) 100%)}
-.sdi-slide__fade{position:absolute;left:0;right:0;bottom:0;height:40%;pointer-events:none;background:linear-gradient(to top,rgba(10,31,18,.72) 0%,rgba(10,31,18,0) 100%)}
-.sdi-slides__cta{position:relative;z-index:5;display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:linear-gradient(135deg,#E8730F,#F5A623);color:#fff;border-radius:99px;font-size:14.5px;font-weight:800;text-decoration:none;box-shadow:0 16px 44px rgba(232,115,15,.55),0 0 0 1px rgba(255,255,255,.18) inset;transition:transform .25s cubic-bezier(.22,.61,.36,1),box-shadow .25s;font-family:inherit;letter-spacing:.02em;text-align:center;max-width:calc(100vw - 48px)}
-.sdi-slides__cta:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 24px 56px rgba(232,115,15,.7),0 0 0 1px rgba(255,255,255,.25) inset}
-.sdi-slides__cta i{font-size:12px}
-.sdi-slides__dots{position:absolute;bottom:clamp(18px,2.4vw,26px);left:clamp(18px,2.4vw,26px);z-index:6;display:flex;gap:8px;align-items:center}
-.sdi-slides__dot{width:26px;height:5px;border-radius:99px;background:rgba(255,255,255,.45);border:none;padding:0;cursor:pointer;transition:width .4s cubic-bezier(.22,.61,.36,1),background .3s;overflow:hidden;position:relative}
-.sdi-slides__dot:hover{background:rgba(255,255,255,.75)}
-.sdi-slides__dot.is-active{width:54px;background:rgba(255,255,255,.2)}
+
+/* KEY: object-fit:contain so the whole image shows at its natural proportion (no top/bottom crop) */
+.sdi-slide__img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:contain;
+  object-position:center center;
+  display:block;
+  background:#0A1F12;
+}
+
+/* Navigation arrows sit at image edges — subtle, no more overlaying CTA */
+.sdi-slides__arrow{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:5;
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(10,31,18,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.3);color:#fff;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:13px;transition:all .22s;opacity:.7;
+}
+.sdi-slides:hover .sdi-slides__arrow{opacity:1}
+.sdi-slides__arrow:hover{background:#E8730F;border-color:#E8730F;transform:translateY(-50%) scale(1.06)}
+.sdi-slides__arrow--prev{left:clamp(12px,1.8vw,20px)}
+.sdi-slides__arrow--next{right:clamp(12px,1.8vw,20px)}
+
+/* Dots row — sits BELOW the image, on the dark background */
+.sdi-slides__dots{
+  display:flex;justify-content:center;align-items:center;gap:8px;
+  padding:16px 24px 10px;
+  background:#0A1F12;
+}
+.sdi-slides__dot{
+  width:26px;height:5px;border-radius:99px;
+  background:rgba(255,255,255,.32);
+  border:none;padding:0;cursor:pointer;
+  transition:width .4s cubic-bezier(.22,.61,.36,1), background .3s;
+  overflow:hidden;position:relative;
+}
+.sdi-slides__dot:hover{background:rgba(255,255,255,.65)}
+.sdi-slides__dot.is-active{width:54px;background:rgba(255,255,255,.18)}
 .sdi-slides__dot-fill{position:absolute;inset:0;background:linear-gradient(90deg,#E8730F,#F5A623);transform-origin:left center;transform:scaleX(0);box-shadow:0 0 12px rgba(232,115,15,.6)}
 .sdi-slides__dot.is-active .sdi-slides__dot-fill{animation:sdiFill var(--sdi-duration,5500ms) linear forwards}
 .sdi-slides.is-paused .sdi-slides__dot.is-active .sdi-slides__dot-fill{animation-play-state:paused}
 @keyframes sdiFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.sdi-slides__arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:46px;height:46px;border-radius:50%;background:rgba(10,31,18,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .22s;opacity:.65}
-.sdi-slides:hover .sdi-slides__arrow{opacity:1}
-.sdi-slides__arrow:hover{background:#E8730F;border-color:#E8730F;transform:translateY(-50%) scale(1.06)}
-.sdi-slides__arrow--prev{left:clamp(14px,2vw,22px)}
-.sdi-slides__arrow--next{right:clamp(14px,2vw,22px)}
+
+/* CTA BAR — at the very bottom of the section, own row, not overlaying image */
+.sdi-slides__cta-bar{
+  display:flex;justify-content:center;align-items:center;
+  padding: clamp(20px,3vw,32px) 24px clamp(24px,3.4vw,36px);
+  background:#0A1F12;
+  border-top:1px solid rgba(245,166,35,.15);
+}
+.sdi-slides__cta{
+  display:inline-flex;align-items:center;gap:11px;
+  padding:16px 38px;
+  background:linear-gradient(135deg,#E8730F,#F5A623);
+  color:#fff;border-radius:99px;
+  font-size:14.5px;font-weight:800;letter-spacing:.02em;
+  text-decoration:none;font-family:inherit;
+  box-shadow:0 14px 40px rgba(232,115,15,.45);
+  transition:transform .25s cubic-bezier(.22,.61,.36,1), box-shadow .25s;
+  text-align:center;max-width:calc(100vw - 32px);
+}
+.sdi-slides__cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 20px 52px rgba(232,115,15,.65);
+}
+.sdi-slides__cta i{font-size:12px}
+
 @media (max-width:768px){
-  .sdi-slides__frame{height:clamp(300px,72vw,440px)}
-  .sdi-slides__cta{padding:13px 26px;font-size:13px}
-  .sdi-slides__arrow{width:38px;height:38px;font-size:11px}
+  .sdi-slides__arrow{width:36px;height:36px;font-size:11px}
+  .sdi-slides__cta{padding:13px 26px;font-size:13px;gap:9px}
+  .sdi-slides__cta i{font-size:11px}
   .sdi-slides__dot{width:20px}
   .sdi-slides__dot.is-active{width:40px}
+  .sdi-slides__dots{padding:14px 20px 8px}
 }
 @media (max-width:520px){
   .sdi-slides__arrow{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   .sdi-slide{transition:opacity 300ms ease}
-  .sdi-slide__img{transform:none!important;transition:none!important}
+  .sdi-slides__frame{transition:none}
   .sdi-slides__dot.is-active .sdi-slides__dot-fill{animation:none;transform:scaleX(1)}
 }
 </style>
@@ -2212,7 +2275,7 @@ function Nav({route,go,onSwitchToAdmin}){const [open,setOpen]=useState(false);co
 function Footer({go,onSwitchToAdmin}){return <footer style={{background:'#0A1F12',color:'#fff',borderTop:'1px solid rgba(245,166,35,.1)'}}><div style={{maxWidth:1240,margin:'0 auto',padding:'56px 24px'}}><div className="grid lg:grid-cols-[1.5fr_1fr_1fr] gap-10"><div><div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}><Mark size={38}/><div style={{lineHeight:1}}><span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Venture Building Service Platform</span><span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span></div></div><p style={{fontSize:11,letterSpacing:'.16em',textTransform:'uppercase',color:'#F5A623',fontWeight:700,marginBottom:14}}>A one-stop shop for starting, building and managing businesses.</p><p style={{fontSize:13,lineHeight:1.65,color:'rgba(255,255,255,.5)',maxWidth:340}}>Tools, expertise, resources and services entrepreneurs need to turn ideas into functioning businesses.</p></div><div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Explore</span><div style={{display:'flex',flexDirection:'column',gap:12}}>{[['venture','All Services'],['track','Track Submission'],['orientation','Orientation'],['pricing','Pricing'],['about','About Us'],['referral','Referral Program'],['administrative','Administrative Desk']].map(([r,l])=><button key={l} onClick={()=>{if(r==='administrative'){onSwitchToAdmin&&onSwitchToAdmin();return;} if(r==='referral'){window.open('https://referral.starteasyzambia.com', '_blank'); return;} go(r);}} style={{display:'block',fontSize:13,color:'rgba(255,255,255,.5)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left',padding:0}}>{l}</button>)}</div></div><div><span className="micro" style={{color:'#F5A623',display:'block',marginBottom:20}}>Contact</span><div style={{display:'flex',flexDirection:'column',gap:12,fontSize:13,color:'rgba(255,255,255,.5)'}}><p style={{margin:0}}>{CONTACT_EMAIL}</p><p style={{margin:0}}>+260 762499581</p><p style={{margin:0,color:'rgba(255,255,255,.35)',fontSize:12}}>Lusaka, Zambia</p></div></div></div><div style={{marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}><p style={{fontSize:11,color:'rgba(255,255,255,.3)',margin:0}}>© {new Date().getFullYear()} StartEasy Zambia · Venture Building Service Platform.</p></div></div></footer>;}
 
 /* ============================================================
-   HERO VIDEO SLIDES — Square 1:1, WHITE theme, no video animation
+   HERO VIDEO SLIDES — Square 1:1, WHITE theme
    ============================================================ */
 function HeroVideoSlides({go}){
   const SLIDE_MS = 7000;
@@ -2320,15 +2383,7 @@ function HeroVideoSlides({go}){
 
     <div className="hero-slides__media" aria-hidden="true">
       {SLIDES.map((s,i)=>(
-        <video
-          key={i}
-          ref={el=>{ videoRefs.current[i] = el; }}
-          className={`hero-slides__video${i===idx?' is-active':''}`}
-          src={s.video}
-          muted loop playsInline
-          preload={i===0 ? 'auto' : 'metadata'}
-          disablePictureInPicture
-        />
+        <video key={i} ref={el=>{ videoRefs.current[i] = el; }} className={`hero-slides__video${i===idx?' is-active':''}`} src={s.video} muted loop playsInline preload={i===0 ? 'auto' : 'metadata'} disablePictureInPicture/>
       ))}
     </div>
 
@@ -2337,33 +2392,15 @@ function HeroVideoSlides({go}){
 
     <div className="hero-slides__stack">
       {SLIDES.map((s,i)=>(
-        <div key={i}
-          className={`hero-slide${i===idx?' is-active':''}`}
-          role="group"
-          aria-roledescription="slide"
-          aria-label={`${i+1} of ${SLIDES.length}`}
-          aria-hidden={i!==idx}>
+        <div key={i} className={`hero-slide${i===idx?' is-active':''}`} role="group" aria-roledescription="slide" aria-label={`${i+1} of ${SLIDES.length}`} aria-hidden={i!==idx}>
           <div className="hero-slides__content">
             <div className="hero-slides__inner">
-              <span className="hero-slides__eyebrow hero-anim hero-anim--1">
-                <span className="hero-slides__accent" style={{background:s.accent}}/>
-                {s.eyebrow}
-              </span>
+              <span className="hero-slides__eyebrow hero-anim hero-anim--1"><span className="hero-slides__accent" style={{background:s.accent}}/>{s.eyebrow}</span>
               <h1 className="hero-slides__title hero-anim hero-anim--2 serif">{s.title}</h1>
-              {s.subtitle && (
-                <p className="hero-slides__sub hero-anim hero-anim--3">{s.subtitle}</p>
-              )}
+              {s.subtitle && (<p className="hero-slides__sub hero-anim hero-anim--3">{s.subtitle}</p>)}
               {s.ctas && s.ctas.length>0 && (
                 <div className="hero-slides__ctas hero-anim hero-anim--4">
-                  {s.ctas.map((c,ci)=>(
-                    <button key={ci}
-                      type="button"
-                      onClick={()=>handleCTA(c)}
-                      className={`hero-cta hero-cta--${c.variant||'primary'}`}>
-                      <i className={`${c.variant==='brand'?'fab':'fas'} ${c.icon}`}/>
-                      {c.label}
-                    </button>
-                  ))}
+                  {s.ctas.map((c,ci)=>(<button key={ci} type="button" onClick={()=>handleCTA(c)} className={`hero-cta hero-cta--${c.variant||'primary'}`}><i className={`${c.variant==='brand'?'fab':'fas'} ${c.icon}`}/>{c.label}</button>))}
                 </div>
               )}
             </div>
@@ -2375,24 +2412,10 @@ function HeroVideoSlides({go}){
     <div className="hero-slides__controls">
       <div className="hero-slides__controls-inner">
         <div className="hero-slides__nav" role="tablist" aria-label="Slide selection">
-          {SLIDES.map((s,i)=>(
-            <button key={i}
-              type="button"
-              role="tab"
-              aria-selected={i===idx}
-              aria-label={`${i+1}. ${s.theme}`}
-              onClick={()=>goTo(i)}
-              className={`hero-slides__dot${i===idx?' is-active':''}`}>
-              <span className="hero-slides__dot-fill" style={{'--slide-duration':`${SLIDE_MS}ms`}}/>
-            </button>
-          ))}
+          {SLIDES.map((s,i)=>(<button key={i} type="button" role="tab" aria-selected={i===idx} aria-label={`${i+1}. ${s.theme}`} onClick={()=>goTo(i)} className={`hero-slides__dot${i===idx?' is-active':''}`}><span className="hero-slides__dot-fill" style={{'--slide-duration':`${SLIDE_MS}ms`}}/></button>))}
         </div>
         <div className="hero-slides__meta">
-          <span className="hero-slides__counter">
-            <strong>{String(idx+1).padStart(2,'0')}</strong>
-            <span className="hero-slides__counter-sep">/</span>
-            <span>{String(SLIDES.length).padStart(2,'0')}</span>
-          </span>
+          <span className="hero-slides__counter"><strong>{String(idx+1).padStart(2,'0')}</strong><span className="hero-slides__counter-sep">/</span><span>{String(SLIDES.length).padStart(2,'0')}</span></span>
           <span className="hero-slides__theme" aria-live="polite">{SLIDES[idx].theme}</span>
         </div>
         <div className="hero-slides__arrows">
@@ -2406,53 +2429,16 @@ function HeroVideoSlides({go}){
 
 /* ============================================================
    SUPPLIER DIRECTORY SLIDES (WITH TEXT — before "Who We Serve")
-   Every slide and CTA links to https://suppliersdirectory.starteasyzambia.com/
    ============================================================ */
 function SupplierDirectorySlides(){
   const DIRECTORY_URL = 'https://suppliersdirectory.starteasyzambia.com/';
   const SLIDE_MS = 6500;
-
   const slides = [
-    {
-      image:'251c1b9c-31cf-4cc8-80ef-f54e54780bc6.png',
-      theme:'Verified suppliers',
-      eyebrow:'Suppliers Directory · Live',
-      title:<>Find <em>verified suppliers.</em></>,
-      subtitle:'Browse, compare and connect with vetted suppliers across Zambia — all in one place.',
-      accent:'#E8730F'
-    },
-    {
-      image:'af44b8eb-11c4-4c9f-b7c4-38bd81a994cd.png',
-      theme:'Compare',
-      eyebrow:'Trusted Network',
-      title:<>Compare. Verify. <em>Connect.</em></>,
-      subtitle:'Shortlist suppliers with confidence — legitimacy, references and pricing, all checked.',
-      accent:'#F5A623'
-    },
-    {
-      image:'7680b070-6cec-46ca-b77c-450334bfad52.png',
-      theme:'Sorted',
-      eyebrow:'StartEasy Suppliers',
-      title:<>Your <em>supply chain,</em> sorted.</>,
-      subtitle:'Open the directory and find exactly what your business needs to grow.',
-      accent:'#2E9C4A'
-    },
-    {
-      image:'53bee5ac-ecc8-4dd2-8e6d-196314e6f908.png',
-      theme:'Screened',
-      eyebrow:'Sourced · Screened · Trusted',
-      title:<>Sourced. Screened. <em>Trusted.</em></>,
-      subtitle:'Every supplier on the platform is verified before they appear in the directory.',
-      accent:'#1B6CA8'
-    },
-    {
-      image:'840b0d13-f0ae-4a99-8a65-62de094bb481.png',
-      theme:'Open now',
-      eyebrow:'Ready when you are',
-      title:<>Open the <em>directory.</em></>,
-      subtitle:'Find the supplier your next contract depends on — one click away.',
-      accent:'#7A4FA3'
-    }
+    { image:'251c1b9c-31cf-4cc8-80ef-f54e54780bc6.png', theme:'Verified suppliers', eyebrow:'Suppliers Directory · Live', title:<>Find <em>verified suppliers.</em></>, subtitle:'Browse, compare and connect with vetted suppliers across Zambia — all in one place.', accent:'#E8730F' },
+    { image:'af44b8eb-11c4-4c9f-b7c4-38bd81a994cd.png', theme:'Compare', eyebrow:'Trusted Network', title:<>Compare. Verify. <em>Connect.</em></>, subtitle:'Shortlist suppliers with confidence — legitimacy, references and pricing, all checked.', accent:'#F5A623' },
+    { image:'7680b070-6cec-46ca-b77c-450334bfad52.png', theme:'Sorted', eyebrow:'StartEasy Suppliers', title:<>Your <em>supply chain,</em> sorted.</>, subtitle:'Open the directory and find exactly what your business needs to grow.', accent:'#2E9C4A' },
+    { image:'53bee5ac-ecc8-4dd2-8e6d-196314e6f908.png', theme:'Screened', eyebrow:'Sourced · Screened · Trusted', title:<>Sourced. Screened. <em>Trusted.</em></>, subtitle:'Every supplier on the platform is verified before they appear in the directory.', accent:'#1B6CA8' },
+    { image:'840b0d13-f0ae-4a99-8a65-62de094bb481.png', theme:'Open now', eyebrow:'Ready when you are', title:<>Open the <em>directory.</em></>, subtitle:'Find the supplier your next contract depends on — one click away.', accent:'#7A4FA3' }
   ];
 
   const [idx,setIdx] = useState(0);
@@ -2463,15 +2449,9 @@ function SupplierDirectorySlides(){
 
   useEffect(()=>{
     if(paused){ pauseAtRef.current = Date.now(); return; }
-    if(pauseAtRef.current > 0){
-      startRef.current += (Date.now() - pauseAtRef.current);
-      pauseAtRef.current = 0;
-    }
+    if(pauseAtRef.current > 0){ startRef.current += (Date.now() - pauseAtRef.current); pauseAtRef.current = 0; }
     const remain = Math.max(300, SLIDE_MS - (Date.now() - startRef.current));
-    const t = setTimeout(()=>{
-      setIdx(i => (i + 1) % slides.length);
-      startRef.current = Date.now();
-    }, remain);
+    const t = setTimeout(()=>{ setIdx(i => (i + 1) % slides.length); startRef.current = Date.now(); }, remain);
     return ()=>clearTimeout(t);
   },[idx, paused, slides.length]);
 
@@ -2503,39 +2483,23 @@ function SupplierDirectorySlides(){
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}>
 
-    <a className="sd-slides__link"
-       href={DIRECTORY_URL}
-       target="_blank" rel="noopener noreferrer"
-       onClick={()=>trackEvent('directory_click',{from:'top_link'})}>
+    <a className="sd-slides__link" href={DIRECTORY_URL} target="_blank" rel="noopener noreferrer" onClick={()=>trackEvent('directory_click',{from:'top_link'})}>
       <i className="fas fa-arrow-up-right-from-square"/> Suppliers Directory
     </a>
 
     <div className="sd-slides__frame">
       {slides.map((s,i)=>(
-        <a key={i}
-           href={DIRECTORY_URL}
-           target="_blank"
-           rel="noopener noreferrer"
-           onClick={()=>trackEvent('directory_click',{from:'slide',slide_index:i})}
-           aria-hidden={i!==idx}
-           tabIndex={i===idx?0:-1}
-           className={`sd-slide${i===idx?' is-active':''}`}>
+        <a key={i} href={DIRECTORY_URL} target="_blank" rel="noopener noreferrer" onClick={()=>trackEvent('directory_click',{from:'slide',slide_index:i})} aria-hidden={i!==idx} tabIndex={i===idx?0:-1} className={`sd-slide${i===idx?' is-active':''}`}>
           <img className="sd-slide__img" src={s.image} alt={s.theme} loading={i===0?'eager':'lazy'}/>
           <div className="sd-slide__tint" aria-hidden="true"/>
           <div className="sd-slide__fade" aria-hidden="true"/>
           <div className="sd-slide__content">
             <div className="sd-slide__inner">
               <div className="sd-slide__box">
-                <span className="sd-slide__eyebrow sd-anim sd-anim--1">
-                  <span className="sd-slide__dot" style={{background:s.accent,color:s.accent}}/>
-                  {s.eyebrow}
-                </span>
+                <span className="sd-slide__eyebrow sd-anim sd-anim--1"><span className="sd-slide__dot" style={{background:s.accent,color:s.accent}}/>{s.eyebrow}</span>
                 <h2 className="sd-slide__title sd-anim sd-anim--2 serif">{s.title}</h2>
                 <p className="sd-slide__sub sd-anim sd-anim--3">{s.subtitle}</p>
-                <span className="sd-slide__cta sd-anim sd-anim--4">
-                  <i className="fas fa-arrow-up-right-from-square"/>
-                  Open Suppliers Directory
-                </span>
+                <span className="sd-slide__cta sd-anim sd-anim--4"><i className="fas fa-arrow-up-right-from-square"/> Open Suppliers Directory</span>
               </div>
             </div>
           </div>
@@ -2545,24 +2509,10 @@ function SupplierDirectorySlides(){
       <div className="sd-slides__controls">
         <div className="sd-slides__controls-inner">
           <div className="sd-slides__nav" role="tablist" aria-label="Slide selection">
-            {slides.map((s,i)=>(
-              <button key={i}
-                type="button"
-                role="tab"
-                aria-selected={i===idx}
-                aria-label={`${i+1}. ${s.theme}`}
-                onClick={()=>goTo(i)}
-                className={`sd-slides__bar${i===idx?' is-active':''}`}>
-                <span className="sd-slides__bar-fill" style={{'--sd-duration':`${SLIDE_MS}ms`}}/>
-              </button>
-            ))}
+            {slides.map((s,i)=>(<button key={i} type="button" role="tab" aria-selected={i===idx} aria-label={`${i+1}. ${s.theme}`} onClick={()=>goTo(i)} className={`sd-slides__bar${i===idx?' is-active':''}`}><span className="sd-slides__bar-fill" style={{'--sd-duration':`${SLIDE_MS}ms`}}/></button>))}
           </div>
           <div className="sd-slides__meta">
-            <span className="sd-slides__counter">
-              <strong>{String(idx+1).padStart(2,'0')}</strong>
-              <span className="sd-slides__counter-sep">/</span>
-              <span>{String(slides.length).padStart(2,'0')}</span>
-            </span>
+            <span className="sd-slides__counter"><strong>{String(idx+1).padStart(2,'0')}</strong><span className="sd-slides__counter-sep">/</span><span>{String(slides.length).padStart(2,'0')}</span></span>
             <span className="sd-slides__tag" aria-live="polite">{slides[idx].theme}</span>
           </div>
           <div className="sd-slides__arrows">
@@ -2576,9 +2526,10 @@ function SupplierDirectorySlides(){
 }
 
 /* ============================================================
-   SUPPLIER DIRECTORY IMAGE SLIDES (PURE IMAGES + CTA — top of Four Support Areas)
-   Only images + one CTA button. No text overlays on the images themselves.
-   Every image and the CTA link to https://suppliersdirectory.starteasyzambia.com/
+   SUPPLIER DIRECTORY IMAGE SLIDES — Pure images + CTA BELOW
+   Images shown at ORIGINAL aspect ratio (no crop).
+   Aspect ratio is read from each image on load.
+   CTA sits in its own bar at the very bottom of the section.
    ============================================================ */
 function SupplierDirectoryImageSlides(){
   const DIRECTORY_URL = 'https://suppliersdirectory.starteasyzambia.com/';
@@ -2594,21 +2545,28 @@ function SupplierDirectoryImageSlides(){
 
   const [idx,setIdx] = useState(0);
   const [paused,setPaused] = useState(false);
+  const [aspects,setAspects] = useState({}); // { [imageIndex]: width/height }
   const startRef = useRef(Date.now());
   const pauseAtRef = useRef(0);
   const touchStartX = useRef(0);
 
+  // Record the natural aspect ratio of each image once it loads
+  const onImgLoad = (i, e) => {
+    const img = e.currentTarget;
+    if(img && img.naturalWidth && img.naturalHeight){
+      const ar = img.naturalWidth / img.naturalHeight;
+      setAspects(prev => prev[i] ? prev : { ...prev, [i]: ar });
+    }
+  };
+
+  // Current aspect ratio (falls back to 16/9 until first image loads)
+  const currentAspect = aspects[idx] || 16/9;
+
   useEffect(()=>{
     if(paused){ pauseAtRef.current = Date.now(); return; }
-    if(pauseAtRef.current > 0){
-      startRef.current += (Date.now() - pauseAtRef.current);
-      pauseAtRef.current = 0;
-    }
+    if(pauseAtRef.current > 0){ startRef.current += (Date.now() - pauseAtRef.current); pauseAtRef.current = 0; }
     const remain = Math.max(300, SLIDE_MS - (Date.now() - startRef.current));
-    const t = setTimeout(()=>{
-      setIdx(i => (i + 1) % images.length);
-      startRef.current = Date.now();
-    }, remain);
+    const t = setTimeout(()=>{ setIdx(i => (i + 1) % images.length); startRef.current = Date.now(); }, remain);
     return ()=>clearTimeout(t);
   },[idx, paused, images.length]);
 
@@ -2639,7 +2597,9 @@ function SupplierDirectoryImageSlides(){
       onMouseLeave={()=>setPaused(false)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}>
-    <div className="sdi-slides__frame">
+
+    {/* Image frame — height driven by the active image's natural aspect ratio (no crop) */}
+    <div className="sdi-slides__frame" style={{ aspectRatio: String(currentAspect) }}>
       {images.map((src,i)=>(
         <a key={i}
            href={DIRECTORY_URL}
@@ -2649,37 +2609,45 @@ function SupplierDirectoryImageSlides(){
            aria-hidden={i!==idx}
            tabIndex={i===idx?0:-1}
            className={`sdi-slide${i===idx?' is-active':''}`}>
-          <img className="sdi-slide__img" src={src} alt="" loading={i===0?'eager':'lazy'}/>
-          <div className="sdi-slide__vignette" aria-hidden="true"/>
-          <div className="sdi-slide__fade" aria-hidden="true"/>
+          <img
+            className="sdi-slide__img"
+            src={src}
+            alt=""
+            loading={i===0?'eager':'lazy'}
+            onLoad={e => onImgLoad(i, e)}
+          />
         </a>
       ))}
 
+      <button type="button" className="sdi-slides__arrow sdi-slides__arrow--prev" onClick={goPrev} aria-label="Previous slide"><i className="fas fa-chevron-left"/></button>
+      <button type="button" className="sdi-slides__arrow sdi-slides__arrow--next" onClick={goNext} aria-label="Next slide"><i className="fas fa-chevron-right"/></button>
+    </div>
+
+    {/* Dots below image */}
+    <div className="sdi-slides__dots" role="tablist" aria-label="Slide selection">
+      {images.map((_,i)=>(
+        <button key={i}
+          type="button"
+          role="tab"
+          aria-selected={i===idx}
+          aria-label={`Slide ${i+1}`}
+          onClick={()=>goTo(i)}
+          className={`sdi-slides__dot${i===idx?' is-active':''}`}>
+          <span className="sdi-slides__dot-fill" style={{'--sdi-duration':`${SLIDE_MS}ms`}}/>
+        </button>
+      ))}
+    </div>
+
+    {/* CTA in its own bar at the very bottom of the section */}
+    <div className="sdi-slides__cta-bar">
       <a className="sdi-slides__cta"
          href={DIRECTORY_URL}
          target="_blank"
          rel="noopener noreferrer"
-         onClick={()=>trackEvent('directory_click',{from:'cta_center'})}>
+         onClick={()=>trackEvent('directory_click',{from:'cta_bottom'})}>
         <i className="fas fa-arrow-up-right-from-square"/>
         Open the Suppliers Directory
       </a>
-
-      <div className="sdi-slides__dots" role="tablist" aria-label="Slide selection">
-        {images.map((_,i)=>(
-          <button key={i}
-            type="button"
-            role="tab"
-            aria-selected={i===idx}
-            aria-label={`Slide ${i+1}`}
-            onClick={()=>goTo(i)}
-            className={`sdi-slides__dot${i===idx?' is-active':''}`}>
-            <span className="sdi-slides__dot-fill" style={{'--sdi-duration':`${SLIDE_MS}ms`}}/>
-          </button>
-        ))}
-      </div>
-
-      <button type="button" className="sdi-slides__arrow sdi-slides__arrow--prev" onClick={goPrev} aria-label="Previous slide"><i className="fas fa-chevron-left"/></button>
-      <button type="button" className="sdi-slides__arrow sdi-slides__arrow--next" onClick={goNext} aria-label="Next slide"><i className="fas fa-chevron-right"/></button>
     </div>
   </section>;
 }
@@ -2743,7 +2711,6 @@ function VentureHome({go,onSwitchToAdmin}){
       </div>
     </section>}
 
-    {/* ============ HERO VIDEO SLIDES (square, white, no video animation) ============ */}
     <HeroVideoSlides go={go}/>
 
     <section id="choose-situation" style={{position:'relative',overflow:'hidden',borderTop:'1px solid rgba(245,166,35,.18)',background:'linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.1))'}}>
