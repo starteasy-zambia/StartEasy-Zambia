@@ -478,7 +478,7 @@ function __seTrackAuthUser(user){
           firstSeen: now,
           lastSeen: now,
           createdAt: now,
-          purpose: 'just-arrived',
+          purpose: 'Just arrived',
           lastActivity: 'signin',
           lastActivityAt: now,
           activityCount: 0,
@@ -509,13 +509,14 @@ function __seUpdateUserPurpose(eventType, payload){
         lastActivityAt: now,
         activityCount: (d.activityCount || 0) + 1
       };
-      if(payload && payload.serviceKey){ update.purpose = 'service:' + payload.serviceKey; update.engagementIntent = payload.serviceKey; }
-      else if(payload && payload.key){ update.purpose = 'service:' + payload.key; update.engagementIntent = payload.key; }
-      else if(payload && payload.scope){ update.purpose = 'wizard:' + payload.scope; }
-      else if(payload && payload.route && payload.route !== 'home'){ update.purpose = 'page:' + payload.route; }
-      else if(eventType === 'directory_click'){ update.purpose = 'suppliers-directory'; }
-      else if(eventType === 'financial_directory_click'){ update.purpose = 'financial-support-directory'; }
-      else if(eventType === 'payment_submit' && payload && payload.serviceCode){ update.purpose = 'paid:' + payload.serviceCode; }
+      // Logic for purposes
+      if(payload && payload.serviceKey){ update.purpose = 'Viewing service: ' + payload.serviceKey; update.engagementIntent = payload.serviceKey; }
+      else if(payload && payload.key){ update.purpose = 'Viewing service: ' + payload.key; update.engagementIntent = payload.key; }
+      else if(payload && payload.scope){ update.purpose = 'Wizard: ' + payload.scope; }
+      else if(payload && payload.route && payload.route !== 'home'){ update.purpose = 'Page: ' + payload.route; }
+      else if(eventType === 'directory_click'){ update.purpose = 'Suppliers Directory'; }
+      else if(eventType === 'financial_directory_click'){ update.purpose = 'Financial Support Directory'; }
+      else if(eventType === 'payment_submit' && payload && payload.serviceCode){ update.purpose = 'Paid: ' + payload.serviceCode; }
       userRef.update(update).catch(function(){});
     }).catch(function(){});
   }catch(e){}
@@ -966,13 +967,13 @@ return <div><div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppe
   /* human-readable purpose label for the Users tab */
   function purposeLabel(purpose){
     if(!purpose) return '—';
-    if(purpose==='just-arrived') return 'Just arrived';
-    if(purpose.indexOf('service:')===0) return 'Viewing: ' + purpose.slice(8);
-    if(purpose.indexOf('page:')===0) return 'Page: ' + purpose.slice(5);
-    if(purpose.indexOf('wizard:')===0) return 'Wizard: ' + purpose.slice(7);
-    if(purpose.indexOf('paid:')===0) return 'Paid: ' + purpose.slice(5);
-    if(purpose==='suppliers-directory') return 'Suppliers Directory';
-    if(purpose==='financial-support-directory') return 'Financial Support Directory';
+    if(purpose==='Just arrived') return 'Just arrived';
+    if(purpose.indexOf('Viewing service:')===0) return 'Service: ' + purpose.slice(17);
+    if(purpose.indexOf('Page:')===0) return 'Page: ' + purpose.slice(6);
+    if(purpose.indexOf('Wizard:')===0) return 'Wizard: ' + purpose.slice(8);
+    if(purpose.indexOf('Paid:')===0) return 'Paid: ' + purpose.slice(6);
+    if(purpose==='Suppliers Directory') return 'Suppliers Directory';
+    if(purpose==='Financial Support Directory') return 'Financial Support Directory';
     return purpose;
   }
 
@@ -1042,7 +1043,7 @@ return <div><div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppe
     return unsub;
   },[authed]);
 
-  /* NEW: listen to authenticated users collection */
+  /* listen to authenticated users collection */
   useEffect(()=>{
     if(!authed || !firebaseReady) return;
     const unsub = db.collection(SE_USERS).orderBy('lastSeen','desc').limit(500)
@@ -1127,7 +1128,7 @@ return <div><div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppe
     const total=users.length;
     const anon=users.filter(u=>u.isAnonymous).length;
     const registered=users.filter(u=>!u.isAnonymous).length;
-    const engaged=users.filter(u=>u.purpose && u.purpose!=='just-arrived').length;
+    const engaged=users.filter(u=>u.purpose && u.purpose!=='Just arrived').length;
     return {total,anon,registered,engaged};
   },[users]);
 
@@ -1135,7 +1136,8 @@ return <div><div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppe
     if(userFilter==='all') return users;
     if(userFilter==='anonymous') return users.filter(u=>u.isAnonymous);
     if(userFilter==='registered') return users.filter(u=>!u.isAnonymous);
-    if(userFilter==='engaged') return users.filter(u=>u.purpose && u.purpose!=='just-arrived');
+    if(userFilter==='buyers') return users.filter(u=>u.purpose && u.purpose.indexOf('Paid:')===0);
+    if(userFilter==='suppliers') return users.filter(u=>u.purpose==='Suppliers Directory' || u.purpose==='Financial Support Directory');
     return users;
   },[users,userFilter]);
 
@@ -1426,7 +1428,7 @@ return <div><div style={{fontSize:10.5,letterSpacing:'.14em',textTransform:'uppe
           <AdminKpi label="Engaged" value={userStats.engaged} sub="Have an active purpose" icon="fa-bullseye" color="#E8730F"/>
         </div>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:20}}>
-          {[['all','All'],['registered','Registered'],['anonymous','Anonymous'],['engaged','Engaged']].map(([k,l])=>
+          {[['all','All'],['registered','Registered'],['anonymous','Anonymous'],['buyers','Buyers'],['suppliers','Suppliers']].map(([k,l])=>
             <button key={k} onClick={()=>setUserFilter(k)} style={{padding:'8px 14px',borderRadius:99,cursor:'pointer',fontFamily:'inherit',fontSize:12,fontWeight:700,border:userFilter===k?'none':'1px solid rgba(10,31,18,.12)',background:userFilter===k?'#0A1F12':'#fff',color:userFilter===k?'#fff':'rgba(10,31,18,.7)'}}>{l}</button>
           )}
         </div>
